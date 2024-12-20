@@ -1,7 +1,22 @@
 services:
+  # React client application
+  client:
+    # Build from Dockerfile in the client directory
+    build:
+      context: ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules # Allow container to manage its own dependencies
+    environment:
+      - NODE_ENV=development
+    # Enable HMR websocket connections
+    command: npm run dev -- --host
+
   # GeoDjango web application
   server:
-    # Build from the DockerFile in the server directory
+    # Build from the Dockerfile in the server directory
     build:
       context: ./server
     # Host to container port mapping
