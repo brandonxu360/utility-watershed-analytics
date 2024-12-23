@@ -13,12 +13,10 @@ FROM ghcr.io/osgeo/gdal:alpine-small-latest
 # Debugging purposes - Python output straight to terminal
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
+# Install Python, PIP, GEOS, and git
+RUN apk add --no-cache python3 py3-pip geos git
 
-# Install Python, PIP, and GEOS
-RUN apk add --no-cache python3 py3-pip geos
-
-# Create an activate virtual environment
+# Create and activate virtual environment
 RUN python3 -m venv /venv
 
 # Set environment path so virtual environment is used by default
@@ -30,8 +28,11 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# We use a volume mount in the Compose file instead of COPY here
-# COPY . .
-
 # Make sure scripts in venv are executable
 RUN chmod +x /venv/bin/*
+
+# Create non-root user
+RUN addgroup -g 1000 devcontainer && \
+    adduser -D -u 1000 -G devcontainer devcontainer
+
+USER devcontainer

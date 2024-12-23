@@ -7,8 +7,9 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./client:/app
-      - /app/node_modules # Allow container to manage its own dependencies
+      - /app/client/node_modules # Allow container to manage its own dependencies
+      - .:/app
+    working_dir: /app/client
     environment:
       - NODE_ENV=development
     # Enable HMR websocket connections
@@ -28,7 +29,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     # Volume mount
     volumes:
-      - ./server:/app
+      - .:/app
+    working_dir: /app/server
     command: python manage.py runserver 0.0.0.0:8000
     # Keep container active and interactive
     tty: true

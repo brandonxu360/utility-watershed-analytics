@@ -1,17 +1,16 @@
 # Use Node.js as base image
 FROM node:20-alpine
 
-# Set working directory
-WORKDIR /app
+# Install git for development purposes
+RUN apk add --no-cache git
 
-# Copy package files
+# Create app directory and set permissions
+WORKDIR /app/client
+RUN chown -R node:node /app/client
+
+# Use alpine's non-root user
+USER node
+
+# Install npm dependencies
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
-
-# We use volume mount instead of copy
-# COPY . .
-
-# Start development server
-CMD ["npm", "run", "dev"]
