@@ -24,6 +24,10 @@ RUN python3 -m venv /venv
 ENV VIRTUAL_ENV=/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
+# Configuration to allow django-admin to function properly
+ENV PYTHONPATH=/app/server
+ENV DJANGO_SETTINGS_MODULE=server.settings
+
 # Install Python dependencies (notably Django and psycopg)
 COPY requirements.txt .
 RUN pip install -r requirements.txt

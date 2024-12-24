@@ -22,7 +22,7 @@ services:
       context: ./server
     # Host to container port mapping
     ports:
-      - :8000:8000
+      - "8000:8000"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PW=${POSTGRES_PW}
