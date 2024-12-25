@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis', # Use GIS
-    'watershed'
-
+    'rest_framework',
+    'server.watershed'
 ]
 
 MIDDLEWARE = [
