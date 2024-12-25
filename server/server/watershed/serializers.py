@@ -1,8 +1,10 @@
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from .models import WatershedBorder
+from rest_framework import serializers
 
 class WatershedBorderSerializer(GeoFeatureModelSerializer):
     """
+    Full serializer with all watershed border fields.
     Uses specialized GeoFeatureModelSerializer to serialize model data
     into GeoJSON.
     Attributes:
@@ -14,3 +16,17 @@ class WatershedBorderSerializer(GeoFeatureModelSerializer):
         model = WatershedBorder
         geo_field = 'geom'
         fields = '__all__'
+
+class WatershedBorderBasicSerializer(GeoFeatureModelSerializer):
+    """
+    Basic serializer with only essential fields and a hyperlink to full details
+    """
+    details_url = serializers.HyperlinkedIdentityField(
+        view_name='watershedborder-detail',
+        read_only=True
+    )
+
+    class Meta:
+        model = WatershedBorder
+        geo_field = 'geom'
+        fields = ('id', 'geom', 'pws_name', 'city', 'cnty_name', 'acres', 'details_url')
