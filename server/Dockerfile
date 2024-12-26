@@ -16,8 +16,13 @@ ENV PYTHONUNBUFFERED=1
 # Install Python, PIP, GEOS, and git
 RUN apk add --no-cache python3 py3-pip geos git
 
-# Create and activate virtual environment
-RUN python3 -m venv /venv
+# Create non-root user
+RUN addgroup -g 1000 devcontainer && \
+    adduser -D -u 1000 -G devcontainer devcontainer
+
+# Create virtual environment directory and set ownership
+RUN python3 -m venv /venv && \
+    chown -R devcontainer:devcontainer /venv
 
 # Set environment path so virtual environment is used by default
 # when running python commands
@@ -38,9 +43,5 @@ RUN chmod +x /venv/bin/*
 # Set up entrypoint shell script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-# Create non-root user
-RUN addgroup -g 1000 devcontainer && \
-    adduser -D -u 1000 -G devcontainer devcontainer
 
 USER devcontainer
