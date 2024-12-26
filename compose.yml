@@ -27,10 +27,14 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PW=${POSTGRES_PW}
       - POSTGRES_DB=${POSTGRES_DB}
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
     # Volume mount
     volumes:
       - .:/app
     working_dir: /app/server
+    entrypoint: ["/entrypoint.sh"]
     command: python manage.py runserver 0.0.0.0:8000
     # Keep container active and interactive
     tty: true
