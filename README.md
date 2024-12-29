@@ -37,7 +37,7 @@ DJANGO_SUPERUSER_EMAIL=devcontainer@gmail.com
 DJANGO_SUPERUSER_PASSWORD=password
 ```
 
-6. **pgAdmin Server Definition**: Though not required, a JSON file in the root directory with the following attributes can be used to automatically define the server for pgAdmin for convenience. Please name the file `pgadmin-servers.json`. Notice the username and password correspond with the postgres database username (`POSTGRES_USER`) and password (`POSTGRES_PW`) defined in the `.env` file.
+6. **pgAdmin Server Definition**: Though not required, a JSON file in the root directory with the following attributes can be used to automatically define the server for pgAdmin for convenience. Please name the file `pgadmin-servers.json`. Notice the username and password correspond with the postgres database username (`POSTGRES_USER`) and password (`POSTGRES_PW`) defined in the `.env` file. Again, be aware that this config could expose sensitive data (database password) if mishandled in production.
 ```json
 {
     "Servers": {
@@ -54,8 +54,14 @@ DJANGO_SUPERUSER_PASSWORD=password
     }
 }
 ```
-7. **Data**: place the watershed data in `fullstack-gis-webapp/server/server/watershed/` and ensure that the folder is named data.
+7. **Data**: place the watershed data in `fullstack-gis-webapp/server/server/watershed/` and ensure that the folder is named `data`. If a custom data folder is to be used, changes are required for the `load.py` script in the `server` Django project.
 
+## Usage
+1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. Note that this is not required, as VSCode devcontainers will automatically start the services upon reopening the project in a container.
+```bash
+docker compose up --build
+```
+2. **Verify Services**:
 * **Client**: Access the React app at http://localhost:5173.
 * **Server**: Access the Django API at http://localhost:8000/admin. Note that the base url is http://localhost:8000, but I don't think there is an endpoint mapped to it.
 * **pgAdmin**: Access pgAdmin at http://localhost:5050. Login with the credentials provided in the `.env` file and add the server if the `pgadmin-server.json` is not provided.
@@ -69,6 +75,9 @@ DJANGO_SUPERUSER_PASSWORD=password
 1. **Docker Issues**:
 * Run `docker compose down` and `docker compose up --build` to reset containers.
 * Check logs with `docker compose logs`.
+2. **Data Issues**: a common point of failure may be achieving the correct data configuration. Ensure that:
+* You have the correct data directory at `fullstack-gis-webapp/server/server/watershed/data`
+* Review the `load.py` script to see how the data is being handled.
 
 
 
