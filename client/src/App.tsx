@@ -1,13 +1,12 @@
-import Map from './components/Map';
-import './App.css';
+import { RouterProvider } from '@tanstack/react-router';
+import { router } from './routes/router';
 
-function App() {
+const App = () => {
   return (
     <div>
-      <h1>Watershed Borders</h1>
-      <Map />
+      <RouterProvider router={router} />
     </div>
   );
-}
+};
 
 export default App;
