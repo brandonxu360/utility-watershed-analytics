@@ -24,7 +24,7 @@ export default function Map() {
     return response.json();
   };
 
-  const { data: watersheds, error, isLoading } = useQuery({
+  const { data: watersheds, error, /*isLoading*/ } = useQuery({
     queryKey: ['watersheds'],
     queryFn: fetchWatersheds
   });
@@ -33,7 +33,7 @@ export default function Map() {
   console.log(BOUNDS)
 
   if (error) return <div>Error: {error.message}</div>;
-  if (isLoading) return <div>Loading...</div>;
+  //if (isLoading) return <div>Loading...</div>;
 
   return (
     <div className="map-container">

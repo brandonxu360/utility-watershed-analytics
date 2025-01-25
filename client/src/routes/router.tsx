@@ -11,7 +11,7 @@ const rootRoute = createRootRoute({
   component: () => (
     <>
       <Navbar />
-      <div style={{ padding: '20px' }}>
+      <div style={{height: '100%'}}>
         <Outlet />
       </div>
     </>
