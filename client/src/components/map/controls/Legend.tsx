@@ -52,17 +52,37 @@ export default function LegendControl() {
       {isLegendOpen && (
         <div className="legend-modal">
           <div className="legend-content">
-            <div>
-              <div style={{ background: '#00FF7F', width: 20, height: 20, display: 'inline-block', borderRadius: 5 }}></div>
-              Tier 1 watersheds
-              <FaExpand />
-              <FaEye />
+            <div className="watershed-container">
+              <div className="watershed-left">
+                <div style={{ background: '#00FF7F', width: 20, height: 20, display: 'inline-block', borderRadius: 5 }}></div>
+                <span className="legend-text" style={{ fontWeight: 'bold' }}>Tier 1 watersheds</span>
+              </div>
+              <div className="watershed-right">
+                <FaExpand 
+                  style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} 
+                  onClick={() => alert('Expand icon clicked')}
+                />
+                <FaEye 
+                  style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} 
+                  onClick={() => alert('Expand icon clicked')}
+                />
+              </div>
             </div>
-            <div>
-              <div style={{ background: '#0000FF', width: 20, height: 20, display: 'inline-block', borderRadius: 5 }}></div>
-              Tier 2 watersheds
-              <FaExpand />
-              <FaEye />
+            <div className="watershed-container">
+              <div className="watershed-left">
+                <div style={{ background: '#0000FF', width: 20, height: 20, display: 'inline-block', borderRadius: 5 }}></div>
+                <span className="legend-text" style={{ fontWeight: 'bold' }}>Tier 2 watersheds</span>
+              </div>              
+              <div className="watershed-right">
+                <FaExpand 
+                  style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} 
+                  onClick={() => alert('Expand icon clicked')}
+                />
+                <FaEye 
+                  style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} 
+                  onClick={() => alert('Expand icon clicked')}
+                />
+              </div>
             </div>
           </div>
         </div>

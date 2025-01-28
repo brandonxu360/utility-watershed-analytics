@@ -16,7 +16,7 @@
   left: 60px;
   background: rgba(0, 0, 0, 0.8);
   color: white;
-  padding: 15px;
+  padding: 10px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   z-index: 1000;
@@ -25,6 +25,22 @@
 .legend-content div {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
   font-size: 14px;
+}
+
+.lengend-text {
+  font-weight: bold;
+}
+
+.watershed-container {
+  padding: 10px;
+}
+
+.watershed-left div {
+  margin-right: 10px;
+}
+
+.watershed-right {
+  margin-left: 20px;
+  gap: 10px;
 }
