@@ -10,9 +10,11 @@ const Login = lazyRouteComponent(() => import('../pages/login/Login'));
 const rootRoute = createRootRoute({
   component: () => (
     <>
-      <Navbar />
-      <div style={{height: '100%'}}>
-        <Outlet />
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100svh' }}>
+        <Navbar />
+        <div style={{ flex: 1 }}>
+          <Outlet />
+        </div>
       </div>
     </>
   ),
