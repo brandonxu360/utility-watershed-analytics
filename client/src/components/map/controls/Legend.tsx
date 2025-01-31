@@ -60,11 +60,11 @@ export default function LegendControl() {
               <div className="watershed-right">
                 <FaExpand 
                   style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} 
-                  onClick={() => alert('Expand icon clicked')}
+                  onClick={() => alert('Show only icon clicked')}
                 />
                 <FaEye 
                   style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} 
-                  onClick={() => alert('Expand icon clicked')}
+                  onClick={() => alert('Hide icon clicked')}
                 />
               </div>
             </div>
@@ -76,11 +76,11 @@ export default function LegendControl() {
               <div className="watershed-right">
                 <FaExpand 
                   style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} 
-                  onClick={() => alert('Expand icon clicked')}
+                  onClick={() => alert('Show only icon clicked')}
                 />
                 <FaEye 
                   style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} 
-                  onClick={() => alert('Expand icon clicked')}
+                  onClick={() => alert('Hide icon clicked')}
                 />
               </div>
             </div>

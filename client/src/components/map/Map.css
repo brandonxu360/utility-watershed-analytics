@@ -44,3 +44,45 @@
   margin-left: 20px;
   gap: 10px;
 }
+
+/*Search Control CSS*/
+.search-modal {
+  position: absolute;
+  top: 1px;
+  right: 50px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.search-modal div {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.search-content {
+  gap: 10px;
+}
+
+.search-modal-field input {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 30px;
+  outline: none;
+  font-size: 14px;
+}
+
+.search-modal-button 
+{
+  transition-duration: 0.4s;
+  background-color: #DCEDFF;
+}
+
+.search-modal-button:hover {
+  background-color: #f1f1f1;
+  color: #121212;
+}
