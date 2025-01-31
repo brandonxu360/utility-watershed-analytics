@@ -24,7 +24,7 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-export default function Map() {
+export default function Map({ setIsSideContentOpen }: { setIsSideContentOpen: (open: boolean) => void }) {
 
   const fetchWatersheds = async () => {
     const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
@@ -70,7 +70,7 @@ export default function Map() {
         <ZoomInControl />
         <ZoomOutControl />
         <SettingsControl />
-        <ExpandControl />
+        <ExpandControl setIsSideContentOpen={setIsSideContentOpen} />
         <UserLocationControl />
 
         <GeoJSON

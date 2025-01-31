@@ -30,6 +30,7 @@ export default function SearchControl() {
       containerRef.current = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
       const searchControl = L.Control.extend({
         onAdd: function () {
+          // Container element
           containerRef.current!.style.backgroundColor = '#121212';
           containerRef.current!.style.width = '40px';
           containerRef.current!.style.height = '40px';
@@ -37,6 +38,7 @@ export default function SearchControl() {
           containerRef.current!.style.justifyContent = 'center';
           containerRef.current!.style.alignItems = 'center';
           containerRef.current!.style.cursor = 'pointer';
+          containerRef.current!.addEventListener('click', toggleSearch);
           return containerRef.current!;
         },
       });
@@ -50,7 +52,7 @@ export default function SearchControl() {
       rootRef.current.render(
         isSearchOpen ? (
           <>
-            <FaXmark style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} onClick={toggleSearch} />
+            <FaXmark style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} />
             <div className='search-modal'>
               <div className='search-content'>
                 <div className='search-modal-field'>
@@ -70,7 +72,7 @@ export default function SearchControl() {
             </div>
           </>
         ) : (
-          <FaMagnifyingGlass style={{ fontSize: '20px', color: 'white', cursor: 'pointer' }} onClick={toggleSearch} />
+          <FaMagnifyingGlass style={{ fontSize: '20px', color: 'white', cursor: 'pointer' }} />
         )
       );
     }
