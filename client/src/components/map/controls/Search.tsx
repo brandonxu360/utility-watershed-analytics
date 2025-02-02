@@ -38,7 +38,7 @@ export default function SearchControl() {
           containerRef.current!.style.justifyContent = 'center';
           containerRef.current!.style.alignItems = 'center';
           containerRef.current!.style.cursor = 'pointer';
-          containerRef.current!.addEventListener('click', toggleSearch);
+          containerRef.current!.onclick = toggleSearch;
           return containerRef.current!;
         },
       });
