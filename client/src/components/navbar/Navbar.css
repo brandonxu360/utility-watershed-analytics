@@ -1,0 +1,36 @@
+/* Navbar.css */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #333;
+  color: #fff;
+}
+
+.navbar-left .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+}
+
+.navbar-right ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-right ul li {
+  margin: 0 10px;
+}
+
+.navbar-right ul li a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.navbar-right ul li a:active {
+  color: cyan;
+}
