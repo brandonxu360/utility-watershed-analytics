@@ -1,10 +1,14 @@
 asgiref==3.8.1
+autopep8==2.3.2
 Django==5.1.4
 django-cors-headers==4.6.0
 django-filter==24.3
+django-silk==5.3.2
 djangorestframework==3.15.2
 djangorestframework-gis==1.1
+gprof2dot==2024.6.6
 psycopg==3.2.3
+pycodestyle==2.12.1
 sqlparse==0.5.3
 typing_extensions==4.12.2
 tzdata==2024.2

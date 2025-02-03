@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/watershed/', include('server.watershed.urls')),
+    path('silk/', include('silk.urls', namespace='silk')),
 ]
