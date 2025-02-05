@@ -51,3 +51,4 @@ class WatershedBorder(models.Model):
     separate = models.CharField(max_length=20, null=True)
     sqmi = models.FloatField()
     geom = models.MultiPolygonField(srid=4326)
+    simplified_geom = models.MultiPolygonField(srid=4326, null=True, blank=True)
