@@ -53,6 +53,7 @@ export default function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <GeoJSON
+          key={JSON.stringify(watersheds)}
           data={watersheds}
           style={() => ({
             color: '#4a83ec',
