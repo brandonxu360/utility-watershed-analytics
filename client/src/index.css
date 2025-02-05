@@ -1,3 +1,6 @@
+/*Website Font*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 :root {
   /*Website Colors*/
   --clr-primary-100: #F5F5F5;
@@ -8,7 +11,7 @@
   --clr-primary-error: #FF4B3E;
 
   /*Fonts*/
-  --ff-primary: Arial, sans-serif;
+  --ff-primary: 'Inter', serif;
   --ff-body: var(--ff-primary);
   --ff-heading: var(--ff-primary);
   line-height: 1.5;
@@ -20,7 +23,7 @@
 
   /*Font Size Variables*/
   --fs-100: 1rem;
-  --fs-200: 1.25rem;
+  --fs-200: 1.2rem;
   --fs-300: 1.5rem;
   --fs-400: 3rem;
   --fs-500: 4.6875rem;
@@ -49,45 +52,6 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/*Larger Laptops*/
-@media (max-width: 90em) {
-  :root {
-    --fs-100: 2rem;
-    --fs-200: 2.25rem;
-    --fs-300: 2.5rem;
-    --fs-400: 4rem;
-    --fs-500: 5.6875rem;
-
-    --fs-nav: var(--fs-200);
-  }
-}
-
-/*Smaller Laptops*/
-@media (max-width: 64em) {
-  :root {
-    --fs-100: 1rem;
-    --fs-200: 1.25rem;
-    --fs-300: 1.5rem;
-    --fs-400: 3rem;
-    --fs-500: 4.6875rem;
-
-    --fs-nav: var(--fs-200);
-  }
-}
-
-/*Tablet screens*/
-@media (max-width: 52em) {
-  :root {  
-    --fs-100: 0.825rem;
-    --fs-200: 1rem;
-    --fs-300: 1.5rem;
-    --fs-400: 2rem;
-    --fs-500: 3.25rem;
-    
-    --fs-nav: var(--fs-100);
-  }
 }
 
 /* CSS Reset retrieved from: https://piccalil.li/blog/a-modern-css-reset */
@@ -159,6 +123,11 @@ svg {
 }
 
 /*End of CSS reset*/
+
+/*Body*/
+body {
+  font-family: var(--ff-body);
+}
 
 /*Links*/
 a {
