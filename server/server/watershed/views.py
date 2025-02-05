@@ -20,7 +20,7 @@ class WatershedBorderViewSet(viewsets.ReadOnlyModelViewSet):
     Note that the payload served by this view can be large and thus, requesting multiple WatershedBorder
     model instances is not advised.
     """
-    queryset = WatershedBorder.objects.all()
+    queryset = WatershedBorder.objects.defer('simplified_geom')
     serializer_class = WatershedBorderSerializer
 
 @extend_schema(
@@ -38,5 +38,5 @@ class WatershedBorderBasicViewSet(viewsets.ReadOnlyModelViewSet):
     This endpoint is intended for scenarios where an overview of multiple watershed borders is required, 
     particularly for mapping purposes where detailed geometry isn't necessary.
     """
-    queryset = WatershedBorder.objects.all()
+    queryset = WatershedBorder.objects.only("id", "simplified_geom", "pws_name", "city", "cnty_name", "acres")
     serializer_class = WatershedBorderBasicSerializer

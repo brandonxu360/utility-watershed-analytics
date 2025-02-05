@@ -9,7 +9,7 @@ class WatershedBorderSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = WatershedBorder
         geo_field = 'geom'
-        fields = '__all__'
+        exclude = ('simplified_geom',)
 
 class WatershedBorderBasicSerializer(GeoFeatureModelSerializer):
     """
@@ -23,6 +23,6 @@ class WatershedBorderBasicSerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = WatershedBorder
-        geo_field = 'geom'
-        fields = ('id', 'geom', 'pws_name', 'city', 'cnty_name', 'acres', 'details_url')
+        geo_field = 'simplified_geom'
+        fields = ('id', 'simplified_geom', 'pws_name', 'city', 'cnty_name', 'acres', 'details_url')
         description = "Basic serializer for Watershed Border with limited fields and a details URL."

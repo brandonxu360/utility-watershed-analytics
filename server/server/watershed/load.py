@@ -67,6 +67,6 @@ def run(verbose=True):
     with connection.cursor() as cursor:
         cursor.execute("""
             UPDATE watershed_watershedborder
-            SET simplified_geom = ST_SimplifyPreserveTopology(geom, 0.01)
+            SET simplified_geom = ST_SimplifyPreserveTopology(geom, 0.02)
             WHERE geom IS NOT NULL;
         """)
