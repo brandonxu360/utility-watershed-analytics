@@ -54,6 +54,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media (max-width: 64em) {
+  :root {
+    --fs-100: 0.75rem;
+    --fs-200: 1rem;
+    --fs-300: 1.25rem;
+    --fs-400: 2rem;
+    --fs-500: 4.6875rem;
+
+    --fs-nav: var(--fs-100);
+  }
+}
+
+@media (min-width: 160em) {
+  :root {
+    --fs-100: 1.75rem;
+    --fs-200: 2.5rem;
+    --fs-300: 3.5rem;
+    --fs-400: 6rem;
+    --fs-500: 4.6875rem;
+
+    --fs-nav: var(--fs-100);
+  }
+}
+
 /* CSS Reset retrieved from: https://piccalil.li/blog/a-modern-css-reset */
 
 /* Box sizing rules */

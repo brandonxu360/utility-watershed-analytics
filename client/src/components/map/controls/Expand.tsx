@@ -10,27 +10,22 @@ export default function ExpandControl({ setIsSideContentOpen }: { setIsSideConte
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rootRef = useRef<Root | null>(null);
 
-  const toggleSidePanel = () => {
-    setIsOpen((prev) => {
-      const newState = !prev;
-      setIsSideContentOpen(newState);
-      return newState;
-    });
-  };
-    
   useEffect(() => {
     if (!containerRef.current) {
       containerRef.current = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+      containerRef.current.style.backgroundColor = '#121212';
+      containerRef.current.style.width = '40px';
+      containerRef.current.style.height = '40px';
+      containerRef.current.style.display = 'flex';
+      containerRef.current.style.justifyContent = 'center';
+      containerRef.current.style.alignItems = 'center';
+      containerRef.current.style.cursor = 'pointer';
+
       const ExpandControl = L.Control.extend({
         onAdd: function () {
-          containerRef.current!.style.backgroundColor = '#121212';
-          containerRef.current!.style.width = '40px';
-          containerRef.current!.style.height = '40px';
-          containerRef.current!.style.display = 'flex';
-          containerRef.current!.style.justifyContent = 'center';
-          containerRef.current!.style.alignItems = 'center';
-          containerRef.current!.style.cursor = 'pointer';
-          containerRef.current!.addEventListener('click', toggleSidePanel);
+          containerRef.current!.addEventListener('click', () => {
+            setIsOpen((prev) => !prev);
+          });
           return containerRef.current!;
         }
       });
@@ -39,7 +34,14 @@ export default function ExpandControl({ setIsSideContentOpen }: { setIsSideConte
       map.addControl(control);
       rootRef.current = createRoot(containerRef.current!);
     }
+  }, [map]);
 
+  // Effect to sync state safely
+  useEffect(() => {
+    setIsSideContentOpen(isOpen);
+  }, [isOpen, setIsSideContentOpen]);
+
+  useEffect(() => {
     if (rootRef.current) {
       rootRef.current.render(
         isOpen ? (
@@ -49,7 +51,7 @@ export default function ExpandControl({ setIsSideContentOpen }: { setIsSideConte
         )
       );
     }
-  }, [map, isOpen]);
+  }, [isOpen]);
 
   return null;
 }

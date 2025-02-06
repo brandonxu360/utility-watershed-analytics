@@ -11,23 +11,11 @@ export default function SearchControl() {
   const containerRef = useRef<HTMLDivElement | null>(null); // Ref for the control container
   const rootRef = useRef<Root | null>(null); // Store the root instance
 
-  const toggleSearch = () => setIsSearchOpen((prev) => !prev); // Toggles the search bar open and close
-
-  const handleSearch = () => {
-    const [lat, lng] = input.split(',').map(coord => parseFloat(coord.trim()));
-    if (!isNaN(lat) && !isNaN(lng)) {
-      map.setView([lat, lng], 13);
-      setInput('');
-      setIsSearchOpen(false);
-    } else {
-      alert('Invalid coordinates. Please enter in "latitude, longitude" format.');
-    }
-  };
-
   useEffect(() => {
     // Create the control only once
     if (!containerRef.current) {
       containerRef.current = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
       const searchControl = L.Control.extend({
         onAdd: function () {
           // Container element
@@ -38,9 +26,14 @@ export default function SearchControl() {
           containerRef.current!.style.justifyContent = 'center';
           containerRef.current!.style.alignItems = 'center';
           containerRef.current!.style.cursor = 'pointer';
-          containerRef.current!.onclick = toggleSearch;
+
+          // Click handler
+          containerRef.current!.addEventListener('click', () => {
+            setIsSearchOpen((prev) => !prev);
+          });
+
           return containerRef.current!;
-        },
+        }
       });
 
       const control = new searchControl({ position: 'topright' });
@@ -53,30 +46,44 @@ export default function SearchControl() {
         isSearchOpen ? (
           <>
             <FaXmark style={{ fontSize: '20px', color: 'white', margin: 'auto', cursor: 'pointer' }} />
-            <div className='search-modal'>
-              <div className='search-content'>
-                <div className='search-modal-field'>
-                  <input
-                    type="text"
-                    placeholder="Search coordinates"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <button onClick={handleSearch} className='search-modal-button'>
-                    Go
-                  </button>
-                </div>
-              </div>
-            </div>
           </>
         ) : (
           <FaMagnifyingGlass style={{ fontSize: '20px', color: 'white', cursor: 'pointer' }} />
         )
       );
     }
-  }, [isSearchOpen, input, map]);
+  }, [isSearchOpen, map]);
 
-  return null;
+  return isSearchOpen ? (
+    <div className='search-modal'>
+      <div className='search-content'>
+        <div className='search-modal-field'>
+          <input
+            type="text"
+            name='Search bar'
+            placeholder="Search coordinates"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+        </div>
+        <div>
+          <button
+            onClick={() => {
+              const [lat, lng] = input.split(',').map(coord => parseFloat(coord.trim()));
+              if (!isNaN(lat) && !isNaN(lng)) {
+                map.setView([lat, lng], 13);
+                setInput('');
+                setIsSearchOpen(false);
+              } else {
+                alert('Invalid coordinates. Please enter in "latitude, longitude" format.');
+              }
+            }}
+            className='search-modal-button'
+          >
+            Go
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
 }

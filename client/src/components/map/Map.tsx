@@ -40,7 +40,7 @@ export default function Map({ setIsSideContentOpen }: { setIsSideContentOpen: (o
   console.log(CENTER)
   console.log(BOUNDS)
 
-  if (error) return <div>{error.message}</div>;
+  if (error) return <div>Error: {error.message}</div>;
   //if (isLoading) return <div>Loading...</div>;
 
   return (

@@ -13,7 +13,7 @@ nav {
 }
 
 .navbar-left .logo {
-  font-size: var(--fs-3=200);
+  font-size: var(--fs-nav);
   color: var(--clr-primary-100);
   text-decoration: none;
 }
