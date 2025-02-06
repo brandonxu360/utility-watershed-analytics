@@ -66,7 +66,7 @@
   }
 }
 
-@media (min-width: 90em) {
+@media (min-width: 100em) {
   :root {
     --fs-100: 1.25rem;
     --fs-200: 1.5rem;
