@@ -66,6 +66,18 @@
   }
 }
 
+@media (min-width: 90em) {
+  :root {
+    --fs-100: 1.25rem;
+    --fs-200: 1.5rem;
+    --fs-300: 2.5rem;
+    --fs-400: 3rem;
+    --fs-500: 5rem;
+
+    --fs-nav: var(--fs-100);
+  }
+}
+
 @media (min-width: 160em) {
   :root {
     --fs-100: 1.75rem;

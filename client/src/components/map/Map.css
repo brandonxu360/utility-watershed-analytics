@@ -73,6 +73,7 @@
   border-radius: var(--size-100);
   height: var(--size-600);
   background-color: var(--clr-primary-100);
+  color: var(--clr-primary-500);
   outline: none;
 }
 
@@ -81,9 +82,9 @@
   font-size: var(--size-300);
   transition-duration: 0.4s;
   background-color: var(--clr-primary-100);
+  color: var(--clr-primary-500);
 }
 
 .search-modal-button:hover {
   background-color: var(--clr-primary-200);
-  color: var(--clr-primary-500);
 }
