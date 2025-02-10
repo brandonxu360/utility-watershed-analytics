@@ -1,7 +1,15 @@
-import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 import { useQuery } from '@tanstack/react-query';
+import LegendControl from './controls/Legend';
+import SearchControl from './controls/Search';
+import LayersControl from './controls/Layers';
+import ZoomInControl from './controls/ZoomIn';
+import ZoomOutControl from './controls/ZoomOut';
+import SettingsControl from './controls/Settings'
+import UserLocationControl from './controls/UserLocation';
+import ExpandControl from './controls/Expand';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -16,7 +24,7 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-export default function Map() {
+export default function Map({ setIsSideContentOpen }: { setIsSideContentOpen: (open: boolean) => void }) {
 
   const fetchWatersheds = async () => {
     const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
@@ -42,7 +50,8 @@ export default function Map() {
         zoom={6}
         minZoom={6}
         maxZoom={13}
-        zoomControl={true}
+        zoomControl={false}
+        doubleClickZoom={false}
         scrollWheelZoom={true}
         maxBounds={BOUNDS}
         maxBoundsViscosity={0.5}
@@ -52,6 +61,18 @@ export default function Map() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        <ScaleControl metric={true} imperial={true} />
+
+        <LegendControl />
+        <SearchControl />
+        <LayersControl />
+        <ZoomInControl />
+        <ZoomOutControl />
+        <SettingsControl />
+        <ExpandControl setIsSideContentOpen={setIsSideContentOpen} />
+        <UserLocationControl />
+
         <GeoJSON
           data={watersheds}
           style={() => ({
