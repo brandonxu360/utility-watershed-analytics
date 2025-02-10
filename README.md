@@ -1,8 +1,7 @@
-# fullstack-gis-webapp
+# Utility Watershed Analytics Web App
 
 ## Project Overview
-This project prototypes a potential development environment setup for a full-stack web application with geospatial capabilities. In this demonstration, watershed border data is loaded from a shape file into a PostgreSQL database, serialized, and sent to the frontend as GeoJSON to be displayed on a Leaflet map.
-
+A full-stack web app providing water utility management with interactive geospatial insights and analytics for informed decision-making in water resource management.
 
 The key technologies include:
 

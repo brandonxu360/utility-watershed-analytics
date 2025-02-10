@@ -4,22 +4,17 @@ from rest_framework import serializers
 
 class WatershedBorderSerializer(GeoFeatureModelSerializer):
     """
-    Full serializer with all watershed border fields.
-    Uses specialized GeoFeatureModelSerializer to serialize model data
-    into GeoJSON.
-    Attributes:
-        model (WatershedBorder): The model class being serialized
-        geo_field (str): Name of the geometry field ('geom')
-        fields (str): Specifies all model fields should be included ('__all__')
+    Serializes the WatershedBorder model with all of its fields.
     """
     class Meta:
         model = WatershedBorder
         geo_field = 'geom'
-        fields = '__all__'
+        exclude = ('simplified_geom',)
 
 class WatershedBorderBasicSerializer(GeoFeatureModelSerializer):
     """
-    Basic serializer with only essential fields and a hyperlink to full details
+    Serializes a simplified version of the WatershedBorder model,
+    including essential fields and a hyperlink to full details.
     """
     details_url = serializers.HyperlinkedIdentityField(
         view_name='watershedborder-detail',
@@ -28,5 +23,6 @@ class WatershedBorderBasicSerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = WatershedBorder
-        geo_field = 'geom'
-        fields = ('id', 'geom', 'pws_name', 'city', 'cnty_name', 'acres', 'details_url')
+        geo_field = 'simplified_geom'
+        fields = ('id', 'simplified_geom', 'pws_name', 'city', 'cnty_name', 'acres', 'details_url')
+        description = "Basic serializer for Watershed Border with limited fields and a details URL."

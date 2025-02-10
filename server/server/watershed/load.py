@@ -1,6 +1,7 @@
 from pathlib import Path
 from django.contrib.gis.utils import LayerMapping
 from .models import WatershedBorder
+from django.db import connection
 
 # Auto-generated `LayerMapping` dictionary for WatershedBorder model
 # /app/server $ django-admin ogrinspect server/watershed/data/OR/OR_drinking_water_source_areas.shp WatershedBorder --srid=4326 --mapping --multi
@@ -61,3 +62,11 @@ watershed_shp_location = Path(__file__).resolve().parent / 'data' / 'OR' / 'OR_d
 def run(verbose=True):
     lm = LayerMapping(WatershedBorder, watershed_shp_location, watershedborder_mapping, transform=False)
     lm.save(strict=True, verbose=verbose)
+
+    # Update the simplified_geom field using PostGIS simplify (potentially more efficient than using geos simplify in the application)
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE watershed_watershedborder
+            SET simplified_geom = ST_SimplifyPreserveTopology(geom, 0.02)
+            WHERE geom IS NOT NULL;
+        """)

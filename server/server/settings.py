@@ -43,11 +43,14 @@ INSTALLED_APPS = [
     'rest_framework_gis',
     'server.watershed',
     'corsheaders',
+    'silk',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -138,3 +141,14 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173', # Vite development server
     'http://127.0.0.1:5173',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Utility Watershed Analytics API',
+    'DESCRIPTION': 'Backend DRF API for a full-stack web app providing water utility management with interactive geospatial insights and analytics for informed decision-making in water resource management.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
