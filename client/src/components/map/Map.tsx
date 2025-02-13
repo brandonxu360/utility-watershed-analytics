@@ -6,6 +6,7 @@ import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 import ExpandControl from './controls/Expand/Expand';
 import LayersControl from './controls/Layers/Layers';
+import LegendControl from './Legend/Legend';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -66,6 +67,11 @@ export default function Map({
 
         {/* Scale control provided by React Leaflet */}
         <ScaleControl metric={true} imperial={true} />
+
+        {/* TOP LEFT CONTROLS */}
+        <div className='leaflet-top leaflet-left'>
+          <LegendControl />
+        </div>
 
         {/* TOP RIGHT CONTROLS */}
         <div className="leaflet-top leaflet-right">
