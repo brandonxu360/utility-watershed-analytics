@@ -9,6 +9,7 @@ import LayersControl from './controls/Layers/Layers';
 import LegendControl from './Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
+import UserLocationControl from './controls/UserLocation/UserLocation';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -86,6 +87,7 @@ export default function Map({
 
         {/* BOTTOM RIGHT CONTROLS */}
         <div className="leaflet-bottom leaflet-right">
+          <UserLocationControl />
           <ExpandControl
             isOpen={isSideContentOpen}
             setIsOpen={setIsSideContentOpen}
