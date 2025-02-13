@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 import ExpandControl from './controls/Expand/Expand';
+import LayersControl from './controls/Layers/Layers';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -68,6 +69,7 @@ export default function Map({
 
         {/* TOP RIGHT CONTROLS */}
         <div className="leaflet-top leaflet-right">
+          <LayersControl />
           <ZoomInControl />
           <ZoomOutControl />
         </div>

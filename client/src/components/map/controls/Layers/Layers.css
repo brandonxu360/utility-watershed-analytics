@@ -1,0 +1,17 @@
+.layers-button {
+    width: 40px;
+    height: 40px;
+    background-color: #121212;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 0;
+}
+
+.layers-icon {
+    font-size: 20px;
+    color: white;
+}
