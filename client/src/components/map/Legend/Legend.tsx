@@ -2,9 +2,18 @@ import { useState } from 'react';
 import { FaListUl, FaXmark, FaEye, FaExpand } from "react-icons/fa6";
 import './Legend.css';
 
+/**
+ * LegendControl - A custom map control component that displays a toggleable legend
+ * showing different watershed tiers and their controls
+ *
+ * @component
+ */
 export default function LegendControl() {
   const [isLegendOpen, setIsLegendOpen] = useState(false);
 
+  /**
+   * Toggles the visibility state of the legend modal
+   */
   const toggleLegend = () => setIsLegendOpen((prev) => !prev);
 
   return (
