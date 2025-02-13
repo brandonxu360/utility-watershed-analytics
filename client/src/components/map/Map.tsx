@@ -7,6 +7,7 @@ import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 import ExpandControl from './controls/Expand/Expand';
 import LayersControl from './controls/Layers/Layers';
 import LegendControl from './Legend/Legend';
+import SearchControl from './controls/Search/Search';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -75,6 +76,7 @@ export default function Map({
 
         {/* TOP RIGHT CONTROLS */}
         <div className="leaflet-top leaflet-right">
+          <SearchControl />
           <LayersControl />
           <ZoomInControl />
           <ZoomOutControl />
