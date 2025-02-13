@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FaListUl, FaXmark, FaEye, FaExpand } from "react-icons/fa6";
-import './Legend.css';
+import './Legend.css'
 
 /**
  * LegendControl - A custom map control component that displays a toggleable legend

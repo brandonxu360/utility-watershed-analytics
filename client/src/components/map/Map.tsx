@@ -6,7 +6,7 @@ import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 import ExpandControl from './controls/Expand/Expand';
 import LayersControl from './controls/Layers/Layers';
-import LegendControl from './Legend/Legend';
+import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
