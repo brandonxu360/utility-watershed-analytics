@@ -1,0 +1,11 @@
+.zoom-out-button {
+  width: 40px;
+  height: 40px;
+  background: #121212;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0;
+}

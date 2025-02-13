@@ -2,14 +2,8 @@ import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 import { useQuery } from '@tanstack/react-query';
-import LegendControl from './controls/Legend';
-import SearchControl from './controls/Search';
-import LayersControl from './controls/Layers';
-import ZoomInControl from './controls/ZoomIn';
-import ZoomOutControl from './controls/ZoomOut';
-import SettingsControl from './controls/Settings'
-import UserLocationControl from './controls/UserLocation';
-import ExpandControl from './controls/Expand';
+import ZoomInControl from './controls/ZoomIn/ZoomIn';
+import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -62,16 +56,14 @@ export default function Map({ setIsSideContentOpen }: { setIsSideContentOpen: (o
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        {/* Scale control provided by React Leaflet */}
         <ScaleControl metric={true} imperial={true} />
 
-        <LegendControl />
-        <SearchControl />
-        <LayersControl />
-        <ZoomInControl />
-        <ZoomOutControl />
-        <SettingsControl />
-        <ExpandControl setIsSideContentOpen={setIsSideContentOpen} />
-        <UserLocationControl />
+        {/* TOP RIGHT CONTROLS */}
+        <div className="leaflet-top leaflet-right">
+          <ZoomInControl />
+          <ZoomOutControl />
+        </div>
 
         <GeoJSON
           data={watersheds}
