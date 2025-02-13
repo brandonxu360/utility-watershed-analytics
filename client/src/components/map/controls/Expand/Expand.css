@@ -1,4 +1,4 @@
-.zoom-out-button {
+.expand-button {
   width: 40px;
   height: 40px;
   background: #121212;
@@ -10,7 +10,7 @@
   border-radius: 0;
 }
 
-.minus-icon {
+.expand-icon {
   font-size: 20px;
   color: white;
 }

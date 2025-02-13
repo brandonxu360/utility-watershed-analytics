@@ -25,7 +25,10 @@ const Home = () => {
         </div>
       </div>
       <div className={`${HomeCss['map-wrapper']} ${isSideContentOpen ? HomeCss['map-shrink'] : ''}`}>
-        <Map setIsSideContentOpen={setIsSideContentOpen} />
+        <Map 
+          isSideContentOpen={isSideContentOpen}
+          setIsSideContentOpen={setIsSideContentOpen} 
+        />
       </div>
     </div>
   );

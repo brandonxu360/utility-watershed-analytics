@@ -29,7 +29,7 @@ export default function ZoomInControl() {
         aria-label="Zoom in"
         title="Zoom in"
       >
-        <FaPlus />
+        <FaPlus className='plus-icon'/>
       </button>
     </div>
   );

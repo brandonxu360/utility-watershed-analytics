@@ -29,7 +29,7 @@ export default function ZoomOutControl() {
         aria-label="Zoom out"
         title="Zoom out"
       >
-        <FaMinus />
+        <FaMinus className='minus-icon'/>
       </button>
     </div>
   );

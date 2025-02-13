@@ -4,6 +4,7 @@ import './Map.css';
 import { useQuery } from '@tanstack/react-query';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
+import ExpandControl from './controls/Expand/Expand';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -18,7 +19,13 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-export default function Map({ setIsSideContentOpen }: { setIsSideContentOpen: (open: boolean) => void }) {
+export default function Map({
+  isSideContentOpen,
+  setIsSideContentOpen
+}: {
+  isSideContentOpen: boolean;
+  setIsSideContentOpen: (open: boolean) => void;
+}) {
 
   const fetchWatersheds = async () => {
     const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
@@ -63,6 +70,14 @@ export default function Map({ setIsSideContentOpen }: { setIsSideContentOpen: (o
         <div className="leaflet-top leaflet-right">
           <ZoomInControl />
           <ZoomOutControl />
+        </div>
+
+        {/* BOTTOM RIGHT CONTROLS */}
+        <div className="leaflet-bottom leaflet-right">
+          <ExpandControl
+            isOpen={isSideContentOpen}
+            setIsOpen={setIsSideContentOpen}
+          />
         </div>
 
         <GeoJSON
