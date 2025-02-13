@@ -38,7 +38,7 @@ export default function Map({
     return response.json();
   };
 
-  const { data: watersheds, error, /*isLoading*/ } = useQuery({
+  const { data: watersheds, error, isLoading } = useQuery({
     queryKey: ['watersheds'],
     queryFn: fetchWatersheds
   });
@@ -63,6 +63,11 @@ export default function Map({
         maxBoundsViscosity={0.5}
         bounds={BOUNDS}
       >
+        {isLoading && (
+          <div className="map-loading-overlay">
+            <div className="loading-spinner"></div>
+          </div>
+        )}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -95,6 +100,7 @@ export default function Map({
         </div>
 
         <GeoJSON
+          key={JSON.stringify(watersheds)}
           data={watersheds}
           style={() => ({
             color: '#4a83ec',
