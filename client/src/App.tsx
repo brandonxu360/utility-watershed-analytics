@@ -3,7 +3,7 @@ import { router } from './routes/router';
 
 const App = () => {
   return (
-    <div style={{height: '100%'}}>
+    <div>
       <RouterProvider router={router} />
     </div>
   );

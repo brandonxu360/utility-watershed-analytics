@@ -1,0 +1,59 @@
+.search-button {
+    width: 40px;
+    height: 40px;
+    background-color: #121212;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    border-radius: 0;
+}
+
+.search-icon {
+    font-size: 20px;
+    color: white;
+}
+
+/*Search Control CSS*/
+.search-modal {
+    position: absolute;
+    top: 10px;
+    right: 60px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--clr-primary-100);
+    padding: var(--size-300);
+    border-radius: var(--size-200);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.search-modal div {
+    display: flex;
+    align-items: center;
+    font-size: var(--size-400);
+}
+
+.search-content {
+    gap: var(--size-300);
+}
+
+.search-modal-field input {
+    border: 1px solid var(--clr-primary-100);
+    border-radius: var(--size-100);
+    height: var(--size-600);
+    background-color: var(--clr-primary-100);
+    color: var(--clr-primary-500);
+    outline: none;
+}
+
+.search-modal-button {
+    font-size: var(--size-300);
+    transition-duration: 0.4s;
+    background-color: var(--clr-primary-100);
+    color: var(--clr-primary-500);
+}
+
+.search-modal-button:hover {
+    background-color: var(--clr-primary-200);
+}
