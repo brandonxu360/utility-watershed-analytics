@@ -8,6 +8,7 @@ import ExpandControl from './controls/Expand/Expand';
 import LayersControl from './controls/Layers/Layers';
 import LegendControl from './Legend/Legend';
 import SearchControl from './controls/Search/Search';
+import SettingsControl from './controls/Settings/Settings';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -80,6 +81,7 @@ export default function Map({
           <LayersControl />
           <ZoomInControl />
           <ZoomOutControl />
+          <SettingsControl />
         </div>
 
         {/* BOTTOM RIGHT CONTROLS */}
