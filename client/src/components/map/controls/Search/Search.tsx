@@ -47,12 +47,14 @@ export default function SearchControl() {
                   placeholder="Search coordinates"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  aria-label='Search bar'
                 />
               </div>
               <div>
                 <button
                   onClick={handleSearch}
                   className="search-modal-button"
+                  aria-label="Go button"
                 >
                   Go
                 </button>
