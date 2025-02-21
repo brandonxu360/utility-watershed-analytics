@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaMagnifyingGlass } from "react-icons/fa6";
+import { FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
 import { useMap } from 'react-leaflet';
 import './Search.css';
 
@@ -33,7 +33,8 @@ export default function SearchControl() {
           aria-label="Search location"
           title="Search location"
         >
-          <FaMagnifyingGlass className="search-icon" />
+          {isSearchOpen ? <FaXmark className="search-icon" /> : <FaMagnifyingGlass className="search-icon" />}
+          
         </button>
       </div>
 

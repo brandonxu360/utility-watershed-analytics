@@ -21,8 +21,8 @@ export default function LegendControl() {
       <button
         onClick={toggleLegend}
         className="legend-button"
-        aria-label="Toggle legend"
-        title="Toggle legend"
+        aria-label={isLegendOpen ? 'Close legend' : 'Open legend'}
+        title={isLegendOpen ? 'Close legend' : 'Open legend'}
       >
         {isLegendOpen ? (
           <FaXmark className="legend-icon" />
