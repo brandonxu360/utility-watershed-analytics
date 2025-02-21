@@ -34,33 +34,33 @@ export default function SearchControl() {
           title="Search location"
         >
           {isSearchOpen ? <FaXmark className="search-icon" /> : <FaMagnifyingGlass className="search-icon" />}
-          
-        </button>
-      </div>
 
-      {isSearchOpen && (
-        <div className="search-modal">
-          <div className="search-content">
-            <div className="search-modal-field">
-              <input
-                type="text"
-                name="Search bar"
-                placeholder="Search coordinates"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-              />
-            </div>
-            <div>
-              <button
-                onClick={handleSearch}
-                className="search-modal-button"
-              >
-                Go
-              </button>
+        </button>
+
+        {isSearchOpen && (
+          <div className="search-modal">
+            <div className="search-content">
+              <div className="search-modal-field">
+                <input
+                  type="text"
+                  name="Search bar"
+                  placeholder="Search coordinates"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                />
+              </div>
+              <div>
+                <button
+                  onClick={handleSearch}
+                  className="search-modal-button"
+                >
+                  Go
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 }
