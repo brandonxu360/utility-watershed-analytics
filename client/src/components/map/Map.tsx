@@ -43,11 +43,7 @@ export default function Map({
     queryFn: fetchWatersheds
   });
 
-  console.log(CENTER)
-  console.log(BOUNDS)
-
   if (error) return <div>Error: {error.message}</div>;
-  //if (isLoading) return <div>Loading...</div>;
 
   return (
     <div className="map-container">
