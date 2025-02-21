@@ -1,0 +1,53 @@
+.legend-button {
+    width: 36px;
+    height: 36px;
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 0;
+}
+
+.legend-icon {
+    font-size: 20px;
+    color: white;
+}
+
+/*Legend Control CSS*/
+.legend-modal {
+    position: absolute;
+    top: 10px;
+    left: 60px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--clr-primary-100);
+    padding: var(--size-300);
+    border-radius: var(--size-200);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    width: 330px;
+}
+
+.watershed-container {
+    padding: var(--size-300);
+}
+
+.watershed-left div {
+    margin-right: var(--size-300);
+}
+
+.watershed-right {
+    margin-left: var(--size-500);
+    gap: var(--size-300);
+}
+
+.legend-content div {
+    display: flex;
+    align-items: center;
+    font-size: var(--fs-100);
+}
+
+.lengend-text {
+    font-weight: bold;
+}

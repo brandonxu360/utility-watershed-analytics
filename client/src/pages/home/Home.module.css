@@ -1,7 +1,60 @@
 .home-container {
-  height: 100%;
+  display: flex;
+  flex: 1;
+  transition: all 0.3s ease-in-out;
 }
 
 .map-wrapper {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.map-wrapper.map-shrink {
+  width: 100%;
+}
+
+.side-panel {
+  width: 0;
+  margin: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: all 0.3s ease-in-out;
+  background: rgb(18, 18, 18, 0.9);
+  color: var(--clr-primary-100);
+}
+
+.side-panel-content {
+ padding: 10px 30px 0;
+}
+
+.side-panel h2 {
+  font-size: var(--fs-300);
+  font-weight: bold;
+  margin-bottom: var(--size-400);
+}
+
+.side-panel h3 {
+  margin-bottom: var(--size-300);
+}
+
+.side-panel h3, 
+.side-panel strong {
+  font-size: var(--fs-200);
+  font-weight: bold;
+}
+
+.side-panel p {
+  font-size: var(--fs-200);
+  margin-bottom: var(--size-400);
+}
+
+.side-panel.open {
+  width: 30%;
+}
+
+/*Tablet Screen*/
+@media(max-width: 52em) {  
+  .side-panel.open {
+    width: 35%;
+  }
 }

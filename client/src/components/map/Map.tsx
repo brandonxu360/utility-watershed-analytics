@@ -1,7 +1,15 @@
-import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 import { useQuery } from '@tanstack/react-query';
+import ZoomInControl from './controls/ZoomIn/ZoomIn';
+import ZoomOutControl from './controls/ZoomOut/ZoomOut';
+import ExpandControl from './controls/Expand/Expand';
+import LayersControl from './controls/Layers/Layers';
+import LegendControl from './controls/Legend/Legend';
+import SearchControl from './controls/Search/Search';
+import SettingsControl from './controls/Settings/Settings';
+import UserLocationControl from './controls/UserLocation/UserLocation';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -16,7 +24,13 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-export default function Map() {
+export default function Map({
+  isSideContentOpen,
+  setIsSideContentOpen
+}: {
+  isSideContentOpen: boolean;
+  setIsSideContentOpen: (open: boolean) => void;
+}) {
 
   const fetchWatersheds = async () => {
     const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
@@ -29,11 +43,7 @@ export default function Map() {
     queryFn: fetchWatersheds
   });
 
-  console.log(CENTER)
-  console.log(BOUNDS)
-
   if (error) return <div>Error: {error.message}</div>;
-  //if (isLoading) return <div>Loading...</div>;
 
   return (
     <div className="map-container">
@@ -42,7 +52,8 @@ export default function Map() {
         zoom={6}
         minZoom={6}
         maxZoom={13}
-        zoomControl={true}
+        zoomControl={false}
+        doubleClickZoom={false}
         scrollWheelZoom={true}
         maxBounds={BOUNDS}
         maxBoundsViscosity={0.5}
@@ -57,6 +68,33 @@ export default function Map() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        {/* Scale control provided by React Leaflet */}
+        <ScaleControl metric={true} imperial={true} />
+
+        {/* TOP LEFT CONTROLS */}
+        <div className='leaflet-top leaflet-left'>
+          <LegendControl />
+        </div>
+
+        {/* TOP RIGHT CONTROLS */}
+        <div className="leaflet-top leaflet-right">
+          <SearchControl />
+          <LayersControl />
+          <ZoomInControl />
+          <ZoomOutControl />
+          <SettingsControl />
+        </div>
+
+        {/* BOTTOM RIGHT CONTROLS */}
+        <div className="leaflet-bottom leaflet-right">
+          <UserLocationControl />
+          <ExpandControl
+            isOpen={isSideContentOpen}
+            setIsOpen={setIsSideContentOpen}
+          />
+        </div>
+
         <GeoJSON
           key={JSON.stringify(watersheds)}
           data={watersheds}

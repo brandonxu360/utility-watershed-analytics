@@ -1,0 +1,16 @@
+.zoom-in-button {
+  width: 36px;
+  height: 36px;
+  background: #121212;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0;
+}
+
+.plus-icon {
+  font-size: 20px;
+  color: white;
+}
