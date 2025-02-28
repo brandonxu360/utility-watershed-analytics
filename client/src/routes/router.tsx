@@ -18,6 +18,7 @@ const rootRoute = createRootRoute({
       </div>
     </>
   ),
+  notFoundComponent: () => <div>Page not found</div>,
 });
 
 const homeRoute = createRoute({
@@ -50,6 +51,12 @@ const loginRoute = createRoute({
   component: Login,
 });
 
+const watershedRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/watershed/$watershedId',
+  component: Home,
+});
+
 // Create the route tree
 const routeTree = rootRoute.addChildren([
   homeRoute,
@@ -57,6 +64,7 @@ const routeTree = rootRoute.addChildren([
   faqRoute,
   documentationRoute,
   loginRoute,
+  watershedRoute,
 ]);
 
 // Pass the route tree to the Router constructor
