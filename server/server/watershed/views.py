@@ -1,42 +1,43 @@
 from rest_framework import viewsets
 from .models import WatershedBorder
-from .serializers import WatershedBorderSerializer, WatershedBorderBasicSerializer
+from .serializers import WatershedBorderSerializer, WatershedBorderSimplifiedSerializer
 from drf_spectacular.utils import extend_schema
 
 @extend_schema(
     description="""
-**Retrieve comprehensive watershed border data.**  
+**Retrieve watershed border data.**  
 
-- Provides **full details** for each watershed border  
+- Provides watershed border details with the original geometry
 - Best used when selecting an **individual watershed**  
 
-Due to the detailed nature of this API, it is **not recommended** for retrieving large datasets at once.
+Note that the payload served by this view can be large due to the geometry fields. It is advised to
+use the WatershedBorderSimplifiedViewSet for retrieving multiple WatershedBorder model instances.
     """
 )
 class WatershedBorderViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This ViewSet provides read-only access to WatershedBorder model instances.
+    This ViewSet provides read-only access to WatershedBorder model instances with the original geometries.
 
-    Note that the payload served by this view can be large and thus, requesting multiple WatershedBorder
-    model instances is not advised.
+    Note that the payload served by this view can be large due to the geometry fields. It is advised to
+    use the WatershedBorderSimplifiedViewSet for retrieving multiple WatershedBorder model instances.
     """
     queryset = WatershedBorder.objects.defer('simplified_geom')
     serializer_class = WatershedBorderSerializer
 
 @extend_schema(
     description="""
-**Retrieve simplified watershed border data.**  
+**Retrieve watershed border data with the simplified geometry.**  
 
-- Provides **only essential** information for each watershed border  
+- Provides watershed border details with a simplified geometry
 - Best used when **retrieving multiple watershed borders** for visualization
     """
 )
-class WatershedBorderBasicViewSet(viewsets.ReadOnlyModelViewSet):
+class WatershedBorderSimplifiedViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This ViewSet provides read-only access to simplified BasicWatershedBorder model instances.
+    This ViewSet provides read-only access to BasicWatershedBorder model instances with simplified geometries.
     
     This endpoint is intended for scenarios where an overview of multiple watershed borders is required, 
     particularly for mapping purposes where detailed geometry isn't necessary.
     """
-    queryset = WatershedBorder.objects.only("id", "simplified_geom", "pws_name", "city", "cnty_name", "acres")
-    serializer_class = WatershedBorderBasicSerializer
+    queryset = WatershedBorder.objects.defer("geom")
+    serializer_class = WatershedBorderSimplifiedSerializer
