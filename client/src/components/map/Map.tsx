@@ -33,7 +33,7 @@ export default function Map({
 }) {
 
   const fetchWatersheds = async () => {
-    const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
+    const response = await fetch('http://localhost:8000/api/watershed/borders-simplified/');
     if (!response.ok) throw new Error('Failed to fetch watersheds');
     return response.json();
   };
@@ -106,10 +106,16 @@ export default function Map({
           })}
           onEachFeature={(feature, layer) => {
             layer.bindPopup(`
-              <strong>${feature.properties.pws_name}</strong><br/>
+              Watershed: ${feature.properties.watershed_name}<br/>
+              Watershed ID: ${feature.properties.watershed_id}<br/>
+              Provider: ${feature.properties.pws_name}<br/>
+              Provider ID: ${feature.properties.pws_id}<br/>
               City: ${feature.properties.city}<br/>
-              County: ${feature.properties.cnty_name}<br/>
-              Acres: ${feature.properties.acres}
+              County: ${feature.properties.county}<br/>
+              State: ${feature.properties.state}<br/>
+              Area: ${feature.properties.area_m2} m²<br/>
+              HUC12 NHD: ${feature.properties.huc12_nhd}<br/>
+              HUC12 wbd: ${feature.properties.huc12_wbd}
             `);
           }}
         />
