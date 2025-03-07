@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import Map from '../../components/map/Map';
 import HomeCss from './Home.module.css';
+import { useMatch } from '@tanstack/react-router';
 
 const Home = () => {
   const [isSideContentOpen, setIsSideContentOpen] = useState(false);
+  const watershedMatch = useMatch({
+    from: '/watershed/$watershedId',
+    shouldThrow: false,
+  });
+  const watershedId = watershedMatch?.params.watershedId;
 
   return (
     <div className={HomeCss['home-container']}>
@@ -28,6 +34,7 @@ const Home = () => {
         <Map 
           isSideContentOpen={isSideContentOpen}
           setIsSideContentOpen={setIsSideContentOpen} 
+          watershedId={watershedId}
         />
       </div>
     </div>

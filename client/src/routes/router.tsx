@@ -1,6 +1,7 @@
 import { lazyRouteComponent, createRoute, createRootRoute, createRouter, Outlet } from '@tanstack/react-router';
 import Navbar from '../components/navbar/Navbar';
 import Home from '../pages/home/Home';
+import Watershed from '../components/watershed/Watershed';
 
 const About = lazyRouteComponent(() => import('../pages/about/About'));
 const FAQ = lazyRouteComponent(() => import('../pages/faq/FAQ'));
@@ -27,6 +28,12 @@ const homeRoute = createRoute({
   component: Home,
 });
 
+const watershedIdRoute = createRoute({
+  getParentRoute: () => homeRoute,
+  path: '/watershed/$watershedId',
+  component: Watershed,
+});
+
 const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/about',
@@ -51,20 +58,13 @@ const loginRoute = createRoute({
   component: Login,
 });
 
-const watershedRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/watershed/$watershedId',
-  component: Home,
-});
-
 // Create the route tree
 const routeTree = rootRoute.addChildren([
-  homeRoute,
+  homeRoute.addChildren([watershedIdRoute]),
   aboutRoute,
   faqRoute,
   documentationRoute,
   loginRoute,
-  watershedRoute,
 ]);
 
 // Pass the route tree to the Router constructor

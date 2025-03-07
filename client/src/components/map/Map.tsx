@@ -1,7 +1,6 @@
-import { MapContainer, TileLayer, GeoJSON, ScaleControl, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
-import { useMatch } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -12,8 +11,8 @@ import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
 import { zoomToFeature } from '../../utils/MapUtil';
-import { useEffect } from 'react';
-import L from 'leaflet';
+import { useNavigate } from '@tanstack/react-router';
+import { MapEffect } from '../../utils/MapEffectUtil';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -28,13 +27,26 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
+/**
+ * Interface for the @see {@link Map} function to enforce type safety.
+ */
 interface MapProps {
   isSideContentOpen: boolean;
   setIsSideContentOpen: (open: boolean) => void;
+  watershedId: string;
 }
 
-export default function Map({ isSideContentOpen, setIsSideContentOpen }: MapProps) {
-  // Fetch watersheds
+/**
+ * Handles the map of our application and contains all of its controls
+ * and watershed specific workflows.
+ * 
+ * @param isSideContentOpen - Flag to check if sidecontent is open.
+ * @param setIsSideContentOpen - Sets the sidecontent panels visibility based on @see {@link isSideContentOpen}.
+ * @param watershedId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
+ * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
+ */
+export default function Map({ isSideContentOpen, setIsSideContentOpen, watershedId }: MapProps) {
+  {/* Fetching watershed data */}
   const fetchWatersheds = async () => {
     const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
     if (!response.ok) throw new Error('Failed to fetch watersheds');
@@ -46,66 +58,22 @@ export default function Map({ isSideContentOpen, setIsSideContentOpen }: MapProp
     queryFn: fetchWatersheds
   });
 
-  const WatershedRouteHandler = () => {
-    const map = useMap();
-    const match = useMatch({
-      from: '/watershed/$watershedId',
-    });
-    
-    useEffect(() => {
-      if (!match || !match.params || !watersheds) {
-        return;
-      }
-      
-      const watershedId = match.params.watershedId;
-      
-      if (!watershedId) {
-        return;
-      }
-      
-      // Find the selected watershed based on the ID from URL params
-      const selectedFeature = watersheds.features.find((feature: { properties: { id: any; pws_id: any; watershed_id: any; objectid: any; }; }) => {
-        if (!feature.properties) return false;
-        
-        // Try multiple potential ID fields
-        const potentialIds = [
-          feature.properties.id,
-          feature.properties.pws_id,
-          feature.properties.watershed_id,
-          feature.properties.objectid
-        ];
-        
-        return potentialIds.some(id => 
-          id != null && id.toString() === watershedId
-        );
-      });
-      
-      if (!selectedFeature) {
-        console.warn(`Watershed with ID ${watershedId} not found`);
-        return;
-      }
-      
-      // Zoom to the selected watershed
-      const geoJsonLayer = L.geoJSON(selectedFeature);
-      const bounds = geoJsonLayer.getBounds();
-      map.flyToBounds(bounds, { 
-        padding: [50, 50],
-        maxZoom: 12
-      });
-      
-    }, [map, match, watersheds]);
-    
-    return null;
-  };
-
-  if (error) return <div>Error: {error.message}</div>;
+  {/* Navigates to a watershed on click */}
+  const navigate = useNavigate();
 
   const onWatershedClick = (e: any) => {
+    console.log('Watershed click event:', e); // Add this line
     const layer = e.sourceTarget;
     const feature = layer.feature;
-    console.log('Clicked watershed:', feature);
+    console.log('Clicked watershed feature:', feature); // Add this line
     zoomToFeature(layer._map, layer);
+  
+    navigate({
+      to: `/watershed/${feature.id}`,
+    });
   };
+  
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div className="map-container">
@@ -155,6 +123,9 @@ export default function Map({ isSideContentOpen, setIsSideContentOpen }: MapProp
             <UserLocationControl />
             <ExpandControl isOpen={isSideContentOpen} setIsOpen={setIsSideContentOpen} />
           </div>
+          
+          {/* Handles URL navigation to a specified watershed */}
+          <MapEffect watershedId={watershedId} watersheds={watersheds} />
 
           {watersheds && (
             <GeoJSON
@@ -181,9 +152,6 @@ export default function Map({ isSideContentOpen, setIsSideContentOpen }: MapProp
               }}
             />
           )}
-
-          {/* Component handling dynamic routing and zoom */}
-          <WatershedRouteHandler />
         </>
       </MapContainer>
     </div>
