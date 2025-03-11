@@ -1,4 +1,4 @@
-import { useParams } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 
 /**
  * Watershed side panel that displays information related to the specified watershed
@@ -6,15 +6,28 @@ import { useParams } from "@tanstack/react-router";
  * 
  * @returns {JSX.Element} - Side panel containing the specified watershed information.
  */
-const Watershed = () => {
+export default function Watershed() {
   const { watershedId } = useParams({from: '/watershed/$watershedId'});
+  const navigate = useNavigate();
 
   return (
-    <div>
-      <h1>Watershed {watershedId}</h1>
-      {/* Optionally render UI for individual watershed */}
-    </div>
-  )
+    <>
+      <button onClick={() => navigate({to: "/"})} style={backButtonStyle}>
+        ← Back
+      </button>
+      <h2>Watershed: {watershedId}</h2>
+      <p>Some stats, model results, etc…</p>
+      {/* Additional watershed info or sub-sections */}
+    </>
+  );
 };
 
-export default Watershed;
+const backButtonStyle = {
+  background: "none",
+  border: "none",
+  color: "var(--clr-primary-100)",
+  fontSize: "1rem",
+  cursor: "pointer",
+  padding: "10px 0",
+  textDecoration: "underline",
+};

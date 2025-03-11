@@ -4,13 +4,11 @@ import './Map.css';
 import { useQuery } from '@tanstack/react-query';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
-import ExpandControl from './controls/Expand/Expand';
 import LayersControl from './controls/Layers/Layers';
 import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
-import { zoomToFeature } from '../../utils/MapUtil';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/MapEffectUtil';
 
@@ -31,21 +29,17 @@ const BOUNDS: [[number, number], [number, number]] = [
  * Interface for the @see {@link Map} function to enforce type safety.
  */
 interface MapProps {
-  isSideContentOpen: boolean;
-  setIsSideContentOpen: (open: boolean) => void;
   watershedId: string;
 }
 
 /**
  * Handles the map of our application and contains all of its controls
  * and watershed specific workflows.
- * 
- * @param isSideContentOpen - Flag to check if sidecontent is open.
- * @param setIsSideContentOpen - Sets the sidecontent panels visibility based on @see {@link isSideContentOpen}.
+ *
  * @param watershedId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
-export default function Map({ isSideContentOpen, setIsSideContentOpen, watershedId }: MapProps) {
+export default function Map({ watershedId }: MapProps) {
   {/* Fetching watershed data */}
   const fetchWatersheds = async () => {
     const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
@@ -62,11 +56,8 @@ export default function Map({ isSideContentOpen, setIsSideContentOpen, watershed
   const navigate = useNavigate();
 
   const onWatershedClick = (e: any) => {
-    console.log('Watershed click event:', e); // Add this line
     const layer = e.sourceTarget;
     const feature = layer.feature;
-    console.log('Clicked watershed feature:', feature); // Add this line
-    zoomToFeature(layer._map, layer);
   
     navigate({
       to: `/watershed/${feature.id}`,
@@ -121,7 +112,6 @@ export default function Map({ isSideContentOpen, setIsSideContentOpen, watershed
           {/* BOTTOM RIGHT CONTROLS */}
           <div className="leaflet-bottom leaflet-right">
             <UserLocationControl />
-            <ExpandControl isOpen={isSideContentOpen} setIsOpen={setIsSideContentOpen} />
           </div>
           
           {/* Handles URL navigation to a specified watershed */}

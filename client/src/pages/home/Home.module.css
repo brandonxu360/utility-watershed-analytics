@@ -9,12 +9,8 @@
   min-height: 0;
 }
 
-.map-wrapper.map-shrink {
-  width: 100%;
-}
-
 .side-panel {
-  width: 0;
+  width: 25%;
   margin: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -48,13 +44,9 @@
   margin-bottom: var(--size-400);
 }
 
-.side-panel.open {
-  width: 30%;
-}
-
 /*Tablet Screen*/
 @media(max-width: 52em) {  
-  .side-panel.open {
+  .side-panel {
     width: 35%;
   }
 }
