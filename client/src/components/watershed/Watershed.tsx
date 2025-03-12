@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { fetchWatersheds } from "../map/Map";
 import styles from "./Watershed.module.css";
-import { FaXmark } from "react-icons/fa6";
 
 /** 
  * Renders the "skeleton" version of the watershed panel while loading.
@@ -10,10 +9,8 @@ import { FaXmark } from "react-icons/fa6";
 function SkeletonWatershedPanel() {
   return (
     <div className={styles.skeletonPanel}>
-      <div className={styles.skeletonTitle}>
-        <div className={styles.skeletonTitleText} />
-        <div className={styles.skeletonCloseButton} />
-      </div>
+      <div className={styles.skeletonCloseButton} />
+      <div className={styles.skeletonTitleText} />
 
       <div className={styles.skeletonParagraph} />
       <div className={styles.skeletonLine} />
@@ -64,17 +61,15 @@ export default function Watershed() {
 
   return (
     <div className={styles.watershedPanel}>
-      <div className={styles.title}>
-        <h2>{watershed.properties.pws_name}</h2>
-        <button
+      <button
           onClick={() => navigate({ to: "/" })}
           className={styles.closeButton}
           aria-label={'Close watershed panel'}
           title={'Close watershed panel'}
         >
-          <FaXmark />
-        </button>
-      </div>
+        BACK
+      </button>
+      <h2>{watershed.properties.pws_name}</h2>
       <p>This is the where the description for the watershed will go. For now we have placeholder text.</p>
       <p>
         <strong>Number of Customers:</strong>{" "}
@@ -89,7 +84,6 @@ export default function Watershed() {
       <p>
         <strong>Acres:</strong> {watershed.properties.acres ?? "N/A"}
       </p>
-      <p>Some stats... (e.g. precipitation, area, or other info)</p>
 
       <div className={styles.actions}>
         <button
