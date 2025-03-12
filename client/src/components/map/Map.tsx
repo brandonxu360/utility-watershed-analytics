@@ -33,6 +33,18 @@ interface MapProps {
 }
 
 /**
+ * Fetches basic watershed border data from the API.
+ * 
+ * @returns {Promise<Object>} A promise that resolves to the JSON response containing watershed data.
+ * @throws {Error} Throws an error if the API request fails.
+ */
+export async function fetchWatersheds() {
+  const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
+  if (!response.ok) throw new Error('Failed to fetch watersheds');
+  return response.json(); // must return the same data shape for both
+}
+
+/**
  * Handles the map of our application and contains all of its controls
  * and watershed specific workflows.
  *
@@ -40,13 +52,6 @@ interface MapProps {
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
 export default function Map({ watershedId }: MapProps) {
-  {/* Fetching watershed data */}
-  const fetchWatersheds = async () => {
-    const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
-    if (!response.ok) throw new Error('Failed to fetch watersheds');
-    return response.json();
-  };
-
   const { data: watersheds, error, isLoading } = useQuery({
     queryKey: ['watersheds'],
     queryFn: fetchWatersheds

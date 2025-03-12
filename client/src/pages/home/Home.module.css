@@ -43,10 +43,3 @@
   font-size: var(--fs-200);
   margin-bottom: var(--size-400);
 }
-
-/*Tablet Screen*/
-@media(max-width: 52em) {  
-  .side-panel {
-    width: 35%;
-  }
-}

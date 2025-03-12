@@ -1,0 +1,119 @@
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: var(--size-300);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--clr-primary-100);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.watershedPanel h2 {
+  margin-bottom: var(--size-300);
+  font-size: var(--fs-300);
+}
+
+.watershedPanel p {
+  margin-bottom: var(--size-200);
+  font-size: var(--fs-200);
+}
+
+.actions {
+  margin-top: var(--size-400);
+  margin-bottom: var(--size-400);
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-300);
+}
+
+.actionButton {
+  background: #4a83ec;
+  color: #fff;
+  border: none;
+  padding: var(--size-300) var(--size-400);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--fs-100);
+}
+
+.actionButton:hover {
+  background: #3a73dc;
+}
+
+/* =========== Skeleton Styles =========== */
+
+.skeletonTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: var(--size-400);
+  margin-bottom: var(--size-800);
+}
+
+.skeletonTitleText,
+.skeletonCloseButton,
+.skeletonParagraph,
+.skeletonLine,
+.skeletonButton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.15) 37%,
+    rgba(255, 255, 255, 0.05) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 4px;
+}
+
+.skeletonTitleText {
+  width: 60%;
+  height: 2rem;
+}
+
+.skeletonCloseButton {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.skeletonParagraph {
+  width: 90%;
+  height: 1.5rem;
+  margin-bottom: var(--size-300);
+}
+
+.skeletonLine {
+  width: 60%;
+  height: 1.5rem;
+  margin-bottom: var(--size-300);
+}
+
+.skeletonActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-300);
+  margin-top: var(--size-800);
+}
+
+.skeletonButton {
+  width: 220px;
+  height: 2.2rem;
+}
+
+/* Shimmer keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
