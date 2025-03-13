@@ -25,6 +25,21 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
+{/* Styles for selected and non selected watersheds */}
+const defaultStyle = {
+  color: '#4a83ec',
+  weight: 1,
+  fillColor: '#4a83ec',
+  fillOpacity: 0.1,
+};
+
+const selectedStyle = {
+  color: '#444444',
+  weight: 3,
+  fillColor: '#4a83ec',
+  fillOpacity: 0.1,
+};
+
 /**
  * Interface for the @see {@link Map} function to enforce type safety.
  */
@@ -126,20 +141,11 @@ export default function Map({ watershedId }: MapProps) {
             <GeoJSON
               key={JSON.stringify(watersheds)}
               data={watersheds}
-              style={() => ({
-                color: '#4a83ec',
-                weight: 1,
-                fillColor: '#4a83ec',
-                fillOpacity: 0.1,
-              })}
+              style={(feature) => {
+                if (!feature) return defaultStyle;
+                return feature.id?.toString() === watershedId ? selectedStyle : defaultStyle;
+              }}
               onEachFeature={(feature, layer) => {
-                // Bind a popup for information
-                layer.bindPopup(`
-                  <strong>${feature.properties.pws_name}</strong><br/>
-                  City: ${feature.properties.city}<br/>
-                  County: ${feature.properties.cnty_name}<br/>
-                  Acres: ${feature.properties.acres}
-                `);
                 // Attach the click event
                 layer.on({
                   click: onWatershedClick,
