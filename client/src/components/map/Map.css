@@ -9,6 +9,17 @@
   width: 100%;
 }
 
+.custom-tooltip {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-size: 12px;
+  font-family: var(--ff-primary);
+  color: var(--clr-primary-500);
+  padding: 0;
+  margin: auto;
+}
+
 .map-loading-overlay {
   position: absolute;
   top: 0;

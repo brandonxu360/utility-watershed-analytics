@@ -51,7 +51,7 @@ export default function Map({
         center={CENTER}
         zoom={6}
         minZoom={6}
-        maxZoom={13}
+        maxZoom={15}
         zoomControl={false}
         doubleClickZoom={false}
         scrollWheelZoom={true}
@@ -105,18 +105,13 @@ export default function Map({
             fillOpacity: 0.1,
           })}
           onEachFeature={(feature, layer) => {
-            layer.bindPopup(`
-              Watershed: ${feature.properties.watershed_name}<br/>
-              Watershed ID: ${feature.properties.watershed_id}<br/>
-              Provider: ${feature.properties.pws_name}<br/>
-              Provider ID: ${feature.properties.pws_id}<br/>
-              City: ${feature.properties.city}<br/>
-              County: ${feature.properties.county}<br/>
-              State: ${feature.properties.state}<br/>
-              Area: ${feature.properties.area_m2} m²<br/>
-              HUC12 NHD: ${feature.properties.huc12_nhd}<br/>
-              HUC12 wbd: ${feature.properties.huc12_wbd}
-            `);
+            if (feature.properties && feature.properties.watershed_name) {
+              layer.bindTooltip(feature.properties.watershed_name, {
+                permanent: true,
+                direction: 'center',
+                className: 'custom-tooltip',
+              });
+            }
           }}
         />
       </MapContainer>

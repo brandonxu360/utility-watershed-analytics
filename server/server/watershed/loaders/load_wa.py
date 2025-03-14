@@ -4,6 +4,7 @@ from ..models import WatershedBorder
 
 # Mapping Washington fields to common schema
 wa_mapping = {
+    'watershed_name': 'SrcName',
     'area_m2': 'area_m2',
     'county': 'County',
     'city': 'WS_City',
