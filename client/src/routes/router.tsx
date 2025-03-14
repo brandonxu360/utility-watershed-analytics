@@ -1,6 +1,7 @@
 import { lazyRouteComponent, createRoute, createRootRoute, createRouter, Outlet } from '@tanstack/react-router';
 import Navbar from '../components/navbar/Navbar';
 import Home from '../pages/home/Home';
+import Watershed from '../components/watershed/Watershed';
 
 const About = lazyRouteComponent(() => import('../pages/about/About'));
 const FAQ = lazyRouteComponent(() => import('../pages/faq/FAQ'));
@@ -18,12 +19,19 @@ const rootRoute = createRootRoute({
       </div>
     </>
   ),
+  notFoundComponent: () => <div>Page not found</div>,
 });
 
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: Home,
+});
+
+const watershedIdRoute = createRoute({
+  getParentRoute: () => homeRoute,
+  path: '/watershed/$watershedId',
+  component: Watershed,
 });
 
 const aboutRoute = createRoute({
@@ -52,7 +60,7 @@ const loginRoute = createRoute({
 
 // Create the route tree
 const routeTree = rootRoute.addChildren([
-  homeRoute,
+  homeRoute.addChildren([watershedIdRoute]),
   aboutRoute,
   faqRoute,
   documentationRoute,
