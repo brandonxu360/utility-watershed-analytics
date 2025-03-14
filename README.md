@@ -53,7 +53,7 @@ DJANGO_SUPERUSER_PASSWORD=password
     }
 }
 ```
-7. **Data**: place the watershed data in `fullstack-gis-webapp/server/server/watershed/` and ensure that the folder is named `data`. If a custom data folder is to be used, changes are required for the `load.py` script in the `server` Django project.
+7. **Data**: Grab the data [here](https://wepp.cloud/share/roger/NASA-Roses/) and download both OR and WA data sets making sure to change their extension to .geojson. Place the watershed data in `fullstack-gis-webapp/server/server/watershed/` and ensure that the folder is named `data`. If a custom data folder is to be used, changes are required for the `load.py` script in the `server` Django project.
 
 ## Usage
 1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. Note that this is not required, as VSCode devcontainers will automatically start the services upon reopening the project in a container.
