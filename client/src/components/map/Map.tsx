@@ -54,7 +54,7 @@ interface MapProps {
  * @throws {Error} Throws an error if the API request fails.
  */
 export async function fetchWatersheds() {
-  const response = await fetch('http://localhost:8000/api/watershed/borders-basic/');
+  const response = await fetch('http://localhost:8000/api/watershed/borders-simplified/');
   if (!response.ok) throw new Error('Failed to fetch watersheds');
   return response.json(); // must return the same data shape for both
 }
