@@ -1,0 +1,23 @@
+{
+    email brandon.xu@wsu.edu
+}
+
+unstable.wepp.cloud {
+
+    ## reverse proxy for the main site
+    reverse_proxy client:5173
+
+    ## Enable HSTS
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+}
+
+wepp3.nkn.uidaho.edu {
+    reverse_proxy server:8000
+
+    ## Enable HSTS
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+}

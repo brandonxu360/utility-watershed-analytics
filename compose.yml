@@ -79,3 +79,16 @@ services:
     volumes:
     # Mount the server configuration file
     - ./pgadmin-servers.json:/pgadmin4/servers.json
+
+  caddy:
+    image: caddy:2-alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy_data:/data
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+
+volumes:
+  caddy_data: {}

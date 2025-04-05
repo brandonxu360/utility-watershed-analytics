@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-1#t+05xjtk9endkv$*of#hr(3y@=45=p8i%1f4erojjbc(c7wa
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'wepp3.nkn.uidaho.edu'
+]
 
 
 # Application definition
@@ -140,6 +142,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173', # Vite development server
     'http://127.0.0.1:5173',
+    'https://unstable.wepp.cloud',
 ]
 
 REST_FRAMEWORK = {

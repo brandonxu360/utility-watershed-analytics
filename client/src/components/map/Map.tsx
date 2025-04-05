@@ -33,7 +33,7 @@ export default function Map({
 }) {
 
   const fetchWatersheds = async () => {
-    const response = await fetch('http://localhost:8000/api/watershed/borders-simplified/');
+    const response = await fetch('https://wepp3.nkn.uidaho.edu/api/watershed/borders-simplified/', {referrer: 'no-referrer'});
     if (!response.ok) throw new Error('Failed to fetch watersheds');
     return response.json();
   };
