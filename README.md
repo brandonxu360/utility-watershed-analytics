@@ -43,6 +43,11 @@ DJANGO_SUPERUSER_EMAIL=devcontainer@gmail.com
 DJANGO_SUPERUSER_PASSWORD=password
 ```
 
+There should also be an environment file in the client directory:
+```env
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
 6. **pgAdmin Server Definition**: Though not required, a JSON file in the root directory with the following attributes can be used to automatically define the server for pgAdmin for convenience. Please name the file `pgadmin-servers.json`. Notice the username and password correspond with the postgres database username (`POSTGRES_USER`) and password (`POSTGRES_PW`) defined in the `.env` file. Again, be aware that this config could expose sensitive data (database password) if mishandled in production.
 ```json
 {
