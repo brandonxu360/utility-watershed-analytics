@@ -27,6 +27,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = [
+    'localhost',
     'wepp3.nkn.uidaho.edu'
 ]
 
