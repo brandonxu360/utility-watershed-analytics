@@ -44,12 +44,10 @@
 .skeletonParagraph,
 .skeletonLine,
 .skeletonButton {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.05) 25%,
-    rgba(255, 255, 255, 0.15) 37%,
-    rgba(255, 255, 255, 0.05) 63%
-  );
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.05) 25%,
+      rgba(255, 255, 255, 0.15) 37%,
+      rgba(255, 255, 255, 0.05) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
   border-radius: 4px;
@@ -97,6 +95,7 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
@@ -113,16 +112,20 @@
 
 .accordionItem {
   overflow: hidden;
+  transition: border-color 0.25s;
 }
 
 .accordionItem .accordionButton {
-  border-bottom: 1px solid var(--clr-primary-100) !important;
+  border-bottom: 1px solid var(--clr-primary-100);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
 
+.accordionItem button:hover {
+  border-color: #646cff;
+}
+
 .accordionButton {
-  position: relative;
   background: none;
   width: 100%;
   color: var(--clr-primary-100);
@@ -136,6 +139,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: border-color 0.25s;
 }
 
 .accordionContent {
@@ -156,10 +160,6 @@
   text-align: left;
 }
 
-.accordionContent button:hover {
-  border-color: #646cff;
-}
-
 .actionButton {
   background: none;
   color: var(--clr-primary-100);
@@ -170,4 +170,42 @@
   cursor: pointer;
   font-size: var(--fs-100);
   text-align: left;
+}
+
+.subButton {
+  position: relative;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 15px;
+  transition: color 0.25s;
+
+  &:before {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    width: 10px;
+    height: 1px;
+    margin: auto;
+    content: '';
+    background-color: var(--clr-primary-100);
+  }
+
+  &:after {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    height: 100%;
+    content: '';
+    background-color: var(--clr-primary-100);
+  }
+
+  &:last-child:after {
+    height: 15px;
+  }
+}
+
+.subButton:hover {
+  color: #646cff;
 }

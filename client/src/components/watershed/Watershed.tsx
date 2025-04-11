@@ -127,11 +127,13 @@ export default function Watershed() {
         </AccordionItem>
 
         <AccordionItem title="View Watershed Data">
-          <AccordionItem title="Soil Burn Severity">
-            <button className={styles.subButton}>Firesev</button>
-            <button className={styles.subButton}>Predict</button>
-            <button className={styles.subButton}>Soil Burn Severity</button>
-          </AccordionItem>
+          <div className={styles.subButton}>
+            <AccordionItem title="Soil Burn Severity">
+              <button className={styles.subButton}>Firesev</button>
+              <button className={styles.subButton}>Predict</button>
+              <button className={styles.subButton}>Soil Burn Severity</button>
+            </AccordionItem>
+          </div>
           <button className={styles.subButton}>Vegetation Cover</button>
           <button className={styles.subButton}>Evapotransportation</button>
           <button className={styles.subButton}>Soil Moisture</button>
