@@ -1,37 +1,53 @@
-import { useState } from 'react';
+import { Outlet, useMatch } from '@tanstack/react-router';
 import Map from '../../components/map/Map';
-import HomeCss from './Home.module.css';
+import HomeSidePanelContent from '../../components/home_info/HomeInfoPanel';
+import './Home.css';
 
-const Home = () => {
-  const [isSideContentOpen, setIsSideContentOpen] = useState(false);
+/**
+ * Interface for the @see {@link Home} function to enforce type safety.
+ */
+interface SidePanelProps {
+  children: React.ReactNode;
+}
+
+/**
+ * SidePanel component that wraps children with a styled container.
+ * 
+ * @param {SidePanelProps} props - The properties object.
+ * @param {React.ReactNode} props.children - The content to be displayed inside the panel.
+ * @returns {JSX.Element} A styled side panel containing the provided children.
+ */
+function SidePanel({ children }: SidePanelProps) {
+  return (
+    <div className='side-panel'>
+      <div className='side-panel-content'>{children}</div>
+    </div>
+  );
+}
+
+/**
+ * Home component that serves as the main layout for the home page.
+ * It determines whether to show a specific watershed panel or the default home info panel.
+ * 
+ * @returns {JSX.Element} The main home page layout including a side panel and a map.
+ */
+export default function Home() {
+  // Check if the user is on a watershed route
+  const watershedMatch = useMatch({
+    from: '/watershed/$watershedId',
+    shouldThrow: false, // Stops invariant route errors i.e. when route doesn't match /watershed/$watershedId
+  });
+  const watershedId = watershedMatch?.params.watershedId;
 
   return (
-    <div className={HomeCss['home-container']}>
-      <div className={`${HomeCss['side-panel']} ${isSideContentOpen ? HomeCss['open'] : ''}`}>
-        <div className={HomeCss['side-panel-content']}>
-          <h2>Explore Watershed Analytics</h2>
-          <p>
-            Visualize and analyze hydrologic and environmental data for watersheds across the western United States. Gain insights into observed and modeled data to understand water and environmental conditions.
-          </p>
-          <h3>Tier 1 Watersheds</h3>
-          <p>
-            Access modeled results that provide initial insights but have not yet been calibrated.
-          </p>
-          <h3>Tier 2 Watersheds</h3>
-          <p>
-            Explore calibrated model results for enhanced accuracy and reliability. Start analyzing now to uncover trends, compare models, and support data-driven decisions for watershed management.
-          </p>
-          <strong>Get Started: Select a watershed to explore its data.</strong>
-        </div>
-      </div>
-      <div className={`${HomeCss['map-wrapper']} ${isSideContentOpen ? HomeCss['map-shrink'] : ''}`}>
-        <Map 
-          isSideContentOpen={isSideContentOpen}
-          setIsSideContentOpen={setIsSideContentOpen} 
-        />
+    <div className='home-container'>
+      <SidePanel>
+        {watershedId ? <Outlet /> : <HomeSidePanelContent />}
+      </SidePanel>
+
+      <div className='map-wrapper'>
+        <Map watershedId={watershedId} />
       </div>
     </div>
   );
-};
-
-export default Home;
+}
