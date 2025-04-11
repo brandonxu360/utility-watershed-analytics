@@ -1,7 +1,7 @@
 import { Outlet, useMatch } from '@tanstack/react-router';
-import HomeCss from './Home.module.css';
 import Map from '../../components/map/Map';
 import HomeSidePanelContent from '../../components/home_info/HomeInfoPanel';
+import './Home.css';
 
 /**
  * Interface for the @see {@link Home} function to enforce type safety.
@@ -19,8 +19,8 @@ interface SidePanelProps {
  */
 function SidePanel({ children }: SidePanelProps) {
   return (
-    <div className={HomeCss['side-panel']}>
-      <div className={HomeCss['side-panel-content']}>{children}</div>
+    <div className='side-panel'>
+      <div className='side-panel-content'>{children}</div>
     </div>
   );
 }
@@ -40,12 +40,12 @@ export default function Home() {
   const watershedId = watershedMatch?.params.watershedId;
 
   return (
-    <div className={HomeCss['home-container']}>
+    <div className='home-container'>
       <SidePanel>
         {watershedId ? <Outlet /> : <HomeSidePanelContent />}
       </SidePanel>
 
-      <div className={HomeCss['map-wrapper']}>
+      <div className='map-wrapper'>
         <Map watershedId={watershedId} />
       </div>
     </div>

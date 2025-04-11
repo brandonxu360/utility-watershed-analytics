@@ -3,29 +3,29 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { fetchWatersheds } from "../map/Map";
 import { FaPlus, FaMinus } from "react-icons/fa6";
-import styles from "./Watershed.module.css";
+import "./Watershed.css";
 
 /** 
  * Renders the "skeleton" version of the watershed panel while loading.
  */
 function SkeletonWatershedPanel() {
   return (
-    <div className={styles.skeletonPanel}>
-      <div className={styles.skeletonCloseButton} />
-      <div className={styles.skeletonTitleText} />
+    <div className="skeletonPanel">
+      <div className='skeletonCloseButton' />
+      <div className='skeletonTitleText' />
 
-      <div className={styles.skeletonParagraph} />
-      <div className={styles.skeletonLine} />
-      <div className={styles.skeletonLine} />
-      <div className={styles.skeletonLine} />
-      <div className={styles.skeletonLine} />
-      <div className={styles.skeletonParagraph} />
+      <div className='skeletonParagraph' />
+      <div className='skeletonLine' />
+      <div className='skeletonLine' />
+      <div className='skeletonLine' />
+      <div className='skeletonLine' />
+      <div className='skeletonParagraph' />
 
-      <div className={styles.skeletonActions}>
-        <div className={styles.skeletonButton} />
-        <div className={styles.skeletonButton} />
-        <div className={styles.skeletonButton} />
-        <div className={styles.skeletonButton} />
+      <div className='skeletonActions'>
+        <div className='skeletonButton' />
+        <div className='skeletonButton' />
+        <div className='skeletonButton' />
+        <div className='skeletonButton' />
       </div>
     </div>
   );
@@ -45,16 +45,16 @@ interface AccordionItemProps {
 function AccordionItem({ title, children }: AccordionItemProps) {
   const [open, setOpen] = useState(false);
   return (
-    <div className={styles.accordionItem}>
+    <div className="accordionItem">
       <button
-        className={styles.accordionButton}
+        className="accordionButton"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
       >
         {title}
         {open ? <FaMinus /> : <FaPlus />}
       </button>
-      {open && <div className={styles.accordionContent}>{children}</div>}
+      {open && <div className="accordionContent">{children}</div>}
     </div>
   );
 }
@@ -90,12 +90,12 @@ export default function Watershed() {
   }
 
   return (
-    <div className={styles.watershedPanel}>
+    <div className="watershedPanel">
       <button
         onClick={() => navigate({ to: "/" })}
-        className={styles.closeButton}
-        aria-label={'Close watershed panel'}
-        title={'Close watershed panel'}
+        className='closeButton'
+        aria-label='Close watershed panel'
+        title='Close watershed panel'
       >
         BACK
       </button>
@@ -115,34 +115,34 @@ export default function Watershed() {
         <strong>Acres:</strong> {watershed.properties.acres ?? "N/A"}
       </p>
 
-      <div className={styles.accordionGroup} key={watershedId}>
+      <div className='accordionGroup' key={watershedId}>
         <AccordionItem title="View Calibrated WEPP Results">
-          <button className={styles.subButton}>Spatial Outputs</button>
-          <button className={styles.subButton}>Tabular Outputs</button>
+          <button className='subButton'>Spatial Outputs</button>
+          <button className='subButton'>Tabular Outputs</button>
         </AccordionItem>
 
         <AccordionItem title="View Calibrated RHESSys Results">
-          <button className={styles.subButton}>Spatial Outputs</button>
-          <button className={styles.subButton}>Tabular Outputs</button>
+          <button className='subButton'>Spatial Outputs</button>
+          <button className='subButton'>Tabular Outputs</button>
         </AccordionItem>
 
         <AccordionItem title="View Watershed Data">
-          <div className={styles.subButton}>
+          <div className='subButton'>
             <AccordionItem title="Soil Burn Severity">
-              <button className={styles.subButton}>Firesev</button>
-              <button className={styles.subButton}>Predict</button>
-              <button className={styles.subButton}>Soil Burn Severity</button>
+              <button className='subButton'>Firesev</button>
+              <button className='subButton'>Predict</button>
+              <button className='subButton'>Soil Burn Severity</button>
             </AccordionItem>
           </div>
-          <button className={styles.subButton}>Vegetation Cover</button>
-          <button className={styles.subButton}>Evapotransportation</button>
-          <button className={styles.subButton}>Soil Moisture</button>
+          <button className='subButton'>Vegetation Cover</button>
+          <button className='subButton'>Evapotransportation</button>
+          <button className='subButton'>Soil Moisture</button>
         </AccordionItem>
 
         <button
-          className={styles.actionButton}
-          aria-label={'Run WEPP cloud watershed analysis model'}
-          title={'Run WEPPcloud watershed analysis model'}
+          className='actionButton'
+          aria-label='Run WEPP cloud watershed analysis model'
+          title='Run WEPPcloud watershed analysis model'
         >
           WEPPcloud Watershed Analysis
         </button>
