@@ -29,7 +29,7 @@ const BOUNDS: [[number, number], [number, number]] = [
 {/* Styles for selected and non selected watersheds */}
 const defaultStyle = {
   color: '#4a83ec',
-  weight: 1,
+  weight: 3,
   fillColor: '#4a83ec',
   fillOpacity: 0.1,
 };
