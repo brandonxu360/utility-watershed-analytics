@@ -11,7 +11,8 @@ services:
       - .:/app
     working_dir: /app/client
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=${NODE_ENV}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
     # Enable HMR websocket connections
     command: npm run dev -- --host
 
@@ -30,6 +31,8 @@ services:
       - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
       - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
       - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=${DEBUG}
     # Volume mount
     volumes:
       - .:/app
@@ -79,3 +82,16 @@ services:
     volumes:
     # Mount the server configuration file
     - ./pgadmin-servers.json:/pgadmin4/servers.json
+
+  caddy:
+    image: caddy:2-alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy_data:/data
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+
+volumes:
+  caddy_data: {}

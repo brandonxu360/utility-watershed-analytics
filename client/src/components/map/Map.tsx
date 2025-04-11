@@ -11,6 +11,7 @@ import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/MapEffectUtil';
+import { API_ENDPOINTS } from '../../config/api';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -54,7 +55,7 @@ interface MapProps {
  * @throws {Error} Throws an error if the API request fails.
  */
 export async function fetchWatersheds() {
-  const response = await fetch('http://localhost:8000/api/watershed/borders-simplified/');
+  const response = await fetch(API_ENDPOINTS.WATERSHEDS);
   if (!response.ok) throw new Error('Failed to fetch watersheds');
   return response.json(); // must return the same data shape for both
 }
