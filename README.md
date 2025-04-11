@@ -27,11 +27,14 @@ This section guides developers on how to set up, configure, and run the applicat
 3. **Install Extensions**: Install the [Dev Containers](vscode:extension/ms-vscode-remote.remote-containers) extension from the VS Code marketplace.
 4. **Clone Repository**:
 ```bash
-git clone https://github.com/brandonxu360/fullstack-gis-webapp.git
-cd fullstack-gis-webapp
+git clone https://github.com/brandonxu360/utility-watershed-analytics.git
+cd utility-watershed-analytics
 ```
 5. **Environment Variables**: Ensure that an `.env` file exists in the root of your project with the following attributes. Example values are provided below for convenience, do not use these values in production:
 ```env
+NODE_ENV=development
+VITE_API_BASE_URL=http://localhost:8000/api
+
 POSTGRES_USER=admin
 POSTGRES_PW=password
 POSTGRES_DB=pg4django
@@ -41,11 +44,9 @@ PGADMIN_PW=password
 DJANGO_SUPERUSER_USERNAME=devcontainer
 DJANGO_SUPERUSER_EMAIL=devcontainer@gmail.com
 DJANGO_SUPERUSER_PASSWORD=password
-```
 
-There should also be an environment file in the client directory:
-```env
-VITE_API_BASE_URL=http://localhost:8000/api
+DJANGO_SECRET_KEY=django-insecure-1#t+05xjtk9endkv$*of#hr(3y@=45=p8i%1f4erojjbc(c7wa
+DEBUG=true
 ```
 
 6. **pgAdmin Server Definition**: Though not required, a JSON file in the root directory with the following attributes can be used to automatically define the server for pgAdmin for convenience. Please name the file `pgadmin-servers.json`. Notice the username and password correspond with the postgres database username (`POSTGRES_USER`) and password (`POSTGRES_PW`) defined in the `.env` file. Again, be aware that this config could expose sensitive data (database password) if mishandled in production.
