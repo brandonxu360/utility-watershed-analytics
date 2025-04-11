@@ -115,7 +115,7 @@ export default function Watershed() {
         <strong>Acres:</strong> {watershed.properties.acres ?? "N/A"}
       </p>
 
-      <div className={styles.accordionGroup}>
+      <div className={styles.accordionGroup} key={watershedId}>
         <AccordionItem title="View Calibrated WEPP Results">
           <button className={styles.subButton}>Spatial Outputs</button>
           <button className={styles.subButton}>Tabular Outputs</button>
