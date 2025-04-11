@@ -10,6 +10,7 @@ import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
+import { API_ENDPOINTS } from '../../config/api';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -33,7 +34,7 @@ export default function Map({
 }) {
 
   const fetchWatersheds = async () => {
-    const response = await fetch('http://localhost:8000/api/watershed/borders-simplified/');
+    const response = await fetch(API_ENDPOINTS.WATERSHEDS);
     if (!response.ok) throw new Error('Failed to fetch watersheds');
     return response.json();
   };
