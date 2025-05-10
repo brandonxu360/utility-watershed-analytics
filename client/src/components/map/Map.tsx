@@ -32,7 +32,7 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-{/* Styles for selected and non selected watersheds */}
+{/* Styles for selected and non selected watersheds */ }
 const defaultStyle = {
   color: '#4a83ec',
   weight: 3,
@@ -79,18 +79,18 @@ export default function Map({ watershedId }: MapProps) {
     queryFn: fetchWatersheds
   });
 
-  {/* Navigates to a watershed on click */}
+  {/* Navigates to a watershed on click */ }
   const navigate = useNavigate();
 
   const onWatershedClick = (e: any) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
-  
+
     navigate({
       to: `/watershed/${feature.id}`,
     });
   };
-  
+
   if (error) return <div>Error: {error.message}</div>;
 
   // Remove zoomLevel state because TooltipToggler will handle zoom changes.
@@ -112,55 +112,54 @@ export default function Map({ watershedId }: MapProps) {
         bounds={BOUNDS}
         style={{ height: '100%', width: '100%' }}
       >
-          {isLoading && (
-            <div className="map-loading-overlay">
-              <div className="loading-spinner"></div>
-            </div>
-          )}
-
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          <ScaleControl metric={true} imperial={true} />
-
-          {/* TOP LEFT CONTROLS */}
-          <div className="leaflet-top leaflet-left">
-            <LegendControl />
+        {isLoading && (
+          <div className="map-loading-overlay">
+            <div className="loading-spinner"></div>
           </div>
+        )}
 
-          {/* TOP RIGHT CONTROLS */}
-          <div className="leaflet-top leaflet-right">
-            <SearchControl />
-            <LayersControl />
-            <ZoomInControl />
-            <ZoomOutControl />
-            <SettingsControl />
-          </div>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-          {/* BOTTOM RIGHT CONTROLS */}
-          <div className="leaflet-bottom leaflet-right">
-            <UserLocationControl />
-          </div>
-          
-          {/* Handles URL navigation to a specified watershed */}
-          <MapEffect watershedId={watershedId} watersheds={watersheds} />
+        <ScaleControl metric={true} imperial={true} />
 
-          {watersheds && (
+        {/* TOP LEFT CONTROLS */}
+        <div className="leaflet-top leaflet-left">
+          <LegendControl />
+        </div>
+
+        {/* TOP RIGHT CONTROLS */}
+        <div className="leaflet-top leaflet-right">
+          <SearchControl />
+          <LayersControl />
+          <ZoomInControl />
+          <ZoomOutControl />
+          <SettingsControl />
+        </div>
+
+        {/* BOTTOM RIGHT CONTROLS */}
+        <div className="leaflet-bottom leaflet-right">
+          <UserLocationControl />
+        </div>
+
+        {/* Handles URL navigation to a specified watershed */}
+        <MapEffect watershedId={watershedId} watersheds={watersheds} />
+
+        {watersheds && (
           <StaticGeoJson
+            key={watershedId ?? "none"}
             ref={geoJsonRef}
             data={watersheds}
-            style={(feature) =>
-              feature.id?.toString() === watershedId
-                ? selectedStyle
-                : defaultStyle
-            }
+            style={(feature) => {
+              if (!feature) return defaultStyle;
+              return feature.id?.toString() === watershedId ? selectedStyle : defaultStyle;
+            }}
             onEachFeature={(feature, layer) => {
-              // bind click-navigation
+              console.log(feature.properties);
               layer.on({ click: onWatershedClick });
-              // bind tooltip
-              if (feature.properties?.watershed_name) {
+              if (feature.properties && feature.properties.watershed_name) {
                 layer.bindTooltip(feature.properties.watershed_name, {
                   permanent: false,
                   direction: 'center',
@@ -171,7 +170,7 @@ export default function Map({ watershedId }: MapProps) {
         )}
 
         {/* TooltipToggler takes care of re-binding the tooltips based on zoom level */}
-        <TooltipToggler geoJsonRef={geoJsonRef} threshold={thresholdZoom} />
+        <TooltipToggler geoJsonRef={geoJsonRef} threshold={thresholdZoom} watershedId={watershedId} />
       </MapContainer>
     </div>
   );
