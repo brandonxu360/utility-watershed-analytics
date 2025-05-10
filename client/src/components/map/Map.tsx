@@ -1,7 +1,9 @@
-import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
+import { useRef } from 'react';
+import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 import { useQuery } from '@tanstack/react-query';
+
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 import ExpandControl from './controls/Expand/Expand';
@@ -10,6 +12,10 @@ import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
+
+import StaticGeoJson from '../../utils/StaticGeoJson';
+import TooltipToggler from '../../utils/TooltipToggler';
+import type L from 'leaflet';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -45,6 +51,10 @@ export default function Map({
 
   if (error) return <div>Error: {error.message}</div>;
 
+  // Remove zoomLevel state because TooltipToggler will handle zoom changes.
+  const thresholdZoom = 10;
+  const geoJsonRef = useRef<L.GeoJSON>(null);
+
   return (
     <div className="map-container">
       <MapContainer
@@ -59,11 +69,13 @@ export default function Map({
         maxBoundsViscosity={0.5}
         bounds={BOUNDS}
       >
+
         {isLoading && (
           <div className="map-loading-overlay">
             <div className="loading-spinner"></div>
           </div>
         )}
+
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -95,8 +107,10 @@ export default function Map({
           />
         </div>
 
-        <GeoJSON
-          key={JSON.stringify(watersheds)}
+        {/* GeoJSON layer without binding tooltip permanently based on state.
+            TooltipToggler will rebind tooltips upon zoom events */}
+        <StaticGeoJson
+          ref={geoJsonRef}
           data={watersheds}
           style={() => ({
             color: '#4a83ec',
@@ -107,13 +121,15 @@ export default function Map({
           onEachFeature={(feature, layer) => {
             if (feature.properties && feature.properties.watershed_name) {
               layer.bindTooltip(feature.properties.watershed_name, {
-                permanent: true,
+                permanent: false,
                 direction: 'center',
-                className: 'custom-tooltip',
               });
             }
           }}
         />
+
+        {/* TooltipToggler takes care of re-binding the tooltips based on zoom level */}
+        <TooltipToggler geoJsonRef={geoJsonRef} threshold={thresholdZoom} />
       </MapContainer>
     </div>
   );
