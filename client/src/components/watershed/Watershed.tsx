@@ -1,0 +1,152 @@
+import { ReactNode, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { fetchWatersheds } from "../map/Map";
+import { FaPlus, FaMinus } from "react-icons/fa6";
+import "./Watershed.css";
+
+/** 
+ * Renders the "skeleton" version of the watershed panel while loading.
+ */
+function SkeletonWatershedPanel() {
+  return (
+    <div className="skeletonPanel">
+      <div className='skeletonCloseButton' />
+      <div className='skeletonTitleText' />
+
+      <div className='skeletonParagraph' />
+      <div className='skeletonLine' />
+      <div className='skeletonLine' />
+      <div className='skeletonLine' />
+      <div className='skeletonLine' />
+      <div className='skeletonParagraph' />
+
+      <div className='skeletonActions'>
+        <div className='skeletonButton' />
+        <div className='skeletonButton' />
+        <div className='skeletonButton' />
+        <div className='skeletonButton' />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Props for the drop down accordian to enforce type safety.
+ */
+interface AccordionItemProps {
+  title: string;
+  children?: ReactNode;
+}
+
+/**
+ * A reusable accordion item component.
+ */
+function AccordionItem({ title, children }: AccordionItemProps) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="accordionItem">
+      <button
+        className="accordionButton"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+      >
+        {title}
+        {open ? <FaMinus /> : <FaPlus />}
+      </button>
+      {open && <div className="accordionContent">{children}</div>}
+    </div>
+  );
+}
+
+/**
+ * Watershed side panel that displays information related to the specified watershed,
+ * including ways to run watershed models.
+ * 
+ * @returns {JSX.Element} - Side panel containing the specific watershed information.
+ */
+export default function Watershed() {
+  const { watershedId } = useParams({ from: '/watershed/$watershedId' });
+  const navigate = useNavigate();
+
+  const { data: watersheds, isLoading, error } = useQuery({
+    queryKey: ["watersheds"],
+    queryFn: fetchWatersheds,
+  });
+
+  if (isLoading) {
+    return <SkeletonWatershedPanel />;
+  }
+
+  if (error) return <div>Error: {(error as Error).message}</div>;
+  if (!watersheds?.features) return <div>No watershed data found.</div>;
+
+  const watershed = watersheds.features.find(
+    (f: any) => f.id && f.id.toString() === watershedId
+  );
+
+  if (!watershed) {
+    return <div>Watershed not found.</div>;
+  }
+
+  return (
+    <div className="watershedPanel">
+      <button
+        onClick={() => navigate({ to: "/" })}
+        className='closeButton'
+        aria-label='Close watershed panel'
+        title='Close watershed panel'
+      >
+        BACK
+      </button>
+      <h2>{watershed.properties.pws_name}</h2>
+      <p>This is where the description for the watershed will go. For now we have placeholder text.</p>
+      <p>
+        <strong>Number of Customers:</strong>{" "}
+        {watershed.properties.num_customers ?? "N/A"}
+      </p>
+      <p>
+        <strong>Source Type:</strong> {watershed.properties.source_type ?? "N/A"}
+      </p>
+      <p>
+        <strong>County:</strong> {watershed.properties.cnty_name ?? "N/A"}
+      </p>
+      <p>
+        <strong>Acres:</strong> {watershed.properties.acres ?? "N/A"}
+      </p>
+
+      <div className='accordionGroup' key={watershedId}>
+        <AccordionItem title="View Calibrated WEPP Results">
+          <button className='subButton'>Spatial Outputs</button>
+          <button className='subButton'>Tabular Outputs</button>
+        </AccordionItem>
+
+        <AccordionItem title="View Calibrated RHESSys Results">
+          <button className='subButton'>Spatial Outputs</button>
+          <button className='subButton'>Tabular Outputs</button>
+        </AccordionItem>
+
+        <AccordionItem title="View Watershed Data">
+          <div className='subButton'>
+            <AccordionItem title="Soil Burn Severity">
+              <button className='subButton'>Firesev</button>
+              <button className='subButton'>Predict</button>
+              <button className='subButton'>Soil Burn Severity</button>
+            </AccordionItem>
+          </div>
+          <button className='subButton'>Vegetation Cover</button>
+          <button className='subButton'>Evapotransportation</button>
+          <button className='subButton'>Soil Moisture</button>
+        </AccordionItem>
+
+        <button
+          className='actionButton'
+          aria-label='Run WEPP cloud watershed analysis model'
+          title='Run WEPPcloud watershed analysis model'
+        >
+          WEPPcloud Watershed Analysis
+        </button>
+      </div>
+    </div>
+  );
+}

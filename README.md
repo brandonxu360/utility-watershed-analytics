@@ -10,21 +10,31 @@ The key technologies include:
 * **Database**: PostgreSQL with [PostGIS](https://postgis.net/) enabled for spatial data.
 * **Tooling**: [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) for containerized services, with development containers ([devcontainers](https://code.visualstudio.com/docs/devcontainers/containers)) integrated into VS Code.
 
-## System Requirements
+The application is deployed on a managed virtual machine provided by the [University of Idaho’s Research Computing and Data Services (RCDS)](https://hpc.uidaho.edu/index.html), using Docker Compose and Caddy for secure reverse proxying. 
+
+For more deployment information, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+## Development Setup
+This section guides developers on how to set up, configure, and run the application locally using Docker and VSCode Dev Containers.
+
+### System Requirements
 * **Hardware**: The hardware requirements have not been tested but the majority of modern computers with at least 4GB of RAM should suffice.
 * **Software**: Docker and VS Code installed with the Dev Containers extension.
 
-## Prerequisites
+### Prerequisites
 1. **Install Docker**: Follow instructions for your operating system to install [Docker](https://docs.docker.com/get-started/get-docker/). Note that Linux systems can install the leaner [Docker Engine](https://docs.docker.com/engine/install/) and use the Docker CLI, which may be preferable.
 2. **Install VS Code**: Download and install [VS Code](https://code.visualstudio.com/).
 3. **Install Extensions**: Install the [Dev Containers](vscode:extension/ms-vscode-remote.remote-containers) extension from the VS Code marketplace.
 4. **Clone Repository**:
 ```bash
-git clone https://github.com/brandonxu360/fullstack-gis-webapp.git
-cd fullstack-gis-webapp
+git clone https://github.com/brandonxu360/utility-watershed-analytics.git
+cd utility-watershed-analytics
 ```
-5. **Environment Variables**: Ensure the an `.env` file exists in the root of your project with the following attributes. Example values are provided below for convenience, do not use these values in production:
+5. **Environment Variables**: Ensure that an `.env` file exists in the root of your project with the following attributes. Example values are provided below for convenience, do not use these values in production:
 ```env
+NODE_ENV=development
+VITE_API_BASE_URL=http://localhost:8000/api
+
 POSTGRES_USER=admin
 POSTGRES_PW=password
 POSTGRES_DB=pg4django
@@ -34,6 +44,9 @@ PGADMIN_PW=password
 DJANGO_SUPERUSER_USERNAME=devcontainer
 DJANGO_SUPERUSER_EMAIL=devcontainer@gmail.com
 DJANGO_SUPERUSER_PASSWORD=password
+
+DJANGO_SECRET_KEY=django-insecure-1#t+05xjtk9endkv$*of#hr(3y@=45=p8i%1f4erojjbc(c7wa
+DEBUG=true
 ```
 
 6. **pgAdmin Server Definition**: Though not required, a JSON file in the root directory with the following attributes can be used to automatically define the server for pgAdmin for convenience. Please name the file `pgadmin-servers.json`. Notice the username and password correspond with the postgres database username (`POSTGRES_USER`) and password (`POSTGRES_PW`) defined in the `.env` file. Again, be aware that this config could expose sensitive data (database password) if mishandled in production.
@@ -53,10 +66,11 @@ DJANGO_SUPERUSER_PASSWORD=password
     }
 }
 ```
-7. **Data**: place the watershed data in `fullstack-gis-webapp/server/server/watershed/` and ensure that the folder is named `data`. If a custom data folder is to be used, changes are required for the `load.py` script in the `server` Django project.
+7. **Data**: Grab the data [here](https://wepp.cloud/share/roger/NASA-Roses/) and download both OR and WA data sets making sure to change their extension to .geojson. Place the watershed data in `fullstack-gis-webapp/server/server/watershed/` and ensure that the folder is named `data`. If a custom data folder is to be used, changes are required for the `load.py` script in the `server` Django project.
 
-## Usage
-1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. Note that this is not required, as VSCode devcontainers will automatically start the services upon reopening the project in a container.
+### Usage
+1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. **Note**: If you are using VSCode with Dev Containers, you can skip this step—containers will start automatically when you open the project in a devcontainer.
+
 ```bash
 docker compose up --build
 ```
@@ -70,7 +84,7 @@ docker compose up --build
 **Additional Notes**:
 * All migrations, the creation of a superuser, and loading of the watershed data into the database is automatically handled by the `entrypoint.sh` file on container start.
 
-## Troubleshooting Tips
+### Troubleshooting Tips
 1. **Docker Issues**:
 * Run `docker compose down` and `docker compose up --build` to reset containers.
 * Check logs with `docker compose logs`.

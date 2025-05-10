@@ -3,3 +3,5 @@
 .env.*
 
 pgadmin-servers.json
+
+caddy_data/
