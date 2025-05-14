@@ -77,27 +77,6 @@ docker compose up --build
 2. **Verify Services**:
 * **Client**: Access the React app at http://localhost:5173.
 * **Server**: Access the Django API at http://localhost:8000/admin. Note that the base url is http://localhost:8000, but I don't think there is an endpoint mapped to it.
-- **Create a VENV**: Create a virtual env and download dependencies from `requirements.txt`
-1. Run the following command to create a VENV
-```bash
-python3 -m venv .venv
-```
-2. Activate the VENV
-```bash
-source .venv/bin/activate
-```
-3. **(Optional)** - ensure pip is up to date
-```bash
-pip install --upgrade pip
-```
-4. Download dependencies from `requirements.txt`
-```
-pip install -r requirements.txt
-```
-5. To exit VENV
-```bash
-deactivate
-```
 * **pgAdmin**: Access pgAdmin at http://localhost:5050. Login with the credentials provided in the `.env` file and add the server if the `pgadmin-server.json` is not provided.
 * **Database**: PostgreSQL is running at localhost:5432.
 3. **Devcontainers Setup (VSCode)**: VSCode will detect the devcontainer configurations upon opening the project and will prompt you to reopen the project in a container. Choose the container based on which service you want to work on (you can open another VSCode window to work on both at the same time). You can reopen the project at any point without being prompted by opening the VSCode Command Palette and using `Dev Containers: Reopen in Container`.
