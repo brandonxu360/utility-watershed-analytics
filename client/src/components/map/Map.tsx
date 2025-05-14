@@ -1,7 +1,9 @@
-import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
+import { useRef } from 'react';
+import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 import { useQuery } from '@tanstack/react-query';
+
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 import LayersControl from './controls/Layers/Layers';
@@ -12,6 +14,10 @@ import UserLocationControl from './controls/UserLocation/UserLocation';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/MapEffectUtil';
 import { API_ENDPOINTS } from '../../config/api';
+
+import StaticGeoJson from '../../utils/StaticGeoJson';
+import TooltipToggler from '../../utils/TooltipToggler';
+import type L from 'leaflet';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -26,7 +32,7 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-{/* Styles for selected and non selected watersheds */}
+{/* Styles for selected and non selected watersheds */ }
 const defaultStyle = {
   color: '#4a83ec',
   weight: 3,
@@ -73,19 +79,23 @@ export default function Map({ watershedId }: MapProps) {
     queryFn: fetchWatersheds
   });
 
-  {/* Navigates to a watershed on click */}
+  {/* Navigates to a watershed on click */ }
   const navigate = useNavigate();
 
   const onWatershedClick = (e: any) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
-  
+
     navigate({
       to: `/watershed/${feature.id}`,
     });
   };
-  
+
   if (error) return <div>Error: {error.message}</div>;
+
+  // Remove zoomLevel state because TooltipToggler will handle zoom changes.
+  const thresholdZoom = 10;
+  const geoJsonRef = useRef<L.GeoJSON>(null);
 
   return (
     <div className="map-container">
@@ -93,7 +103,7 @@ export default function Map({ watershedId }: MapProps) {
         center={CENTER}
         zoom={6}
         minZoom={6}
-        maxZoom={13}
+        maxZoom={15}
         zoomControl={false}
         doubleClickZoom={false}
         scrollWheelZoom={true}
@@ -102,59 +112,65 @@ export default function Map({ watershedId }: MapProps) {
         bounds={BOUNDS}
         style={{ height: '100%', width: '100%' }}
       >
-        <>
-          {isLoading && (
-            <div className="map-loading-overlay">
-              <div className="loading-spinner"></div>
-            </div>
-          )}
-
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          <ScaleControl metric={true} imperial={true} />
-
-          {/* TOP LEFT CONTROLS */}
-          <div className="leaflet-top leaflet-left">
-            <LegendControl />
+        {isLoading && (
+          <div className="map-loading-overlay">
+            <div className="loading-spinner"></div>
           </div>
+        )}
 
-          {/* TOP RIGHT CONTROLS */}
-          <div className="leaflet-top leaflet-right">
-            <SearchControl />
-            <LayersControl />
-            <ZoomInControl />
-            <ZoomOutControl />
-            <SettingsControl />
-          </div>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-          {/* BOTTOM RIGHT CONTROLS */}
-          <div className="leaflet-bottom leaflet-right">
-            <UserLocationControl />
-          </div>
-          
-          {/* Handles URL navigation to a specified watershed */}
-          <MapEffect watershedId={watershedId} watersheds={watersheds} />
+        <ScaleControl metric={true} imperial={true} />
 
-          {watersheds && (
-            <GeoJSON
-              key={JSON.stringify(watersheds)}
-              data={watersheds}
-              style={(feature) => {
-                if (!feature) return defaultStyle;
-                return feature.id?.toString() === watershedId ? selectedStyle : defaultStyle;
-              }}
-              onEachFeature={(feature, layer) => {
-                // Attach the click event
-                layer.on({
-                  click: onWatershedClick,
+        {/* TOP LEFT CONTROLS */}
+        <div className="leaflet-top leaflet-left">
+          <LegendControl />
+        </div>
+
+        {/* TOP RIGHT CONTROLS */}
+        <div className="leaflet-top leaflet-right">
+          <SearchControl />
+          <LayersControl />
+          <ZoomInControl />
+          <ZoomOutControl />
+          <SettingsControl />
+        </div>
+
+        {/* BOTTOM RIGHT CONTROLS */}
+        <div className="leaflet-bottom leaflet-right">
+          <UserLocationControl />
+        </div>
+
+        {/* Handles URL navigation to a specified watershed */}
+        <MapEffect watershedId={watershedId} watersheds={watersheds} />
+
+        {watersheds && (
+          <StaticGeoJson
+            key={watershedId ?? "none"}
+            ref={geoJsonRef}
+            data={watersheds}
+            style={(feature) => {
+              if (!feature) return defaultStyle;
+              return feature.id?.toString() === watershedId ? selectedStyle : defaultStyle;
+            }}
+            onEachFeature={(feature, layer) => {
+              console.log(feature.properties);
+              layer.on({ click: onWatershedClick });
+              if (feature.properties && feature.properties.watershed_name) {
+                layer.bindTooltip(feature.properties.watershed_name, {
+                  permanent: false,
+                  direction: 'center',
                 });
-              }}
-            />
-          )}
-        </>
+              }
+            }}
+          />
+        )}
+
+        {/* TooltipToggler takes care of re-binding the tooltips based on zoom level */}
+        <TooltipToggler geoJsonRef={geoJsonRef} threshold={thresholdZoom} watershedId={watershedId} />
       </MapContainer>
     </div>
   );
