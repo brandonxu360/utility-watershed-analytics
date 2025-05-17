@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { fetchWatersheds } from "../map/Map";
-import { FaPlus, FaMinus } from "react-icons/fa6";
+import { FaPlus, FaMinus, FaEye, FaEyeSlash } from "react-icons/fa6";
 import "./Watershed.css";
 
 /** 
@@ -69,6 +69,8 @@ export default function Watershed() {
   const { watershedId } = useParams({ from: '/watershed/$watershedId' });
   const navigate = useNavigate();
 
+  const [showSubcatchments, setShowSubcatchments] = useState(false);
+
   const { data: watersheds, isLoading, error } = useQuery({
     queryKey: ["watersheds"],
     queryFn: fetchWatersheds,
@@ -114,6 +116,29 @@ export default function Watershed() {
       <p>
         <strong>Acres:</strong> {watershed.properties.acres ?? "N/A"}
       </p>
+
+      <div className="row">
+        <p><strong>Watershed Models</strong></p>
+
+        <button
+          type="button"
+          className={`toggleBtn ${showSubcatchments ? "active" : ""}`}
+          style={{ padding: '0.5rem' }}
+          aria-label={
+            showSubcatchments
+              ? "Hide subcatchment overlay"
+              : "Show subcatchment overlay"
+          }
+          title={
+            showSubcatchments
+              ? "Hide subcatchment overlay"
+              : "Show subcatchment overlay"
+          }
+          onClick={() => setShowSubcatchments(s => !s)}
+        >
+          {showSubcatchments ? <FaEyeSlash style={{ width: '1rem', height: '1rem' }} /> : <FaEye style={{ width: '1rem', height: '1rem' }} />}
+        </button>
+      </div>
 
       <div className='accordionGroup' key={watershedId}>
         <AccordionItem title="View Calibrated WEPP Results">

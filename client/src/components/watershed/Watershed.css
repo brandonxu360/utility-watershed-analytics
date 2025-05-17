@@ -209,3 +209,38 @@
 .subButton:hover {
   color: #646cff;
 }
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--size-400) 0;
+}
+
+.row p {
+  margin: 0;
+  padding: 0;
+}
+
+.toggleBtn {
+  background-color: var(--clr-primary-300);
+  border: 2px solid var(--clr-primary-500);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.1s ease, transform 0.1s ease;
+}
+
+.toggleBtn:active,
+.toggleBtn.active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(1px);
+}
+
+.toggleBtn:focus {
+  outline: 2px dashed var(--clr-accent);
+  outline-offset: 2px;
+}
