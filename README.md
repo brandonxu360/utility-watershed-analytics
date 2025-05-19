@@ -87,7 +87,7 @@ Alternatively, one could work through the [data-manifest.yml](/server/data-manif
 1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. **Note**: If you are using VSCode with Dev Containers, you can skip this step—containers will start automatically when you open the project in a devcontainer.
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 2. **Verify Services**:
 * **Client**: Access the React app at http://localhost:5173.
