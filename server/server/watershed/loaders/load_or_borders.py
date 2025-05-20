@@ -19,9 +19,9 @@ or_mapping = {
     'geom': 'geometry',
 }
 
-or_data_location = Path(__file__).resolve().parent.parent / 'data' / 'OR_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson'
+or_data_location = Path(__file__).resolve().parent.parent / 'data' / 'borders' / 'OR_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson'
 
-def load_oregon_data(verbose=True):
+def load_oregon_borders(verbose=True):
     """Loads Oregon watershed data."""
     lm = LayerMapping(WatershedBorder, or_data_location, or_mapping, transform=False)
     lm.save(strict=True, verbose=verbose)

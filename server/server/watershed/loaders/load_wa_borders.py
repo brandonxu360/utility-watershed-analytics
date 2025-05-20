@@ -14,9 +14,9 @@ wa_mapping = {
     'geom': 'geometry',
 }
 
-wa_data_location = Path(__file__).resolve().parent.parent / 'data' / 'WA_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson'
+wa_data_location = Path(__file__).resolve().parent.parent / 'data' / 'borders' / 'WA_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson'
 
-def load_washington_data(verbose=True):
+def load_washington_borders(verbose=True):
     """Loads Washington watershed data."""
     lm = LayerMapping(WatershedBorder, wa_data_location, wa_mapping, transform=False)
     
