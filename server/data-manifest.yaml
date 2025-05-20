@@ -1,0 +1,6 @@
+- name: WA watersheds
+  url: https://wepp.cloud/share/roger/NASA-Roses/OR_drinking_water_source_areas_less_than_130mi2_weppcloud.json
+  target: server/watershed/data/OR_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson
+- name: OR watersheds
+  url: https://wepp.cloud/share/roger/NASA-Roses/WA_drinking_water_source_areas_less_than_130mi2_weppcloud.json
+  target: server/watershed/data/WA_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson

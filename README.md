@@ -66,13 +66,28 @@ DEBUG=true
     }
 }
 ```
-7. **Data**: Grab the data [here](https://wepp.cloud/share/roger/NASA-Roses/) and download both OR and WA data sets making sure to change their extension to .geojson. Place the watershed data in `fullstack-gis-webapp/server/server/watershed/` and ensure that the folder is named `data`. If a custom data folder is to be used, changes are required for the `load.py` script in the `server` Django project.
+7. **Data**: For convenience, a python script is provided to fetch the required datasets. To use this script:
+
+    1. Create a virtual environment and install the dependencies:
+    ```bash
+    # These example commands are executed from the project root directory
+    python -m venv server/.venv/venv-download
+    source server/.venv/venv-download/bin/activate
+    pip install -r server/data-script-requirements.txt
+    ```
+
+    2. Run the script:
+    ```bash
+    python server/data-download-script.py
+    ```
+
+Alternatively, one could work through the [data-manifest.yml](/server/data-manifest.yaml) and manually download the data files from `url` into `target`.
 
 ### Usage
 1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. **Note**: If you are using VSCode with Dev Containers, you can skip this step—containers will start automatically when you open the project in a devcontainer.
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 2. **Verify Services**:
 * **Client**: Access the React app at http://localhost:5173.
