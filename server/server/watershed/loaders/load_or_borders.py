@@ -1,6 +1,6 @@
 from pathlib import Path
 from django.contrib.gis.utils import LayerMapping
-from ..models import WatershedBorder
+from server.watershed.models import WatershedBorder
 
 # Mapping Oregon fields to common schema
 or_mapping = {
