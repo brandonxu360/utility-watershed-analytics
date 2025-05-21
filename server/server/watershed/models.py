@@ -19,6 +19,8 @@ class WatershedBorder(models.Model):
     geom = models.MultiPolygonField(srid=4326)
     simplified_geom = models.MultiPolygonField(srid=4326, null=True, blank=True)
 
+# This is based on an auto-generated Django model module created by ogrinspect. See command below:
+# /app/server $ python manage.py ogrinspect server/watershed/data/subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg Subcatchment--srid=4326 --mapping --multi
 class Subcatchment(models.Model):
     topazid = models.BigIntegerField()
     weppid = models.BigIntegerField()
@@ -61,6 +63,8 @@ class Subcatchment(models.Model):
     deploss_kg = models.FloatField()
     geom = models.MultiPolygonField(srid=4326)
 
+# This is based on an auto-generated Django model module created by ogrinspect. See command below:
+# /app/server $ python manage.py ogrinspect server/watershed/data/subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg Channel --layer=1 --srid=4326 --mapping --multi
 class Channel(models.Model):
     topazid = models.BigIntegerField()
     weppid = models.BigIntegerField()
