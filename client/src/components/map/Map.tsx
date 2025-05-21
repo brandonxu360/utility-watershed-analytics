@@ -11,7 +11,7 @@ import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/MapEffectUtil';
-import { API_ENDPOINTS } from '../../config/api';
+import { fetchWatersheds } from '../../api/api';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -46,18 +46,6 @@ const selectedStyle = {
  */
 interface MapProps {
   watershedId: string;
-}
-
-/**
- * Fetches basic watershed border data from the API.
- * 
- * @returns {Promise<Object>} A promise that resolves to the JSON response containing watershed data.
- * @throws {Error} Throws an error if the API request fails.
- */
-export async function fetchWatersheds() {
-  const response = await fetch(API_ENDPOINTS.WATERSHEDS);
-  if (!response.ok) throw new Error('Failed to fetch watersheds');
-  return response.json(); // must return the same data shape for both
 }
 
 /**

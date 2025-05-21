@@ -4,5 +4,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://wepp3.
 // API endpoints
 export const API_ENDPOINTS = {
   WATERSHEDS: `${API_BASE_URL}/watershed/borders-simplified/`,
+  /* TODO: Implement subcatchment url here */
+  SUBCATCHMENTS: ``,
   // Add other endpoints as needed
 };
