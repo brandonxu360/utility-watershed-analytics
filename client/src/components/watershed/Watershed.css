@@ -1,11 +1,9 @@
 .closeButton {
-  background: none;
+  background-color: var(--clr-primary-error);
   border: none;
-  padding: 0;
   color: var(--clr-primary-100);
   font-size: var(--fs-100);
   cursor: pointer;
-  text-decoration: underline;
   margin-top: var(--size-300);
   margin-bottom: var(--size-400);
 }

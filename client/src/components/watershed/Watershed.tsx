@@ -1,9 +1,9 @@
 import { ReactNode, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { fetchWatersheds } from "../map/Map";
 import { FaPlus, FaMinus, FaEye, FaEyeSlash } from "react-icons/fa6";
 import "./Watershed.css";
+import { fetchWatersheds } from "../../api/api";
 
 /** 
  * Renders the "skeleton" version of the watershed panel while loading.
@@ -98,6 +98,7 @@ export default function Watershed() {
         className='closeButton'
         aria-label='Close watershed panel'
         title='Close watershed panel'
+        style={{padding: '0.313rem 0.5rem'}}
       >
         BACK
       </button>
@@ -123,7 +124,7 @@ export default function Watershed() {
         <button
           type="button"
           className={`toggleBtn ${showSubcatchments ? "active" : ""}`}
-          style={{ padding: '0.5rem' }}
+          style={{ padding: '0.313rem' }}
           aria-label={
             showSubcatchments
               ? "Hide subcatchment overlay"
@@ -136,6 +137,7 @@ export default function Watershed() {
           }
           onClick={() => setShowSubcatchments(s => !s)}
         >
+          <p style={{fontSize: '0.625rem', marginRight: '5px'}}>view subcatchments</p>
           {showSubcatchments ? <FaEyeSlash style={{ width: '1rem', height: '1rem' }} /> : <FaEye style={{ width: '1rem', height: '1rem' }} />}
         </button>
       </div>

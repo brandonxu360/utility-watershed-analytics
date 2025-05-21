@@ -55,7 +55,7 @@ interface MapProps {
  * @param watershedId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
-export default function Map({ watershedId }: MapProps) {
+export default function Map({ watershedId }: MapProps): JSX.Element {
   const { data: watersheds, error, isLoading } = useQuery({
     queryKey: ['watersheds'],
     queryFn: fetchWatersheds
