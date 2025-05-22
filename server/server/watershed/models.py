@@ -41,7 +41,7 @@ class Subcatchment(models.Model):
     cancov = models.FloatField()
     inrcov = models.FloatField()
     rilcov = models.FloatField()
-    disturbed_class = models.CharField(max_length=50)
+    disturbed_class = models.CharField(max_length=50, null=True)
     mukey = models.CharField(max_length=30)
     clay = models.FloatField()
     sand = models.FloatField()

@@ -11,6 +11,4 @@ router.register('channels', ChannelViewSet)
 
 
 # Make router routes accessible to project URL configuration
-urlpatterns = [
-    path('', include(router.urls)),
-]
+urlpatterns = router.urls
