@@ -97,7 +97,7 @@ def load_subcatchments_and_channels(verbose=True):
         subcatchment_lm.save(strict=True, verbose=verbose)
         channel_lm.save(strict=True, verbose=verbose)
 
-        return Subcatchment.objects.count(), Channel.objects.count()
+    return Subcatchment.objects.count(), Channel.objects.count()
 
         
 
