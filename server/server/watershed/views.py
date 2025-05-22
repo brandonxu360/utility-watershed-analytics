@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import WatershedBorder
-from .serializers import WatershedBorderSerializer, WatershedBorderSimplifiedSerializer
+from server.watershed.models import WatershedBorder, Subcatchment, Channel
+from server.watershed.serializers import WatershedBorderSerializer, WatershedBorderSimplifiedSerializer, SubcatchmentSerializer, ChannelSerializer
 from drf_spectacular.utils import extend_schema
 
 @extend_schema(
@@ -41,3 +41,17 @@ class WatershedBorderSimplifiedViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = WatershedBorder.objects.defer("geom")
     serializer_class = WatershedBorderSimplifiedSerializer
+
+class SubcatchmentViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Provides read-only access to Subcatchment model instances.
+    """
+    queryset = Subcatchment.objects.all()
+    serializer_class = SubcatchmentSerializer
+
+class ChannelViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Provides read-only access to Channel model instances.
+    """
+    queryset = Channel.objects.all()
+    serializer_class = ChannelSerializer
