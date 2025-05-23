@@ -3,7 +3,6 @@ from django.contrib.gis.db import models
 # Represents an individual watershed - the watershed details and its geometry.
 # This is meant to serve as a generalized model that is compatible with the different WA/OR watershed formats.
 class WatershedBorder(models.Model):
-    id = models.AutoField(primary_key=True)
     area_m2 = models.FloatField()
     pws_id = models.CharField(max_length=10)
     pws_name = models.CharField(max_length=254)
@@ -15,7 +14,7 @@ class WatershedBorder(models.Model):
     huc12_nhd = models.CharField(max_length=254, null=True)
     huc12_wbd = models.CharField(max_length=254, null=True)
     sq_miles = models.FloatField()
-    webcloud_run_id = models.CharField(max_length=255)
+    webcloud_run_id = models.CharField(primary_key=True, max_length=255)
     geom = models.MultiPolygonField(srid=4326)
     simplified_geom = models.MultiPolygonField(srid=4326, null=True, blank=True)
 
