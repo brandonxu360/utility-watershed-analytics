@@ -94,10 +94,16 @@ def load_subcatchments_and_channels(verbose=True):
         subcatchment_lm = LayerMapping(Subcatchment, entry.path, subcatchment_mapping, layer=0, transform=False)
         channel_lm = LayerMapping(Channel, entry.path, channel_mapping, layer=1, transform=False)
 
+        prev_subcatchment_count = Subcatchment.objects.count()
+        prev_channel_count = Channel.objects.count()
+
         subcatchment_lm.save(strict=True, verbose=verbose)
         channel_lm.save(strict=True, verbose=verbose)
 
-    return Subcatchment.objects.count(), Channel.objects.count()
+        new_subcatchment_count = Subcatchment.objects.count() - prev_subcatchment_count
+        new_channel_count = Channel.objects.count() - prev_channel_count
+
+        print(f"Ingested Subcatchments count: {new_subcatchment_count}, Channels: {new_channel_count}")
 
         
 
