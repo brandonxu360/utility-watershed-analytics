@@ -6,13 +6,13 @@ from server.watershed.loaders.load_subcatchments_and_channels import load_subcat
 # Save the models to the database using the mapping
 def run(verbose=True):
     # Load the Oregon watersheds
-    load_oregon_borders()
+    load_oregon_borders(verbose=False)
 
     # Load the Washington watersheds
-    load_washington_borders()
+    load_washington_borders(verbose=False)
 
     # Load the subcatchments and channels
-    load_subcatchments_and_channels()
+    load_subcatchments_and_channels(verbose=False)
 
     # Update the simplified_geom field using PostGIS simplify (potentially more efficient than using geos simplify in the application)
     with connection.cursor() as cursor:

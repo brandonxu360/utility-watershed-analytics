@@ -26,6 +26,7 @@ def load_washington_borders(verbose=True):
     new_ids = set(WatershedBorder.objects.values_list('id', flat=True)) - existing_ids  # Newly inserted WA IDs
 
     # Update only the newly inserted records with state='WA'
-    WatershedBorder.objects.filter(id__in=new_ids).update(state='WA')
+    wa_borders = WatershedBorder.objects.filter(id__in=new_ids)
+    wa_borders.update(state='WA')
 
-    return WatershedBorder.objects.filter(state='WA').count()
+    print(f'Ingested WA Borders count: {wa_borders.count()}')
