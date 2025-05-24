@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
+from django.contrib.gis.db.models import Model
 from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.gdal.layer import Layer
 from django.contrib.gis.geos import Polygon, MultiPolygon
 from server.watershed.models import Subcatchment, Channel
 
@@ -80,6 +82,28 @@ channel_mapping = {
 
 data_location = Path(__file__).resolve().parent.parent / "data" / "subcatchments-and-channels"
 
+def save_watershed_associated_layer(layer: Layer, mapping: dict[str, str], associated_watershed_id: str, model_class: type[Model]) -> int:
+    """Save a layer of features with a one-to-many relationship with watersheds (one watershed - many layer features) and returns the number of features saved."""
+
+    instances = []
+
+    for feature in layer:
+        # Gather the relevant OGR values from the data source
+        kwargs = {key: feature.get(value) for key, value in mapping.items()}
+
+        # Handle the geometry
+        geom = feature.geom.geos
+        kwargs['geom'] = MultiPolygon(geom) if isinstance(geom, Polygon) else geom
+
+        # Add the watershed foreign key reference
+        kwargs['watershed_id'] = associated_watershed_id
+
+        instances.append(model_class(**kwargs))
+    
+    model_class.objects.bulk_create(instances)
+
+    return len(instances)
+
 def load_subcatchments_and_channels(verbose=True):
     # Iterate over all of the subcatchment/channel datafiles
     # Each datafile should correspond to a parent watershed - the name of the datafile should be the webcloud_run_id of the associated watershed
@@ -99,44 +123,12 @@ def load_subcatchments_and_channels(verbose=True):
             watershed_id = os.path.splitext(entry.name)[0]
 
             # Subcatchments
-            subcatchment_layer = ds[0]
-            subcatchments = []
-
-            for feature in subcatchment_layer:
-                # Gather the relevant OGR values from the data source
-                kwargs = {key: feature.get(value) for key, value in subcatchment_mapping.items()}
-
-                # Handle geometry data
-                geom = feature.geom.geos
-                kwargs['geom'] = MultiPolygon(geom) if isinstance(geom, Polygon) else geom
-
-                # Insert any additional data
-                kwargs['watershed_id'] = watershed_id
-
-                subcatchments.append(Subcatchment(**kwargs))
-
-            Subcatchment.objects.bulk_create(subcatchments)
-            print(f"    Subcatchments saved: {len(subcatchments)}")
+            subcatchment_count = save_watershed_associated_layer(ds[0], subcatchment_mapping, watershed_id, Subcatchment)
+            print(f"    Subcatchments saved: {subcatchment_count}")
 
             # Channels
-            channel_layer = ds[1]
-            channels = []
-
-            for feature in channel_layer:
-                # Gather the relevant OGR values from the data source
-                kwargs = {key: feature.get(value) for key, value in channel_mapping.items()}
-
-                # Handle geometry data
-                geom = feature.geom.geos
-                kwargs['geom'] = MultiPolygon(geom) if isinstance(geom, Polygon) else geom
-
-                # Insert any additional data
-                kwargs['watershed_id'] = watershed_id
-
-                channels.append(Channel(**kwargs))
-
-            Channel.objects.bulk_create(channels)
-            print(f"    Channels saved: {len(channels)}")
+            channel_count = save_watershed_associated_layer(ds[1], channel_mapping, watershed_id, Channel)
+            print(f"    Channels saved: {channel_count}")
 
         except Exception as e:
             print(f"Error processing {entry.name}: {e}")
