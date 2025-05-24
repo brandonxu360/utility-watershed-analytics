@@ -21,6 +21,7 @@ class WatershedBorder(models.Model):
 # This is based on an auto-generated Django model module created by ogrinspect. See command below:
 # /app/server $ python manage.py ogrinspect server/watershed/data/subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg Subcatchment--srid=4326 --mapping --multi
 class Subcatchment(models.Model):
+    watershed = models.ForeignKey(to=WatershedBorder, on_delete=models.CASCADE)
     topazid = models.BigIntegerField()
     weppid = models.BigIntegerField()
     slope_scalar = models.FloatField()
@@ -65,6 +66,7 @@ class Subcatchment(models.Model):
 # This is based on an auto-generated Django model module created by ogrinspect. See command below:
 # /app/server $ python manage.py ogrinspect server/watershed/data/subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg Channel --layer=1 --srid=4326 --mapping --multi
 class Channel(models.Model):
+    watershed = models.ForeignKey(to=WatershedBorder, on_delete=models.CASCADE)
     topazid = models.BigIntegerField()
     weppid = models.BigIntegerField()
     topaz_id = models.BigIntegerField()
