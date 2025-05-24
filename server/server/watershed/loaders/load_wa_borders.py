@@ -29,4 +29,4 @@ def load_washington_borders(verbose=True):
     wa_borders = WatershedBorder.objects.filter(webcloud_run_id__in=new_ids)
     wa_borders.update(state='WA')
 
-    print(f'Ingested WA Borders count: {wa_borders.count()}')
+    print(f'Ingested WA borders count: {wa_borders.count()}')

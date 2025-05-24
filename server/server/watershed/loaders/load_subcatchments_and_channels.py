@@ -81,7 +81,7 @@ data_location = Path(__file__).resolve().parent.parent / "data" / "subcatchments
 
 def load_subcatchments_and_channels(verbose=True):
     # Iterate over all of the subcatchment/channel datafiles
-    # Each datafile should correspond to a parent watershed
+    # Each datafile should correspond to a parent watershed - the name of the datafile should be the webcloud_run_id of the associated watershed
     for entry in os.scandir(data_location):
         """Loads all the subcatchments and channels from the datafiles into the database."""
 
@@ -89,7 +89,7 @@ def load_subcatchments_and_channels(verbose=True):
         if not entry.is_file():
             continue
 
-        print(f"Processing: {entry.path}")
+        print(f"Processing: {entry.name}")
         
         subcatchment_lm = LayerMapping(Subcatchment, entry.path, subcatchment_mapping, layer=0, transform=False)
         channel_lm = LayerMapping(Channel, entry.path, channel_mapping, layer=1, transform=False)
@@ -103,7 +103,7 @@ def load_subcatchments_and_channels(verbose=True):
         new_subcatchment_count = Subcatchment.objects.count() - prev_subcatchment_count
         new_channel_count = Channel.objects.count() - prev_channel_count
 
-        print(f"Ingested Subcatchments count: {new_subcatchment_count}, Channels: {new_channel_count}")
+        print(f"Ingested subcatchments count: {new_subcatchment_count}\nIngested channels count: {new_channel_count}")
 
         
 
