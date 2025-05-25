@@ -1,14 +1,15 @@
 from rest_framework import routers
 from django.urls import path, include
-from server.watershed.views import WatershedBorderViewSet, WatershedBorderSimplifiedViewSet, SubcatchmentViewSet, ChannelViewSet
+from server.watershed.views import WatershedBorderViewSet, WatershedBorderSimplifiedViewSet, WatershedSubcatchmentListView, WatershedChannelListView
 
 # Use router to automatically manage API endpoints based on registered viewsets
 router = routers.DefaultRouter()
 router.register('borders', WatershedBorderViewSet, basename='watershedborder')
 router.register('borders-simplified', WatershedBorderSimplifiedViewSet, basename='watershedborder-simplified')
-router.register('subcatchments', SubcatchmentViewSet)
-router.register('channels', ChannelViewSet)
-
 
 # Make router routes accessible to project URL configuration
-urlpatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+    path('<slug:webcloud_run_id>/subcatchments', WatershedSubcatchmentListView.as_view()),
+    path('<slug:webcloud_run_id>/channels', WatershedSubcatchmentListView.as_view())
+]
