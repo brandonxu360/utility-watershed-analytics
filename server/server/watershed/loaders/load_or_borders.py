@@ -1,6 +1,6 @@
 from pathlib import Path
 from django.contrib.gis.utils import LayerMapping
-from server.watershed.models import WatershedBorder
+from server.watershed.models import Watershed
 
 # Mapping Oregon fields to common schema
 or_mapping = {
@@ -23,6 +23,6 @@ or_data_location = Path(__file__).resolve().parent.parent / 'data' / 'borders' /
 
 def load_oregon_borders(verbose=True):
     """Loads Oregon watershed data."""
-    lm = LayerMapping(WatershedBorder, or_data_location, or_mapping, transform=False)
+    lm = LayerMapping(Watershed, or_data_location, or_mapping, transform=False)
     lm.save(strict=True, verbose=verbose)
-    print(f'Ingested OR borders count: {WatershedBorder.objects.filter(state='OR').count()}')
+    print(f'Ingested OR borders count: {Watershed.objects.filter(state='OR').count()}')

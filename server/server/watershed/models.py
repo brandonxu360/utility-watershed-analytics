@@ -2,7 +2,7 @@ from django.contrib.gis.db import models
 
 # Represents an individual watershed - the watershed details and its geometry.
 # This is meant to serve as a generalized model that is compatible with the different WA/OR watershed formats.
-class WatershedBorder(models.Model):
+class Watershed(models.Model):
     area_m2 = models.FloatField()
     pws_id = models.CharField(max_length=10)
     pws_name = models.CharField(max_length=254)
@@ -21,7 +21,7 @@ class WatershedBorder(models.Model):
 # This is based on an auto-generated Django model module created by ogrinspect. See command below:
 # /app/server $ python manage.py ogrinspect server/watershed/data/subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg Subcatchment--srid=4326 --mapping --multi
 class Subcatchment(models.Model):
-    watershed = models.ForeignKey(to=WatershedBorder, on_delete=models.CASCADE)
+    watershed = models.ForeignKey(to=Watershed, on_delete=models.CASCADE)
     topazid = models.BigIntegerField()
     weppid = models.BigIntegerField()
     slope_scalar = models.FloatField()
@@ -66,7 +66,7 @@ class Subcatchment(models.Model):
 # This is based on an auto-generated Django model module created by ogrinspect. See command below:
 # /app/server $ python manage.py ogrinspect server/watershed/data/subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg Channel --layer=1 --srid=4326 --mapping --multi
 class Channel(models.Model):
-    watershed = models.ForeignKey(to=WatershedBorder, on_delete=models.CASCADE)
+    watershed = models.ForeignKey(to=Watershed, on_delete=models.CASCADE)
     topazid = models.BigIntegerField()
     weppid = models.BigIntegerField()
     topaz_id = models.BigIntegerField()
