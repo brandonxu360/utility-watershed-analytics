@@ -1,26 +1,38 @@
 from rest_framework import viewsets, generics
-from server.watershed.models import WatershedBorder, Subcatchment, Channel
-from server.watershed.serializers import WatershedBorderSerializer, WatershedBorderSimplifiedSerializer, SubcatchmentSerializer, ChannelSerializer
+from server.watershed.models import Watershed, Subcatchment, Channel
+from server.watershed.serializers import WatershedSerializer, WatershedSimplifiedSerializer, SubcatchmentSerializer, ChannelSerializer
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-class WatershedBorderViewSet(viewsets.ReadOnlyModelViewSet):
+class WatershedViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Provides read-only access to watersheds with their original geometries.
+    Provides read-only access to watersheds.
+    """
+    queryset = Watershed.objects.defer('geom', 'simplified_geom')
 
-    Note that the payload served by this view can be large due to the geometry fields. It is advisable to
-    use simplified geometry endpoint for retrieving multiple watersheds.
-    """
-    queryset = WatershedBorder.objects.defer('simplified_geom')
-    serializer_class = WatershedBorderSerializer
-
-class WatershedBorderSimplifiedViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Provides read-only access to watersheds with simplified geometries.
+    # No logic changes, only decorating for documentation
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='simplified_geom', description='Use simplified geometry', required=False, type=bool),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Gets all the available watersheds with the original or simplified geometries (depending on simplified_geom query parameter)"""
+        return super().list(request, *args, **kwargs)
     
-    This endpoint is intended for scenarios where an overview of multiple watershed borders is required, 
-    particularly for mapping purposes where detailed geometries aren't necessary.
-    """
-    queryset = WatershedBorder.objects.defer("geom")
-    serializer_class = WatershedBorderSimplifiedSerializer
+    # No logic changes, only decorating for documentation
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='simplified_geom', description='Use simplified geometry', required=False, type=bool),
+        ]
+    )
+    def retrieve(self, request, *args, **kwargs):
+        """Gets the specified watershed with the original or simplified geometries (depending on simplified_geom query parameter)"""
+        return super().retrieve(request, *args, **kwargs)
+    
+    # Dynamically choose the serializer depending on if simplified geometry was requested
+    def get_serializer_class(self):
+        simplified = self.request.query_params.get('simplified_geom', '').lower() == 'true'
+        return WatershedSimplifiedSerializer if simplified else WatershedSerializer
 
 class WatershedSubcatchmentListView(generics.ListAPIView):
     """

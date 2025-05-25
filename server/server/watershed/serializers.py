@@ -1,22 +1,22 @@
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
-from server.watershed.models import WatershedBorder, Subcatchment, Channel
+from server.watershed.models import Watershed, Subcatchment, Channel
 
-class WatershedBorderSerializer(GeoFeatureModelSerializer):
+class WatershedSerializer(GeoFeatureModelSerializer):
     """
-    Serializes the WatershedBorder model with the original (unsimplified) geometry.
+    Serializes the Watershed model with the original (unsimplified) geometry.
     """
     class Meta:
-        model = WatershedBorder
+        model = Watershed
         geo_field = 'geom'
         exclude = ('simplified_geom',)
 
-class WatershedBorderSimplifiedSerializer(GeoFeatureModelSerializer):
+class WatershedSimplifiedSerializer(GeoFeatureModelSerializer):
     """
-    Serializes the WatershedBorder model with the simplified geometry.
+    Serializes the Watershed model with the simplified geometry.
     """
 
     class Meta:
-        model = WatershedBorder
+        model = Watershed
         geo_field = 'simplified_geom'
         exclude = ('geom',)
         description = "Basic serializer for Watershed Border with limited fields and a details URL."
