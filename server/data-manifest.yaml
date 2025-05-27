@@ -1,6 +1,15 @@
-- name: WA watersheds
+# Watershed Borders
+- name: Washington Watershed Borders (less than 130 miles squared)
   url: https://wepp.cloud/share/roger/NASA-Roses/OR_drinking_water_source_areas_less_than_130mi2_weppcloud.json
-  target: server/watershed/data/OR_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson
-- name: OR watersheds
+  target: server/watershed/data/borders/OR_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson
+- name: Oregon Watershed Borders (less than 130 miles squared)
   url: https://wepp.cloud/share/roger/NASA-Roses/WA_drinking_water_source_areas_less_than_130mi2_weppcloud.json
-  target: server/watershed/data/WA_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson
+  target: server/watershed/data/borders/WA_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson
+
+# Subcatchments and Channels
+- name: Cedar River Subcatchments and Channels
+  url: https://wepp.cloud/weppcloud/runs/24roses-WA_77050_CEDAR_RIVER/disturbed9002/download/export/arcmap/24roses-WA_77050_CEDAR_RIVER.gpkg
+  target: server/watershed/data/subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg
+- name: Mill Creek Subcatchments and Channels
+  url: https://wepp.cloud/weppcloud/runs/24roses-WA_92500_Mill_Creek_Water_Shed/disturbed9002/download/export/arcmap/24roses-WA_92500_Mill_Creek_Water_Shed.gpkg
+  target: server/watershed/data/subcatchments-and-channels/24roses-WA_92500_Mill_Creek_Water_Shed.gpkg
