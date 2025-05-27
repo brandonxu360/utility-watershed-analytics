@@ -15,13 +15,13 @@ export async function fetchWatersheds() {
 /**
  * Fetches subcatchment polygons for a given watershed.
  * 
- * @param {string} watershedId - The unique identifier of the watershed 
+ * @param {string} webcloudRunId - The unique identifier of the watershed 
  * for which subcatchment data should be retrieved.
  * @returns {Promise<any>} A promise that resolves to the JSON response containing
  * the subcatchment feature collection (e.g., GeoJSON) for the specified watershed.
  */
-export async function fetchSubcatchments(watershedId: string) {
-  const res = await fetch(`${API_ENDPOINTS.SUBCATCHMENTS}/${watershedId}`);
+export async function fetchSubcatchments(webcloudRunId: string) {
+  const res = await fetch(`${API_ENDPOINTS.SUBCATCHMENTS}/${webcloudRunId}/subcatchments`);
   if (!res.ok) throw new Error("Failed to fetch subcatchments");
   return res.json();
 }

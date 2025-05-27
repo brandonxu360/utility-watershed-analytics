@@ -1,9 +1,9 @@
-import { ReactNode, useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { FaPlus, FaMinus, FaEye, FaEyeSlash } from "react-icons/fa6";
+import { /*fetchSubcatchments,*/ fetchWatersheds } from "../../api/api";
 import "./Watershed.css";
-import { fetchWatersheds } from "../../api/api";
 
 /** 
  * Renders the "skeleton" version of the watershed panel while loading.
@@ -60,16 +60,22 @@ function AccordionItem({ title, children }: AccordionItemProps) {
 }
 
 /**
+ * Props for the watershed side panel to enforce type safety.
+ */
+interface watershedPanelProps {
+  showSubcatchments: boolean;
+  setShowSubcatchments: Dispatch<SetStateAction<boolean>>;
+}
+
+/**
  * Watershed side panel that displays information related to the specified watershed,
  * including ways to run watershed models.
  * 
  * @returns {JSX.Element} - Side panel containing the specific watershed information.
  */
-export default function Watershed() {
+export default function Watershed({showSubcatchments, setShowSubcatchments}: watershedPanelProps) {
   const { watershedId } = useParams({ from: '/watershed/$watershedId' });
   const navigate = useNavigate();
-
-  const [showSubcatchments, setShowSubcatchments] = useState(false);
 
   const { data: watersheds, isLoading, error } = useQuery({
     queryKey: ["watersheds"],
@@ -87,9 +93,11 @@ export default function Watershed() {
     (f: any) => f.id && f.id.toString() === watershedId
   );
 
-  if (!watershed) {
-    return <div>Watershed not found.</div>;
-  }
+  if (!watershed) return <div>Watershed not found.</div>;
+
+  const webcloudRunId = watershed?.properties?.webcloud_run_id;
+
+  if (!webcloudRunId) return <div>Watershed</div>
 
   return (
     <div className="watershedPanel">
@@ -119,7 +127,7 @@ export default function Watershed() {
       </p>
 
       <div className="row">
-        <p><strong>Watershed Models</strong></p>
+        <p style={{marginBottom: '0'}}><strong>Watershed Models</strong></p>
 
         <button
           type="button"
@@ -135,9 +143,9 @@ export default function Watershed() {
               ? "Hide subcatchment overlay"
               : "Show subcatchment overlay"
           }
-          onClick={() => setShowSubcatchments(s => !s)}
+          onClick={() => setShowSubcatchments(prev => !prev)}
         >
-          <p style={{fontSize: '0.625rem', marginRight: '5px'}}>view subcatchments</p>
+          <p style={{fontSize: '0.625rem', marginBottom: '0', marginRight: '0.5rem'}}>view subcatchments</p>
           {showSubcatchments ? <FaEyeSlash style={{ width: '1rem', height: '1rem' }} /> : <FaEye style={{ width: '1rem', height: '1rem' }} />}
         </button>
       </div>

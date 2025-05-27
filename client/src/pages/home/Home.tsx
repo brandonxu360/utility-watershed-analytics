@@ -1,6 +1,8 @@
-import { Outlet, useMatch } from '@tanstack/react-router';
+import { useMatch } from '@tanstack/react-router';
 import Map from '../../components/map/Map';
 import HomeSidePanelContent from '../../components/home_info/HomeInfoPanel';
+import { useState } from 'react';
+import Watershed from '../../components/watershed/Watershed';
 import './Home.css';
 
 /**
@@ -39,14 +41,24 @@ export default function Home() {
   });
   const watershedId = watershedMatch?.params.watershedId;
 
+  const [showSubcatchments, setShowSubcatchments] = useState(false);
+
   return (
     <div className='home-container'>
       <SidePanel>
-        {watershedId ? <Outlet /> : <HomeSidePanelContent />}
+        {watershedId ?
+          <Watershed
+            showSubcatchments={showSubcatchments}
+            setShowSubcatchments={setShowSubcatchments}
+          />
+          : <HomeSidePanelContent />}
       </SidePanel>
 
       <div className='map-wrapper'>
-        <Map watershedId={watershedId} />
+        <Map
+          watershedId={watershedId}
+          showSubcatchments={showSubcatchments}
+        />
       </div>
     </div>
   );

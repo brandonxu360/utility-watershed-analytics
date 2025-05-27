@@ -1,6 +1,4 @@
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import './Map.css';
 import { useQuery } from '@tanstack/react-query';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -11,7 +9,9 @@ import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/MapEffectUtil';
-import { fetchWatersheds } from '../../api/api';
+import { fetchSubcatchments, fetchWatersheds } from '../../api/api';
+import 'leaflet/dist/leaflet.css';
+import './Map.css';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -26,7 +26,7 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-{/* Styles for selected and non selected watersheds */}
+{ /* Styles for selected and non selected watersheds */ }
 const defaultStyle = {
   color: '#4a83ec',
   weight: 3,
@@ -46,6 +46,7 @@ const selectedStyle = {
  */
 interface MapProps {
   watershedId: string;
+  showSubcatchments: boolean;
 }
 
 /**
@@ -55,25 +56,36 @@ interface MapProps {
  * @param watershedId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
-export default function Map({ watershedId }: MapProps): JSX.Element {
+export default function Map({ watershedId, showSubcatchments }: MapProps): JSX.Element {
   const { data: watersheds, error, isLoading } = useQuery({
     queryKey: ['watersheds'],
     queryFn: fetchWatersheds
   });
 
-  {/* Navigates to a watershed on click */}
+  const {
+    data: subcatchments,
+    error: subError,
+    isLoading: subLoading
+  } = useQuery({
+    queryKey: ["subcatchments", watershedId],
+    queryFn: () => fetchSubcatchments(watershedId!),
+    enabled: Boolean(showSubcatchments && watershedId),
+  });
+
+  {/* Navigates to a watershed on click */ }
   const navigate = useNavigate();
 
   const onWatershedClick = (e: any) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
-  
+
     navigate({
       to: `/watershed/${feature.id}`,
     });
   };
-  
+
   if (error) return <div>Error: {error.message}</div>;
+  if (subError) return <div>Error: {subError.message}</div>;
 
   return (
     <div className="map-container">
@@ -91,7 +103,7 @@ export default function Map({ watershedId }: MapProps): JSX.Element {
         style={{ height: '100%', width: '100%' }}
       >
         <>
-          {isLoading && (
+          {isLoading || subLoading && (
             <div className="map-loading-overlay">
               <div className="loading-spinner"></div>
             </div>
@@ -122,7 +134,7 @@ export default function Map({ watershedId }: MapProps): JSX.Element {
           <div className="leaflet-bottom leaflet-right">
             <UserLocationControl />
           </div>
-          
+
           {/* Handles URL navigation to a specified watershed */}
           <MapEffect watershedId={watershedId} watersheds={watersheds} />
 
@@ -140,6 +152,14 @@ export default function Map({ watershedId }: MapProps): JSX.Element {
                   click: onWatershedClick,
                 });
               }}
+            />
+          )}
+
+          {showSubcatchments && subcatchments && (
+            <GeoJSON
+              key="subcatchmentsLayer"
+              data={subcatchments}
+              style={() => ({ color: "#007BFF", weight: 1, fillOpacity: 0.2 })}
             />
           )}
         </>
