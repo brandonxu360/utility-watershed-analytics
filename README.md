@@ -107,5 +107,18 @@ docker compose up
 * You have the correct data directory at `fullstack-gis-webapp/server/server/watershed/data`
 * Review the `load.py` script to see how the data is being handled.
 
+## Running Tests
 
+As the featureset expands, we're working on integrating a test-driven development approach.
 
+To run backend tests (Django/DRF), use either of the following commands:
+
+```bash
+docker compose exec server python manage.py test
+```
+
+Or, if you are inside the backend container:
+
+```bash
+python manage.py test
+```
