@@ -42,7 +42,7 @@ class WatershedSubcatchmentListView(generics.ListAPIView):
 
     # Override this method so only subcatchments belonging to the relevant watershed are returned
     def get_queryset(self):
-        watershed_id = self.kwargs['watershed_id']
+        watershed_id = self.kwargs['webcloud_run_id']
         return Subcatchment.objects.filter(watershed_id=watershed_id)
     
 class WatershedChannelListView(generics.ListAPIView):
