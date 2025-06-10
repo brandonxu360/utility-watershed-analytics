@@ -45,7 +45,7 @@ const selectedStyle = {
  * Interface for the @see {@link Map} function to enforce type safety.
  */
 interface MapProps {
-  watershedId: string;
+  webcloudRunId: string;
   showSubcatchments: boolean;
 }
 
@@ -53,23 +53,19 @@ interface MapProps {
  * Handles the map of our application and contains all of its controls
  * and watershed specific workflows.
  *
- * @param watershedId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
+ * @param webcloudRunId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
-export default function Map({ watershedId, showSubcatchments }: MapProps): JSX.Element {
-  const { data: watersheds, error, isLoading } = useQuery({
+export default function Map({ webcloudRunId, showSubcatchments }: MapProps): JSX.Element {
+  const { data: watersheds, error: watershedsError, isLoading: watershedsLoading } = useQuery({
     queryKey: ['watersheds'],
-    queryFn: fetchWatersheds
+    queryFn: fetchWatersheds,
   });
 
-  const {
-    data: subcatchments,
-    error: subError,
-    isLoading: subLoading
-  } = useQuery({
-    queryKey: ["subcatchments", watershedId],
-    queryFn: () => fetchSubcatchments(watershedId!),
-    enabled: Boolean(showSubcatchments && watershedId),
+  const { data: subcatchments, error: subError, isLoading: subLoading } = useQuery({
+    queryKey: ['subcatchments', webcloudRunId],
+    queryFn: () => fetchSubcatchments(webcloudRunId!),
+    enabled: Boolean(showSubcatchments && webcloudRunId),
   });
 
   {/* Navigates to a watershed on click */ }
@@ -84,7 +80,7 @@ export default function Map({ watershedId, showSubcatchments }: MapProps): JSX.E
     });
   };
 
-  if (error) return <div>Error: {error.message}</div>;
+  if (watershedsError) return <div>Error: {watershedsError.message}</div>;
   if (subError) return <div>Error: {subError.message}</div>;
 
   return (
@@ -103,9 +99,9 @@ export default function Map({ watershedId, showSubcatchments }: MapProps): JSX.E
         style={{ height: '100%', width: '100%' }}
       >
         <>
-          {isLoading || subLoading && (
+          {(watershedsLoading || subLoading) && (
             <div className="map-loading-overlay">
-              <div className="loading-spinner"></div>
+              <div className="loading-spinner" />
             </div>
           )}
 
@@ -136,7 +132,7 @@ export default function Map({ watershedId, showSubcatchments }: MapProps): JSX.E
           </div>
 
           {/* Handles URL navigation to a specified watershed */}
-          <MapEffect watershedId={watershedId} watersheds={watersheds} />
+          <MapEffect webcloudRunId={webcloudRunId} watersheds={watersheds} />
 
           {watersheds && (
             <GeoJSON
@@ -144,7 +140,7 @@ export default function Map({ watershedId, showSubcatchments }: MapProps): JSX.E
               data={watersheds}
               style={(feature) => {
                 if (!feature) return defaultStyle;
-                return feature.id?.toString() === watershedId ? selectedStyle : defaultStyle;
+                return feature.id?.toString() === webcloudRunId ? selectedStyle : defaultStyle;
               }}
               onEachFeature={(feature, layer) => {
                 // Attach the click event

@@ -7,7 +7,7 @@ import L from 'leaflet';
  * Interface for the @see {@link MapEffect} function to enforce type safety
  */
 interface MapEffectProps {
-  watershedId: string | undefined;
+  webcloudRunId: string | undefined;
   watersheds: any; // Replace with a more specific type
 }
 
@@ -15,17 +15,17 @@ interface MapEffectProps {
  * Helper function that zooms onto the specified watershed if the url matches
  * the /watershed/$watershedId format.
  * 
- * @param watershedId - The parsed watershed id taken from the url
+ * @param webcloudRunId - The parsed watershed id taken from the url
  * @param watersheds - Our fetched watershed data from @see {@link fetchWatersheds}
  * @returns {null} - Doesn't return anything
  */
-export function MapEffect({ watershedId, watersheds }: MapEffectProps) {
+export function MapEffect({ webcloudRunId, watersheds }: MapEffectProps) {
   const map = useMap();
 
   useEffect(() => {
-    if (watershedId && watersheds && Array.isArray(watersheds.features)) {
+    if (webcloudRunId && watersheds && Array.isArray(watersheds.features)) {
       const matchingFeature = watersheds.features.find(
-        (f: any) => f.id && f.id.toString() === watershedId // Might want to replace with a more specific type
+        (f: any) => f.id && f.id.toString() === webcloudRunId // Might want to replace with a more specific type
       );
       
       if (matchingFeature) {
@@ -34,7 +34,7 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps) {
         zoomToFeature(map, tempLayer);
       }
     }
-  }, [watershedId, watersheds, map]);    
+  }, [webcloudRunId, watersheds, map]);    
 
   return null;
 }

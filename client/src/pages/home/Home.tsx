@@ -36,27 +36,29 @@ function SidePanel({ children }: SidePanelProps) {
 export default function Home() {
   // Check if the user is on a watershed route
   const watershedMatch = useMatch({
-    from: '/watershed/$watershedId',
-    shouldThrow: false, // Stops invariant route errors i.e. when route doesn't match /watershed/$watershedId
+    from: '/watershed/$webcloudRunId',
+    shouldThrow: false, // Stops invariant route errors i.e. when route doesn't match /watershed/$id
   });
-  const watershedId = watershedMatch?.params.watershedId;
+  const watershedId = watershedMatch?.params.webcloudRunId;
 
   const [showSubcatchments, setShowSubcatchments] = useState(false);
 
   return (
     <div className='home-container'>
       <SidePanel>
-        {watershedId ?
+        {watershedId ? (
           <Watershed
             showSubcatchments={showSubcatchments}
             setShowSubcatchments={setShowSubcatchments}
           />
-          : <HomeSidePanelContent />}
+        ) : (
+          <HomeSidePanelContent />
+        )}
       </SidePanel>
 
       <div className='map-wrapper'>
         <Map
-          watershedId={watershedId}
+          webcloudRunId={watershedId}
           showSubcatchments={showSubcatchments}
         />
       </div>

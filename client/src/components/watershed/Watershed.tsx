@@ -73,8 +73,8 @@ interface watershedPanelProps {
  * 
  * @returns {JSX.Element} - Side panel containing the specific watershed information.
  */
-export default function Watershed({showSubcatchments, setShowSubcatchments}: watershedPanelProps) {
-  const { watershedId } = useParams({ from: '/watershed/$watershedId' });
+export default function Watershed({ showSubcatchments, setShowSubcatchments }: watershedPanelProps) {
+  const { webcloudRunId } = useParams({ from: '/watershed/$webcloudRunId' });
   const navigate = useNavigate();
 
   const { data: watersheds, isLoading, error } = useQuery({
@@ -90,23 +90,23 @@ export default function Watershed({showSubcatchments, setShowSubcatchments}: wat
   if (!watersheds?.features) return <div>No watershed data found.</div>;
 
   const watershed = watersheds.features.find(
-    (f: any) => f.id && f.id.toString() === watershedId
+    (f: any) => f.id && f.id.toString() === webcloudRunId
   );
 
   if (!watershed) return <div>Watershed not found.</div>;
-
-  const webcloudRunId = watershed?.properties?.webcloud_run_id;
-
   if (!webcloudRunId) return <div>Watershed</div>
 
   return (
     <div className="watershedPanel">
       <button
-        onClick={() => navigate({ to: "/" })}
+        onClick={() => {
+          setShowSubcatchments(false);
+          navigate({ to: "/" });
+        }}
         className='closeButton'
         aria-label='Close watershed panel'
         title='Close watershed panel'
-        style={{padding: '0.313rem 0.5rem'}}
+        style={{ padding: '0.313rem 0.5rem' }}
       >
         BACK
       </button>
@@ -127,7 +127,7 @@ export default function Watershed({showSubcatchments, setShowSubcatchments}: wat
       </p>
 
       <div className="row">
-        <p style={{marginBottom: '0'}}><strong>Watershed Models</strong></p>
+        <p style={{ marginBottom: '0' }}><strong>Watershed Models</strong></p>
 
         <button
           type="button"
@@ -145,12 +145,12 @@ export default function Watershed({showSubcatchments, setShowSubcatchments}: wat
           }
           onClick={() => setShowSubcatchments(prev => !prev)}
         >
-          <p style={{fontSize: '0.625rem', marginBottom: '0', marginRight: '0.5rem'}}>view subcatchments</p>
+          <p style={{ fontSize: '0.625rem', marginBottom: '0', marginRight: '0.5rem' }}>view subcatchments</p>
           {showSubcatchments ? <FaEyeSlash style={{ width: '1rem', height: '1rem' }} /> : <FaEye style={{ width: '1rem', height: '1rem' }} />}
         </button>
       </div>
 
-      <div className='accordionGroup' key={watershedId}>
+      <div className='accordionGroup' key={webcloudRunId}>
         <AccordionItem title="View Calibrated WEPP Results">
           <button className='subButton'>Spatial Outputs</button>
           <button className='subButton'>Tabular Outputs</button>
