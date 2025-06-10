@@ -1,8 +1,8 @@
-import { ReactNode, useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { fetchWatersheds } from "../map/Map";
-import { FaPlus, FaMinus } from "react-icons/fa6";
+import { FaPlus, FaMinus, FaEye, FaEyeSlash } from "react-icons/fa6";
+import { /*fetchSubcatchments,*/ fetchWatersheds } from "../../api/api";
 import "./Watershed.css";
 
 /** 
@@ -60,13 +60,21 @@ function AccordionItem({ title, children }: AccordionItemProps) {
 }
 
 /**
+ * Props for the watershed side panel to enforce type safety.
+ */
+interface watershedPanelProps {
+  showSubcatchments: boolean;
+  setShowSubcatchments: Dispatch<SetStateAction<boolean>>;
+}
+
+/**
  * Watershed side panel that displays information related to the specified watershed,
  * including ways to run watershed models.
  * 
  * @returns {JSX.Element} - Side panel containing the specific watershed information.
  */
-export default function Watershed() {
-  const { watershedId } = useParams({ from: '/watershed/$watershedId' });
+export default function Watershed({ showSubcatchments, setShowSubcatchments }: watershedPanelProps) {
+  const { webcloudRunId } = useParams({ from: '/watershed/$webcloudRunId' });
   const navigate = useNavigate();
 
   const { data: watersheds, isLoading, error } = useQuery({
@@ -82,20 +90,23 @@ export default function Watershed() {
   if (!watersheds?.features) return <div>No watershed data found.</div>;
 
   const watershed = watersheds.features.find(
-    (f: any) => f.id && f.id.toString() === watershedId
+    (f: any) => f.id && f.id.toString() === webcloudRunId
   );
 
-  if (!watershed) {
-    return <div>Watershed not found.</div>;
-  }
+  if (!watershed) return <div>Watershed not found.</div>;
+  if (!webcloudRunId) return <div>Watershed</div>
 
   return (
     <div className="watershedPanel">
       <button
-        onClick={() => navigate({ to: "/" })}
+        onClick={() => {
+          setShowSubcatchments(false);
+          navigate({ to: "/" });
+        }}
         className='closeButton'
         aria-label='Close watershed panel'
         title='Close watershed panel'
+        style={{ padding: '0.313rem 0.5rem' }}
       >
         BACK
       </button>
@@ -115,7 +126,31 @@ export default function Watershed() {
         <strong>Acres:</strong> {watershed.properties.acres ?? "N/A"}
       </p>
 
-      <div className='accordionGroup' key={watershedId}>
+      <div className="row">
+        <p style={{ marginBottom: '0' }}><strong>Watershed Models</strong></p>
+
+        <button
+          type="button"
+          className={`toggleBtn ${showSubcatchments ? "active" : ""}`}
+          style={{ padding: '0.313rem' }}
+          aria-label={
+            showSubcatchments
+              ? "Hide subcatchment overlay"
+              : "Show subcatchment overlay"
+          }
+          title={
+            showSubcatchments
+              ? "Hide subcatchment overlay"
+              : "Show subcatchment overlay"
+          }
+          onClick={() => setShowSubcatchments(prev => !prev)}
+        >
+          <p style={{ fontSize: '0.625rem', marginBottom: '0', marginRight: '0.5rem' }}>view subcatchments</p>
+          {showSubcatchments ? <FaEyeSlash style={{ width: '1rem', height: '1rem' }} /> : <FaEye style={{ width: '1rem', height: '1rem' }} />}
+        </button>
+      </div>
+
+      <div className='accordionGroup' key={webcloudRunId}>
         <AccordionItem title="View Calibrated WEPP Results">
           <button className='subButton'>Spatial Outputs</button>
           <button className='subButton'>Tabular Outputs</button>

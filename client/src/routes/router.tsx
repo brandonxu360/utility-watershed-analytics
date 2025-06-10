@@ -30,7 +30,7 @@ const homeRoute = createRoute({
 
 const watershedIdRoute = createRoute({
   getParentRoute: () => homeRoute,
-  path: '/watershed/$watershedId',
+  path: '/watershed/$webcloudRunId',
   component: Watershed,
 });
 
