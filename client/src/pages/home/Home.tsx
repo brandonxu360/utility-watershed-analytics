@@ -1,7 +1,6 @@
 import { useMatch } from '@tanstack/react-router';
 import Map from '../../components/map/Map';
 import HomeSidePanelContent from '../../components/home_info/HomeInfoPanel';
-import { useState } from 'react';
 import Watershed from '../../components/watershed/Watershed';
 import './Home.css';
 
@@ -41,16 +40,11 @@ export default function Home() {
   });
   const watershedId = watershedMatch?.params.webcloudRunId;
 
-  const [showSubcatchments, setShowSubcatchments] = useState(false);
-
   return (
     <div className='home-container'>
       <SidePanel>
         {watershedId ? (
-          <Watershed
-            showSubcatchments={showSubcatchments}
-            setShowSubcatchments={setShowSubcatchments}
-          />
+          <Watershed />
         ) : (
           <HomeSidePanelContent />
         )}
@@ -59,7 +53,6 @@ export default function Home() {
       <div className='map-wrapper'>
         <Map
           webcloudRunId={watershedId}
-          showSubcatchments={showSubcatchments}
         />
       </div>
     </div>

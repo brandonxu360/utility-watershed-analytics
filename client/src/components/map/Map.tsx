@@ -10,6 +10,7 @@ import UserLocationControl from './controls/UserLocation/UserLocation';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/MapEffectUtil';
 import { fetchSubcatchments, fetchWatersheds } from '../../api/api';
+import { useState } from 'react';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -46,7 +47,6 @@ const selectedStyle = {
  */
 interface MapProps {
   webcloudRunId: string;
-  showSubcatchments: boolean;
 }
 
 /**
@@ -56,7 +56,9 @@ interface MapProps {
  * @param webcloudRunId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
-export default function Map({ webcloudRunId, showSubcatchments }: MapProps): JSX.Element {
+export default function Map({ webcloudRunId }: MapProps): JSX.Element {
+  const [showSubcatchments, setShowSubcatchments] = useState(false);
+
   const { data: watersheds, error: watershedsError, isLoading: watershedsLoading } = useQuery({
     queryKey: ['watersheds'],
     queryFn: fetchWatersheds,
@@ -89,7 +91,7 @@ export default function Map({ webcloudRunId, showSubcatchments }: MapProps): JSX
         center={CENTER}
         zoom={6}
         minZoom={6}
-        maxZoom={13}
+        maxZoom={15}
         zoomControl={false}
         doubleClickZoom={false}
         scrollWheelZoom={true}
@@ -115,12 +117,14 @@ export default function Map({ webcloudRunId, showSubcatchments }: MapProps): JSX
           {/* TOP LEFT CONTROLS */}
           <div className="leaflet-top leaflet-left">
             <LegendControl />
+            <LayersControl
+              setShowSubcatchments={setShowSubcatchments}
+            />
           </div>
 
           {/* TOP RIGHT CONTROLS */}
           <div className="leaflet-top leaflet-right">
             <SearchControl />
-            <LayersControl />
             <ZoomInControl />
             <ZoomOutControl />
             <SettingsControl />
@@ -155,7 +159,7 @@ export default function Map({ webcloudRunId, showSubcatchments }: MapProps): JSX
             <GeoJSON
               key="subcatchmentsLayer"
               data={subcatchments}
-              style={() => ({ color: "#007BFF", weight: 1, fillOpacity: 0.2 })}
+              style={() => ({ color: "#007BFF", weight: 1, fillOpacity: 0.1 })}
             />
           )}
         </>
