@@ -9,4 +9,6 @@ export const API_ENDPOINTS = {
   WATERSHED:  (id: string) => `${API_BASE_URL}/watershed/${id}/`,
   // Subcatchments for a watershed
   SUBCATCHMENTS: (id: string) => `${API_BASE_URL}/watershed/${id}/subcatchments`,
+  // Channels for a watershed
+  CHANNELS: (id: string) => `${API_BASE_URL}/watershed/${id}/channels`,
 };

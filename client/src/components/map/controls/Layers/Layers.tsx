@@ -7,6 +7,7 @@ import './Layers.css';
  */
 interface WatershedLayersControlProps {
   setShowSubcatchments: Dispatch<SetStateAction<boolean>>;
+  setShowChannels: Dispatch<SetStateAction<boolean>>;
 }
 
 /**
@@ -15,7 +16,7 @@ interface WatershedLayersControlProps {
  *
  * @component
  */
-export default function Layers({ setShowSubcatchments }: WatershedLayersControlProps) {
+export default function Layers({ setShowSubcatchments, setShowChannels }: WatershedLayersControlProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [layers, setLayers] = useState({
     subcatchment: false,
@@ -37,6 +38,10 @@ export default function Layers({ setShowSubcatchments }: WatershedLayersControlP
 
     if (id === 'subcatchment') {
       setShowSubcatchments(checked);
+    }
+
+    if (id === 'channels') {
+      setShowChannels(checked);
     }
   };
 
@@ -77,9 +82,8 @@ export default function Layers({ setShowSubcatchments }: WatershedLayersControlP
                 id="channels"
                 checked={layers.channels}
                 onChange={handleChange}
-                disabled
               />
-              <label htmlFor="channels" className="layer-label disabled">
+              <label htmlFor="channels" className="layer-label">
                 View Channels
               </label>
             </div>

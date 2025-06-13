@@ -9,8 +9,8 @@ import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/MapEffectUtil';
-import { fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { useState } from 'react';
+import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
+import { useCallback, useMemo, useState } from 'react';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -58,6 +58,7 @@ interface MapProps {
  */
 export default function Map({ webcloudRunId }: MapProps): JSX.Element {
   const [showSubcatchments, setShowSubcatchments] = useState(false);
+  const [showChannels, setShowChannels] = useState(false);
 
   const { data: watersheds, error: watershedsError, isLoading: watershedsLoading } = useQuery({
     queryKey: ['watersheds'],
@@ -68,6 +69,12 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
     queryKey: ['subcatchments', webcloudRunId],
     queryFn: () => fetchSubcatchments(webcloudRunId!),
     enabled: Boolean(showSubcatchments && webcloudRunId),
+  });
+
+  const { data: channels, error: channelError, isLoading: channelLoading } = useQuery({
+    queryKey: ['channels', webcloudRunId],
+    queryFn: () => fetchChannels(webcloudRunId!),
+    enabled: Boolean(showChannels && webcloudRunId),
   });
 
   {/* Navigates to a watershed on click */ }
@@ -84,6 +91,29 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
 
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
   if (subError) return <div>Error: {subError.message}</div>;
+  if (channelError) return <div>Error: {channelError.message}</div>;
+
+  // Memoize GeoJSON data to prevent unnecessary re-renders
+  const memoWatersheds = useMemo(() => watersheds, [watersheds]);
+  const memoSubcatchments = useMemo(() => subcatchments, [subcatchments]);
+  const memoChannels = useMemo(() => channels, [channels]);
+
+  // Memoize style functions
+  const watershedStyle = useCallback(
+    (feature: any) =>
+      feature.id?.toString() === webcloudRunId ? selectedStyle : defaultStyle,
+    [webcloudRunId]
+  );
+
+  const subcatchmentStyle = useCallback(
+    () => ({ color: '#007BFF', weight: 1, fillOpacity: 0.1 }),
+    []
+  );
+
+  const channelStyle = useCallback(
+    () => ({ color: '#ff6700', weight: 1, fillOpacity: 0.1 }),
+    []
+  );
 
   return (
     <div className="map-container">
@@ -101,7 +131,7 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
         style={{ height: '100%', width: '100%' }}
       >
         <>
-          {(watershedsLoading || subLoading) && (
+          {(watershedsLoading || subLoading || channelLoading) && (
             <div className="map-loading-overlay">
               <div className="loading-spinner" />
             </div>
@@ -119,6 +149,7 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
             <LegendControl />
             <LayersControl
               setShowSubcatchments={setShowSubcatchments}
+              setShowChannels={setShowChannels}
             />
           </div>
 
@@ -138,29 +169,20 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
           {/* Handles URL navigation to a specified watershed */}
           <MapEffect webcloudRunId={webcloudRunId} watersheds={watersheds} />
 
-          {watersheds && (
+          {memoWatersheds && (
             <GeoJSON
-              key={JSON.stringify(watersheds)}
-              data={watersheds}
-              style={(feature) => {
-                if (!feature) return defaultStyle;
-                return feature.id?.toString() === webcloudRunId ? selectedStyle : defaultStyle;
-              }}
-              onEachFeature={(feature, layer) => {
-                // Attach the click event
-                layer.on({
-                  click: onWatershedClick,
-                });
-              }}
+              data={memoWatersheds}
+              style={watershedStyle}
+              onEachFeature={(feature, layer) => layer.on({ click: onWatershedClick })}
             />
           )}
 
-          {showSubcatchments && subcatchments && (
-            <GeoJSON
-              key="subcatchmentsLayer"
-              data={subcatchments}
-              style={() => ({ color: "#007BFF", weight: 1, fillOpacity: 0.1 })}
-            />
+          {showSubcatchments && memoSubcatchments && (
+            <GeoJSON data={memoSubcatchments} style={subcatchmentStyle} />
+          )}
+
+          {showChannels && memoChannels && (
+            <GeoJSON data={memoChannels} style={channelStyle} />
           )}
         </>
       </MapContainer>
