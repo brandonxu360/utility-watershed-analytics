@@ -1,8 +1,8 @@
 import { ReactNode, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { fetchWatersheds } from "../map/Map";
 import { FaPlus, FaMinus } from "react-icons/fa6";
+import { /*fetchSubcatchments,*/ fetchWatersheds } from "../../api/api";
 import "./Watershed.css";
 
 /** 
@@ -66,7 +66,7 @@ function AccordionItem({ title, children }: AccordionItemProps) {
  * @returns {JSX.Element} - Side panel containing the specific watershed information.
  */
 export default function Watershed() {
-  const { watershedId } = useParams({ from: '/watershed/$watershedId' });
+  const { webcloudRunId } = useParams({ from: '/watershed/$webcloudRunId' });
   const navigate = useNavigate();
 
   const { data: watersheds, isLoading, error } = useQuery({
@@ -82,20 +82,22 @@ export default function Watershed() {
   if (!watersheds?.features) return <div>No watershed data found.</div>;
 
   const watershed = watersheds.features.find(
-    (f: any) => f.id && f.id.toString() === watershedId
+    (f: any) => f.id && f.id.toString() === webcloudRunId
   );
 
-  if (!watershed) {
-    return <div>Watershed not found.</div>;
-  }
+  if (!watershed) return <div>Watershed not found.</div>;
+  if (!webcloudRunId) return <div>Watershed</div>
 
   return (
     <div className="watershedPanel">
       <button
-        onClick={() => navigate({ to: "/" })}
+        onClick={() => {
+          navigate({ to: "/" });
+        }}
         className='closeButton'
         aria-label='Close watershed panel'
         title='Close watershed panel'
+        style={{ padding: '0.313rem 0.5rem' }}
       >
         BACK
       </button>
@@ -115,7 +117,11 @@ export default function Watershed() {
         <strong>Acres:</strong> {watershed.properties.acres ?? "N/A"}
       </p>
 
-      <div className='accordionGroup' key={watershedId}>
+      <div className="row">
+        <p style={{ marginBottom: '0' }}><strong>Watershed Models</strong></p>
+      </div>
+
+      <div className='accordionGroup' key={webcloudRunId}>
         <AccordionItem title="View Calibrated WEPP Results">
           <button className='subButton'>Spatial Outputs</button>
           <button className='subButton'>Tabular Outputs</button>

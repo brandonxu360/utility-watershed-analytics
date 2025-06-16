@@ -1,6 +1,7 @@
-import { Outlet, useMatch } from '@tanstack/react-router';
+import { useMatch } from '@tanstack/react-router';
 import Map from '../../components/map/Map';
 import HomeSidePanelContent from '../../components/home_info/HomeInfoPanel';
+import Watershed from '../../components/watershed/Watershed';
 import './Home.css';
 
 /**
@@ -34,19 +35,25 @@ function SidePanel({ children }: SidePanelProps) {
 export default function Home() {
   // Check if the user is on a watershed route
   const watershedMatch = useMatch({
-    from: '/watershed/$watershedId',
-    shouldThrow: false, // Stops invariant route errors i.e. when route doesn't match /watershed/$watershedId
+    from: '/watershed/$webcloudRunId',
+    shouldThrow: false, // Stops invariant route errors i.e. when route doesn't match /watershed/$id
   });
-  const watershedId = watershedMatch?.params.watershedId;
+  const watershedId = watershedMatch?.params.webcloudRunId;
 
   return (
     <div className='home-container'>
       <SidePanel>
-        {watershedId ? <Outlet /> : <HomeSidePanelContent />}
+        {watershedId ? (
+          <Watershed />
+        ) : (
+          <HomeSidePanelContent />
+        )}
       </SidePanel>
 
       <div className='map-wrapper'>
-        <Map watershedId={watershedId} />
+        <Map
+          webcloudRunId={watershedId}
+        />
       </div>
     </div>
   );
