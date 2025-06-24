@@ -13,6 +13,7 @@ import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/ap
 import { useCallback, useMemo, useState } from 'react';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
+import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -147,15 +148,18 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
           {/* TOP LEFT CONTROLS */}
           <div className="leaflet-top leaflet-left">
             <LegendControl />
-            <LayersControl
-              setShowSubcatchments={setShowSubcatchments}
-              setShowChannels={setShowChannels}
-            />
+            {webcloudRunId && (
+              <WatershedToggle
+                setShowSubcatchments={setShowSubcatchments}
+                setShowChannels={setShowChannels}
+              />
+            )}
           </div>
 
           {/* TOP RIGHT CONTROLS */}
           <div className="leaflet-top leaflet-right">
             <SearchControl />
+            <LayersControl />
             <ZoomInControl />
             <ZoomOutControl />
             <SettingsControl />
