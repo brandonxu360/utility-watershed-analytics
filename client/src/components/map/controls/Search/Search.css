@@ -1,6 +1,6 @@
 .search-button {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     background-color: #121212;
     cursor: pointer;
     display: flex;
@@ -18,7 +18,7 @@
 /*Search Control CSS*/
 .search-modal {
     position: absolute;
-    top: 10px;
+    top: 0;
     right: 60px;
     background: rgba(0, 0, 0, 0.8);
     color: var(--clr-primary-100);

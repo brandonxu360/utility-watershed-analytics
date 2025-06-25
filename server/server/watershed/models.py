@@ -1,10 +1,8 @@
-from django.db import models
 from django.contrib.gis.db import models
 
-# This is an auto-generated Django model module created by ogrinspect.
-# /app/server $ django-admin ogrinspect server/watershed/data/OR/OR_drinking_water_source_areas.shp WatershedBorder --srid=4326 --mapping --multi
-class WatershedBorder(models.Model):
-    id = models.AutoField(primary_key=True)
+# Represents an individual watershed - the watershed details and its geometry.
+# This is meant to serve as a generalized model that is compatible with the different WA/OR watershed formats.
+class Watershed(models.Model):
     area_m2 = models.FloatField()
     pws_id = models.CharField(max_length=10)
     pws_name = models.CharField(max_length=254)
@@ -16,6 +14,82 @@ class WatershedBorder(models.Model):
     huc12_nhd = models.CharField(max_length=254, null=True)
     huc12_wbd = models.CharField(max_length=254, null=True)
     sq_miles = models.FloatField()
-    webcloud_run_id = models.CharField(max_length=255)
+    webcloud_run_id = models.CharField(primary_key=True, max_length=255)
     geom = models.MultiPolygonField(srid=4326)
     simplified_geom = models.MultiPolygonField(srid=4326, null=True, blank=True)
+
+# This is based on an auto-generated Django model module created by ogrinspect. See command below:
+# /app/server $ python manage.py ogrinspect server/watershed/data/subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg Subcatchment--srid=4326 --mapping --multi
+class Subcatchment(models.Model):
+    watershed = models.ForeignKey(to=Watershed, on_delete=models.CASCADE)
+    topazid = models.BigIntegerField()
+    weppid = models.BigIntegerField()
+    slope_scalar = models.FloatField()
+    length_m = models.FloatField()
+    width_m = models.FloatField()
+    direction = models.FloatField()
+    aspect = models.FloatField()
+    area_m2 = models.BigIntegerField()
+    elevation_m = models.FloatField()
+    centroid_px = models.BigIntegerField()
+    centroid_py = models.BigIntegerField()
+    centroid_lon = models.FloatField()
+    centroid_lat = models.FloatField()
+    dom = models.BigIntegerField()
+    desc = models.CharField(max_length=100)
+    color = models.CharField(max_length=20)
+    cancov = models.FloatField()
+    inrcov = models.FloatField()
+    rilcov = models.FloatField()
+    disturbed_class = models.CharField(max_length=50, null=True)
+    mukey = models.CharField(max_length=30)
+    clay = models.FloatField()
+    sand = models.FloatField()
+    ll = models.CharField(max_length=20, null=True)
+    simple_texture = models.CharField(max_length=30)
+    runoff_volume_m3 = models.FloatField()
+    subrunoff_volume_m3 = models.FloatField()
+    baseflow_volume_m3 = models.FloatField()
+    soil_loss_kg = models.FloatField()
+    sediment_deposition_kg = models.FloatField()
+    sediment_yield_kg = models.FloatField()
+    solub_react_phosphorus_kg = models.FloatField()
+    particulate_phosphorus_kg = models.FloatField()
+    total_phosphorus_kg = models.FloatField()
+    soil = models.CharField(max_length=50)
+    runoff_mm = models.FloatField()
+    subrunoff_mm = models.FloatField()
+    baseflow_mm = models.FloatField()
+    deploss_kg = models.FloatField()
+    geom = models.MultiPolygonField(srid=4326)
+
+# This is based on an auto-generated Django model module created by ogrinspect. See command below:
+# /app/server $ python manage.py ogrinspect server/watershed/data/subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg Channel --layer=1 --srid=4326 --mapping --multi
+class Channel(models.Model):
+    watershed = models.ForeignKey(to=Watershed, on_delete=models.CASCADE)
+    topazid = models.BigIntegerField()
+    weppid = models.BigIntegerField()
+    topaz_id = models.BigIntegerField()
+    slope_scalar = models.FloatField()
+    length_m = models.FloatField()
+    width_m = models.FloatField()
+    direction = models.FloatField()
+    order = models.BigIntegerField()
+    aspect = models.FloatField()
+    area_m2 = models.BigIntegerField()
+    elevation_m = models.FloatField()
+    centroid_px = models.BigIntegerField()
+    centroid_py = models.BigIntegerField()
+    centroid_lon = models.FloatField()
+    centroid_lat = models.FloatField()
+    discharge_volume_m3 = models.FloatField()
+    sediment_yield_tonne = models.FloatField()
+    soil_loss_kg = models.FloatField()
+    upland_charge_m3 = models.FloatField()
+    subsuface_flow_volume = models.FloatField()
+    contributing_area_ha = models.FloatField()
+    solub_react_phosphorus_kg = models.FloatField()
+    particulate_phosphorus_kg = models.FloatField()
+    total_phosphorus_kg = models.FloatField()
+    weppchnid = models.BigIntegerField()
+    geom = models.MultiPolygonField(srid=4326)
