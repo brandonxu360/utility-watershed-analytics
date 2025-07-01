@@ -4,17 +4,18 @@
 
 unstable.wepp.cloud {
 
-    ## reverse proxy for the main site
-    reverse_proxy client:5173
-
-    ## Enable HSTS
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    # Backend server requests (specific to the following paths)
+    @backend path /api/* /admin/* /silk/*
+    handle @backend {
+        reverse_proxy server:8000
     }
-}
 
-wepp3.nkn.uidaho.edu {
-    reverse_proxy server:8000
+    # Frontend requests - static file server
+    handle {
+        root * /app/client/build
+        file_server
+        # try_files {path} /index.html
+    }
 
     ## Enable HSTS
     header {

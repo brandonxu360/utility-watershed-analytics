@@ -26,11 +26,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
 
-ALLOWED_HOSTS = [
-    'localhost',
-    'wepp3.nkn.uidaho.edu'
-]
-
+ALLOWED_HOSTS = [] if DEBUG else ['unstable.wepp.cloud']
 
 # Application definition
 

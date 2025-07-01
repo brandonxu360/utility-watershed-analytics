@@ -1,0 +1,53 @@
+# PRODUCTION COMPOSE CONFIG
+services:
+
+  # No frontend/client container - static files will be served.
+
+  # Backend Django server
+  server:
+    build:
+      context: ./server
+      # Consider specifying a production-specific dockerfile
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PW=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=False
+    command: gunicorn server.wsgi:application --bind 0.0.0.0:8000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # PostgreSQL database with PostGIS
+  db:
+    image: postgis/postgis
+    container_name: postgis
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5 
+
+  # Backend reverse proxy & frontend file server
+  caddy:
+    image: caddy:2-alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy_data:/data
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+
+volumes:
+  caddy_data: {}
