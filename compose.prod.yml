@@ -8,6 +8,10 @@ services:
     build:
       context: ./server
       # Consider specifying a production-specific dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PW=${POSTGRES_PW}
@@ -17,6 +21,7 @@ services:
       - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=False
+    entrypoint: ["/entrypoint.sh"]
     command: gunicorn server.wsgi:application --bind 0.0.0.0:8000
     depends_on:
       db:

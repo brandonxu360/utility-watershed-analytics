@@ -37,7 +37,6 @@ services:
     # Volume mount
     volumes:
       - .:/app
-    working_dir: /app/server
     entrypoint: ["/entrypoint.sh"]
     command: python manage.py runserver 0.0.0.0:8000
     # Keep container active and interactive
