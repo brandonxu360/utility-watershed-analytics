@@ -1,7 +1,7 @@
 import { useMatch } from '@tanstack/react-router';
 import Map from '../../components/map/Map';
-import HomeSidePanelContent from '../../components/home_info/HomeInfoPanel';
-import Watershed from '../../components/watershed/Watershed';
+import HomeSidePanelContent from '../../components/side-panels/home_info/HomeInfoPanel';
+import Watershed from '../../components/side-panels/watershed/WatershedPanel';
 import './Home.css';
 
 /**
