@@ -1,5 +1,12 @@
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { MapEffect } from '../../utils/MapEffectUtil';
+import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
+import { useCallback, useMemo, useState } from 'react';
+import { useAppDispatch } from '../../app/hooks';
+import { setWatershedID } from '../../features/watershed/watershedSlice';
+import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 import LayersControl from './controls/Layers/Layers';
@@ -7,13 +14,8 @@ import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
 import UserLocationControl from './controls/UserLocation/UserLocation';
-import { useNavigate } from '@tanstack/react-router';
-import { MapEffect } from '../../utils/MapEffectUtil';
-import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { useCallback, useMemo, useState } from 'react';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
-import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -58,6 +60,8 @@ interface MapProps {
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
 export default function Map({ webcloudRunId }: MapProps): JSX.Element {
+  const dispatch = useAppDispatch();
+
   const [showSubcatchments, setShowSubcatchments] = useState(false);
   const [showChannels, setShowChannels] = useState(false);
 
@@ -84,6 +88,8 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
   const onWatershedClick = (e: any) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
+
+    dispatch(setWatershedID(feature.id.toString()))
 
     navigate({
       to: `/watershed/${feature.id}`,

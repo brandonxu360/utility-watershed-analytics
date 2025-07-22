@@ -1,8 +1,11 @@
-import { useNavigate, useParams } from '@tanstack/react-router'
-import './Watershed.css'
-import AccordionItem from '../../accordian-item/AccordianItem'
+import { useMemo } from 'react';
+import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { clearWatershedID, selectWatershedID } from '../../../features/watershed/watershedSlice';
+import AccordionItem from '../../accordian-item/AccordianItem'
+import './Watershed.css'
 
 /** 
  * Renders the "skeleton" version of the watershed panel while loading.
@@ -31,31 +34,33 @@ function SkeletonWatershedPanel() {
 }
 
 export default function WatershedOverview() {
-    const { webcloudRunId } = useParams({ from: '/watershed/$webcloudRunId' });
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+
+    const watershedId = useAppSelector(selectWatershedID)
 
     const { data: watersheds, isLoading, error } = useQuery({
         queryKey: ["watersheds"],
         queryFn: fetchWatersheds,
     });
 
-    if (isLoading) {
-        return <SkeletonWatershedPanel />;
-    }
+    const watershed = useMemo(() => {
+        if (!watersheds?.features || !watershedId) return null;
+        return watersheds.features.find(
+            (f: any) => f.id && f.id.toString() === watershedId
+        );
+    }, [watersheds?.features, watershedId]);
 
+    if (isLoading) return <SkeletonWatershedPanel />;
     if (error) return <div>Error: {(error as Error).message}</div>;
     if (!watersheds?.features) return <div>No watershed data found.</div>;
-
-    const watershed = watersheds.features.find(
-        (f: any) => f.id && f.id.toString() === webcloudRunId
-    );
-
     if (!watershed) return <div>Watershed not found.</div>;
 
     return (
         <div className="watershedPanel">
             <button
                 onClick={() => {
+                    dispatch(clearWatershedID());
                     navigate({ to: "/" });
                 }}
                 className='closeButton'
@@ -85,7 +90,7 @@ export default function WatershedOverview() {
                 <p style={{ marginBottom: '0' }}><strong>Watershed Models</strong></p>
             </div>
 
-            <div className='accordionGroup' key={webcloudRunId}>
+            <div className='accordionGroup' key={watershedId}>
                 <AccordionItem title="View Calibrated WEPP Results">
                     <button className='subButton'>Spatial Outputs</button>
                     <button className='subButton'>Tabular Outputs</button>
@@ -100,7 +105,7 @@ export default function WatershedOverview() {
                     className="actionButton"
                     aria-label='View Watershed Data'
                     title='View Watershed Data'
-                    onClick={() => navigate({ to: `./data` })}
+                    onClick={() => navigate({ to: `/watershed/data/${watershedId}` })}
                 >
                     View Watershed Data
                 </button>

@@ -1,7 +1,6 @@
 import { lazyRouteComponent, createRoute, createRootRoute, createRouter, Outlet } from '@tanstack/react-router';
 import Navbar from '../components/navbar/Navbar';
 import Home from '../pages/home/Home';
-import Watershed from '../components/side-panels/watershed/WatershedPanel';
 import WatershedOverview from '../components/side-panels/watershed/WatershedOverview';
 import WatershedDataPanel from '../components/side-panels/watershed/WatershedDataPanel';
 
@@ -13,9 +12,9 @@ const Login = lazyRouteComponent(() => import('../pages/login/Login'));
 const rootRoute = createRootRoute({
   component: () => (
     <>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100svh' }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <Navbar />
-        <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
+        <div style={{ display: "flex", flex: 1, minHeight: 0, height: "100%" }}>
           <Outlet />
         </div>
       </div>
@@ -30,21 +29,15 @@ const homeRoute = createRoute({
   component: Home,
 });
 
-const watershedIdRoute = createRoute({
+const watershedOverviewRoute = createRoute({
   getParentRoute: () => homeRoute,
   path: '/watershed/$webcloudRunId',
-  component: Watershed,
-});
-
-const watershedOverviewRoute = createRoute({
-  getParentRoute: () => watershedIdRoute,
-  path: '/',
   component: WatershedOverview,
 });
 
 const watershedDataRoute = createRoute({
-  getParentRoute: () => watershedIdRoute,
-  path: 'data',
+  getParentRoute: () => homeRoute,
+  path: '/watershed/data/$webcloudRunId',
   component: WatershedDataPanel,
 });
 
@@ -75,7 +68,8 @@ const loginRoute = createRoute({
 // Create the route tree
 const routeTree = rootRoute.addChildren([
   homeRoute.addChildren([
-    watershedIdRoute.addChildren([watershedOverviewRoute, watershedDataRoute]),
+    watershedOverviewRoute,
+    watershedDataRoute,
   ]),
   aboutRoute,
   faqRoute,

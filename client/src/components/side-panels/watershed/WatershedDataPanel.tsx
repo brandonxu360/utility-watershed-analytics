@@ -1,8 +1,11 @@
-import { useNavigate, useParams } from '@tanstack/react-router'
-import './Watershed.css'
-import AccordionItem from '../../accordian-item/AccordianItem'
+import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
+import { useMemo, useState } from 'react';
+import { useAppSelector } from '../../../app/hooks';
+import { selectWatershedID } from '../../../features/watershed/watershedSlice';
+import AccordionItem from '../../accordian-item/AccordianItem'
+import './Watershed.css'
 
 /** 
  * Renders the "skeleton" version of the watershed panel while loading.
@@ -31,36 +34,42 @@ function SkeletonWatershedPanel() {
 }
 
 export default function WatershedDataPanel() {
-    const { webcloudRunId } = useParams({ from: '/watershed/$webcloudRunId' });
     const navigate = useNavigate();
+
+    const watershedId = useAppSelector(selectWatershedID)
 
     const { data: watersheds, isLoading, error } = useQuery({
         queryKey: ["watersheds"],
         queryFn: fetchWatersheds,
     });
 
-    if (isLoading) {
-        return <SkeletonWatershedPanel />;
-    }
+    const [expandedPanel, setExpandedPanel] = useState<"vegetation" | null>(null);
 
+    const togglePanel = (panel: "vegetation") => {
+        setExpandedPanel(prev => (prev === panel ? null : panel));
+    };
+
+    const watershed = useMemo(() => {
+        if (!watersheds?.features || !watershedId) return null;
+        return watersheds.features.find(
+            (f: any) => f.id && f.id.toString() === watershedId
+        );
+    }, [watersheds?.features, watershedId]);
+
+    if (isLoading) return <SkeletonWatershedPanel />;
     if (error) return <div>Error: {(error as Error).message}</div>;
     if (!watersheds?.features) return <div>No watershed data found.</div>;
-
-    const watershed = watersheds.features.find(
-        (f: any) => f.id && f.id.toString() === webcloudRunId
-    );
-
     if (!watershed) return <div>Watershed not found.</div>;
 
     return (
-        <div className='watershedPanel'>
+        <div className="watershedPanel">
             <button
                 onClick={() => {
                     navigate({ to: ".." });
                 }}
                 className='closeButton'
-                aria-label='Close watershed panel'
-                title='Close watershed panel'
+                aria-label='Back to watershed overview panel'
+                title='Back to watershed overview panel'
                 style={{ padding: '0.313rem 0.5rem' }}
             >
                 BACK
@@ -93,7 +102,30 @@ export default function WatershedDataPanel() {
                     <button className="subButton">Soil Burn Severity</button>
                 </AccordionItem>
 
-                <button className="actionButton">Vegetation Cover</button>
+                <div>
+                    <button
+                        className="actionButton"
+                        onClick={() => togglePanel("vegetation")}
+                    >
+                        Vegetation Cover
+                    </button>
+                    <div
+                        className={
+                            expandedPanel === "vegetation"
+                                ? "dateSelector expanded"
+                                : "dateSelector"
+                        }
+                    >
+                        <label htmlFor="veg-year">Select Year Range:</label>
+                        <select id="veg-year">
+                            <option value="2024-2025">2024–2025</option>
+                            <option value="2023-2024">2023–2024</option>
+                            <option value="2022-2023">2022–2023</option>
+                            {/* …etc */}
+                        </select>
+                    </div>
+                </div>
+
                 <button className="actionButton">Evapotransportation</button>
                 <button className="actionButton">Soil Moisture</button>
             </div>
