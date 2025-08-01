@@ -1,9 +1,8 @@
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
-import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { clearWatershedID, selectWatershedID } from '../../../features/watershed/watershedSlice';
+import { WatershedIDContext } from '../../../utils/watershedID/WatershedIDContext';
 import AccordionItem from '../../accordian-item/AccordianItem'
 import './Watershed.css'
 
@@ -35,9 +34,7 @@ function SkeletonWatershedPanel() {
 
 export default function WatershedOverview() {
     const navigate = useNavigate();
-    const dispatch = useAppDispatch();
-
-    const watershedId = useAppSelector(selectWatershedID)
+    const watershedId = useContext(WatershedIDContext);
 
     const { data: watersheds, isLoading, error } = useQuery({
         queryKey: ["watersheds"],
@@ -60,7 +57,6 @@ export default function WatershedOverview() {
         <div className="watershedPanel">
             <button
                 onClick={() => {
-                    dispatch(clearWatershedID());
                     navigate({ to: "/" });
                 }}
                 className='closeButton'

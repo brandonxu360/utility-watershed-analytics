@@ -1,9 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
-import { useMemo, useState } from 'react';
-import { useAppSelector } from '../../../app/hooks';
-import { selectWatershedID } from '../../../features/watershed/watershedSlice';
+import { useContext, useMemo, useState } from 'react';
+import { FaPlus, FaXmark } from 'react-icons/fa6';
+import { WatershedIDContext } from '../../../utils/watershedID/WatershedIDContext';
 import AccordionItem from '../../accordian-item/AccordianItem'
 import './Watershed.css'
 
@@ -34,20 +34,29 @@ function SkeletonWatershedPanel() {
 }
 
 export default function WatershedDataPanel() {
-    const navigate = useNavigate();
+    const [isOpen, setIsOpen] = useState(false);
+    const [vegOption, setVegOption] = useState<'shrub' | 'tree' | ''>('');
 
-    const watershedId = useAppSelector(selectWatershedID)
+    const navigate = useNavigate();
+    const watershedId = useContext(WatershedIDContext);
 
     const { data: watersheds, isLoading, error } = useQuery({
         queryKey: ["watersheds"],
         queryFn: fetchWatersheds,
     });
 
-    const [expandedPanel, setExpandedPanel] = useState<"vegetation" | null>(null);
+    const toggleVeg = () => setIsOpen(open => !open);
+    // const handleVegClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    //     const id = (e.target as HTMLInputElement).id as 'shrub' | 'tree';
+    //     if (vegOption === id) {
+    //         e.preventDefault();
+    //         setVegOption('');
+    //     }
+    // };
 
-    const togglePanel = (panel: "vegetation") => {
-        setExpandedPanel(prev => (prev === panel ? null : panel));
-    };
+    // const handleVegChange = (e: ChangeEvent<HTMLInputElement>) => {
+    //     setVegOption(e.target.id as 'shrub' | 'tree');
+    // };
 
     const watershed = useMemo(() => {
         if (!watersheds?.features || !watershedId) return null;
@@ -65,7 +74,9 @@ export default function WatershedDataPanel() {
         <div className="watershedPanel">
             <button
                 onClick={() => {
-                    navigate({ to: ".." });
+                    navigate({
+                        to: `/watershed/${watershedId}`,
+                    });
                 }}
                 className='closeButton'
                 aria-label='Back to watershed overview panel'
@@ -102,28 +113,46 @@ export default function WatershedDataPanel() {
                     <button className="subButton">Soil Burn Severity</button>
                 </AccordionItem>
 
+                {/* Vegetation Cover Toggle */}
                 <div>
                     <button
-                        className="actionButton"
-                        onClick={() => togglePanel("vegetation")}
+                        onClick={toggleVeg}
+                        className="accordionButton"
+                        aria-label={isOpen ? 'Close Vegetation Cover' : 'Open Vegetation Cover'}
+                        title={isOpen ? 'Close Vegetation Cover' : 'Open Vegetation Cover'}
                     >
-                        Vegetation Cover
+                        Vegetation Cover {isOpen ? <FaXmark /> : <FaPlus />}
                     </button>
-                    <div
-                        className={
-                            expandedPanel === "vegetation"
-                                ? "dateSelector expanded"
-                                : "dateSelector"
-                        }
-                    >
-                        <label htmlFor="veg-year">Select Year Range:</label>
-                        <select id="veg-year">
-                            <option value="2024-2025">2024–2025</option>
-                            <option value="2023-2024">2023–2024</option>
-                            <option value="2022-2023">2022–2023</option>
-                            {/* …etc */}
-                        </select>
-                    </div>
+
+                    {isOpen && (
+                        <div className="vegetationSelector expanded">
+                            <div className="veg-options">
+                                {(['shrub', 'tree'] as const).map(option => (
+                                    <div key={option} className='veg-options-container'>
+                                        <input
+                                            type="radio"
+                                            id={option}
+                                            name="veg"
+                                            checked={vegOption === option}
+                                            onChange={() => setVegOption(option)}
+                                        />
+                                        <label htmlFor={option}>
+                                            {option === 'shrub' ? 'Shrub Cover' : 'Tree Cover'}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                            <div>
+                                <button
+                                    type="button"
+                                    className="clear-button"
+                                    onClick={() => setVegOption('')}
+                                >
+                                    Clear Selection
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <button className="actionButton">Evapotransportation</button>

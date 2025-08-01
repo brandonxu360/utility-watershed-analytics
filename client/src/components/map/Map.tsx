@@ -1,21 +1,20 @@
-import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
-import { MapEffect } from '../../utils/MapEffectUtil';
-import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { useCallback, useMemo, useState } from 'react';
-import { useAppDispatch } from '../../app/hooks';
-import { setWatershedID } from '../../features/watershed/watershedSlice';
-import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
-import ZoomInControl from './controls/ZoomIn/ZoomIn';
-import ZoomOutControl from './controls/ZoomOut/ZoomOut';
-import LayersControl from './controls/Layers/Layers';
-import LegendControl from './controls/Legend/Legend';
-import SearchControl from './controls/Search/Search';
-import SettingsControl from './controls/Settings/Settings';
-import UserLocationControl from './controls/UserLocation/UserLocation';
-import 'leaflet/dist/leaflet.css';
-import './Map.css';
+import { useCallback, useContext, useMemo, useState } from 'react'
+import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet'
+import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
+import { MapEffect } from '../../utils/map/MapEffectUtil'
+import { WatershedIDContext } from '../../utils/watershedID/WatershedIDContext'
+import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api'
+import WatershedToggle from './controls/WatershedToggle/WatershedToggle'
+import ZoomInControl from './controls/ZoomIn/ZoomIn'
+import ZoomOutControl from './controls/ZoomOut/ZoomOut'
+import LayersControl from './controls/Layers/Layers'
+import LegendControl from './controls/Legend/Legend'
+import SearchControl from './controls/Search/Search'
+import SettingsControl from './controls/Settings/Settings'
+import UserLocationControl from './controls/UserLocation/UserLocation'
+import 'leaflet/dist/leaflet.css'
+import './Map.css'
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -45,11 +44,28 @@ const selectedStyle = {
   fillOpacity: 0.1,
 };
 
-/**
- * Interface for the @see {@link Map} function to enforce type safety.
- */
-interface MapProps {
-  webcloudRunId: string;
+// Renders subcatchment polygons and binds hover-only tooltips
+function SubcatchmentLayer({ data, style }: {
+  data: GeoJSON.FeatureCollection
+  style: (feature: any) => any
+}) {
+  return (
+    <GeoJSON
+      data={data}
+      style={style}
+      onEachFeature={(feature, layer) => {
+        // TODO: this area needs to be hectares. Also need to add more of the available data to show with the tooltip.
+        const area = feature.properties?.area_m2 ?? 0
+        layer.bindTooltip(
+          `<strong>Hillslope ${feature.id}</strong><br/>Area: ${area.toFixed(0)} m²`,
+        )
+        layer.on({
+          mouseover: () => layer.openTooltip(),
+          mouseout: () => layer.closeTooltip(),
+        })
+      }}
+    />
+  )
 }
 
 /**
@@ -59,8 +75,10 @@ interface MapProps {
  * @param webcloudRunId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
-export default function Map({ webcloudRunId }: MapProps): JSX.Element {
-  const dispatch = useAppDispatch();
+export default function Map(): JSX.Element {
+  const navigate = useNavigate()
+
+  const watershedId = useContext(WatershedIDContext)
 
   const [showSubcatchments, setShowSubcatchments] = useState(false);
   const [showChannels, setShowChannels] = useState(false);
@@ -71,34 +89,26 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
   });
 
   const { data: subcatchments, error: subError, isLoading: subLoading } = useQuery({
-    queryKey: ['subcatchments', webcloudRunId],
-    queryFn: () => fetchSubcatchments(webcloudRunId!),
-    enabled: Boolean(showSubcatchments && webcloudRunId),
+    queryKey: ['subcatchments', watershedId],
+    queryFn: () => fetchSubcatchments(watershedId!),
+    enabled: Boolean(showSubcatchments && watershedId),
   });
 
   const { data: channels, error: channelError, isLoading: channelLoading } = useQuery({
-    queryKey: ['channels', webcloudRunId],
-    queryFn: () => fetchChannels(webcloudRunId!),
-    enabled: Boolean(showChannels && webcloudRunId),
+    queryKey: ['channels', watershedId],
+    queryFn: () => fetchChannels(watershedId!),
+    enabled: Boolean(showChannels && watershedId),
   });
 
-  {/* Navigates to a watershed on click */ }
-  const navigate = useNavigate();
-
+  { /* Navigates to a watershed on click */ }
   const onWatershedClick = (e: any) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
-
-    dispatch(setWatershedID(feature.id.toString()))
 
     navigate({
       to: `/watershed/${feature.id}`,
     });
   };
-
-  if (watershedsError) return <div>Error: {watershedsError.message}</div>;
-  if (subError) return <div>Error: {subError.message}</div>;
-  if (channelError) return <div>Error: {channelError.message}</div>;
 
   // Memoize GeoJSON data to prevent unnecessary re-renders
   const memoWatersheds = useMemo(() => watersheds, [watersheds]);
@@ -108,8 +118,8 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
   // Memoize style functions
   const watershedStyle = useCallback(
     (feature: any) =>
-      feature.id?.toString() === webcloudRunId ? selectedStyle : defaultStyle,
-    [webcloudRunId]
+      feature.id?.toString() === watershedId ? selectedStyle : defaultStyle,
+    [watershedId]
   );
 
   const subcatchmentStyle = useCallback(
@@ -122,6 +132,10 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
     []
   );
 
+  if (watershedsError) return <div>Error: {watershedsError.message}</div>;
+  if (subError) return <div>Error: {subError.message}</div>;
+  if (channelError) return <div>Error: {channelError.message}</div>;
+
   return (
     <div className="map-container">
       <MapContainer
@@ -131,70 +145,72 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
         maxZoom={15}
         zoomControl={false}
         doubleClickZoom={false}
-        scrollWheelZoom={true}
+        scrollWheelZoom
         maxBounds={BOUNDS}
         maxBoundsViscosity={0.5}
         bounds={BOUNDS}
         style={{ height: '100%', width: '100%' }}
+        preferCanvas
       >
-        <>
-          {(watershedsLoading || subLoading || channelLoading) && (
-            <div className="map-loading-overlay">
-              <div className="loading-spinner" />
-            </div>
-          )}
-
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          <ScaleControl metric={true} imperial={true} />
-
-          {/* TOP LEFT CONTROLS */}
-          <div className="leaflet-top leaflet-left">
-            <LegendControl />
-            {webcloudRunId && (
-              <WatershedToggle
-                setShowSubcatchments={setShowSubcatchments}
-                setShowChannels={setShowChannels}
-              />
-            )}
+        {(watershedsLoading || subLoading || channelLoading) && (
+          <div className="map-loading-overlay">
+            <div className="loading-spinner" />
           </div>
+        )}
 
-          {/* TOP RIGHT CONTROLS */}
-          <div className="leaflet-top leaflet-right">
-            <SearchControl />
-            <LayersControl />
-            <ZoomInControl />
-            <ZoomOutControl />
-            <SettingsControl />
-          </div>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-          {/* BOTTOM RIGHT CONTROLS */}
-          <div className="leaflet-bottom leaflet-right">
-            <UserLocationControl />
-          </div>
+        <ScaleControl metric imperial />
 
-          {/* Handles URL navigation to a specified watershed */}
-          <MapEffect webcloudRunId={webcloudRunId} watersheds={watersheds} />
-
-          {memoWatersheds && (
-            <GeoJSON
-              data={memoWatersheds}
-              style={watershedStyle}
-              onEachFeature={(feature, layer) => layer.on({ click: onWatershedClick })}
+        {/* TOP LEFT CONTROLS */}
+        <div className="leaflet-top leaflet-left">
+          <LegendControl />
+          {watershedId && (
+            <WatershedToggle
+              setShowSubcatchments={setShowSubcatchments}
+              setShowChannels={setShowChannels}
             />
           )}
+        </div>
 
-          {showSubcatchments && memoSubcatchments && (
-            <GeoJSON data={memoSubcatchments} style={subcatchmentStyle} />
-          )}
+        {/* TOP RIGHT CONTROLS */}
+        <div className="leaflet-top leaflet-right">
+          <SearchControl />
+          <LayersControl />
+          <ZoomInControl />
+          <ZoomOutControl />
+          <SettingsControl />
+        </div>
 
-          {showChannels && memoChannels && (
-            <GeoJSON data={memoChannels} style={channelStyle} />
-          )}
-        </>
+        {/* BOTTOM RIGHT CONTROLS */}
+        <div className="leaflet-bottom leaflet-right">
+          <UserLocationControl />
+        </div>
+
+        {/* Handles URL navigation to a specified watershed */}
+        <MapEffect watershedId={watershedId} watersheds={memoWatersheds} />
+
+        {memoWatersheds && (
+          <GeoJSON
+            data={memoWatersheds}
+            style={watershedStyle}
+            onEachFeature={(_ /*feature*/, layer) => layer.on({ click: onWatershedClick })}
+          />
+        )}
+
+        {showSubcatchments && memoSubcatchments && (
+          <SubcatchmentLayer
+            data={memoSubcatchments}
+            style={subcatchmentStyle}
+          />
+        )}
+
+        {showChannels && memoChannels && (
+          <GeoJSON data={memoChannels} style={channelStyle} />
+        )}
       </MapContainer>
     </div>
   );

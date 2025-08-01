@@ -4,7 +4,7 @@
  * 
  * @returns {JSX.Element} A sidebar panel containing watershed information.
  */
-export default function HomeSidePanelContent() {
+export default function HomeSidePanelContent(): JSX.Element {
   return (
     <div className="home-panel">
       <h2>Explore Watershed Analytics</h2>

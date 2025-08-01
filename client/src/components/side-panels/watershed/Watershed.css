@@ -236,27 +236,45 @@
   outline-offset: 2px;
 }
 
-.dateSelector {
+.vegetationSelector {
   max-height: 0;
   overflow: hidden;
   transition: max-height .3s ease;
   margin-top: 0;
 }
 
-.dateSelector.expanded {
-  max-height: 4rem;
-  margin-top: .5rem;
+.vegetationSelector.expanded {
+  max-height: 14rem;
+  padding-top: .5rem;
+  background-color: rgba(0, 168, 151, 0.3);
 }
 
-/* style the select */
-.dateSelector label {
-  display: block;
-  font-size: .875rem;
-  margin-bottom: .25rem;
+.veg-options {
+  padding: var(--size-100);
+  padding-left: var(--size-400);
 }
 
-.dateSelector select {
-  width: 100%;
-  padding: .25rem;
-  font-size: 1rem;
+.veg-options-container {
+  display: flex;
+  align-items: center;
+  gap: var(--size-200);
+  padding: var(--size-200) 0;
+}
+
+.vegetationSelector label {
+  font-size: var(--fs-100);
+  margin-left: var(--size-200);
+}
+
+.vegetationSelector input {
+  transform: scale(1.5);
+  margin: 0;
+}
+
+.clear-button {
+  margin: var(--size-300) var(--size-400);
+  padding: var(--size-100);
+  background-color: var(--clr-primary-300);
+  color: var(--clr-primary-100);
+  font-size: var(--fs-100);
 }

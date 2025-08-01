@@ -1,8 +1,8 @@
 import { Outlet } from '@tanstack/react-router';
-import { useAppSelector } from '../../app/hooks';
-import { selectWatershedID } from '../../features/watershed/watershedSlice';
+import { useContext } from 'react';
+import { WatershedIDContext } from '../../utils/watershedID/WatershedIDContext';
 import Map from '../../components/map/Map';
-import HomeSidePanelContent from '../../components/side-panels/home_info/HomeInfoPanel';
+import HomeSidePanelContent from '../../components/side-panels/home-info/HomeInfoPanel';
 import './Home.css';
 
 /**
@@ -34,7 +34,7 @@ function SidePanel({ children }: SidePanelProps): JSX.Element {
  * @returns {JSX.Element} The main home page layout including a side panel and a map.
  */
 export default function Home(): JSX.Element {
-  const watershedId = useAppSelector(selectWatershedID)
+  const watershedId = useContext(WatershedIDContext);
 
   return (
     <div className='home-container'>
@@ -43,9 +43,7 @@ export default function Home(): JSX.Element {
       </SidePanel>
 
       <div className='map-wrapper'>
-        <Map
-          webcloudRunId={watershedId}
-        />
+        <Map />
       </div>
     </div>
   );
