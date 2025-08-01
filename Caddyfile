@@ -5,15 +5,16 @@
 unstable.wepp.cloud {
     root * /app/client/build
 
-    # Serve static frontend files
-    file_server
+    route {
+        # Proxy API/admin/backend routes to Django
+        @backend path /api/* /admin/* /silk/*
+        reverse_proxy @backend server:8000
 
-    # Proxy API/admin/backend routes to Django
-    reverse_proxy /api/* /admin/* /silk/* server:8000
-
-    # Optional: rewrite SPA routes (e.g., /dashboard)
-    try_files {path} /index.html
-
+        # Serve frontend files
+        try_files {path} /index.html
+        file_server
+    }
+    
     # Security headers
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
