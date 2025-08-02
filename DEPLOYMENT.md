@@ -8,12 +8,16 @@ The application is deployed on a virtual machine (VM) provided by the [Universit
 * **Hostname:** wepp3
 * **OS:** Ubuntu 24.04.2 LTS
 * **Virtualization:** VMware
-* **Public Domains:** 
-    * `unstable.wepp.cloud` (serves frontend/client)
-    * `wepp3.nkn.uidaho.edu` (serves backend/server)
+* **Public Domain: `unstable.wepp.cloud`** 
 
 ## Deployment Overview
-The application is deployed via Docker Compose and reverse proxied using [Caddy](https://caddyserver.com/).
+The production deployment consists of three main services orchestrated with Docker Compose:
+
+1. **Backend (Django)** - API server
+2. **Database (PostgreSQL + PostGIS)** - Geospatial database
+3. **Reverse Proxy (Caddy)** - Serves static frontend files and proxies API requests
+
+The frontend React application is built as static files and served directly by Caddy, while API routes (`/api/*`, `/admin/*`, `/silk/*`) are proxied to the Django backend.
 
 To ensure the Docker Compose stack autostarts, a [systemd service](/utility-watershed-analytics.service) is configured on the host VM.
 
@@ -33,7 +37,7 @@ cd /workdir/utility-watershed-analytics
 ```
 
 ### Deploying Changes
-To deploy updates from GitHub:
+#### For Backend/Infrastructure Changes:
 ```bash
 # Navigate to the project directory
 cd /workdir/utility-watershed-analytics
@@ -41,8 +45,51 @@ cd /workdir/utility-watershed-analytics
 # Pull the latest changes
 git pull origin main
 
-# Rebuild and restart
-docker compose up --build -d
+# Stop current services
+docker compose -f compose.prod.yml down
+
+# Rebuild and restart services
+docker compose -f compose.prod.yml up --build -d
+```
+
+#### For Frontend Changes:
+```bash
+# Navigate to the project directory
+cd /workdir/utility-watershed-analytics
+
+# Pull the latest changes
+git pull origin main
+
+# Remove existing build artifacts
+sudo rm -rf ./client/build
+
+# Rebuild frontend
+docker build -f client/Dockerfile.prod -t client-build-prod client/
+
+# Extract new static files
+docker run --rm -u root -v "$PWD/client/build:/out" client-build-prod cp -r /app/client/dist/. /out
+```
+
+### Useful Commands
+
+**View service logs:**
+```bash
+docker compose -f compose.prod.yml logs -f [service_name]
+```
+
+**Check service status:**
+```bash
+docker compose -f compose.prod.yml ps
+```
+
+**Stop all services:**
+```bash
+docker compose -f compose.prod.yml down
+```
+
+**Start services:**
+```bash
+docker compose -f compose.prod.yml up -d
 ```
 
 ## Acknowledgements

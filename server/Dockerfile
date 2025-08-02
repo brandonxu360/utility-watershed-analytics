@@ -20,6 +20,8 @@ RUN apk add --no-cache python3 py3-pip geos git
 RUN addgroup -g 1000 devcontainer && \
     adduser -D -u 1000 -G devcontainer devcontainer
 
+WORKDIR /app/server
+
 # Create virtual environment directory and set ownership
 RUN python3 -m venv /venv && \
     chown -R devcontainer:devcontainer /venv

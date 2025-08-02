@@ -177,7 +177,7 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
             <GeoJSON
               data={memoWatersheds}
               style={watershedStyle}
-              onEachFeature={(feature, layer) => layer.on({ click: onWatershedClick })}
+              onEachFeature={(_, layer) => layer.on({ click: onWatershedClick })}
             />
           )}
 
