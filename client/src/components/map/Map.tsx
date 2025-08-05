@@ -54,11 +54,35 @@ function SubcatchmentLayer({ data, style }: {
       data={data}
       style={style}
       onEachFeature={(feature, layer) => {
-        // TODO: this area needs to be hectares. Also need to add more of the available data to show with the tooltip.
-        const area = feature.properties?.area_m2 ?? 0
+        const props = feature.properties ?? {};
         layer.bindTooltip(
-          `<strong>Hillslope ${feature.id}</strong><br/>Area: ${area.toFixed(0)} m²`,
-        )
+          `<strong>Hillslope ${feature.id}</strong>
+          <br/>Watershed: ${props.watershed ?? 'N/A'}
+          <br/>TopazID: ${props.topazid ?? 'N/A'}
+          <br/>WeppID: ${props.weppid ?? 'N/A'}
+          <br/>Area: ${props.area_m2 ? (props.area_m2 / 10000).toFixed(2) : 'N/A'} ha
+          <br/>Aspect: ${props.aspect ?? 'N/A'}
+          <br/>Baseflow: ${props.baseflow_mm ?? 'N/A'}
+          <br/>Canopy Cover: ${props.cancov !== undefined ? (props.cancov * 100).toFixed(0) : 'N/A'}%
+          <br/>Clay: ${props.clay ?? 'N/A'}%
+          <br/>Description: ${props.desc ?? 'N/A'}
+          <br/>Direction: ${props.direction ?? 'N/A'}
+          <br/>Elevation: ${props.elevation_m ?? 'N/A'}
+          <br/>Inrcov: ${props.inrcov ?? 'N/A'}
+          <br/>Length: ${props.length_m ?? 'N/A'}
+          <br/>Width: ${props.width_m ?? 'N/A'}
+          <br/>Rilcov: ${props.rilcov ?? 'N/A'}
+          <br/>Runoff: ${props.runoff_mm ?? 'N/A'}
+          <br/>Runoff Volume: ${props.runoff_volume_m3 ?? 'N/A'}
+          <br/>Sand: ${props.sand ?? 'N/A'}%
+          <br/>Sediment Yield: ${props.sediment_yield_kg ?? 'N/A'}
+          <br/>Simple Texture: ${props.simple_texture ?? 'N/A'}
+          <br/>Slope: ${props.slope_scalar ? props.slope_scalar.toFixed(2) : 'N/A'}
+          <br/>Soil: ${props.soil ?? 'N/A'}
+          <br/>Soil Loss: ${props.soil_loss_kg ?? 'N/A'}
+          <br/>Subrunoff: ${props.subrunoff_mm ?? 'N/A'}
+          <br/>Subrunoff Volume: ${props.subrunoff_volume_m3 ?? 'N/A'}`,
+        );
         layer.on({
           mouseover: () => layer.openTooltip(),
           mouseout: () => layer.closeTooltip(),

@@ -276,5 +276,6 @@
   padding: var(--size-100);
   background-color: var(--clr-primary-300);
   color: var(--clr-primary-100);
+  border-radius: 0;
   font-size: var(--fs-100);
 }
