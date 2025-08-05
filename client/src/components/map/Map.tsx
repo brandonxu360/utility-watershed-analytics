@@ -193,13 +193,13 @@ export default function Map(): JSX.Element {
         {/* Handles URL navigation to a specified watershed */}
         <MapEffect watershedId={watershedId} watersheds={memoWatersheds} />
 
-        {memoWatersheds && (
-          <GeoJSON
-            data={memoWatersheds}
-            style={watershedStyle}
-            onEachFeature={(_ /*feature*/, layer) => layer.on({ click: onWatershedClick })}
-          />
-        )}
+          {memoWatersheds && (
+            <GeoJSON
+              data={memoWatersheds}
+              style={watershedStyle}
+              onEachFeature={(_, layer) => layer.on({ click: onWatershedClick })}
+            />
+          )}
 
         {showSubcatchments && memoSubcatchments && (
           <SubcatchmentLayer
