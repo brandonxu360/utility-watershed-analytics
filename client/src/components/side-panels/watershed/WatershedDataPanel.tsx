@@ -4,6 +4,7 @@ import { fetchWatersheds } from '../../../api/api';
 import { useContext, useMemo, useState } from 'react';
 import { FaPlus, FaXmark } from 'react-icons/fa6';
 import { WatershedIDContext } from '../../../utils/watershedID/WatershedIDContext';
+import { useBottomPanelContext } from '../../bottom-panel/BottomPanelContext';
 import AccordionItem from '../../accordian-item/AccordianItem'
 import './Watershed.css'
 
@@ -39,6 +40,7 @@ export default function WatershedDataPanel() {
 
     const navigate = useNavigate();
     const watershedId = useContext(WatershedIDContext);
+    const bottomPanel = useBottomPanelContext();
 
     const { data: watersheds, isLoading, error } = useQuery({
         queryKey: ["watersheds"],
@@ -46,17 +48,6 @@ export default function WatershedDataPanel() {
     });
 
     const toggleVeg = () => setIsOpen(open => !open);
-    // const handleVegClick = (e: React.MouseEvent<HTMLInputElement>) => {
-    //     const id = (e.target as HTMLInputElement).id as 'shrub' | 'tree';
-    //     if (vegOption === id) {
-    //         e.preventDefault();
-    //         setVegOption('');
-    //     }
-    // };
-
-    // const handleVegChange = (e: ChangeEvent<HTMLInputElement>) => {
-    //     setVegOption(e.target.id as 'shrub' | 'tree');
-    // };
 
     const watershed = useMemo(() => {
         if (!watersheds?.features || !watershedId) return null;
@@ -134,7 +125,15 @@ export default function WatershedDataPanel() {
                                             id={option}
                                             name="veg"
                                             checked={vegOption === option}
-                                            onChange={() => setVegOption(option)}
+                                            onChange={() => {
+                                                setVegOption(option);
+                                                bottomPanel.openPanel(
+                                                    <div>
+                                                        <h3>{option === 'shrub' ? 'Shrub Cover' : 'Tree Cover'} Details</h3>
+                                                        <p>Panel content for {option} cover goes here.</p>
+                                                    </div>
+                                                );
+                                            }}
                                         />
                                         <label htmlFor={option}>
                                             {option === 'shrub' ? 'Shrub Cover' : 'Tree Cover'}
@@ -146,7 +145,10 @@ export default function WatershedDataPanel() {
                                 <button
                                     type="button"
                                     className="clear-button"
-                                    onClick={() => setVegOption('')}
+                                    onClick={() => {
+                                        setVegOption('');
+                                        bottomPanel.closePanel();
+                                    }}
                                 >
                                     Clear Selection
                                 </button>

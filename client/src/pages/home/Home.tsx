@@ -1,8 +1,10 @@
 import { Outlet } from '@tanstack/react-router';
 import { useContext } from 'react';
 import { WatershedIDContext } from '../../utils/watershedID/WatershedIDContext';
+import { BottomPanelProvider, useBottomPanelContext } from '../../components/bottom-panel/BottomPanelContext';
 import Map from '../../components/map/Map';
 import HomeSidePanelContent from '../../components/side-panels/home-info/HomeInfoPanel';
+import BottomPanel from '../../components/bottom-panel/BottomPanel';
 import './Home.css';
 
 /**
@@ -37,13 +39,30 @@ export default function Home(): JSX.Element {
   const watershedId = useContext(WatershedIDContext);
 
   return (
+    <BottomPanelProvider>
+      <HomeContent watershedId={watershedId} />
+    </BottomPanelProvider>
+  );
+}
+
+function HomeContent({ watershedId }: { watershedId: string | null }) {
+  const bottomPanel = useBottomPanelContext();
+
+  return (
     <div className='home-container'>
       <SidePanel>
         {watershedId ? <Outlet /> : <HomeSidePanelContent />}
       </SidePanel>
-
-      <div className='map-wrapper'>
+      <div className='map-wrapper' style={{ position: 'relative' }}>
         <Map />
+        {bottomPanel.isOpen && (
+          <BottomPanel
+            isOpen={bottomPanel.isOpen}
+            onClose={bottomPanel.closePanel}
+          >
+            {bottomPanel.content}
+          </BottomPanel>
+        )}
       </div>
     </div>
   );
