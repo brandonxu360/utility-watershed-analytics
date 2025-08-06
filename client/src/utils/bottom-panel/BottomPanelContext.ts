@@ -1,4 +1,12 @@
-import { useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
+
+export const BottomPanelContext = createContext<ReturnType<typeof useBottomPanel> | null>(null);
+
+export function useBottomPanelContext() {
+  const ctx = useContext(BottomPanelContext);
+  if (!ctx) throw new Error('useBottomPanelContext must be used within BottomPanelProvider');
+  return ctx;
+}
 
 type PanelContent = React.ReactNode | null;
 

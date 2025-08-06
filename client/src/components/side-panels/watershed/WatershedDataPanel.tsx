@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
 import { useContext, useMemo, useState } from 'react';
 import { FaPlus, FaXmark } from 'react-icons/fa6';
-import { WatershedIDContext } from '../../../utils/watershedID/WatershedIDContext';
-import { useBottomPanelContext } from '../../bottom-panel/BottomPanelContext';
+import { WatershedIDContext } from '../../../utils/watershed-id/WatershedIDContext';
+import { useBottomPanelContext } from '../../../utils/bottom-panel/BottomPanelContext';
 import AccordionItem from '../../accordian-item/AccordianItem'
 import './Watershed.css'
 

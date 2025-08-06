@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { FaGripLines } from 'react-icons/fa6';
 import './BottomPanel.css';
 
 interface BottomPanelProps {
@@ -22,7 +23,7 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   const onDrag = (e: MouseEvent) => {
     if (panelRef.current) {
       const newHeight = startHeight.current - (e.clientY - startY.current);
-      panelRef.current.style.height = `${Math.max(60, Math.min(window.innerHeight - 100, newHeight))}px`;
+      panelRef.current.style.height = `${Math.max(16, Math.min(window.innerHeight - 54, newHeight))}px`;
     }
   };
 
@@ -34,11 +35,13 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="bottom-panel-overlay">
-      <div className="bottom-panel" ref={panelRef}>
-        <div className="bottom-panel-drag" onMouseDown={handleDrag} />
-        <div className="bottom-panel-content">{children}</div>
+    <div className="bottom-panel" ref={panelRef}>
+      <div className="bottom-panel-drag" onMouseDown={handleDrag}>
+        <span>
+          <FaGripLines />
+        </span>
       </div>
+      <div className="bottom-panel-content">{children}</div>
     </div>
   );
 }
