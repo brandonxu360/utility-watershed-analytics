@@ -1,7 +1,9 @@
 import { lazyRouteComponent, createRoute, createRootRoute, createRouter, Outlet } from '@tanstack/react-router';
+import { WatershedIDProvider } from '../utils/watershedID/WatershedIDProvider';
 import Navbar from '../components/navbar/Navbar';
 import Home from '../pages/home/Home';
-import Watershed from '../components/watershed/Watershed';
+import WatershedOverview from '../components/side-panels/watershed/WatershedOverview';
+import WatershedDataPanel from '../components/side-panels/watershed/WatershedDataPanel';
 
 const About = lazyRouteComponent(() => import('../pages/about/About'));
 const FAQ = lazyRouteComponent(() => import('../pages/faq/FAQ'));
@@ -11,27 +13,37 @@ const Login = lazyRouteComponent(() => import('../pages/login/Login'));
 const rootRoute = createRootRoute({
   component: () => (
     <>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100svh' }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <Navbar />
-        <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
+        <div style={{ display: "flex", flex: 1, minHeight: 0, height: "100%" }}>
           <Outlet />
         </div>
       </div>
     </>
   ),
-  notFoundComponent: () => <div>Page not found</div>,
+  notFoundComponent: () => <div>404: Page Not Found</div>,
 });
 
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: Home,
+  component: () => (
+    <WatershedIDProvider>
+      <Home />
+    </WatershedIDProvider>
+  ),
 });
 
-const watershedIdRoute = createRoute({
+export const watershedOverviewRoute = createRoute({
   getParentRoute: () => homeRoute,
   path: '/watershed/$webcloudRunId',
-  component: Watershed,
+  component: WatershedOverview,
+});
+
+export const watershedDataRoute = createRoute({
+  getParentRoute: () => homeRoute,
+  path: '/watershed/data/$webcloudRunId',
+  component: WatershedDataPanel,
 });
 
 const aboutRoute = createRoute({
@@ -60,7 +72,10 @@ const loginRoute = createRoute({
 
 // Create the route tree
 const routeTree = rootRoute.addChildren([
-  homeRoute.addChildren([watershedIdRoute]),
+  homeRoute.addChildren([
+    watershedOverviewRoute,
+    watershedDataRoute,
+  ]),
   aboutRoute,
   faqRoute,
   documentationRoute,
