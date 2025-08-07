@@ -5,6 +5,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { MapEffect } from '../../utils/map/MapEffectUtil'
 import { WatershedIDContext } from '../../utils/watershed-id/WatershedIDContext'
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api'
+import { useBottomPanelContext } from '../../utils/bottom-panel/BottomPanelContext'
 import WatershedToggle from './controls/WatershedToggle/WatershedToggle'
 import ZoomInControl from './controls/ZoomIn/ZoomIn'
 import ZoomOutControl from './controls/ZoomOut/ZoomOut'
@@ -100,11 +101,14 @@ export default function Map(): JSX.Element {
     enabled: Boolean(showChannels && watershedId),
   });
 
+  const bottomPanel = useBottomPanelContext();
+
   { /* Navigates to a watershed on click */ }
   const onWatershedClick = (e: any) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
 
+    bottomPanel.closePanel();
     navigate({
       to: `/watershed/${feature.id}`,
     });

@@ -7,7 +7,7 @@
   max-height: 100%;
   background: #222;
   color: #fff;
-  border-top: 2px solid #444;
+  border-top: 0.5px solid var(--clr-primary-500);
   box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
   resize: none;
   pointer-events: auto;

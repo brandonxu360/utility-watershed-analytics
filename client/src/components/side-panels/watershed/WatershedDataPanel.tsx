@@ -5,6 +5,7 @@ import { useContext, useMemo, useState } from 'react';
 import { FaPlus, FaXmark } from 'react-icons/fa6';
 import { WatershedIDContext } from '../../../utils/watershed-id/WatershedIDContext';
 import { useBottomPanelContext } from '../../../utils/bottom-panel/BottomPanelContext';
+import CoverageBarChart from '../../coverage-bar-chart/CoverageBarChart';
 import AccordionItem from '../../accordian-item/AccordianItem'
 import './Watershed.css'
 
@@ -56,6 +57,17 @@ export default function WatershedDataPanel() {
         );
     }, [watersheds?.features, watershedId]);
 
+    const shrubData = [
+        { name: 'Zone 1', coverage: 120, density: 80 },
+        { name: 'Zone 2', coverage: 98, density: 65 },
+        { name: 'Zone 3', coverage: 86, density: 70 },
+    ];
+    const treeData = [
+        { name: 'Zone 1', coverage: 150, density: 90 },
+        { name: 'Zone 2', coverage: 130, density: 85 },
+        { name: 'Zone 3', coverage: 110, density: 75 },
+    ];
+
     if (isLoading) return <SkeletonWatershedPanel />;
     if (error) return <div>Error: {(error as Error).message}</div>;
     if (!watersheds?.features) return <div>No watershed data found.</div>;
@@ -65,6 +77,7 @@ export default function WatershedDataPanel() {
         <div className="watershedPanel">
             <button
                 onClick={() => {
+                    bottomPanel.closePanel();
                     navigate({
                         to: `/watershed/${watershedId}`,
                     });
@@ -129,8 +142,24 @@ export default function WatershedDataPanel() {
                                                 setVegOption(option);
                                                 bottomPanel.openPanel(
                                                     <div>
-                                                        <h3>{option === 'shrub' ? 'Shrub Cover' : 'Tree Cover'} Details</h3>
-                                                        <p>Panel content for {option} cover goes here.</p>
+                                                        <div className='dateSelector right-align'>
+                                                            <label htmlFor="veg-year">Select Year Range:</label>
+                                                            <select id="veg-year">
+                                                                <option value="2024-2025">2024-2025</option>
+                                                                <option value="2023-2024">2023-2024</option>
+                                                                <option value="2022-2023">2022-2023</option>
+                                                                {/* …etc */}
+                                                            </select>
+                                                        </div>
+                                                        {/* Simple for now as there are only 2 sets of data but will rework as more data is added */}
+                                                        <CoverageBarChart
+                                                            data={option === 'shrub' ? shrubData : treeData}
+                                                            title={option === 'shrub' ? 'Shrub Coverage' : 'Tree Coverage'}
+                                                            barKeys={[
+                                                                { key: 'coverage', color: '#8884d8', activeFill: 'pink', activeStroke: 'blue' },
+                                                                { key: 'density', color: '#82ca9d', activeFill: 'gold', activeStroke: 'purple' }
+                                                            ]}
+                                                        />
                                                     </div>
                                                 );
                                             }}
