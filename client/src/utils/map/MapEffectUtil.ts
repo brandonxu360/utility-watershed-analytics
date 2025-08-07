@@ -3,12 +3,9 @@ import { useEffect } from 'react';
 import { zoomToFeature } from './MapUtil';
 import L from 'leaflet';
 
-/**
- * Interface for the @see {@link MapEffect} function to enforce type safety
- */
 interface MapEffectProps {
   watershedId: string | null;
-  watersheds: any; // Replace with a more specific type
+  watersheds: any;
 }
 
 /**
@@ -25,7 +22,7 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
   useEffect(() => {
     if (watershedId && watersheds && Array.isArray(watersheds.features)) {
       const matchingFeature = watersheds.features.find(
-        (f: any) => f.id && f.id.toString() === watershedId // Might want to replace with a more specific type
+        (f: any) => f.id && f.id.toString() === watershedId
       );
 
       if (matchingFeature) {

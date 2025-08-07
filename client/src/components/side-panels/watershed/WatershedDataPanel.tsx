@@ -46,17 +46,6 @@ export default function WatershedDataPanel() {
     });
 
     const toggleVeg = () => setIsOpen(open => !open);
-    // const handleVegClick = (e: React.MouseEvent<HTMLInputElement>) => {
-    //     const id = (e.target as HTMLInputElement).id as 'shrub' | 'tree';
-    //     if (vegOption === id) {
-    //         e.preventDefault();
-    //         setVegOption('');
-    //     }
-    // };
-
-    // const handleVegChange = (e: ChangeEvent<HTMLInputElement>) => {
-    //     setVegOption(e.target.id as 'shrub' | 'tree');
-    // };
 
     const watershed = useMemo(() => {
         if (!watersheds?.features || !watershedId) return null;

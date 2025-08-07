@@ -44,7 +44,7 @@ const selectedStyle = {
   fillOpacity: 0.1,
 };
 
-// Renders subcatchment polygons and binds hover-only tooltips
+// Renders subcatchment hillslope polygons and binds hover-only tooltips
 function SubcatchmentLayer({ data, style }: {
   data: GeoJSON.FeatureCollection
   style: (feature: any) => any
@@ -56,32 +56,21 @@ function SubcatchmentLayer({ data, style }: {
       onEachFeature={(feature, layer) => {
         const props = feature.properties ?? {};
         layer.bindTooltip(
-          `<strong>Hillslope ${feature.id}</strong>
-          <br/>Watershed: ${props.watershed ?? 'N/A'}
-          <br/>TopazID: ${props.topazid ?? 'N/A'}
-          <br/>WeppID: ${props.weppid ?? 'N/A'}
-          <br/>Area: ${props.area_m2 ? (props.area_m2 / 10000).toFixed(2) : 'N/A'} ha
-          <br/>Aspect: ${props.aspect ?? 'N/A'}
-          <br/>Baseflow: ${props.baseflow_mm ?? 'N/A'}
-          <br/>Canopy Cover: ${props.cancov !== undefined ? (props.cancov * 100).toFixed(0) : 'N/A'}%
-          <br/>Clay: ${props.clay ?? 'N/A'}%
-          <br/>Description: ${props.desc ?? 'N/A'}
-          <br/>Direction: ${props.direction ?? 'N/A'}
-          <br/>Elevation: ${props.elevation_m ?? 'N/A'}
-          <br/>Inrcov: ${props.inrcov ?? 'N/A'}
-          <br/>Length: ${props.length_m ?? 'N/A'}
-          <br/>Width: ${props.width_m ?? 'N/A'}
-          <br/>Rilcov: ${props.rilcov ?? 'N/A'}
-          <br/>Runoff: ${props.runoff_mm ?? 'N/A'}
-          <br/>Runoff Volume: ${props.runoff_volume_m3 ?? 'N/A'}
-          <br/>Sand: ${props.sand ?? 'N/A'}%
-          <br/>Sediment Yield: ${props.sediment_yield_kg ?? 'N/A'}
-          <br/>Simple Texture: ${props.simple_texture ?? 'N/A'}
-          <br/>Slope: ${props.slope_scalar ? props.slope_scalar.toFixed(2) : 'N/A'}
-          <br/>Soil: ${props.soil ?? 'N/A'}
-          <br/>Soil Loss: ${props.soil_loss_kg ?? 'N/A'}
-          <br/>Subrunoff: ${props.subrunoff_mm ?? 'N/A'}
-          <br/>Subrunoff Volume: ${props.subrunoff_volume_m3 ?? 'N/A'}`,
+          `<span class="tooltip-bold"><strong>Hillslope ID</strong>
+          <br/>TopazID: ${props.topazid ?? 'N/A'}, WeppID: ${props.weppid ?? 'N/A'}
+          <br/><strong>Width:</strong>
+          ${props.width_m.toFixed(2) ?? 'N/A'} m
+          <br/><strong>Length:</strong>
+          ${props.length_m.toFixed(2) ?? 'N/A'} m
+          <br/><strong>Area:</strong>
+          ${props.area_m2 ? (props.area_m2 / 10000).toFixed(2) : 'N/A'} ha
+          <br/><strong>Slope:</strong>
+          ${props.slope_scalar ? props.slope_scalar.toFixed(2) : 'N/A'}
+          <br/><strong>Aspect:</strong>
+          ${props.aspect.toFixed(2) ?? 'N/A'}
+          <br/><strong>Soil:</strong>
+          ${props.soil ?? 'N/A'}</span>`,
+          { className: 'tooltip-bold' }
         );
         layer.on({
           mouseover: () => layer.openTooltip(),

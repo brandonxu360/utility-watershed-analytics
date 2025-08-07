@@ -69,17 +69,17 @@ export default function WatershedOverview() {
             <h2>{watershed.properties.pws_name}</h2>
             <p>This is where the description for the watershed will go. For now we have placeholder text.</p>
             <p>
+                <strong>County:</strong> {watershed.properties.county ?? "N/A"}
+            </p>
+            <p>
+                <strong>Acres:</strong> {watershed.properties.area_m2 ? `${(watershed.properties.area_m2 / 10000).toFixed(2)} ha` : "N/A"}
+            </p>
+            <p>
                 <strong>Number of Customers:</strong>{" "}
                 {watershed.properties.num_customers ?? "N/A"}
             </p>
             <p>
                 <strong>Source Type:</strong> {watershed.properties.source_type ?? "N/A"}
-            </p>
-            <p>
-                <strong>County:</strong> {watershed.properties.cnty_name ?? "N/A"}
-            </p>
-            <p>
-                <strong>Acres:</strong> {watershed.properties.acres ?? "N/A"}
             </p>
 
             <div className="row">
