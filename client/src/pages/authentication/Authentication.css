@@ -1,3 +1,17 @@
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--clr-primary-100) inset !important;
+    -webkit-text-fill-color: var(--clr-primary-500) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+input:-webkit-autofill::first-line {
+    color: var(--clr-primary-500) !important;
+    -webkit-text-fill-color: var(--clr-primary-500) !important;
+}
+
 .auth-page {
     width: 100%;
     display: flex;
