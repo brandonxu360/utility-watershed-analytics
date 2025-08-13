@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import { useQuery } from '@tanstack/react-query';   
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
-import { WatershedIDContext } from '../../utils/watershedID/WatershedIDContext';
+import { WatershedIDContext } from '../../utils/watershed-id/WatershedIDContext';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
 import { useBottomPanelContext } from '../../utils/bottom-panel/BottomPanelContext';
 import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
