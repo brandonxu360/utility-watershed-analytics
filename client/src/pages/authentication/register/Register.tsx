@@ -112,7 +112,6 @@ const Register: React.FC<RegisterProps> = ({ onSubmit }) => {
 
           <div className="auth-footer">
             <span>Already have an account? </span>
-            {/* likely should navigate to '/login' */}
             <Link to="/login" className="link-button">Login</Link>
           </div>
         </form>

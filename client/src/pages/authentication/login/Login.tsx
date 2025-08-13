@@ -11,7 +11,6 @@ export interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({
   onSubmit,
-  forgotPasswordUrl,
 }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -74,13 +73,7 @@ const Login: React.FC<LoginProps> = ({
           </div>
 
           <div className="forgot-row">
-            {forgotPasswordUrl ? (
-              <a href={forgotPasswordUrl} className="forgot-link">
-                Forgot password?
-              </a>
-            ) : (
-              <span className="forgot-link">Forgot password?</span>
-            )}
+            {(<span className="forgot-link">Forgot password?</span>)}
           </div>
 
           <button type="submit" className="primary-btn">

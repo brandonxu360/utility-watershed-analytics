@@ -25,7 +25,6 @@ input:-webkit-autofill::first-line {
 
 .auth-card {
     width: 100%;
-    max-width: var(--card-width);
     text-align: center;
     background: transparent;
     border-radius: 6px;
@@ -36,12 +35,11 @@ input:-webkit-autofill::first-line {
     font-size: 48px;
     margin: 18px 0 8px;
     font-weight: 800;
-    color: #fff;
+    color: var(--clr-primary-100);
     line-height: 1;
 }
 
 .auth-subtitle {
-    color: var(--muted);
     margin-bottom: 24px;
     font-size: 14px;
 }
@@ -50,7 +48,6 @@ input:-webkit-autofill::first-line {
     display: block;
     text-align: left;
     margin: 8px 0 6px;
-    color: var(--muted);
     font-size: 14px;
 }
 
@@ -128,7 +125,7 @@ input:-webkit-autofill::first-line {
     border-radius: 12px;
     border: 0;
     background: var(--clr-primary-300);
-    color: white;
+    color: var(--clr-primary-100);
     cursor: pointer;
 }
 
@@ -136,7 +133,6 @@ input:-webkit-autofill::first-line {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--muted);
     text-align: center;
     font-size: 0.75rem;
 }
