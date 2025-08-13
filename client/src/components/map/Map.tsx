@@ -105,7 +105,7 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
   const subcatchmentStyle = useCallback(
     () => ({
       color: '#2c2c2c',
-      weight: 1,
+      weight: 0.75,
       fillColor: '#4a83ec',
       fillOpacity: 0.1,
     }),
@@ -113,18 +113,23 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
   );
 
   const channelStyle = useCallback(
-    () => ({ color: '#ff6700', weight: 0.75, fillOpacity: 1 }),
+    () => ({
+      color: '#ff6700',
+      fillOpacity: 0.1,
+      weight: 0.75 
+    }),
     []
   );
 
-  const [selectedLayerId, setSelectedLayerId] = useState<'Default' | 'Satellite' | 'Topographic'>('Default');
+  const [selectedLayerId, setSelectedLayerId] = useState</*'Default'*/ | 'Satellite' | 'Topographic'>('Satellite');
 
   const tileLayers = {
-    Default: {
-      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 15,
-    },
+    // Might not keep this layer.
+    // Default: {
+    //   url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    //   maxZoom: 15,
+    // },
     Satellite: {
       url: "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg",
       attribution: '&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
