@@ -11,9 +11,6 @@ import './Legend.css'
 export default function LegendControl() {
   const [isLegendOpen, setIsLegendOpen] = useState(false);
 
-  /**
-   * Toggles the visibility state of the legend modal
-   */
   const toggleLegend = () => setIsLegendOpen((prev) => !prev);
 
   return (

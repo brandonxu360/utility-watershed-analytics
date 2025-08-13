@@ -32,7 +32,6 @@
     margin: 0 0 var(--size-100) 0;
     font-size: var(--fs-100);
     font-weight: bold;
-    color: var(--clr-primary-50);
 }
 
 .watershed-toggle-content {
