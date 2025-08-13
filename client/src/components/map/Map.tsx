@@ -2,7 +2,7 @@ import { useCallback, useContext, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import { useQuery } from '@tanstack/react-query';   
 import { useNavigate } from '@tanstack/react-router';
-import { MapEffect } from '../../utils/MapEffectUtil';
+import { MapEffect } from '../../utils/map/MapEffectUtil';
 import { WatershedIDContext } from '../../utils/watershedID/WatershedIDContext'
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
 import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
@@ -196,7 +196,6 @@ export default function Map(): JSX.Element {
         preferCanvas
       >
 
-        <>
           {(watershedsLoading || subLoading || channelLoading) && (
             <div className="map-loading-overlay">
               <div className="loading-spinner" />
@@ -214,14 +213,13 @@ export default function Map(): JSX.Element {
           {/* TOP LEFT CONTROLS */}
           <div className="leaflet-top leaflet-left">
             <LegendControl />
-            {webcloudRunId && (
+            {watershedId && (
               <WatershedToggle
                 setShowSubcatchments={setShowSubcatchments}
                 setShowChannels={setShowChannels}
               />
             )}
           </div>
-        )}
 
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
