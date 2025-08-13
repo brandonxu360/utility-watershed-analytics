@@ -90,10 +90,6 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
     });
   };
 
-  if (watershedsError) return <div>Error: {watershedsError.message}</div>;
-  if (subError) return <div>Error: {subError.message}</div>;
-  if (channelError) return <div>Error: {channelError.message}</div>;
-
   // Memoize GeoJSON data to prevent unnecessary re-renders
   const memoWatersheds = useMemo(() => watersheds, [watersheds]);
   const memoSubcatchments = useMemo(() => subcatchments, [subcatchments]);
@@ -115,6 +111,10 @@ export default function Map({ webcloudRunId }: MapProps): JSX.Element {
     () => ({ color: '#ff6700', weight: 1, fillOpacity: 0.1 }),
     []
   );
+
+  if (watershedsError) return <div>Error: {watershedsError.message}</div>;
+  if (subError) return <div>Error: {subError.message}</div>;
+  if (channelError) return <div>Error: {channelError.message}</div>;
 
   return (
     <div className="map-container">

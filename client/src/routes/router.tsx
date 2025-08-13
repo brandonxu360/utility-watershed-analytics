@@ -6,7 +6,8 @@ import Watershed from '../components/watershed/Watershed';
 const About = lazyRouteComponent(() => import('../pages/about/About'));
 const FAQ = lazyRouteComponent(() => import('../pages/faq/FAQ'));
 const Documentation = lazyRouteComponent(() => import('../pages/documentation/Documentation'));
-const Login = lazyRouteComponent(() => import('../pages/login/Login'));
+const Login = lazyRouteComponent(() => import('../pages/authentication/login/Login'));
+const Register = lazyRouteComponent(() => import('../pages/authentication/register/Register'));
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -58,6 +59,12 @@ const loginRoute = createRoute({
   component: Login,
 });
 
+const registerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'register',
+  component: Register,
+});
+
 // Create the route tree
 const routeTree = rootRoute.addChildren([
   homeRoute.addChildren([watershedIdRoute]),
@@ -65,6 +72,7 @@ const routeTree = rootRoute.addChildren([
   faqRoute,
   documentationRoute,
   loginRoute,
+  registerRoute,
 ]);
 
 // Pass the route tree to the Router constructor
