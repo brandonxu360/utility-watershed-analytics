@@ -29,6 +29,8 @@
 }
 
 .watershed-container {
+    display: flex;
+    justify-content: space-between;
     padding: var(--size-300);
 }
 

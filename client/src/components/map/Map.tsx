@@ -3,8 +3,9 @@ import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import { useQuery } from '@tanstack/react-query';   
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
-import { WatershedIDContext } from '../../utils/watershedID/WatershedIDContext'
+import { WatershedIDContext } from '../../utils/watershedID/WatershedIDContext';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
+import { useBottomPanelContext } from '../../utils/bottom-panel/BottomPanelContext';
 import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -113,11 +114,14 @@ export default function Map(): JSX.Element {
     enabled: Boolean(showChannels && watershedId),
   });
 
+  const bottomPanel = useBottomPanelContext();
+
   { /* Navigates to a watershed on click */ }
   const onWatershedClick = (e: any) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
 
+    bottomPanel.closePanel();
     navigate({
       to: `/watershed/${feature.id}`,
     });
@@ -220,24 +224,6 @@ export default function Map(): JSX.Element {
               />
             )}
           </div>
-
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
-        <ScaleControl metric imperial />
-
-        {/* TOP LEFT CONTROLS */}
-        <div className="leaflet-top leaflet-left">
-          <LegendControl />
-          {watershedId && (
-            <WatershedToggle
-              setShowSubcatchments={setShowSubcatchments}
-              setShowChannels={setShowChannels}
-            />
-          )}
-        </div>
 
           {/* TOP RIGHT CONTROLS */}
           <div className="leaflet-top leaflet-right">
