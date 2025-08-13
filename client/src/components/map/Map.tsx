@@ -1,20 +1,20 @@
-import { useCallback, useContext, useMemo, useState } from 'react'
-import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet'
-import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
-import { MapEffect } from '../../utils/map/MapEffectUtil'
+import { useCallback, useContext, useMemo, useState } from 'react';
+import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
+import { useQuery } from '@tanstack/react-query';   
+import { useNavigate } from '@tanstack/react-router';
+import { MapEffect } from '../../utils/MapEffectUtil';
 import { WatershedIDContext } from '../../utils/watershedID/WatershedIDContext'
-import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api'
-import WatershedToggle from './controls/WatershedToggle/WatershedToggle'
-import ZoomInControl from './controls/ZoomIn/ZoomIn'
-import ZoomOutControl from './controls/ZoomOut/ZoomOut'
-import LayersControl from './controls/Layers/Layers'
-import LegendControl from './controls/Legend/Legend'
-import SearchControl from './controls/Search/Search'
-import SettingsControl from './controls/Settings/Settings'
-import UserLocationControl from './controls/UserLocation/UserLocation'
-import 'leaflet/dist/leaflet.css'
-import './Map.css'
+import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
+import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
+import ZoomInControl from './controls/ZoomIn/ZoomIn';
+import ZoomOutControl from './controls/ZoomOut/ZoomOut';
+import LayersControl from './controls/Layers/Layers';
+import LegendControl from './controls/Legend/Legend';
+import SearchControl from './controls/Search/Search';
+import SettingsControl from './controls/Settings/Settings';
+import UserLocationControl from './controls/UserLocation/UserLocation';
+import 'leaflet/dist/leaflet.css';
+import './Map.css';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -34,14 +34,14 @@ const defaultStyle = {
   color: '#4a83ec',
   weight: 3,
   fillColor: '#4a83ec',
-  fillOpacity: 0.1,
+  fillOpacity: 0.25,
 };
 
 const selectedStyle = {
-  color: '#444444',
+  color: '#2c2c2c',
   weight: 3,
   fillColor: '#4a83ec',
-  fillOpacity: 0.1,
+  fillOpacity: 0.5,
 };
 
 // Renders subcatchment hillslope polygons and binds hover-only tooltips
@@ -136,14 +136,44 @@ export default function Map(): JSX.Element {
   );
 
   const subcatchmentStyle = useCallback(
-    () => ({ color: '#007BFF', weight: 1, fillOpacity: 0.1 }),
+    () => ({
+      color: '#2c2c2c',
+      weight: 0.75,
+      fillColor: '#4a83ec',
+      fillOpacity: 0.1,
+    }),
     []
   );
 
   const channelStyle = useCallback(
-    () => ({ color: '#ff6700', weight: 1, fillOpacity: 0.1 }),
+    () => ({
+      color: '#ff6700',
+      fillOpacity: 0.1,
+      weight: 0.75 
+    }),
     []
   );
+
+  const [selectedLayerId, setSelectedLayerId] = useState</*'Default'*/ | 'Satellite' | 'Topographic'>('Satellite');
+
+  const tileLayers = {
+    // Might not keep this layer.
+    // Default: {
+    //   url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    //   maxZoom: 15,
+    // },
+    Satellite: {
+      url: "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg",
+      attribution: '&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 20,
+    },
+    Topographic: {
+      url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+      attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+      maxZoom: 17,
+    }
+  };
 
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
   if (subError) return <div>Error: {subError.message}</div>;
@@ -155,7 +185,7 @@ export default function Map(): JSX.Element {
         center={CENTER}
         zoom={6}
         minZoom={6}
-        maxZoom={15}
+        maxZoom={tileLayers[selectedLayerId].maxZoom}
         zoomControl={false}
         doubleClickZoom={false}
         scrollWheelZoom
@@ -165,9 +195,31 @@ export default function Map(): JSX.Element {
         style={{ height: '100%', width: '100%' }}
         preferCanvas
       >
-        {(watershedsLoading || subLoading || channelLoading) && (
-          <div className="map-loading-overlay">
-            <div className="loading-spinner" />
+
+        <>
+          {(watershedsLoading || subLoading || channelLoading) && (
+            <div className="map-loading-overlay">
+              <div className="loading-spinner" />
+            </div>
+          )}
+
+          <TileLayer
+            attribution={tileLayers[selectedLayerId].attribution}
+            url={tileLayers[selectedLayerId].url}
+            maxZoom={tileLayers[selectedLayerId].maxZoom}
+          />
+
+          <ScaleControl metric={true} imperial={true} />
+
+          {/* TOP LEFT CONTROLS */}
+          <div className="leaflet-top leaflet-left">
+            <LegendControl />
+            {webcloudRunId && (
+              <WatershedToggle
+                setShowSubcatchments={setShowSubcatchments}
+                setShowChannels={setShowChannels}
+              />
+            )}
           </div>
         )}
 
@@ -189,14 +241,17 @@ export default function Map(): JSX.Element {
           )}
         </div>
 
-        {/* TOP RIGHT CONTROLS */}
-        <div className="leaflet-top leaflet-right">
-          <SearchControl />
-          <LayersControl />
-          <ZoomInControl />
-          <ZoomOutControl />
-          <SettingsControl />
-        </div>
+          {/* TOP RIGHT CONTROLS */}
+          <div className="leaflet-top leaflet-right">
+            <SearchControl />
+            <LayersControl
+              selectedLayerId={selectedLayerId}
+              setSelectedLayerId={setSelectedLayerId}
+            />
+            <ZoomInControl />
+            <ZoomOutControl />
+            <SettingsControl />
+          </div>
 
         {/* BOTTOM RIGHT CONTROLS */}
         <div className="leaflet-bottom leaflet-right">

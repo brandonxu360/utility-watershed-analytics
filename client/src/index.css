@@ -99,7 +99,7 @@
 }
 
 /* Remove default margin */
-*{
+* {
   margin: 0;
   padding: 0;
   font: inherit;
@@ -146,9 +146,9 @@ svg {
 /* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
 @media (prefers-reduced-motion: reduce) {
   html:focus-within {
-   scroll-behavior: auto;
+    scroll-behavior: auto;
   }
-  
+
   *,
   *::before,
   *::after {
@@ -206,9 +206,11 @@ button:hover {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
