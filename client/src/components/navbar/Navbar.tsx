@@ -16,6 +16,7 @@ const Navbar = () => {
               Home
             </Link>
           </li>
+          {/* TODO
           <li>
             <Link to="/about" activeProps={{ style: { color: 'cyan' } }}>
               About
@@ -30,7 +31,7 @@ const Navbar = () => {
             <Link to="/documentation" activeProps={{ style: { color: 'cyan' } }}>
               Documentation
             </Link>
-          </li>
+          </li> */}
           <li>
             <Link to="/login" activeProps={{ style: { color: 'cyan' } }}>
               Login
