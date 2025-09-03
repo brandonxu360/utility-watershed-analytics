@@ -14,8 +14,8 @@ RUN npm install
 COPY . .
 
 # Use alpine's non-root user
-RUN chown -R node:node /app/client
-USER node
+# RUN chown -R node:node /app/client
+# USER node
 
 # Build static files for production
 RUN npm run build
