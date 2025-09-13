@@ -69,7 +69,7 @@ services:
     image: caddy:2-alpine
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy_data:/data
+      - caddy_data:/data
       - frontend-build:/app/client/build
     ports:
       - 80:80
