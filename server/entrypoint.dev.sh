@@ -22,11 +22,8 @@ if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
     fi
 
     # Load the watershed data from shp into database
-    echo "Loading watershed data"
-    python manage.py shell << EOF
-from server.watershed.load import run
-run()
-EOF
+    echo "Running watershed data loading command"
+    python manage.py load_watershed_data --verbosity=2
 
     # Touch the flag file to indicate this logic has been run
     touch "$CONTAINER_ALREADY_STARTED"
