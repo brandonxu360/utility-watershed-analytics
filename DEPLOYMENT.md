@@ -11,13 +11,14 @@ The application is deployed on a virtual machine (VM) provided by the [Universit
 * **Public Domain: `unstable.wepp.cloud`** 
 
 ## Deployment Overview
-The production deployment consists of three main services orchestrated with Docker Compose:
+The production deployment consists of four main services orchestrated with Docker Compose:
 
-1. **Backend (Django)** - API server
-2. **Database (PostgreSQL + PostGIS)** - Geospatial database
-3. **Reverse Proxy (Caddy)** - Serves static frontend files and proxies API requests
+1. **Frontend Build** - Builds React static files into a shared volume
+2. **Backend (Django)** - API server
+3. **Database (PostgreSQL + PostGIS)** - Geospatial database
+4. **Reverse Proxy (Caddy)** - Serves static frontend files and proxies API requests
 
-The frontend React application is built as static files and served directly by Caddy, while API routes (`/api/*`, `/admin/*`, `/silk/*`) are proxied to the Django backend.
+The frontend React application is built in a dedicated container that outputs static files to a shared Docker volume. Caddy serves these static files directly while proxying API routes (`/api/*`, `/admin/*`, `/silk/*`) to the Django backend.
 
 To ensure the Docker Compose stack autostarts, a [systemd service](/utility-watershed-analytics.service) is configured on the host VM.
 
@@ -56,16 +57,8 @@ docker compose -f compose.prod.yml up --build server caddy -d
 
 #### For Frontend Changes:
 ```bash
-# Remove existing build artifacts
-sudo rm -rf ./client/build
-
-# Rebuild frontend
-docker build -f client/Dockerfile.prod -t client-build-prod client/
-
-# Extract new static files
-docker run --rm -u root -v "$PWD/client/build:/out" client-build-prod cp -r /app/client/dist/. /out
-
-# Restart Caddy to serve new files
+# Rebuild frontend and restart services
+docker compose -f compose.prod.yml up --build frontend-build -d
 docker compose -f compose.prod.yml restart caddy
 ```
 

@@ -1,7 +1,15 @@
 # PRODUCTION COMPOSE CONFIG
 services:
 
-  # No frontend/client container - static files will be served.
+  # Frontend build container - builds static files to shared volume
+  frontend-build:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    volumes:
+      - frontend-build:/app/client/dist
+    profiles:
+      - build
 
   # Backend Django server
   server:
@@ -49,7 +57,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy_data:/data
-      - ./client/build:/app/client/build
+      - frontend-build:/app/client/build
     ports:
       - 80:80
       - 443:443
@@ -57,3 +65,4 @@ services:
 
 volumes:
   caddy_data: {}
+  frontend-build: {}
