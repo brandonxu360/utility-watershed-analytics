@@ -37,7 +37,14 @@ The application is located at:
 cd /workdir/utility-watershed-analytics
 ```
 
-### Deploying Changes
+### Initial Deployment
+Build the frontend first and then start the rest of the services:
+```bash
+docker compose -f compose.prod.yml up --build frontend-build -d
+docker compose -f compose.prod.yml up -d  
+```
+
+### Deploying New Changes
 Navigate to the project directory and pull the latest changes:
 ```bash
 cd /workdir/utility-watershed-analytics
