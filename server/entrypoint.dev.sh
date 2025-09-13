@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "=== DEVELOPMENT STARTUP ==="
+
 #Run migrations
 echo "Running Migrations"
 python manage.py makemigrations
@@ -33,5 +35,6 @@ else
     echo "-- Container already initialized, skipping first-time tasks --"
 fi
 
-echo "Starting server"
+echo "=== DEVELOPMENT STARTUP COMPLETE ==="
+echo "Starting Django development server..."
 exec "$@"

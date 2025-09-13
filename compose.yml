@@ -22,6 +22,7 @@ services:
     # Build from the Dockerfile in the server directory
     build:
       context: ./server
+      target: development
     # Host to container port mapping
     ports:
       - "8000:8000"

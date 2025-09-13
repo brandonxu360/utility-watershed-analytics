@@ -7,7 +7,7 @@ services:
   server:
     build:
       context: ./server
-      # Consider specifying a production-specific dockerfile
+      target: production
     ports:
       - "8000:8000"
     volumes:
