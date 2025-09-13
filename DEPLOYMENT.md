@@ -38,12 +38,17 @@ cd /workdir/utility-watershed-analytics
 ```
 
 ### Deploying Changes
+Navigate to the project directory and pull the latest changes:
 ```bash
-# Navigate to the project directory
 cd /workdir/utility-watershed-analytics
-
-# Pull the latest changes
 git pull origin main
+```
+
+#### For Frontend Changes:
+Rebuild frontend and restart services
+```bash
+docker compose -f compose.prod.yml up --build frontend-build -d
+docker compose -f compose.prod.yml restart caddy
 ```
 
 #### For Backend/Infrastructure Changes (Preserving Database):
@@ -53,13 +58,6 @@ docker compose -f compose.prod.yml restart server caddy
 
 # Or rebuild and restart for major changes
 docker compose -f compose.prod.yml up --build server caddy -d
-```
-
-#### For Frontend Changes:
-```bash
-# Rebuild frontend and restart services
-docker compose -f compose.prod.yml up --build frontend-build -d
-docker compose -f compose.prod.yml restart caddy
 ```
 
 ### Data Management
