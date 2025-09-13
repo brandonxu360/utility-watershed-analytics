@@ -37,29 +37,25 @@ cd /workdir/utility-watershed-analytics
 ```
 
 ### Deploying Changes
-#### For Backend/Infrastructure Changes:
 ```bash
 # Navigate to the project directory
 cd /workdir/utility-watershed-analytics
 
 # Pull the latest changes
 git pull origin main
+```
 
-# Stop current services
-docker compose -f compose.prod.yml down
+#### For Backend/Infrastructure Changes (Preserving Database):
+```bash
+# Restart only application containers (server + caddy)
+docker compose -f compose.prod.yml restart server caddy
 
-# Rebuild and restart services
-docker compose -f compose.prod.yml up --build -d
+# Or rebuild and restart for major changes
+docker compose -f compose.prod.yml up --build server caddy -d
 ```
 
 #### For Frontend Changes:
 ```bash
-# Navigate to the project directory
-cd /workdir/utility-watershed-analytics
-
-# Pull the latest changes
-git pull origin main
-
 # Remove existing build artifacts
 sudo rm -rf ./client/build
 
@@ -68,6 +64,26 @@ docker build -f client/Dockerfile.prod -t client-build-prod client/
 
 # Extract new static files
 docker run --rm -u root -v "$PWD/client/build:/out" client-build-prod cp -r /app/client/dist/. /out
+
+# Restart Caddy to serve new files
+docker compose -f compose.prod.yml restart caddy
+```
+
+### Data Management
+Load watershed data after initial deployment or when data updates are available:
+
+```bash
+# Load data (first time or updates)
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
+
+# Preview what would be loaded (safe to test)
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --dry-run
+
+# Force reload even if data already exists
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --force
+
+# Load with detailed output for debugging
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --verbosity=2
 ```
 
 ### Useful Commands

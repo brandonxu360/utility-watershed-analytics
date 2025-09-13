@@ -99,6 +99,52 @@ docker compose up
 **Additional Notes**:
 * All migrations, the creation of a superuser, and loading of the watershed data into the database is automatically handled by the `entrypoint.sh` file on container start.
 
+## Development Container Management
+
+### Restarting Application Containers (Preserving Database)
+For code changes or general app restarts without affecting the database:
+
+```bash
+# Restart app containers only (client + server)
+docker compose restart client server
+
+# Rebuild and restart for code changes
+docker compose up --build client server -d
+
+# View logs for app containers
+docker compose logs -f client server
+```
+
+### Data Management (Development)
+After initial setup, watershed data is automatically loaded. For manual data management:
+
+```bash
+# Load data manually
+docker compose exec server python manage.py load_watershed_data
+
+# Available options:
+# --force          Reload data even if it already exists
+# --dry-run        Preview what would be loaded
+# --verbosity=2    Detailed output for debugging
+```
+
+### Full Container Management
+```bash
+# Stop all containers
+docker compose down
+
+# Start all containers
+docker compose up -d
+
+# Rebuild all containers
+docker compose up --build -d
+
+# View all logs
+docker compose logs -f
+```
+
+> **Note:** For production deployment and container management, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
 ### Troubleshooting Tips
 1. **Docker Issues**:
 * Run `docker compose down` and `docker compose up --build` to reset containers.
