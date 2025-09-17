@@ -176,7 +176,6 @@
     left: 0;
     width: 10px;
     height: 1px;
-    margin: auto;
     content: '';
     background-color: var(--clr-primary-100);
   }
@@ -186,7 +185,7 @@
     top: 0;
     bottom: 0;
     left: 0;
-    width: 1px;
+    width: 2px;
     height: 100%;
     content: '';
     background-color: var(--clr-primary-100);

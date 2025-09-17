@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 
-interface AccordionItemProps {
+type AccordionItemProps = {
   title: string;
   children?: ReactNode;
 }

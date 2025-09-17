@@ -1,14 +1,7 @@
-import { useState, ChangeEvent, Dispatch, SetStateAction } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { FaInfo, FaXmark } from 'react-icons/fa6';
+import { useWatershedOverlayContext } from '../../../../context/watershed-overlay/WatershedOverlayProvider';
 import './WatershedToggle.css';
-
-/**
- * Props for Watershed Toggle control
- */
-interface WatershedToggleControlProps {
-  setShowSubcatchments: Dispatch<SetStateAction<boolean>>;
-  setShowChannels: Dispatch<SetStateAction<boolean>>;
-}
 
 /**
  * WatershedToggle - A custom map control component that toggles
@@ -16,7 +9,8 @@ interface WatershedToggleControlProps {
  *
  * @component
  */
-export default function WatershedToggle({ setShowSubcatchments, setShowChannels }: WatershedToggleControlProps) {
+export default function WatershedToggle() {
+  const { setSubcatchment, setChannels, setPatches } = useWatershedOverlayContext();
   const [isOpen, setIsOpen] = useState(false);
   const [WatershedToggle, setLayers] = useState({
     subcatchment: false,
@@ -34,15 +28,10 @@ export default function WatershedToggle({ setShowSubcatchments, setShowChannels 
    */
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = e.target;
-    setLayers(prev => ({ ...prev, [id]: checked }));
-
-    if (id === 'subcatchment') {
-      setShowSubcatchments(checked);
-    }
-
-    if (id === 'channels') {
-      setShowChannels(checked);
-    }
+    setLayers(prev => ({...prev, [id]: checked}));
+    if (id === 'subcatchment') setSubcatchment(checked);
+    if (id === 'channels') setChannels(checked);
+    if (id === 'patches') setPatches(checked);
   };
 
   return (

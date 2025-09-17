@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
 import { useContext, useMemo, useState } from 'react';
 import { FaPlus, FaXmark } from 'react-icons/fa6';
-import { WatershedIDContext } from '../../../utils/watershed-id/WatershedIDContext';
-import { useBottomPanelContext } from '../../../utils/bottom-panel/BottomPanelContext';
+import { WatershedIDContext } from '../../../context/watershed-id/WatershedIDContext';
+import { useBottomPanelContext } from '../../../context/bottom-panel/BottomPanelContext';
+import { useWatershedOverlayContext } from '../../../context/watershed-overlay/WatershedOverlayProvider';
 import CoverageBarChart from '../../coverage-bar-chart/CoverageBarChart';
 import AccordionItem from '../../accordian-item/AccordianItem'
 import './Watershed.css'
@@ -38,6 +39,8 @@ function SkeletonWatershedPanel() {
 export default function WatershedDataPanel() {
     const [isOpen, setIsOpen] = useState(false);
     const [vegOption, setVegOption] = useState<'shrub' | 'tree' | ''>('');
+
+    const { setSubcatchment, setUseSubcatchmentFeatureColor } = useWatershedOverlayContext();
 
     const navigate = useNavigate();
     const watershedId = useContext(WatershedIDContext);
@@ -188,6 +191,15 @@ export default function WatershedDataPanel() {
 
                 <button className="actionButton">Evapotransportation</button>
                 <button className="actionButton">Soil Moisture</button>
+                <button
+                    className="actionButton"
+                    onClick={() => {
+                        setSubcatchment(true);
+                        setUseSubcatchmentFeatureColor(true);
+                    }}
+                >
+                    View Land Use
+                </button>
             </div>
         </div>
     )

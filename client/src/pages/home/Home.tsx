@@ -1,8 +1,9 @@
 import { Outlet } from '@tanstack/react-router';
 import { useContext } from 'react';
-import { WatershedIDContext } from '../../utils/watershed-id/WatershedIDContext';
-import { useBottomPanelContext } from '../../utils/bottom-panel/BottomPanelContext';
-import { BottomPanelProvider } from '../../utils/bottom-panel/BottomPanelProvider';
+import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
+import { WatershedOverlayProvider } from '../../context/watershed-overlay/WatershedOverlayProvider';
+import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
+import { BottomPanelProvider } from '../../context/bottom-panel/BottomPanelProvider';
 import Map from '../../components/map/Map';
 import HomeSidePanelContent from '../../components/side-panels/home-info/HomeInfoPanel';
 import BottomPanel from '../../components/bottom-panel/BottomPanel';
@@ -50,21 +51,23 @@ function HomeContent({ watershedId }: { watershedId: string | null }) {
   const bottomPanel = useBottomPanelContext();
 
   return (
-    <div className='home-container'>
-      <SidePanel>
-        {watershedId ? <Outlet /> : <HomeSidePanelContent />}
-      </SidePanel>
-      <div className='map-wrapper' style={{ position: 'relative' }}>
-        <Map />
-        {bottomPanel.isOpen && (
-          <BottomPanel
-            isOpen={bottomPanel.isOpen}
-            onClose={bottomPanel.closePanel}
-          >
-            {bottomPanel.content}
-          </BottomPanel>
-        )}
+    <WatershedOverlayProvider>
+      <div className='home-container'>
+        <SidePanel>
+          {watershedId ? <Outlet /> : <HomeSidePanelContent />}
+        </SidePanel>
+        <div className='map-wrapper' style={{ position: 'relative' }}>
+          <Map />
+          {bottomPanel.isOpen && (
+            <BottomPanel
+              isOpen={bottomPanel.isOpen}
+              onClose={bottomPanel.closePanel}
+            >
+              {bottomPanel.content}
+            </BottomPanel>
+          )}
+        </div>
       </div>
-    </div>
+    </WatershedOverlayProvider>
   );
 }

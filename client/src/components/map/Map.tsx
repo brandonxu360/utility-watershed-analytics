@@ -1,11 +1,12 @@
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
-import { useQuery } from '@tanstack/react-query';   
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
-import { WatershedIDContext } from '../../utils/watershed-id/WatershedIDContext';
+import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { useBottomPanelContext } from '../../utils/bottom-panel/BottomPanelContext';
+import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
+import { useWatershedOverlayContext } from '../../context/watershed-overlay/WatershedOverlayProvider';
 import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -76,7 +77,7 @@ function SubcatchmentLayer({ data, style }: {
         layer.on({
           mouseover: () => layer.openTooltip(),
           mouseout: () => layer.closeTooltip(),
-        })
+        });
       }}
     />
   )
@@ -93,9 +94,7 @@ export default function Map(): JSX.Element {
   const navigate = useNavigate()
 
   const watershedId = useContext(WatershedIDContext)
-
-  const [showSubcatchments, setShowSubcatchments] = useState(false);
-  const [showChannels, setShowChannels] = useState(false);
+  const { subcatchment, channels, useSubcatchmentFeatureColor } = useWatershedOverlayContext();
 
   const { data: watersheds, error: watershedsError, isLoading: watershedsLoading } = useQuery({
     queryKey: ['watersheds'],
@@ -105,13 +104,13 @@ export default function Map(): JSX.Element {
   const { data: subcatchments, error: subError, isLoading: subLoading } = useQuery({
     queryKey: ['subcatchments', watershedId],
     queryFn: () => fetchSubcatchments(watershedId!),
-    enabled: Boolean(showSubcatchments && watershedId),
+    enabled: Boolean(subcatchment && watershedId),
   });
 
-  const { data: channels, error: channelError, isLoading: channelLoading } = useQuery({
+  const { data: channelData, error: channelError, isLoading: channelLoading } = useQuery({
     queryKey: ['channels', watershedId],
     queryFn: () => fetchChannels(watershedId!),
-    enabled: Boolean(showChannels && watershedId),
+    enabled: Boolean(channels && watershedId),
   });
 
   const bottomPanel = useBottomPanelContext();
@@ -130,7 +129,7 @@ export default function Map(): JSX.Element {
   // Memoize GeoJSON data to prevent unnecessary re-renders
   const memoWatersheds = useMemo(() => watersheds, [watersheds]);
   const memoSubcatchments = useMemo(() => subcatchments, [subcatchments]);
-  const memoChannels = useMemo(() => channels, [channels]);
+  const memoChannels = useMemo(() => channelData, [channelData]);
 
   // Memoize style functions
   const watershedStyle = useCallback(
@@ -140,20 +139,30 @@ export default function Map(): JSX.Element {
   );
 
   const subcatchmentStyle = useCallback(
-    () => ({
-      color: '#2c2c2c',
-      weight: 0.75,
-      fillColor: '#4a83ec',
-      fillOpacity: 0.1,
-    }),
-    []
+    (feature: any) => {
+      if (useSubcatchmentFeatureColor && feature?.properties?.color) {
+        return {
+          color: feature.properties.color,
+          weight: 0.75,
+          fillColor: feature.properties.color,
+          fillOpacity: 0.1,
+        };
+      }
+      return {
+        color: '#2c2c2c',
+        weight: 0.75,
+        fillColor: '#4a83ec',
+        fillOpacity: 0.1,
+      };
+    },
+    [useSubcatchmentFeatureColor]
   );
 
   const channelStyle = useCallback(
     () => ({
       color: '#ff6700',
       fillOpacity: 0.1,
-      weight: 0.75 
+      weight: 0.75
     }),
     []
   );
@@ -200,42 +209,39 @@ export default function Map(): JSX.Element {
         preferCanvas
       >
 
-          {(watershedsLoading || subLoading || channelLoading) && (
-            <div className="map-loading-overlay">
-              <div className="loading-spinner" />
-            </div>
+        {(watershedsLoading || subLoading || channelLoading) && (
+          <div className="map-loading-overlay">
+            <div className="loading-spinner" />
+          </div>
+        )}
+
+        <TileLayer
+          attribution={tileLayers[selectedLayerId].attribution}
+          url={tileLayers[selectedLayerId].url}
+          maxZoom={tileLayers[selectedLayerId].maxZoom}
+        />
+
+        <ScaleControl metric={true} imperial={true} />
+
+        {/* TOP LEFT CONTROLS */}
+        <div className="leaflet-top leaflet-left">
+          <LegendControl />
+          {watershedId && (
+            <WatershedToggle />
           )}
+        </div>
 
-          <TileLayer
-            attribution={tileLayers[selectedLayerId].attribution}
-            url={tileLayers[selectedLayerId].url}
-            maxZoom={tileLayers[selectedLayerId].maxZoom}
+        {/* TOP RIGHT CONTROLS */}
+        <div className="leaflet-top leaflet-right">
+          <SearchControl />
+          <LayersControl
+            selectedLayerId={selectedLayerId}
+            setSelectedLayerId={setSelectedLayerId}
           />
-
-          <ScaleControl metric={true} imperial={true} />
-
-          {/* TOP LEFT CONTROLS */}
-          <div className="leaflet-top leaflet-left">
-            <LegendControl />
-            {watershedId && (
-              <WatershedToggle
-                setShowSubcatchments={setShowSubcatchments}
-                setShowChannels={setShowChannels}
-              />
-            )}
-          </div>
-
-          {/* TOP RIGHT CONTROLS */}
-          <div className="leaflet-top leaflet-right">
-            <SearchControl />
-            <LayersControl
-              selectedLayerId={selectedLayerId}
-              setSelectedLayerId={setSelectedLayerId}
-            />
-            <ZoomInControl />
-            <ZoomOutControl />
-            <SettingsControl />
-          </div>
+          <ZoomInControl />
+          <ZoomOutControl />
+          <SettingsControl />
+        </div>
 
         {/* BOTTOM RIGHT CONTROLS */}
         <div className="leaflet-bottom leaflet-right">
@@ -245,22 +251,22 @@ export default function Map(): JSX.Element {
         {/* Handles URL navigation to a specified watershed */}
         <MapEffect watershedId={watershedId} watersheds={memoWatersheds} />
 
-          {memoWatersheds && (
-            <GeoJSON
-              data={memoWatersheds}
-              style={watershedStyle}
-              onEachFeature={(_, layer) => layer.on({ click: onWatershedClick })}
-            />
-          )}
+        {memoWatersheds && (
+          <GeoJSON
+            data={memoWatersheds}
+            style={watershedStyle}
+            onEachFeature={(_, layer) => layer.on({ click: onWatershedClick })}
+          />
+        )}
 
-        {showSubcatchments && memoSubcatchments && (
+        {subcatchment && memoSubcatchments && (
           <SubcatchmentLayer
             data={memoSubcatchments}
             style={subcatchmentStyle}
           />
         )}
 
-        {showChannels && memoChannels && (
+        {channels && memoChannels && (
           <GeoJSON data={memoChannels} style={channelStyle} />
         )}
       </MapContainer>
