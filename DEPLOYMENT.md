@@ -38,10 +38,19 @@ cd /workdir/utility-watershed-analytics
 ```
 
 ### Initial Deployment
-Build the frontend first and then start the rest of the services:
+Build the frontend, download data, start services, and load data:
 ```bash
+# 1. Build frontend static files
 docker compose -f compose.prod.yml up --build frontend-build -d
-docker compose -f compose.prod.yml up -d  
+
+# 2. Download data files
+docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
+
+# 3. Start all services (database needs to be running for data loading)
+docker compose -f compose.prod.yml up -d
+
+# 4. Load data into database
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
 ```
 
 ### Deploying New Changes
@@ -68,7 +77,18 @@ docker compose -f compose.prod.yml up --build server caddy -d
 ```
 
 ### Data Management
-Load watershed data after initial deployment or when data updates are available:
+The application includes a containerized data downloader service for managing watershed data files. Data is expected to be managed at the developer's discretion, so less automation exists in this area.
+
+#### Download Data Files
+To download the latest watershed data files:
+
+```bash
+# Download data files to shared volume
+docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
+```
+
+#### Load Data into Database
+After downloading data files, load them into the database:
 
 ```bash
 # Load data (first time or updates)
@@ -82,6 +102,17 @@ docker compose -f compose.prod.yml exec server python manage.py load_watershed_d
 
 # Load with detailed output for debugging
 docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --verbosity=2
+```
+
+#### Complete Data Setup (Download + Load)
+For initial deployment or major data updates:
+
+```bash
+# 1. Download all data files
+docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
+
+# 2. Load data into database
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
 ```
 
 ### Useful Commands

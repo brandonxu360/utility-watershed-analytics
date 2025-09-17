@@ -1,0 +1,28 @@
+# Lightweight Python image for data downloading
+FROM python:3.11-alpine
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV DATA_OUTPUT_DIR=/data
+
+# Create working directory
+WORKDIR /app
+
+# Create data output directory
+RUN mkdir -p /data
+
+# Copy requirements for data download script
+COPY server/data-script-requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r data-script-requirements.txt
+
+# Copy data download script and manifest
+COPY server/data-downloader.py .
+COPY server/data-manifest.yaml .
+
+# Make the script executable
+RUN chmod +x data-downloader.py
+
+# Default command
+CMD ["python", "data-downloader.py"]

@@ -11,6 +11,18 @@ services:
     profiles:
       - build
 
+  # Data downloader service - downloads watershed data files
+  data-downloader:
+    build:
+      context: .
+      dockerfile: Dockerfile.data-downloader
+    volumes:
+      - watershed_data:/data
+    environment:
+      - DATA_OUTPUT_DIR=/data
+    profiles:
+      - data-management
+
   # Backend Django server
   server:
     build:
@@ -20,6 +32,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - watershed_data:/app/server/watershed/data
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PW=${POSTGRES_PW}
@@ -66,3 +79,5 @@ services:
 volumes:
   caddy_data: {}
   frontend-build: {}
+  watershed_data: {}
+
