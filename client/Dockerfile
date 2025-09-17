@@ -16,3 +16,6 @@ USER node
 
 # Install npm dependencies
 RUN npm install
+
+# Development server will be started via command in compose
+# No need to copy source code since it's mounted as volume

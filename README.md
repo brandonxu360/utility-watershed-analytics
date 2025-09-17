@@ -66,22 +66,31 @@ DEBUG=true
     }
 }
 ```
-7. **Data**: For convenience, a python script is provided to fetch the required datasets. To use this script:
+7. **Data**: Watershed data files are managed through a containerized downloader service. For the best developer experience, download data before starting the main application:
 
-    1. Create a virtual environment and install the dependencies:
     ```bash
-    # These example commands are executed from the project root directory
-    python -m venv server/.venv/venv-download
-    source server/.venv/venv-download/bin/activate
-    pip install -r server/data-script-requirements.txt
+    # Recommended: Download data files first
+    docker compose --profile data-management run --rm data-downloader
+    
+    # Then start the application (data will be auto-loaded)
+    docker compose up
+    ```
+    
+    Alternatively, you can start the application first and download data later:
+    ```bash
+    # Start application first
+    docker compose up
+    
+    # Download data in another terminal
+    docker compose --profile data-management run --rm data-downloader
+    
+    # Restart server to auto-load data, or load manually
+    docker compose restart server
+    # OR
+    docker compose exec server python manage.py load_watershed_data
     ```
 
-    2. Run the script:
-    ```bash
-    python server/data-download-script.py
-    ```
-
-Alternatively, one could work through the [data-manifest.yml](/server/data-manifest.yaml) and manually download the data files from `url` into `target`.
+See the [data-manifest.yml](/server/data-manifest.yaml) to manage the data.
 
 ### Usage
 1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. **Note**: If you are using VSCode with Dev Containers, you can skip this step—containers will start automatically when you open the project in a devcontainer.
@@ -99,13 +108,79 @@ docker compose up
 **Additional Notes**:
 * All migrations, the creation of a superuser, and loading of the watershed data into the database is automatically handled by the `entrypoint.sh` file on container start.
 
+## Development Container Management
+
+### Restarting Application Containers (Preserving Database)
+For code changes or general app restarts without affecting the database:
+
+```bash
+# Restart app containers only (client + server)
+docker compose restart client server
+
+# Rebuild and restart for code changes
+docker compose up --build client server -d
+
+# View logs for app containers
+docker compose logs -f client server
+```
+
+### Data Management (Development)
+To load watershed data into your development environment:
+
+```bash
+# 1. Download data files first
+docker compose --profile data-management run --rm data-downloader
+
+# 2. Load data into database
+docker compose exec server python manage.py load_watershed_data
+
+# Available options for loading:
+# --force          Reload data even if it already exists
+# --dry-run        Preview what would be loaded
+# --verbosity=2    Detailed output for debugging
+```
+
+Useful commands for removing or resetting data:
+```bash
+# Remove all services and data (database + downloaded files)
+docker compose down -v
+
+# Remove the data file volume
+docker volume rm utility-watershed-analytics_watershed_data
+
+# Re-download data
+docker compose --profile data-management run --rm data-downloader
+
+# Reload data from current data files into database
+docker compose exec server python manage.py load_watershed_data --force
+```
+
+### Full Container Management
+```bash
+# Stop all containers
+docker compose down
+
+# Start all containers
+docker compose up -d
+
+# Rebuild all containers
+docker compose up --build -d
+
+# View all logs
+docker compose logs -f
+```
+
+> **Note:** For production deployment and container management, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
 ### Troubleshooting Tips
 1. **Docker Issues**:
 * Run `docker compose down` and `docker compose up --build` to reset containers.
 * Check logs with `docker compose logs`.
-2. **Data Issues**: a common point of failure may be achieving the correct data configuration. Ensure that:
-* You have the correct data directory at `fullstack-gis-webapp/server/server/watershed/data`
-* Review the `load.py` script to see how the data is being handled.
+2. **Data Issues**: a common point of failure may be achieving the correct data configuration.
+* If running into `relation does not exist` errors, you may need to run migrations to sync the database:
+    ```bash
+    docker compose exec server python manage.py migrate
+    ```
 
 ## Running Tests
 

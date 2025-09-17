@@ -22,6 +22,7 @@ services:
     # Build from the Dockerfile in the server directory
     build:
       context: ./server
+      target: development
     # Host to container port mapping
     ports:
       - "8000:8000"
@@ -37,6 +38,7 @@ services:
     # Volume mount
     volumes:
       - .:/app
+      - watershed_data:/app/server/watershed/data
     entrypoint: ["/entrypoint.sh"]
     command: python manage.py runserver 0.0.0.0:8000
     # Keep container active and interactive
@@ -45,6 +47,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  # Data downloader service - downloads watershed data files
+  data-downloader:
+    build:
+      context: .
+      dockerfile: Dockerfile.data-downloader
+    volumes:
+      - watershed_data:/data
+    environment:
+      - DATA_OUTPUT_DIR=/data
+    profiles:
+      - data-management
 
   # PostgreSQL database with PostGIS
   db:
@@ -82,3 +96,6 @@ services:
     volumes:
     # Mount the server configuration file
     - ./pgadmin-servers.json:/pgadmin4/servers.json
+  
+volumes:
+  watershed_data: {}  

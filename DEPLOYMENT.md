@@ -11,13 +11,14 @@ The application is deployed on a virtual machine (VM) provided by the [Universit
 * **Public Domain: `unstable.wepp.cloud`** 
 
 ## Deployment Overview
-The production deployment consists of three main services orchestrated with Docker Compose:
+The production deployment consists of four main services orchestrated with Docker Compose:
 
-1. **Backend (Django)** - API server
-2. **Database (PostgreSQL + PostGIS)** - Geospatial database
-3. **Reverse Proxy (Caddy)** - Serves static frontend files and proxies API requests
+1. **Frontend Build** - Builds React static files into a shared volume
+2. **Backend (Django)** - API server
+3. **Database (PostgreSQL + PostGIS)** - Geospatial database
+4. **Reverse Proxy (Caddy)** - Serves static frontend files and proxies API requests
 
-The frontend React application is built as static files and served directly by Caddy, while API routes (`/api/*`, `/admin/*`, `/silk/*`) are proxied to the Django backend.
+The frontend React application is built in a dedicated container that outputs static files to a shared Docker volume. Caddy serves these static files directly while proxying API routes (`/api/*`, `/admin/*`, `/silk/*`) to the Django backend.
 
 To ensure the Docker Compose stack autostarts, a [systemd service](/utility-watershed-analytics.service) is configured on the host VM.
 
@@ -36,38 +37,82 @@ The application is located at:
 cd /workdir/utility-watershed-analytics
 ```
 
-### Deploying Changes
-#### For Backend/Infrastructure Changes:
+### Initial Deployment
+Build the frontend, download data, start services, and load data:
 ```bash
-# Navigate to the project directory
+# 1. Build frontend static files
+docker compose -f compose.prod.yml up --build frontend-build -d
+
+# 2. Download data files
+docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
+
+# 3. Start all services (database needs to be running for data loading)
+docker compose -f compose.prod.yml up -d
+
+# 4. Load data into database
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
+```
+
+### Deploying New Changes
+Navigate to the project directory and pull the latest changes:
+```bash
 cd /workdir/utility-watershed-analytics
-
-# Pull the latest changes
 git pull origin main
-
-# Stop current services
-docker compose -f compose.prod.yml down
-
-# Rebuild and restart services
-docker compose -f compose.prod.yml up --build -d
 ```
 
 #### For Frontend Changes:
+Rebuild frontend and restart services
 ```bash
-# Navigate to the project directory
-cd /workdir/utility-watershed-analytics
+docker compose -f compose.prod.yml up --build frontend-build -d
+docker compose -f compose.prod.yml restart caddy
+```
 
-# Pull the latest changes
-git pull origin main
+#### For Backend/Infrastructure Changes (Preserving Database):
+```bash
+# Restart only application containers (server + caddy)
+docker compose -f compose.prod.yml restart server caddy
 
-# Remove existing build artifacts
-sudo rm -rf ./client/build
+# Or rebuild and restart for major changes
+docker compose -f compose.prod.yml up --build server caddy -d
+```
 
-# Rebuild frontend
-docker build -f client/Dockerfile.prod -t client-build-prod client/
+### Data Management
+The application includes a containerized data downloader service for managing watershed data files. Data is expected to be managed at the developer's discretion, so less automation exists in this area.
 
-# Extract new static files
-docker run --rm -u root -v "$PWD/client/build:/out" client-build-prod cp -r /app/client/dist/. /out
+#### Download Data Files
+To download the latest watershed data files:
+
+```bash
+# Download data files to shared volume
+docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
+```
+
+#### Load Data into Database
+After downloading data files, load them into the database:
+
+```bash
+# Load data (first time or updates)
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
+
+# Preview what would be loaded (safe to test)
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --dry-run
+
+# Force reload even if data already exists
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --force
+
+# Load with detailed output for debugging
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --verbosity=2
+```
+
+#### Complete Data Setup (Download + Load)
+For initial deployment or major data updates:
+
+```bash
+# 1. Download all data files
+docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
+
+# 2. Load data into database
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
 ```
 
 ### Useful Commands

@@ -8,7 +8,9 @@
 # in a seperate container)
 
 # Official GDAL image, comes with PROJ (GEOS not included)
-FROM ghcr.io/osgeo/gdal:alpine-small-latest
+# Base stage with common dependencies - this is a multistage dockerfile to 
+# support both development and production environments
+FROM ghcr.io/osgeo/gdal:alpine-small-latest AS base
 
 # Debugging purposes - Python output straight to terminal
 ENV PYTHONUNBUFFERED=1
@@ -42,8 +44,20 @@ RUN pip install -r requirements.txt
 # Make sure scripts in venv are executable
 RUN chmod +x /venv/bin/*
 
-# Set up entrypoint shell script
-COPY entrypoint.sh /entrypoint.sh
+# Development stage
+FROM base AS development
+
+# Copy development entrypoint
+COPY entrypoint.dev.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+USER devcontainer
+
+# Production stage  
+FROM base AS production
+
+# Copy production entrypoint
+COPY entrypoint.prod.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 USER devcontainer

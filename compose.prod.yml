@@ -1,17 +1,38 @@
 # PRODUCTION COMPOSE CONFIG
 services:
 
-  # No frontend/client container - static files will be served.
+  # Frontend build container - builds static files to shared volume
+  frontend-build:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    volumes:
+      - frontend-build:/app/client/dist
+    profiles:
+      - build
+
+  # Data downloader service - downloads watershed data files
+  data-downloader:
+    build:
+      context: .
+      dockerfile: Dockerfile.data-downloader
+    volumes:
+      - watershed_data:/data
+    environment:
+      - DATA_OUTPUT_DIR=/data
+    profiles:
+      - data-management
 
   # Backend Django server
   server:
     build:
       context: ./server
-      # Consider specifying a production-specific dockerfile
+      target: production
     ports:
       - "8000:8000"
     volumes:
       - .:/app
+      - watershed_data:/app/server/watershed/data
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PW=${POSTGRES_PW}
@@ -49,7 +70,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy_data:/data
-      - ./client/build:/app/client/build
+      - frontend-build:/app/client/build
     ports:
       - 80:80
       - 443:443
@@ -57,3 +78,6 @@ services:
 
 volumes:
   caddy_data: {}
+  frontend-build: {}
+  watershed_data: {}
+
