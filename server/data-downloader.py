@@ -73,7 +73,7 @@ def download_watershed_data():
             
             # Use session for connection pooling and timeout
             with requests.Session() as session:
-                response = session.get(url, timeout=300, stream=True)
+                response = session.get(url, timeout=60, stream=True)
                 response.raise_for_status()
                 
                 # Write file in chunks to handle large files
