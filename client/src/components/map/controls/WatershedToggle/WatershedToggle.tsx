@@ -13,7 +13,7 @@ export default function WatershedToggle() {
   const { 
     subcatchment,
     channels,
-    patches,
+    // patches,
     landuse,
     setSubcatchment,
     setChannels,
@@ -22,12 +22,6 @@ export default function WatershedToggle() {
   } = useWatershedOverlayStore();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [WatershedToggle, setLayers] = useState({
-    subcatchment: subcatchment ?? false,
-    channels: channels ?? false,
-    patches: patches ?? false,
-    landuse: landuse ?? false,
-  });
 
   /**
    * Toggles the open state of the control panel
@@ -39,13 +33,17 @@ export default function WatershedToggle() {
    */
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = e.target;
-    setLayers(prev => ({...prev, [id]: checked}));
     if (id === 'subcatchment') setSubcatchment(checked);
     if (id === 'channels') setChannels(checked);
     if (id === 'patches') setPatches(checked);
     if (id === 'landuse') {
-      setSubcatchment(true);
-      setLanduse(true);
+      if (checked) {
+        setSubcatchment(true);
+        setLanduse(true);
+      } else {
+        setSubcatchment(false);
+        setLanduse(false);
+      }
     }
   };
 
@@ -72,8 +70,9 @@ export default function WatershedToggle() {
               <input
                 type="checkbox"
                 id="subcatchment"
-                checked={WatershedToggle.subcatchment}
+                checked={subcatchment}
                 onChange={handleChange}
+                disabled={landuse && subcatchment}
               />
               <label htmlFor="subcatchment" className="watershed-toggle-label">
                 View Subcatchments
@@ -84,7 +83,7 @@ export default function WatershedToggle() {
               <input
                 type="checkbox"
                 id="channels"
-                checked={WatershedToggle.channels}
+                checked={channels}
                 onChange={handleChange}
               />
               <label htmlFor="channels" className="watershed-toggle-label">
@@ -96,7 +95,7 @@ export default function WatershedToggle() {
               <input
                 type="checkbox"
                 id="patches"
-                checked={WatershedToggle.patches}
+                checked={patches}
                 onChange={handleChange}
                 disabled
               />
@@ -109,7 +108,7 @@ export default function WatershedToggle() {
               <input
                 type="checkbox"
                 id="landuse"
-                checked={WatershedToggle.landuse}
+                checked={landuse}
                 onChange={handleChange}
               />
               <label htmlFor="landuse" className="watershed-toggle-label">
