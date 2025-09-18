@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from 'react';
 import { FaInfo, FaXmark } from 'react-icons/fa6';
-import { useWatershedOverlayContext } from '../../../../context/watershed-overlay/WatershedOverlayProvider';
+import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
 import './WatershedToggle.css';
 
 /**
@@ -10,12 +10,23 @@ import './WatershedToggle.css';
  * @component
  */
 export default function WatershedToggle() {
-  const { setSubcatchment, setChannels, setPatches } = useWatershedOverlayContext();
+  const { 
+    subcatchment,
+    channels,
+    patches,
+    landuse,
+    setSubcatchment,
+    setChannels,
+    setPatches,
+    setLanduse
+  } = useWatershedOverlayStore();
+
   const [isOpen, setIsOpen] = useState(false);
   const [WatershedToggle, setLayers] = useState({
-    subcatchment: false,
-    channels: false,
-    patches: false,
+    subcatchment: subcatchment ?? false,
+    channels: channels ?? false,
+    patches: patches ?? false,
+    landuse: landuse ?? false,
   });
 
   /**
@@ -32,6 +43,10 @@ export default function WatershedToggle() {
     if (id === 'subcatchment') setSubcatchment(checked);
     if (id === 'channels') setChannels(checked);
     if (id === 'patches') setPatches(checked);
+    if (id === 'landuse') {
+      setSubcatchment(true);
+      setLanduse(true);
+    }
   };
 
   return (
@@ -77,7 +92,7 @@ export default function WatershedToggle() {
               </label>
             </div>
 
-            <div className="watershed-toggle-container">
+            {/* <div className="watershed-toggle-container">
               <input
                 type="checkbox"
                 id="patches"
@@ -87,6 +102,18 @@ export default function WatershedToggle() {
               />
               <label htmlFor="patches" className="watershed-toggle-label disabled">
                 View Patches
+              </label>
+            </div> */}
+
+            <div className="watershed-toggle-container">
+              <input
+                type="checkbox"
+                id="landuse"
+                checked={WatershedToggle.landuse}
+                onChange={handleChange}
+              />
+              <label htmlFor="landuse" className="watershed-toggle-label">
+                View Land Use
               </label>
             </div>
           </div>

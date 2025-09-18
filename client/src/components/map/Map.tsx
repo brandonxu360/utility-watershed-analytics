@@ -6,7 +6,7 @@ import { MapEffect } from '../../utils/map/MapEffectUtil';
 import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
 import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
-import { useWatershedOverlayContext } from '../../context/watershed-overlay/WatershedOverlayProvider';
+import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
 import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -94,7 +94,7 @@ export default function Map(): JSX.Element {
   const navigate = useNavigate()
 
   const watershedId = useContext(WatershedIDContext)
-  const { subcatchment, channels, useSubcatchmentFeatureColor } = useWatershedOverlayContext();
+  const { subcatchment, channels, landuse } = useWatershedOverlayStore();
 
   const { data: watersheds, error: watershedsError, isLoading: watershedsLoading } = useQuery({
     queryKey: ['watersheds'],
@@ -140,7 +140,7 @@ export default function Map(): JSX.Element {
 
   const subcatchmentStyle = useCallback(
     (feature: any) => {
-      if (useSubcatchmentFeatureColor && feature?.properties?.color) {
+      if (landuse && feature?.properties?.color) {
         return {
           color: feature.properties.color,
           weight: 0.75,
@@ -155,7 +155,7 @@ export default function Map(): JSX.Element {
         fillOpacity: 0.1,
       };
     },
-    [useSubcatchmentFeatureColor]
+    [landuse]
   );
 
   const channelStyle = useCallback(
@@ -196,8 +196,8 @@ export default function Map(): JSX.Element {
     <div className="map-container">
       <MapContainer
         center={CENTER}
-        zoom={6}
-        minZoom={6}
+        zoom={7}
+        minZoom={7}
         maxZoom={tileLayers[selectedLayerId].maxZoom}
         zoomControl={false}
         doubleClickZoom={false}

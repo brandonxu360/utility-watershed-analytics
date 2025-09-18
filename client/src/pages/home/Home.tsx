@@ -1,7 +1,6 @@
 import { Outlet } from '@tanstack/react-router';
 import { useContext } from 'react';
 import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
-import { WatershedOverlayProvider } from '../../context/watershed-overlay/WatershedOverlayProvider';
 import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
 import { BottomPanelProvider } from '../../context/bottom-panel/BottomPanelProvider';
 import Map from '../../components/map/Map';
@@ -51,7 +50,6 @@ function HomeContent({ watershedId }: { watershedId: string | null }) {
   const bottomPanel = useBottomPanelContext();
 
   return (
-    <WatershedOverlayProvider>
       <div className='home-container'>
         <SidePanel>
           {watershedId ? <Outlet /> : <HomeSidePanelContent />}
@@ -68,6 +66,5 @@ function HomeContent({ watershedId }: { watershedId: string | null }) {
           )}
         </div>
       </div>
-    </WatershedOverlayProvider>
   );
 }
