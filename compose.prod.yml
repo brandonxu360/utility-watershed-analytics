@@ -14,7 +14,7 @@ services:
   # Data downloader service - downloads watershed data files
   data-downloader:
     build:
-      context: .
+      context: ./server
       dockerfile: Dockerfile.data-downloader
     volumes:
       - watershed_data:/data
@@ -32,7 +32,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-      - watershed_data:/app/server/watershed/data
+      - watershed_data:/app/server/server/watershed/data
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PW=${POSTGRES_PW}
