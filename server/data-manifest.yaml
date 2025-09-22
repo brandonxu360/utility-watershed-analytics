@@ -1,8 +1,8 @@
 # Watershed Borders
-- name: Washington Watershed Borders (less than 130 miles squared)
+- name: Oregon Watershed Borders (less than 130 miles squared)
   url: https://wepp.cloud/share/roger/NASA-Roses/OR_drinking_water_source_areas_less_than_130mi2_weppcloud.json
   target: server/watershed/data/borders/OR_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson
-- name: Oregon Watershed Borders (less than 130 miles squared)
+- name: Washington Watershed Borders (less than 130 miles squared)
   url: https://wepp.cloud/share/roger/NASA-Roses/WA_drinking_water_source_areas_less_than_130mi2_weppcloud.json
   target: server/watershed/data/borders/WA_drinking_water_source_areas_less_than_130mi2_weppcloud.geojson
 
