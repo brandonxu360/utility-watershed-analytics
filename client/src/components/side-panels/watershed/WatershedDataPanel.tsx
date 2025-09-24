@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
 import { useContext, useMemo, useState } from 'react';
-import { FaPlus, FaXmark } from 'react-icons/fa6';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 import { WatershedIDContext } from '../../../context/watershed-id/WatershedIDContext';
 import { useBottomPanelContext } from '../../../context/bottom-panel/BottomPanelContext';
 import { useWatershedOverlayStore } from '../../../store/WatershedOverlayStore';
@@ -129,7 +129,7 @@ export default function WatershedDataPanel() {
                         aria-label={isOpen ? 'Close Vegetation Cover' : 'Open Vegetation Cover'}
                         title={isOpen ? 'Close Vegetation Cover' : 'Open Vegetation Cover'}
                     >
-                        Vegetation Cover {isOpen ? <FaXmark /> : <FaPlus />}
+                        Vegetation Cover {isOpen ? <FaChevronUp /> : <FaChevronDown />}
                     </button>
 
                     {isOpen && (

@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { FaMinus, FaPlus } from "react-icons/fa6";
+import { FaChevronUp, FaChevronDown } from "react-icons/fa6";
 
 type AccordionItemProps = {
   title: string;
@@ -16,7 +16,7 @@ export default function AccordionItem({ title, children }: AccordionItemProps) {
         aria-expanded={open}
       >
         {title}
-        {open ? <FaMinus /> : <FaPlus />}
+        {open ? <FaChevronUp /> : <FaChevronDown />}
       </button>
       {open && <div className="accordionContent">{children}</div>}
     </div>

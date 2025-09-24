@@ -7,20 +7,19 @@ import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContex
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
 import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
 import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
-import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
+import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 import LayersControl from './controls/Layers/Layers';
 import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
-import UserLocationControl from './controls/UserLocation/UserLocation';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
-  Number(((41.88 + 46.19) / 2).toFixed(2)),
+  Number(((43.88 + 50.19) / 2).toFixed(2)),
   Number(((-124.52 + -116.93) / 2).toFixed(2))
 ];
 
@@ -142,10 +141,10 @@ export default function Map(): JSX.Element {
     (feature: any) => {
       if (landuse && feature?.properties?.color) {
         return {
-          color: feature.properties.color,
+          color: '#2c2c2c',
           weight: 0.75,
           fillColor: feature.properties.color,
-          fillOpacity: 0.1,
+          fillOpacity: 0.25,
         };
       }
       return {
@@ -167,15 +166,9 @@ export default function Map(): JSX.Element {
     []
   );
 
-  const [selectedLayerId, setSelectedLayerId] = useState</*'Default'*/ | 'Satellite' | 'Topographic'>('Satellite');
+  const [selectedLayerId, setSelectedLayerId] = useState<'Satellite' | 'Topographic'>('Satellite');
 
   const tileLayers = {
-    // Might not keep this layer.
-    // Default: {
-    //   url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    //   maxZoom: 15,
-    // },
     Satellite: {
       url: "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg",
       attribution: '&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -226,9 +219,6 @@ export default function Map(): JSX.Element {
         {/* TOP LEFT CONTROLS */}
         <div className="leaflet-top leaflet-left">
           <LegendControl />
-          {watershedId && (
-            <WatershedToggle />
-          )}
         </div>
 
         {/* TOP RIGHT CONTROLS */}
@@ -243,9 +233,11 @@ export default function Map(): JSX.Element {
           <SettingsControl />
         </div>
 
-        {/* BOTTOM RIGHT CONTROLS */}
-        <div className="leaflet-bottom leaflet-right">
-          <UserLocationControl />
+        {/* BOTTOM LEFT CONTROLS */}
+        <div className="leaflet-bottom leaflet-right" style={{ marginBottom: '2.25rem', marginRight: '0.625rem' }}>
+          {watershedId && (
+            <DataLayersControl />
+          )}
         </div>
 
         {/* Handles URL navigation to a specified watershed */}

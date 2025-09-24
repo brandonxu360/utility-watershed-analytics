@@ -3,7 +3,6 @@ import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
 import { WatershedIDContext } from '../../../context/watershed-id/WatershedIDContext';
-import AccordionItem from '../../accordian-item/AccordianItem'
 import './Watershed.css'
 
 /** 
@@ -87,23 +86,20 @@ export default function WatershedOverview() {
             </div>
 
             <div className='accordionGroup' key={watershedId}>
-                <AccordionItem title="View Calibrated WEPP Results">
-                    <button className='subButton'>Spatial Outputs</button>
-                    <button className='subButton'>Tabular Outputs</button>
-                </AccordionItem>
-
-                <AccordionItem title="View Calibrated RHESSys Results">
-                    <button className='subButton'>Spatial Outputs</button>
-                    <button className='subButton'>Tabular Outputs</button>
-                </AccordionItem>
+                <button
+                    className='actionButton'
+                    aria-label='View Calibrated WEPP Results'
+                    title='View Calibrated WEPP Results'
+                >
+                    View Calibrated WEPP Results
+                </button>
 
                 <button
-                    className="actionButton"
-                    aria-label='View Watershed Data'
-                    title='View Watershed Data'
-                    onClick={() => navigate({ to: `/watershed/data/${watershedId}` })}
+                    className='actionButton'
+                    aria-label='View Calibrated RHESSys Results'
+                    title='View Calibrated RHESSys Results'
                 >
-                    View Watershed Data
+                    View Calibrated RHESSys Results
                 </button>
 
                 <button
