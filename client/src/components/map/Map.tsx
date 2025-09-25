@@ -19,7 +19,7 @@ import './Map.css';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
-  Number(((43.88 + 50.19) / 2).toFixed(2)),
+  Number(((43.88 + 49.19) / 2).toFixed(2)),
   Number(((-124.52 + -116.93) / 2).toFixed(2))
 ];
 

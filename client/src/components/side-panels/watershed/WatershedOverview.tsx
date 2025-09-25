@@ -65,50 +65,54 @@ export default function WatershedOverview() {
             >
                 BACK
             </button>
-            <h2>{watershed.properties.pws_name}</h2>
-            <p>This is where the description for the watershed will go. For now we have placeholder text.</p>
-            <p>
-                <strong>County:</strong> {watershed.properties.county ?? "N/A"}
-            </p>
-            <p>
-                <strong>Acres:</strong> {watershed.properties.area_m2 ? `${(watershed.properties.area_m2 / 10000).toFixed(2)} ha` : "N/A"}
-            </p>
-            <p>
-                <strong>Number of Customers:</strong>{" "}
-                {watershed.properties.num_customers ?? "N/A"}
-            </p>
-            <p>
-                <strong>Source Type:</strong> {watershed.properties.source_type ?? "N/A"}
-            </p>
-
-            <div className="row">
-                <p style={{ marginBottom: '0' }}><strong>Watershed Models</strong></p>
+            <div style={{ marginTop: '1.5rem' }}>
+                <h2>{watershed.properties.pws_name}</h2>
+                <p>This is where the description for the watershed will go. For now we have placeholder text.</p>
+                <p>
+                    <strong>County:</strong> {watershed.properties.county ?? "N/A"}
+                </p>
+                <p>
+                    <strong>Acres:</strong> {watershed.properties.area_m2 ? `${(watershed.properties.area_m2 / 10000).toFixed(2)} ha` : "N/A"}
+                </p>
+                <p>
+                    <strong>Number of Customers:</strong>{" "}
+                    {watershed.properties.num_customers ?? "N/A"}
+                </p>
+                <p>
+                    <strong>Source Type:</strong> {watershed.properties.source_type ?? "N/A"}
+                </p>
             </div>
 
-            <div className='accordionGroup' key={watershedId}>
-                <button
-                    className='actionButton'
-                    aria-label='View Calibrated WEPP Results'
-                    title='View Calibrated WEPP Results'
-                >
-                    View Calibrated WEPP Results
-                </button>
+            <div style={{ marginTop: '2rem' }}>
+                <div className="row">
+                    <p style={{ marginBottom: '0' }}><strong>Watershed Models</strong></p>
+                </div>
 
-                <button
-                    className='actionButton'
-                    aria-label='View Calibrated RHESSys Results'
-                    title='View Calibrated RHESSys Results'
-                >
-                    View Calibrated RHESSys Results
-                </button>
+                <div className='accordionGroup' key={watershedId}>
+                    <button
+                        className='actionButton'
+                        aria-label='View Calibrated WEPP Results'
+                        title='View Calibrated WEPP Results'
+                    >
+                        View Calibrated WEPP Results
+                    </button>
 
-                <button
-                    className='actionButton'
-                    aria-label='Run WEPP cloud watershed analysis model'
-                    title='Run WEPPcloud watershed analysis model'
-                >
-                    WEPPcloud Watershed Analysis
-                </button>
+                    <button
+                        className='actionButton'
+                        aria-label='View Calibrated RHESSys Results'
+                        title='View Calibrated RHESSys Results'
+                    >
+                        View Calibrated RHESSys Results
+                    </button>
+
+                    <button
+                        className='actionButton'
+                        aria-label='Run WEPP cloud watershed analysis model'
+                        title='Run WEPPcloud watershed analysis model'
+                    >
+                        WEPPcloud Watershed Analysis
+                    </button>
+                </div>
             </div>
         </div>
     )

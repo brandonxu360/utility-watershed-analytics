@@ -70,6 +70,7 @@
   background: var(--clr-primary-100);
   padding: 0;
   width: 100%;
+  border-bottom: var(--clr-primary-400) 0.5px solid;
 }
 
 .layerpicker-heading {
