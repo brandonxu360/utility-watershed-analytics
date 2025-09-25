@@ -41,7 +41,7 @@ cd /workdir/utility-watershed-analytics
 Build the frontend, download data, start services, and load data:
 ```bash
 # 1. Build frontend static files
-docker compose -f compose.prod.yml up --build frontend-build -d
+docker compose -f compose.prod.yml run --rm --build frontend-build
 
 # 2. Download data files
 docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
@@ -63,7 +63,7 @@ git pull origin main
 #### For Frontend Changes:
 Rebuild frontend and restart services
 ```bash
-docker compose -f compose.prod.yml up --build frontend-build -d
+docker compose -f compose.prod.yml run --rm --build frontend-build
 docker compose -f compose.prod.yml restart caddy
 ```
 
