@@ -10,6 +10,6 @@
 - name: Cedar River Subcatchments and Channels
   url: https://wepp.cloud/weppcloud/runs/24roses-WA_77050_CEDAR_RIVER/disturbed9002/download/export/arcmap/24roses-WA_77050_CEDAR_RIVER.gpkg
   target: subcatchments-and-channels/24roses-WA_77050_CEDAR_RIVER.gpkg
-- name: Mill Creek Subcatchments and  Channels
+- name: Mill Creek Subcatchments and Channels
   url: https://wepp.cloud/weppcloud/runs/24roses-WA_92500_Mill_Creek_Water_Shed/disturbed9002/download/export/arcmap/24roses-WA_92500_Mill_Creek_Water_Shed.gpkg
   target: subcatchments-and-channels/24roses-WA_92500_Mill_Creek_Water_Shed.gpkg
