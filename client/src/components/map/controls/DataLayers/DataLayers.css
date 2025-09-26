@@ -5,7 +5,7 @@
   left: 50%;
   bottom: 0;
   transform: translateX(-50%);
-  width: 200px;
+  width: 275px;
   background: transparent;
 }
 
@@ -39,7 +39,7 @@
   align-items: center;
   justify-content: flex-start;
   padding: 8px 0;
-  height: 32px;
+  height: 40px;
 }
 
 .layerpicker-nav>div {
@@ -48,8 +48,8 @@
 }
 
 .layerpicker-navbutton {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,7 +70,6 @@
   background: var(--clr-primary-100);
   padding: 0;
   width: 100%;
-  border-bottom: var(--clr-primary-400) 0.5px solid;
 }
 
 .layerpicker-heading {
@@ -111,12 +110,4 @@
   transform: scale(1.1);
   margin-left: 12px;
   cursor: pointer;
-}
-
-.layerpicker {
-  height: 63px;
-}
-
-.layerpicker.open {
-  height: 202px;
 }

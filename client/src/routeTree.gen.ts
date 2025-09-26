@@ -12,6 +12,11 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as RouterImport } from './routes/router'
+import { Route as RegisterRouteImport } from './routes/RegisterRoute'
+import { Route as LoginRouteImport } from './routes/LoginRoute'
+import { Route as FaqRouteImport } from './routes/FaqRoute'
+import { Route as DocumentationRouteImport } from './routes/DocumentationRoute'
+import { Route as AboutRouteImport } from './routes/AboutRoute'
 
 // Create/Update Routes
 
@@ -21,10 +26,75 @@ const RouterRoute = RouterImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const RegisterRouteRoute = RegisterRouteImport.update({
+  id: '/RegisterRoute',
+  path: '/RegisterRoute',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LoginRouteRoute = LoginRouteImport.update({
+  id: '/LoginRoute',
+  path: '/LoginRoute',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const FaqRouteRoute = FaqRouteImport.update({
+  id: '/FaqRoute',
+  path: '/FaqRoute',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DocumentationRouteRoute = DocumentationRouteImport.update({
+  id: '/DocumentationRoute',
+  path: '/DocumentationRoute',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AboutRouteRoute = AboutRouteImport.update({
+  id: '/AboutRoute',
+  path: '/AboutRoute',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/AboutRoute': {
+      id: '/AboutRoute'
+      path: '/AboutRoute'
+      fullPath: '/AboutRoute'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/DocumentationRoute': {
+      id: '/DocumentationRoute'
+      path: '/DocumentationRoute'
+      fullPath: '/DocumentationRoute'
+      preLoaderRoute: typeof DocumentationRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/FaqRoute': {
+      id: '/FaqRoute'
+      path: '/FaqRoute'
+      fullPath: '/FaqRoute'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/LoginRoute': {
+      id: '/LoginRoute'
+      path: '/LoginRoute'
+      fullPath: '/LoginRoute'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/RegisterRoute': {
+      id: '/RegisterRoute'
+      path: '/RegisterRoute'
+      fullPath: '/RegisterRoute'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRoute
+    }
     '/router': {
       id: '/router'
       path: '/router'
@@ -38,32 +108,76 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
+  '/AboutRoute': typeof AboutRouteRoute
+  '/DocumentationRoute': typeof DocumentationRouteRoute
+  '/FaqRoute': typeof FaqRouteRoute
+  '/LoginRoute': typeof LoginRouteRoute
+  '/RegisterRoute': typeof RegisterRouteRoute
   '/router': typeof RouterRoute
 }
 
 export interface FileRoutesByTo {
+  '/AboutRoute': typeof AboutRouteRoute
+  '/DocumentationRoute': typeof DocumentationRouteRoute
+  '/FaqRoute': typeof FaqRouteRoute
+  '/LoginRoute': typeof LoginRouteRoute
+  '/RegisterRoute': typeof RegisterRouteRoute
   '/router': typeof RouterRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/AboutRoute': typeof AboutRouteRoute
+  '/DocumentationRoute': typeof DocumentationRouteRoute
+  '/FaqRoute': typeof FaqRouteRoute
+  '/LoginRoute': typeof LoginRouteRoute
+  '/RegisterRoute': typeof RegisterRouteRoute
   '/router': typeof RouterRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/router'
+  fullPaths:
+    | '/AboutRoute'
+    | '/DocumentationRoute'
+    | '/FaqRoute'
+    | '/LoginRoute'
+    | '/RegisterRoute'
+    | '/router'
   fileRoutesByTo: FileRoutesByTo
-  to: '/router'
-  id: '__root__' | '/router'
+  to:
+    | '/AboutRoute'
+    | '/DocumentationRoute'
+    | '/FaqRoute'
+    | '/LoginRoute'
+    | '/RegisterRoute'
+    | '/router'
+  id:
+    | '__root__'
+    | '/AboutRoute'
+    | '/DocumentationRoute'
+    | '/FaqRoute'
+    | '/LoginRoute'
+    | '/RegisterRoute'
+    | '/router'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
+  AboutRouteRoute: typeof AboutRouteRoute
+  DocumentationRouteRoute: typeof DocumentationRouteRoute
+  FaqRouteRoute: typeof FaqRouteRoute
+  LoginRouteRoute: typeof LoginRouteRoute
+  RegisterRouteRoute: typeof RegisterRouteRoute
   RouterRoute: typeof RouterRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  AboutRouteRoute: AboutRouteRoute,
+  DocumentationRouteRoute: DocumentationRouteRoute,
+  FaqRouteRoute: FaqRouteRoute,
+  LoginRouteRoute: LoginRouteRoute,
+  RegisterRouteRoute: RegisterRouteRoute,
   RouterRoute: RouterRoute,
 }
 
@@ -77,8 +191,28 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
+        "/AboutRoute",
+        "/DocumentationRoute",
+        "/FaqRoute",
+        "/LoginRoute",
+        "/RegisterRoute",
         "/router"
       ]
+    },
+    "/AboutRoute": {
+      "filePath": "AboutRoute.tsx"
+    },
+    "/DocumentationRoute": {
+      "filePath": "DocumentationRoute.tsx"
+    },
+    "/FaqRoute": {
+      "filePath": "FaqRoute.tsx"
+    },
+    "/LoginRoute": {
+      "filePath": "LoginRoute.tsx"
+    },
+    "/RegisterRoute": {
+      "filePath": "RegisterRoute.tsx"
     },
     "/router": {
       "filePath": "router.tsx"

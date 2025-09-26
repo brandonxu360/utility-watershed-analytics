@@ -7,6 +7,8 @@ import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContex
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
 import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
 import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
+import { Properties } from '../../types/WatershedFeature';
+import { LeafletMouseEvent, PathOptions } from 'leaflet';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -48,7 +50,7 @@ const selectedStyle = {
 // Renders subcatchment hillslope polygons and binds hover-only tooltips
 function SubcatchmentLayer({ data, style }: {
   data: GeoJSON.FeatureCollection
-  style: (feature: any) => any
+  style: (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => PathOptions
 }) {
   return (
     <GeoJSON
@@ -115,7 +117,7 @@ export default function Map(): JSX.Element {
   const bottomPanel = useBottomPanelContext();
 
   { /* Navigates to a watershed on click */ }
-  const onWatershedClick = (e: any) => {
+  const onWatershedClick = (e: LeafletMouseEvent) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
 
@@ -132,13 +134,13 @@ export default function Map(): JSX.Element {
 
   // Memoize style functions
   const watershedStyle = useCallback(
-    (feature: any) =>
-      feature.id?.toString() === watershedId ? selectedStyle : defaultStyle,
+    (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) =>
+      feature?.id?.toString() === watershedId ? selectedStyle : defaultStyle,
     [watershedId]
   );
 
   const subcatchmentStyle = useCallback(
-    (feature: any) => {
+    (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => {
       if (landuse && feature?.properties?.color) {
         return {
           color: '#2c2c2c',

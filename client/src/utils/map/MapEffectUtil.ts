@@ -1,11 +1,12 @@
 import { useMap } from 'react-leaflet';
 import { useEffect } from 'react';
 import { zoomToFeature } from './MapUtil';
+import { Properties } from '../../types/WatershedFeature';
 import L from 'leaflet';
 
 interface MapEffectProps {
   watershedId: string | null;
-  watersheds: any;
+  watersheds: GeoJSON.FeatureCollection<GeoJSON.Geometry, Properties>;
 }
 
 /**
@@ -22,7 +23,7 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
   useEffect(() => {
     if (watershedId && watersheds && Array.isArray(watersheds.features)) {
       const matchingFeature = watersheds.features.find(
-        (f: any) => f.id && f.id.toString() === watershedId
+        (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties>) => feature.id && feature.id.toString() === watershedId
       );
 
       if (matchingFeature) {

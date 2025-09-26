@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 
 type CoverageBarChartProps = {
-    data: any[];
+    data: any[];     // eslint-disable-line @typescript-eslint/no-explicit-any
     title: string;
     barKeys: { key: string; color: string; activeFill: string; activeStroke: string }[];
 };

@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
 import { WatershedIDContext } from '../../../context/watershed-id/WatershedIDContext';
+import { WatershedFeature } from '../../../types/WatershedFeature';
 import './Watershed.css'
 
 /** 
@@ -43,7 +44,7 @@ export default function WatershedOverview() {
     const watershed = useMemo(() => {
         if (!watersheds?.features || !watershedId) return null;
         return watersheds.features.find(
-            (f: any) => f.id && f.id.toString() === watershedId
+            (feature: WatershedFeature) => feature.id && feature.id.toString() === watershedId
         );
     }, [watersheds?.features, watershedId]);
 

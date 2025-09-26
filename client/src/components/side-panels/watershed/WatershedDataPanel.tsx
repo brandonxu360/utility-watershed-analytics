@@ -6,6 +6,7 @@ import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 import { WatershedIDContext } from '../../../context/watershed-id/WatershedIDContext';
 import { useBottomPanelContext } from '../../../context/bottom-panel/BottomPanelContext';
 import { useWatershedOverlayStore } from '../../../store/WatershedOverlayStore';
+import { WatershedFeature } from '../../../types/WatershedFeature';
 import CoverageBarChart from '../../coverage-bar-chart/CoverageBarChart';
 import AccordionItem from '../../accordian-item/AccordianItem'
 import './Watershed.css'
@@ -56,7 +57,7 @@ export default function WatershedDataPanel() {
     const watershed = useMemo(() => {
         if (!watersheds?.features || !watershedId) return null;
         return watersheds.features.find(
-            (f: any) => f.id && f.id.toString() === watershedId
+            (feature: WatershedFeature) => feature.id && feature.id.toString() === watershedId
         );
     }, [watersheds?.features, watershedId]);
 
