@@ -1,6 +1,15 @@
 import { ChangeEvent, useState } from 'react';
-import { FaChevronUp, FaChevronDown, FaWater, FaGlobe, FaTree } from 'react-icons/fa';
 import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
+
+import {
+  FaChevronUp,
+  FaChevronDown,
+  FaWater,
+  FaGlobe,
+  FaTree,
+  FaFireAlt,
+} from 'react-icons/fa';
+
 import './DataLayers.css';
 
 /**
@@ -26,6 +35,7 @@ export default function DataLayersControl() {
     { key: 'Hill Slopes', icon: <FaWater title="Hill Slopes" /> },
     { key: 'Coverage', icon: <FaGlobe title="Coverage" /> },
     { key: 'Vegetation', icon: <FaTree title="Vegetation" /> },
+    { key: 'Soil Burn', icon: <FaFireAlt title="Soil Burn" /> },
   ];
 
   const toggleOpen = () => setIsOpen(prev => !prev);
@@ -98,10 +108,59 @@ export default function DataLayersControl() {
                           onChange={handleChange}
                         />
                       </div>
+                      <div className="layerpicker-layer">
+                        <button className="layerpicker-title">Evapotransportation</button>
+                      </div>
+                      <div className="layerpicker-layer">
+                        <button className="layerpicker-title">Soil Moisture</button>
+                      </div>
                     </>
                   )}
                   {activeTab === 'Vegetation' && (
                     <>
+                      <div className="layerpicker-layer">
+                        <button className="layerpicker-title">Shrub Cover</button>
+                        <input
+                          type="checkbox"
+                          id="shrubCover"
+                          // checked={shrubCover}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="layerpicker-layer">
+                        <button className="layerpicker-title">Tree Cover</button>
+                        <input
+                          type="checkbox"
+                          id="treeCover"
+                          // checked={treeCover}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </>
+                  )}
+                  {activeTab === 'Soil Burn' && (
+                    <>
+                      <div className="layerpicker-layer">
+                        <button className="layerpicker-title">Fire Severity</button>
+                        <input
+                          type="checkbox"
+                          id="fireSeverity"
+                          // checked={fireSeverity}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="layerpicker-layer">
+                        <button className="layerpicker-title">Soil Burn Severity</button>
+                        <input
+                          type="checkbox"
+                          id="soilBurnSeverity"
+                          // checked={soilBurnSeverity}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="layerpicker-layer">
+                        <button className="layerpicker-title">Predict</button>
+                      </div>
                     </>
                   )}
                 </div>
