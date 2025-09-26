@@ -19,3 +19,6 @@ COPY . .
 
 # Build static files for production
 RUN npm run build
+
+# Exit cleanly when container runs (build is already complete)
+CMD ["echo", "Frontend build complete - static files ready in /app/client/dist"]

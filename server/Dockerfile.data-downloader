@@ -12,14 +12,14 @@ WORKDIR /app
 RUN mkdir -p /data
 
 # Copy requirements for data download script
-COPY server/data-script-requirements.txt .
+COPY data-script-requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r data-script-requirements.txt
 
 # Copy data download script and manifest
-COPY server/data-downloader.py .
-COPY server/data-manifest.yaml .
+COPY data-downloader.py .
+COPY data-manifest.yaml .
 
 # Make the script executable
 RUN chmod +x data-downloader.py

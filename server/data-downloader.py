@@ -47,13 +47,7 @@ def download_watershed_data():
         name = item["name"]
         url = item["url"]
         
-        # Use relative path from target but place in output directory
-        try:
-            relative_target = Path(item["target"]).relative_to("server/watershed/data")
-            target = output_dir / relative_target
-        except ValueError as e:
-            print(f"ERROR: Invalid target path for {name}: {item['target']}")
-            continue
+        target = output_dir / Path(item["target"])
 
         print(f"\n==> Processing: {name}")
 

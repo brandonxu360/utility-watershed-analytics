@@ -38,7 +38,7 @@ services:
     # Volume mount
     volumes:
       - .:/app
-      - watershed_data:/app/server/watershed/data
+      - watershed_data:/app/server/server/watershed/data
     entrypoint: ["/entrypoint.sh"]
     command: python manage.py runserver 0.0.0.0:8000
     # Keep container active and interactive
@@ -51,7 +51,7 @@ services:
   # Data downloader service - downloads watershed data files
   data-downloader:
     build:
-      context: .
+      context: ./server
       dockerfile: Dockerfile.data-downloader
     volumes:
       - watershed_data:/data

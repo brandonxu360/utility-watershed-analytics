@@ -22,7 +22,7 @@ if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
     fi
 
     # Check if watershed data exists, if not provide helpful message
-    if [ -d "/app/server/watershed/data" ] && [ "$(ls -A /app/server/watershed/data 2>/dev/null)" ]; then
+    if [ -d "/app/server/server/watershed/data" ] && [ "$(ls -A /app/server/server/watershed/data 2>/dev/null)" ]; then
         echo "Watershed data found, loading into database..."
         python manage.py load_watershed_data --verbosity=2
     else
