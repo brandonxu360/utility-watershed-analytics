@@ -37,7 +37,7 @@
   background: var(--clr-primary-100);
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   padding: 8px 0;
   height: 40px;
 }

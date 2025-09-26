@@ -4,7 +4,6 @@ import { WatershedIDContext } from './WatershedIDContext';
 
 import {
   watershedOverviewRoute,
-  watershedDataRoute,
 } from '../../routes/router';
 
 export function WatershedIDProvider({ children }: { children: ReactNode }) {
@@ -13,14 +12,8 @@ export function WatershedIDProvider({ children }: { children: ReactNode }) {
     shouldThrow: false,
   });
 
-  const dataMatch = useMatch({
-    from: watershedDataRoute.id,
-    shouldThrow: false,
-  });
-
   const watershedId =
     overviewMatch?.params.webcloudRunId ??
-    dataMatch?.params.webcloudRunId ??
     null;
 
   return (

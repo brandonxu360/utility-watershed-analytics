@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from 'react';
+import DataLayersTabContent from './DataLayersTabContent';
 import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
 
 import {
@@ -20,8 +21,6 @@ import './DataLayers.css';
  */
 export default function DataLayersControl() {
   const {
-    subcatchment,
-    channels,
     landuse,
     setSubcatchment,
     setChannels,
@@ -73,97 +72,10 @@ export default function DataLayersControl() {
             <div>
               <div>
                 <div className="layerpicker-heading">{activeTab}</div>
-                <div className="layerpicker-layers" id="layerpicker-layers">
-                  {activeTab === 'Hill Slopes' && (
-                    <>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Subcatchments</button>
-                        <input
-                          type="checkbox"
-                          id="subcatchment"
-                          checked={subcatchment}
-                          onChange={handleChange}
-                          disabled={landuse && subcatchment}
-                        />
-                      </div>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Channels</button>
-                        <input
-                          type="checkbox"
-                          id="channels"
-                          checked={channels}
-                          onChange={handleChange}
-                        />
-                      </div>
-                    </>
-                  )}
-                  {activeTab === 'Coverage' && (
-                    <>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Land Use</button>
-                        <input
-                          type="checkbox"
-                          id="landuse"
-                          checked={landuse}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Evapotransportation</button>
-                      </div>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Soil Moisture</button>
-                      </div>
-                    </>
-                  )}
-                  {activeTab === 'Vegetation' && (
-                    <>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Shrub Cover</button>
-                        <input
-                          type="checkbox"
-                          id="shrubCover"
-                          // checked={shrubCover}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Tree Cover</button>
-                        <input
-                          type="checkbox"
-                          id="treeCover"
-                          // checked={treeCover}
-                          onChange={handleChange}
-                        />
-                      </div>
-                    </>
-                  )}
-                  {activeTab === 'Soil Burn' && (
-                    <>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Fire Severity</button>
-                        <input
-                          type="checkbox"
-                          id="fireSeverity"
-                          // checked={fireSeverity}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Soil Burn Severity</button>
-                        <input
-                          type="checkbox"
-                          id="soilBurnSeverity"
-                          // checked={soilBurnSeverity}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Predict</button>
-                      </div>
-                    </>
-                  )}
-                </div>
+                <DataLayersTabContent
+                  activeTab={activeTab}
+                  handleChange={handleChange}
+                />
               </div>
             </div>
           </div>

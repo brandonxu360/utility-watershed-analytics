@@ -3,10 +3,6 @@ import { WatershedIDProvider } from '../context/watershed-id/WatershedIDProvider
 import Navbar from '../components/navbar/Navbar';
 import Home from '../pages/home/Home';
 import WatershedOverview from '../components/side-panels/watershed/WatershedOverview';
-import WatershedDataPanel from '../components/side-panels/watershed/WatershedDataPanel';
-import AboutRoute from './AboutRoute';
-import FaqRoute from './FaqRoute';
-import DocumentationRoute from './DocumentationRoute';
 import LoginRoute from './LoginRoute';
 import RegisterRoute from './RegisterRoute';
 
@@ -40,30 +36,6 @@ export const watershedOverviewRoute = createRoute({
   component: WatershedOverview,
 });
 
-export const watershedDataRoute = createRoute({
-  getParentRoute: () => homeRoute,
-  path: '/watershed/data/$webcloudRunId',
-  component: WatershedDataPanel,
-});
-
-const aboutRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/about',
-  component: AboutRoute,
-})
-
-const faqRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/faq',
-  component: FaqRoute,
-});
-
-const documentationRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/documentation',
-  component: DocumentationRoute,
-});
-
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
@@ -80,11 +52,7 @@ const registerRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   homeRoute.addChildren([
     watershedOverviewRoute,
-    watershedDataRoute,
   ]),
-  aboutRoute,
-  faqRoute,
-  documentationRoute,
   loginRoute,
   registerRoute,
 ]);
