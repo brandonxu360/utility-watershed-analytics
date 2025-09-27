@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChangeEvent } from 'react';
 import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
+import { FaQuestionCircle } from 'react-icons/fa';
 
 type DataLayersTabContentProps = {
     activeTab: string;
@@ -46,6 +47,9 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                 <>
                     <div className="layerpicker-layer">
                         <button className="layerpicker-title">Land Use</button>
+                        <span className="layerpicker-help-icon" title="Land Use Legend">
+                            <FaQuestionCircle />
+                        </span>
                         <input
                             type="checkbox"
                             id="landuse"
