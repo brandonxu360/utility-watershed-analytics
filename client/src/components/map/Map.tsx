@@ -235,13 +235,6 @@ export default function Map(): JSX.Element {
           <SettingsControl />
         </div>
 
-        {/* BOTTOM LEFT CONTROLS */}
-        <div className="leaflet-bottom leaflet-right" style={{ marginBottom: '2.25rem', marginRight: '0.625rem' }}>
-          {watershedId && (
-            <DataLayersControl />
-          )}
-        </div>
-
         {/* Handles URL navigation to a specified watershed */}
         <MapEffect watershedId={watershedId} watersheds={memoWatersheds} />
 
@@ -264,6 +257,12 @@ export default function Map(): JSX.Element {
           <GeoJSON data={memoChannels} style={channelStyle} />
         )}
       </MapContainer>
+
+      {watershedId && (
+        <div style={{ position: 'absolute', right: '20px', bottom: '30px' }}>
+          <DataLayersControl />
+        </div>
+      )}
     </div>
   );
 }
