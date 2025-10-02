@@ -1,0 +1,31 @@
+name: Client CI - Build & Test
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'client/**'
+      - '.github/workflows/client-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'client/**'
+      - '.github/workflows/client-ci.yml'
+
+jobs:
+  build-and-test:
+    name: Build Production Container & Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build production Docker image
+        run: docker build -f ./client/Dockerfile.prod -t client-test:latest ./client
+      
+      - name: Run linting in container
+        run: docker run --rm client-test:latest npm run lint
+      
+      - name: Run tests in container
+        run: docker run --rm client-test:latest npm run test

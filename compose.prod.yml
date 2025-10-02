@@ -31,7 +31,6 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
       - watershed_data:/app/server/server/watershed/data
     environment:
       - POSTGRES_USER=${POSTGRES_USER}

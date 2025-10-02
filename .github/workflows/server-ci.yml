@@ -1,0 +1,46 @@
+name: Server CI - Build & Test
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server-ci.yml'
+
+jobs:
+  build-and-test:
+    name: Build Production Container & Run Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgis/postgis:latest
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build production Docker image
+        run: docker build -f ./server/Dockerfile --target production -t server-test:latest ./server
+
+      - name: Run Django tests in container
+        run: docker run --rm --add-host db:127.0.0.1 --network host -e POSTGRES_USER=test_user -e POSTGRES_PW=test_password -e POSTGRES_DB=test_db -e DJANGO_SECRET_KEY=test-secret-key-for-ci-only -e DEBUG=True server-test:latest python manage.py test
+
+      - name: Run Django linting (flake8/autopep8 check)
+        run: docker run --rm server-test:latest python -m autopep8 --diff --recursive .

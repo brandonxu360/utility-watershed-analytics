@@ -56,6 +56,9 @@ USER devcontainer
 # Production stage  
 FROM base AS production
 
+# Copy application files
+COPY . .
+
 # Copy production entrypoint
 COPY entrypoint.prod.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
