@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from 'react';
-import DataLayersTabContent from './DataLayersTabContent';
 import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
+import DataLayersTabContent from './DataLayersTabContent';
 
 import {
   FaChevronUp,
@@ -21,10 +21,10 @@ import './DataLayers.css';
  */
 export default function DataLayersControl() {
   const {
-    landuse,
     setSubcatchment,
     setChannels,
-    setLanduse
+    setLanduse,
+    reset
   } = useWatershedOverlayStore();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -41,22 +41,23 @@ export default function DataLayersControl() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = e.target;
+
     if (id === 'subcatchment') {
       setSubcatchment(checked);
-      if (!checked && landuse) {
+      if (!checked) {
         setLanduse(false);
       }
     }
+
     if (id === 'channels') {
       setChannels(checked);
     }
+
     if (id === 'landuse') {
-      if (checked) {
-        setSubcatchment(true);
-        setLanduse(true);
-      } else {
-        setLanduse(false);
-        setSubcatchment(false);
+      setSubcatchment(true);
+      setLanduse(true);
+      if (!checked) {
+        reset();
       }
     }
   };

@@ -2,6 +2,7 @@ import { useContext, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
+import { useWatershedOverlayStore } from '../../../store/WatershedOverlayStore';
 import { WatershedIDContext } from '../../../context/watershed-id/WatershedIDContext';
 import { WatershedFeature } from '../../../types/WatershedFeature';
 import './Watershed.css'
@@ -35,6 +36,7 @@ function SkeletonWatershedPanel() {
 export default function WatershedOverview() {
     const navigate = useNavigate();
     const watershedId = useContext(WatershedIDContext);
+    const { reset } = useWatershedOverlayStore();
 
     const { data: watersheds, isLoading, error } = useQuery({
         queryKey: ["watersheds"],
@@ -58,6 +60,7 @@ export default function WatershedOverview() {
             <button
                 onClick={() => {
                     navigate({ to: "/" });
+                    reset();
                 }}
                 className='closeButton'
                 aria-label='Close watershed panel'
@@ -66,7 +69,7 @@ export default function WatershedOverview() {
             >
                 BACK
             </button>
-            <div style={{ marginTop: '1.5rem' }}>
+            <div style={{ marginTop: '1.15rem' }}>
                 <h2>{watershed.properties.pws_name}</h2>
                 <p>This is where the description for the watershed will go. For now we have placeholder text.</p>
                 <p>

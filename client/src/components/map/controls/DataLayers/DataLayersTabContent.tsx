@@ -16,6 +16,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
         subcatchment,
         channels,
         landuse,
+        setLanduseLegend
     } = useWatershedOverlayStore();
 
     return (
@@ -47,9 +48,13 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                 <>
                     <div className="layerpicker-layer">
                         <button className="layerpicker-title">Land Use</button>
-                        <span className="layerpicker-help-icon" title="Land Use Legend">
+                        {landuse && <span
+                            className="layerpicker-help-icon"
+                            title="Land Use Legend"
+                            onClick={() => { setLanduseLegend(true); }}
+                        >
                             <FaQuestionCircle />
-                        </span>
+                        </span>}
                         <input
                             type="checkbox"
                             id="landuse"

@@ -16,6 +16,7 @@ import LayersControl from './controls/Layers/Layers';
 import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
+import LandUseLegend from './controls/LandUseLegend/LandUseLegend';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -96,6 +97,7 @@ export default function Map(): JSX.Element {
 
   const watershedId = useContext(WatershedIDContext)
   const { subcatchment, channels, landuse } = useWatershedOverlayStore();
+  const { setLanduseLegendMap } = useWatershedOverlayStore();
 
   const { data: watersheds, error: watershedsError, isLoading: watershedsLoading } = useQuery({
     queryKey: ['watersheds'],
@@ -139,6 +141,22 @@ export default function Map(): JSX.Element {
     [watershedId]
   );
 
+  useMemo(() => {
+    if (landuse && memoSubcatchments) {
+      const legend: Record<string, string> = {};
+      for (const feature of memoSubcatchments.features) {
+        const color = feature.properties?.color;
+        const desc = feature.properties?.desc;
+        if (color && desc && !(color in legend)) {
+          legend[color] = desc;
+        }
+      }
+      setLanduseLegendMap(legend);
+    } else if (!landuse) {
+      setLanduseLegendMap({});
+    }
+  }, [landuse, memoSubcatchments, setLanduseLegendMap]);
+
   const subcatchmentStyle = useCallback(
     (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => {
       if (landuse && feature?.properties?.color) {
@@ -146,7 +164,7 @@ export default function Map(): JSX.Element {
           color: '#2c2c2c',
           weight: 0.75,
           fillColor: feature.properties.color,
-          fillOpacity: 0.25,
+          fillOpacity: 1,
         };
       }
       return {
@@ -257,6 +275,8 @@ export default function Map(): JSX.Element {
           <GeoJSON data={memoChannels} style={channelStyle} />
         )}
       </MapContainer>
+
+      <LandUseLegend />
 
       {watershedId && (
         <div style={{ position: 'absolute', right: '20px', bottom: '30px' }}>

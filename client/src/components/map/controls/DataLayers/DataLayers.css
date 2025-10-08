@@ -44,7 +44,7 @@
 
 .layerpicker-nav>div {
   display: flex;
-  gap: 8px;
+  gap: 25px;
 }
 
 .layerpicker-navbutton {

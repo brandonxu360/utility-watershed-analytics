@@ -5,6 +5,7 @@ import Home from '../pages/home/Home';
 import WatershedOverview from '../components/side-panels/watershed/WatershedOverview';
 import LoginRoute from './LoginRoute';
 import RegisterRoute from './RegisterRoute';
+import { BottomPanelProvider } from '../context/bottom-panel/BottomPanelProvider';
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -25,7 +26,9 @@ const homeRoute = createRoute({
   path: '/',
   component: () => (
     <WatershedIDProvider>
-      <Home />
+      <BottomPanelProvider>
+        <Home />
+      </BottomPanelProvider>
     </WatershedIDProvider>
   ),
 });
