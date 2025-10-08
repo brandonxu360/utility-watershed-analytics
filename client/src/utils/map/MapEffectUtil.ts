@@ -35,7 +35,7 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
         zoomToFeature(map, tempLayer);
       }
     }
-  }, [watershedId, watersheds, map]);
+  }, [watershedId, watersheds, map, reset]);
 
   return null;
 }
