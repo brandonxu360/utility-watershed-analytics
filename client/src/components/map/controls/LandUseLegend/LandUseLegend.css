@@ -1,7 +1,7 @@
 .landuse-legend-wrapper {
     position: absolute;
     left: 10px;
-    bottom: 60px;
+    top: 60px;
     z-index: 1200;
     max-width: 360px;
 }
@@ -17,9 +17,8 @@
 .landuse-legend-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     font-weight: bold;
-    gap: 0.5rem;
+    gap: 1.25rem;
     margin-bottom: 0.5rem;
 }
 

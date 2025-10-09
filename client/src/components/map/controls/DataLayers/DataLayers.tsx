@@ -63,7 +63,7 @@ export default function DataLayersControl() {
   };
 
   return (
-    <div className="layerpicker leaflet-control" id="layer-picker-region">
+    <div className="layerpicker leaflet-control">
       <div>
         <div className="layerpicker-header" onClick={toggleOpen}>
           Data Layers <span className="layerpicker-chevron">{isOpen ? <FaChevronDown /> : <FaChevronUp />}</span>

@@ -279,7 +279,7 @@ export default function Map(): JSX.Element {
       <LandUseLegend />
 
       {watershedId && (
-        <div style={{ position: 'absolute', right: '20px', bottom: '30px' }}>
+        <div style={{ position: 'absolute', right: '10px', bottom: '30px' }}>
           <DataLayersControl />
         </div>
       )}

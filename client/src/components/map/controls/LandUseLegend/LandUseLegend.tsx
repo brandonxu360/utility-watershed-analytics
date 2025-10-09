@@ -11,13 +11,13 @@ export default function LandUseLegend() {
         <div className="landuse-legend-wrapper" role="region" aria-label="Land use legend">
             <div className="landuse-legend">
                 <div className="landuse-legend-header">
-                    <h3>Land Use Legend</h3>
                     <FaXmark
                         onClick={() => setLanduseLegend(false)}
                         className='landuse-close'
                         aria-label='Close land use legend panel'
                         title='Close land use legend panel'
                     />
+                    <h3>Land Use Legend</h3>
                 </div>
 
                 <div className="landuse-legend-content">
