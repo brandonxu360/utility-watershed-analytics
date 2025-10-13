@@ -43,4 +43,4 @@ jobs:
         run: docker run --rm --add-host db:127.0.0.1 --network host -e POSTGRES_USER=test_user -e POSTGRES_PW=test_password -e POSTGRES_DB=test_db -e DJANGO_SECRET_KEY=test-secret-key-for-ci-only -e DEBUG=True server-test:latest python manage.py test
 
       - name: Run Django linting (flake8/autopep8 check)
-        run: docker run --rm server-test:latest python -m autopep8 --diff --recursive .
+        run: docker run --rm server-test:latest python -m autopep8 --diff --exit-code --recursive .
