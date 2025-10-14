@@ -1,15 +1,11 @@
-import { lazyRouteComponent, createRoute, createRootRoute, createRouter, Outlet } from '@tanstack/react-router';
-import { WatershedIDProvider } from '../utils/watershed-id/WatershedIDProvider';
+import { createRoute, createRootRoute, createRouter, Outlet } from '@tanstack/react-router';
+import { WatershedIDProvider } from '../context/watershed-id/WatershedIDProvider';
 import Navbar from '../components/navbar/Navbar';
 import Home from '../pages/home/Home';
 import WatershedOverview from '../components/side-panels/watershed/WatershedOverview';
-import WatershedDataPanel from '../components/side-panels/watershed/WatershedDataPanel';
-
-const About = lazyRouteComponent(() => import('../pages/about/About'));
-const FAQ = lazyRouteComponent(() => import('../pages/faq/FAQ'));
-const Documentation = lazyRouteComponent(() => import('../pages/documentation/Documentation'));
-const Login = lazyRouteComponent(() => import('../pages/authentication/login/Login'));
-const Register = lazyRouteComponent(() => import('../pages/authentication/register/Register'));
+import LoginRoute from './LoginRoute';
+import RegisterRoute from './RegisterRoute';
+import { BottomPanelProvider } from '../context/bottom-panel/BottomPanelProvider';
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -30,7 +26,9 @@ const homeRoute = createRoute({
   path: '/',
   component: () => (
     <WatershedIDProvider>
-      <Home />
+      <BottomPanelProvider>
+        <Home />
+      </BottomPanelProvider>
     </WatershedIDProvider>
   ),
 });
@@ -41,51 +39,23 @@ export const watershedOverviewRoute = createRoute({
   component: WatershedOverview,
 });
 
-export const watershedDataRoute = createRoute({
-  getParentRoute: () => homeRoute,
-  path: '/watershed/data/$webcloudRunId',
-  component: WatershedDataPanel,
-});
-
-const aboutRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/about',
-  component: About,
-})
-
-const faqRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/faq',
-  component: FAQ,
-});
-
-const documentationRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/documentation',
-  component: Documentation,
-});
-
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
-  component: Login,
+  component: LoginRoute,
 });
 
 const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'register',
-  component: Register,
+  component: RegisterRoute,
 });
 
 // Create the route tree
 const routeTree = rootRoute.addChildren([
   homeRoute.addChildren([
     watershedOverviewRoute,
-    watershedDataRoute,
   ]),
-  aboutRoute,
-  faqRoute,
-  documentationRoute,
   loginRoute,
   registerRoute,
 ]);

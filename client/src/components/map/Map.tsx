@@ -1,25 +1,28 @@
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
-import { useQuery } from '@tanstack/react-query';   
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
-import { WatershedIDContext } from '../../utils/watershed-id/WatershedIDContext';
+import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { useBottomPanelContext } from '../../utils/bottom-panel/BottomPanelContext';
-import WatershedToggle from './controls/WatershedToggle/WatershedToggle';
+import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
+import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
+import { Properties } from '../../types/WatershedFeature';
+import { LeafletMouseEvent, PathOptions } from 'leaflet';
+import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 // import LayersControl from './controls/Layers/Layers';
 import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
-import UserLocationControl from './controls/UserLocation/UserLocation';
+import LandUseLegend from './controls/LandUseLegend/LandUseLegend';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
-  Number(((41.88 + 46.19) / 2).toFixed(2)),
+  Number(((43.88 + 49.19) / 2).toFixed(2)),
   Number(((-124.52 + -116.93) / 2).toFixed(2))
 ];
 
@@ -48,7 +51,7 @@ const selectedStyle = {
 // Renders subcatchment hillslope polygons and binds hover-only tooltips
 function SubcatchmentLayer({ data, style }: {
   data: GeoJSON.FeatureCollection
-  style: (feature: any) => any
+  style: (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => PathOptions
 }) {
   return (
     <GeoJSON
@@ -76,7 +79,7 @@ function SubcatchmentLayer({ data, style }: {
         layer.on({
           mouseover: () => layer.openTooltip(),
           mouseout: () => layer.closeTooltip(),
-        })
+        });
       }}
     />
   )
@@ -93,9 +96,8 @@ export default function Map(): JSX.Element {
   const navigate = useNavigate()
 
   const watershedId = useContext(WatershedIDContext)
-
-  const [showSubcatchments, setShowSubcatchments] = useState(false);
-  const [showChannels, setShowChannels] = useState(false);
+  const { subcatchment, channels, landuse } = useWatershedOverlayStore();
+  const { setLanduseLegendMap } = useWatershedOverlayStore();
 
   const { data: watersheds, error: watershedsError, isLoading: watershedsLoading } = useQuery({
     queryKey: ['watersheds'],
@@ -105,19 +107,19 @@ export default function Map(): JSX.Element {
   const { data: subcatchments, error: subError, isLoading: subLoading } = useQuery({
     queryKey: ['subcatchments', watershedId],
     queryFn: () => fetchSubcatchments(watershedId!),
-    enabled: Boolean(showSubcatchments && watershedId),
+    enabled: Boolean(subcatchment && watershedId),
   });
 
-  const { data: channels, error: channelError, isLoading: channelLoading } = useQuery({
+  const { data: channelData, error: channelError, isLoading: channelLoading } = useQuery({
     queryKey: ['channels', watershedId],
     queryFn: () => fetchChannels(watershedId!),
-    enabled: Boolean(showChannels && watershedId),
+    enabled: Boolean(channels && watershedId),
   });
 
   const bottomPanel = useBottomPanelContext();
 
   { /* Navigates to a watershed on click */ }
-  const onWatershedClick = (e: any) => {
+  const onWatershedClick = (e: LeafletMouseEvent) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
 
@@ -130,43 +132,63 @@ export default function Map(): JSX.Element {
   // Memoize GeoJSON data to prevent unnecessary re-renders
   const memoWatersheds = useMemo(() => watersheds, [watersheds]);
   const memoSubcatchments = useMemo(() => subcatchments, [subcatchments]);
-  const memoChannels = useMemo(() => channels, [channels]);
+  const memoChannels = useMemo(() => channelData, [channelData]);
 
   // Memoize style functions
   const watershedStyle = useCallback(
-    (feature: any) =>
-      feature.id?.toString() === watershedId ? selectedStyle : defaultStyle,
+    (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) =>
+      feature?.id?.toString() === watershedId ? selectedStyle : defaultStyle,
     [watershedId]
   );
 
+  useMemo(() => {
+    if (landuse && memoSubcatchments) {
+      const legend: Record<string, string> = {};
+      for (const feature of memoSubcatchments.features) {
+        const color = feature.properties?.color;
+        const desc = feature.properties?.desc;
+        if (color && desc && !(color in legend)) {
+          legend[color] = desc;
+        }
+      }
+      setLanduseLegendMap(legend);
+    } else if (!landuse) {
+      setLanduseLegendMap({});
+    }
+  }, [landuse, memoSubcatchments, setLanduseLegendMap]);
+
   const subcatchmentStyle = useCallback(
-    () => ({
-      color: '#2c2c2c',
-      weight: 0.75,
-      fillColor: '#4a83ec',
-      fillOpacity: 0.1,
-    }),
-    []
+    (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => {
+      if (landuse && feature?.properties?.color) {
+        return {
+          color: '#2c2c2c',
+          weight: 0.75,
+          fillColor: feature.properties.color,
+          fillOpacity: 1,
+        };
+      }
+      return {
+        color: '#2c2c2c',
+        weight: 0.75,
+        fillColor: '#4a83ec',
+        fillOpacity: 0.1,
+      };
+    },
+    [landuse]
   );
 
   const channelStyle = useCallback(
     () => ({
       color: '#ff6700',
       fillOpacity: 0.1,
-      weight: 0.75 
+      weight: 0.75
     }),
     []
   );
 
-  const [selectedLayerId, /*setSelectedLayerId*/] = useState</*'Default' | 'Satellite' | */ 'Topographic'>('Topographic');
+  const [selectedLayerId, /*setSelectedLayerId*/] = useState</*'Satellite' | */ 'Topographic'>('Topographic');
 
   const tileLayers = {
-    // Might not keep this layer.
-    // Default: {
-    //   url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    //   maxZoom: 15,
-    // },
     // Satellite: {
     //   url: "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg",
     //   attribution: '&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -187,8 +209,8 @@ export default function Map(): JSX.Element {
     <div className="map-container">
       <MapContainer
         center={CENTER}
-        zoom={6}
-        minZoom={6}
+        zoom={7}
+        minZoom={7}
         maxZoom={tileLayers[selectedLayerId].maxZoom}
         zoomControl={false}
         doubleClickZoom={false}
@@ -200,70 +222,67 @@ export default function Map(): JSX.Element {
         preferCanvas
       >
 
-          {(watershedsLoading || subLoading || channelLoading) && (
-            <div className="map-loading-overlay">
-              <div className="loading-spinner" />
-            </div>
-          )}
-
-          <TileLayer
-            attribution={tileLayers[selectedLayerId].attribution}
-            url={tileLayers[selectedLayerId].url}
-            maxZoom={tileLayers[selectedLayerId].maxZoom}
-          />
-
-          <ScaleControl metric={true} imperial={true} />
-
-          {/* TOP LEFT CONTROLS */}
-          <div className="leaflet-top leaflet-left">
-            <LegendControl />
-            {watershedId && (
-              <WatershedToggle
-                setShowSubcatchments={setShowSubcatchments}
-                setShowChannels={setShowChannels}
-              />
-            )}
+        {(watershedsLoading || subLoading || channelLoading) && (
+          <div className="map-loading-overlay">
+            <div className="loading-spinner" />
           </div>
+        )}
 
-          {/* TOP RIGHT CONTROLS */}
-          <div className="leaflet-top leaflet-right">
-            <SearchControl />
-            {/* <LayersControl
+        <TileLayer
+          attribution={tileLayers[selectedLayerId].attribution}
+          url={tileLayers[selectedLayerId].url}
+          maxZoom={tileLayers[selectedLayerId].maxZoom}
+        />
+
+        <ScaleControl metric={true} imperial={true} />
+
+        {/* TOP LEFT CONTROLS */}
+        <div className="leaflet-top leaflet-left">
+          <LegendControl />
+        </div>
+
+        {/* TOP RIGHT CONTROLS */}
+        <div className="leaflet-top leaflet-right">
+          <SearchControl />
+          {/* <LayersControl
               selectedLayerId={selectedLayerId}
               setSelectedLayerId={setSelectedLayerId}
             /> */}
-            <ZoomInControl />
-            <ZoomOutControl />
-            <SettingsControl />
-          </div>
-
-        {/* BOTTOM RIGHT CONTROLS */}
-        <div className="leaflet-bottom leaflet-right">
-          <UserLocationControl />
+          <ZoomInControl />
+          <ZoomOutControl />
+          <SettingsControl />
         </div>
 
         {/* Handles URL navigation to a specified watershed */}
         <MapEffect watershedId={watershedId} watersheds={memoWatersheds} />
 
-          {memoWatersheds && (
-            <GeoJSON
-              data={memoWatersheds}
-              style={watershedStyle}
-              onEachFeature={(_, layer) => layer.on({ click: onWatershedClick })}
-            />
-          )}
+        {memoWatersheds && (
+          <GeoJSON
+            data={memoWatersheds}
+            style={watershedStyle}
+            onEachFeature={(_, layer) => layer.on({ click: onWatershedClick })}
+          />
+        )}
 
-        {showSubcatchments && memoSubcatchments && (
+        {subcatchment && memoSubcatchments && (
           <SubcatchmentLayer
             data={memoSubcatchments}
             style={subcatchmentStyle}
           />
         )}
 
-        {showChannels && memoChannels && (
+        {channels && memoChannels && (
           <GeoJSON data={memoChannels} style={channelStyle} />
         )}
       </MapContainer>
+
+      <LandUseLegend />
+
+      {watershedId && (
+        <div style={{ position: 'absolute', right: '10px', bottom: '30px' }}>
+          <DataLayersControl />
+        </div>
+      )}
     </div>
   );
 }

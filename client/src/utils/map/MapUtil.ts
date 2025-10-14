@@ -8,7 +8,7 @@ import { Map } from 'leaflet';
  * @returns {null} - Doesn't return anything.
  */
 export function zoomToFeature(map: Map, layer: L.Layer) {
-  const bounds = (layer as any).getBounds?.();
+  const bounds = (layer as L.GeoJSON).getBounds?.();
   if (bounds) {
     map.flyToBounds(bounds, {
       maxZoom: 14,

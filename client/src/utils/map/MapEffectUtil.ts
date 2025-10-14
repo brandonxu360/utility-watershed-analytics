@@ -1,11 +1,13 @@
 import { useMap } from 'react-leaflet';
 import { useEffect } from 'react';
 import { zoomToFeature } from './MapUtil';
+import { Properties } from '../../types/WatershedFeature';
+import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
 import L from 'leaflet';
 
 interface MapEffectProps {
   watershedId: string | null;
-  watersheds: any;
+  watersheds: GeoJSON.FeatureCollection<GeoJSON.Geometry, Properties>;
 }
 
 /**
@@ -18,20 +20,22 @@ interface MapEffectProps {
  */
 export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
   const map = useMap();
+  const { reset } = useWatershedOverlayStore();
 
   useEffect(() => {
     if (watershedId && watersheds && Array.isArray(watersheds.features)) {
       const matchingFeature = watersheds.features.find(
-        (f: any) => f.id && f.id.toString() === watershedId
+        (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties>) => feature.id && feature.id.toString() === watershedId
       );
 
       if (matchingFeature) {
         // Create a temporary GeoJSON layer from the feature
+        reset();
         const tempLayer = L.geoJSON(matchingFeature);
         zoomToFeature(map, tempLayer);
       }
     }
-  }, [watershedId, watersheds, map]);
+  }, [watershedId, watersheds, map, reset]);
 
   return null;
 }

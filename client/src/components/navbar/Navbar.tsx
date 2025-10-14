@@ -1,5 +1,5 @@
-import './Navbar.css';
 import { Link } from '@tanstack/react-router';
+import './Navbar.css';
 
 const Navbar = () => {
   return (
@@ -16,22 +16,6 @@ const Navbar = () => {
               Home
             </Link>
           </li>
-          {/* TODO
-          <li>
-            <Link to="/about" activeProps={{ style: { color: 'cyan' } }}>
-              About
-            </Link>
-          </li>
-          <li>
-            <Link to="/faq" activeProps={{ style: { color: 'cyan' } }}>
-              FAQ
-            </Link>
-          </li>
-          <li>
-            <Link to="/documentation" activeProps={{ style: { color: 'cyan' } }}>
-              Documentation
-            </Link>
-          </li> */}
           <li>
             <Link to="/login" activeProps={{ style: { color: 'cyan' } }}>
               Login

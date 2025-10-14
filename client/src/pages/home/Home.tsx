@@ -1,28 +1,19 @@
-import { Outlet } from '@tanstack/react-router';
-import { useContext } from 'react';
-import { WatershedIDContext } from '../../utils/watershed-id/WatershedIDContext';
-import { useBottomPanelContext } from '../../utils/bottom-panel/BottomPanelContext';
-import { BottomPanelProvider } from '../../utils/bottom-panel/BottomPanelProvider';
-import Map from '../../components/map/Map';
+import React, { useContext } from 'react';
+import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
+import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
+import WatershedOverview from '../../components/side-panels/watershed/WatershedOverview';
 import HomeSidePanelContent from '../../components/side-panels/home-info/HomeInfoPanel';
 import BottomPanel from '../../components/bottom-panel/BottomPanel';
+import Map from '../../components/map/Map';
 import './Home.css';
-
-/**
- * Interface for the @see {@link Home} function to enforce type safety.
- */
-interface SidePanelProps {
-  children: React.ReactNode;
-}
 
 /**
  * SidePanel component that wraps children with a styled container.
  * 
- * @param {SidePanelProps} props - The properties object.
  * @param {React.ReactNode} props.children - The content to be displayed inside the panel.
  * @returns {JSX.Element} A styled side panel containing the provided children.
  */
-function SidePanel({ children }: SidePanelProps): JSX.Element {
+function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <div className='side-panel'>
       <div className='side-panel-content'>{children}</div>
@@ -38,21 +29,12 @@ function SidePanel({ children }: SidePanelProps): JSX.Element {
  */
 export default function Home(): JSX.Element {
   const watershedId = useContext(WatershedIDContext);
-
-  return (
-    <BottomPanelProvider>
-      <HomeContent watershedId={watershedId} />
-    </BottomPanelProvider>
-  );
-}
-
-function HomeContent({ watershedId }: { watershedId: string | null }) {
   const bottomPanel = useBottomPanelContext();
 
   return (
     <div className='home-container'>
       <SidePanel>
-        {watershedId ? <Outlet /> : <HomeSidePanelContent />}
+        {watershedId ? <WatershedOverview /> : <HomeSidePanelContent />}
       </SidePanel>
       <div className='map-wrapper' style={{ position: 'relative' }}>
         <Map />
