@@ -3,8 +3,8 @@ import { useState } from "react";
 import './Layers.css';
 
 interface LayersControlProps {
-  selectedLayerId: /*'Default'*/ | 'Satellite' | 'Topographic';
-  setSelectedLayerId: (id: /*'Default'*/ | 'Satellite' | 'Topographic') => void;
+  selectedLayerId: 'Satellite' | 'Topographic';
+  setSelectedLayerId: (id: 'Satellite' | 'Topographic') => void;
 }
 
 /**
@@ -16,11 +16,10 @@ export default function LayersControl({ selectedLayerId, setSelectedLayerId }: L
   const [isLayersOpen, setIsLayersOpen] = useState(false);
 
   const layers = [
-    // { id: 'Default', name: 'Default' },
     { id: 'Satellite', name: 'Satellite' },
     { id: 'Topographic', name: 'Topographic' }
   ];
- 
+
   const toggleLayers = () => setIsLayersOpen((prev) => !prev);
 
   return (

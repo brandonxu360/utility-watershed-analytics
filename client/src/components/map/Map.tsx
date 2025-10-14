@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
@@ -12,7 +12,7 @@ import { LeafletMouseEvent, PathOptions } from 'leaflet';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
-// import LayersControl from './controls/Layers/Layers';
+import LayersControl from './controls/Layers/Layers';
 import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
@@ -33,7 +33,7 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-{ /* Styles for selected and non selected watersheds */ }
+/* Styles for selected and non selected watersheds */
 const defaultStyle = {
   color: '#4a83ec',
   weight: 3,
@@ -118,7 +118,7 @@ export default function Map(): JSX.Element {
 
   const bottomPanel = useBottomPanelContext();
 
-  { /* Navigates to a watershed on click */ }
+  /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
@@ -141,7 +141,7 @@ export default function Map(): JSX.Element {
     [watershedId]
   );
 
-  useMemo(() => {
+  useEffect(() => {
     if (landuse && memoSubcatchments) {
       const legend: Record<string, string> = {};
       for (const feature of memoSubcatchments.features) {
@@ -186,14 +186,21 @@ export default function Map(): JSX.Element {
     []
   );
 
-  const [selectedLayerId, /*setSelectedLayerId*/] = useState</*'Satellite' | */ 'Topographic'>('Topographic');
+  const [selectedLayerId, setSelectedLayerId] = useState<'Satellite' | 'Topographic'>('Satellite');
 
-  const tileLayers = {
-    // Satellite: {
-    //   url: "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg",
-    //   attribution: '&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    //   maxZoom: 20,
-    // },
+  const tileLayers: Record<'Satellite' | 'Topographic', {
+    url: string;
+    attribution: string;
+    maxZoom: number;
+    subdomains?: string[];
+  }> = {
+    Satellite: {
+      // NOTE: unofficial Google tile endpoint. For production consider using the Google Maps APIs with a key.
+      url: "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+      attribution: '&copy; Google',
+      maxZoom: 20,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    },
     Topographic: {
       url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
       attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
@@ -229,9 +236,11 @@ export default function Map(): JSX.Element {
         )}
 
         <TileLayer
+          key={selectedLayerId}
           attribution={tileLayers[selectedLayerId].attribution}
           url={tileLayers[selectedLayerId].url}
           maxZoom={tileLayers[selectedLayerId].maxZoom}
+          {...(tileLayers[selectedLayerId].subdomains ? { subdomains: tileLayers[selectedLayerId].subdomains } : {})}
         />
 
         <ScaleControl metric={true} imperial={true} />
@@ -244,10 +253,10 @@ export default function Map(): JSX.Element {
         {/* TOP RIGHT CONTROLS */}
         <div className="leaflet-top leaflet-right">
           <SearchControl />
-          {/* <LayersControl
-              selectedLayerId={selectedLayerId}
-              setSelectedLayerId={setSelectedLayerId}
-            /> */}
+          <LayersControl
+            selectedLayerId={selectedLayerId}
+            setSelectedLayerId={setSelectedLayerId}
+          />
           <ZoomInControl />
           <ZoomOutControl />
           <SettingsControl />
