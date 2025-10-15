@@ -2,6 +2,7 @@ import React from 'react';
 import { ChangeEvent } from 'react';
 import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
 import { FaQuestionCircle } from 'react-icons/fa';
+import { useBottomPanelStore } from '../../../../store/BottomPanelStore';
 
 type DataLayersTabContentProps = {
     activeTab: string;
@@ -18,6 +19,8 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
         landuse,
         setLanduseLegend
     } = useWatershedOverlayStore();
+
+    const { shrubCover, treeCover } = useBottomPanelStore();
 
     return (
         <div className="layerpicker-layers" id="layerpicker-layers">
@@ -77,7 +80,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                         <input
                             type="checkbox"
                             id="shrubCover"
-                            // checked={shrubCover}
+                            checked={shrubCover}
                             onChange={handleChange}
                         />
                     </div>
@@ -86,7 +89,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                         <input
                             type="checkbox"
                             id="treeCover"
-                            // checked={treeCover}
+                            checked={treeCover}
                             onChange={handleChange}
                         />
                     </div>
