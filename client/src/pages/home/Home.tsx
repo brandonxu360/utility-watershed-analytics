@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
 import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
-import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
+import { useBottomPanelStore } from '../../store/BottomPanelStore';
 import WatershedOverview from '../../components/side-panels/watershed/WatershedOverview';
 import HomeSidePanelContent from '../../components/side-panels/home-info/HomeInfoPanel';
-import BottomPanel from '../../components/bottom-panel/BottomPanel';
+import BottomPanel from '../../components/bottom-panels/BottomPanel';
 import Map from '../../components/map/Map';
 import './Home.css';
 
@@ -29,7 +29,7 @@ function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
  */
 export default function Home(): JSX.Element {
   const watershedId = useContext(WatershedIDContext);
-  const bottomPanel = useBottomPanelContext();
+  const { isOpen, content, closePanel } = useBottomPanelStore();
 
   return (
     <div className='home-container'>
@@ -38,12 +38,12 @@ export default function Home(): JSX.Element {
       </SidePanel>
       <div className='map-wrapper' style={{ position: 'relative' }}>
         <Map />
-        {bottomPanel.isOpen && (
+        {isOpen && (
           <BottomPanel
-            isOpen={bottomPanel.isOpen}
-            onClose={bottomPanel.closePanel}
+            isOpen={isOpen}
+            onClose={closePanel}
           >
-            {bottomPanel.content}
+            {content}
           </BottomPanel>
         )}
       </div>

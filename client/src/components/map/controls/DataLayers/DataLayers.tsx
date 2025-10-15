@@ -1,5 +1,7 @@
 import { ChangeEvent, useState } from 'react';
 import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
+import { useBottomPanelStore } from '../../../../store/BottomPanelStore';
+import { VegetationCover } from '../../../bottom-panels/VegetationCover';
 import DataLayersTabContent from './DataLayersTabContent';
 
 import {
@@ -26,6 +28,13 @@ export default function DataLayersControl() {
     setLanduse,
     reset
   } = useWatershedOverlayStore();
+
+  const {
+    openPanel,
+    setShrubCover,
+    setTreeCover,
+    closePanel
+  } = useBottomPanelStore();
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Hill Slopes');
@@ -54,10 +63,30 @@ export default function DataLayersControl() {
     }
 
     if (id === 'landuse') {
-      setSubcatchment(true);
-      setLanduse(true);
+      setSubcatchment(checked);
+      setLanduse(checked);
       if (!checked) {
         reset();
+      }
+    }
+
+    if (id === 'shrubCover') {
+      setTreeCover(false);
+      setShrubCover(checked);
+      openPanel(<VegetationCover option="shrub" />);
+
+      if (!checked) {
+        closePanel();
+      }
+    }
+
+    if (id === 'treeCover') {
+      setShrubCover(false);
+      setTreeCover(checked);
+      openPanel(<VegetationCover option="tree" />);
+
+      if (!checked) {
+        closePanel();
       }
     }
   };

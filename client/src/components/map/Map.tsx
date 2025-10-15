@@ -5,10 +5,10 @@ import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
 import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { useBottomPanelContext } from '../../context/bottom-panel/BottomPanelContext';
 import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
 import { Properties } from '../../types/WatershedFeature';
 import { LeafletMouseEvent, PathOptions } from 'leaflet';
+import { useBottomPanelStore } from '../../store/BottomPanelStore';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -116,14 +116,14 @@ export default function Map(): JSX.Element {
     enabled: Boolean(channels && watershedId),
   });
 
-  const bottomPanel = useBottomPanelContext();
+  const { closePanel } = useBottomPanelStore();
 
   { /* Navigates to a watershed on click */ }
   const onWatershedClick = (e: LeafletMouseEvent) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
 
-    bottomPanel.closePanel();
+    closePanel();
     navigate({
       to: `/watershed/${feature.id}`,
     });
