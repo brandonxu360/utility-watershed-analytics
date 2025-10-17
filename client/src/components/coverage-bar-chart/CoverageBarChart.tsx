@@ -1,14 +1,14 @@
 import React from 'react';
+
 import {
     ResponsiveContainer,
-    ComposedChart,
-    Bar,
     Line,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
     Legend,
+    LineChart,
 } from 'recharts';
 
 type CoverageBarChartProps = {
@@ -22,7 +22,7 @@ export const CoverageBarChart: React.FC<CoverageBarChartProps> = ({ data, title,
         <div style={{ width: '100%', height: 300 }}>
             <h3 style={{ textAlign: 'center', margin: '0 0 8px' }}>{title}</h3>
             <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart
+                <LineChart
                     data={data}
                     margin={{
                         top: 20,
@@ -36,22 +36,17 @@ export const CoverageBarChart: React.FC<CoverageBarChartProps> = ({ data, title,
                     <YAxis />
                     <Tooltip />
                     <Legend />
-
-                    {barKeys.map((bk, idx) =>
-                        idx === 0 ? (
-                            <Bar key={bk.key} dataKey={bk.key} barSize={20} fill={bk.color} />
-                        ) : (
-                            <Line
-                                key={bk.key}
-                                type="monotone"
-                                dataKey={bk.key}
-                                stroke={bk.color}
-                                strokeWidth={2}
-                                dot={false}
-                            />
-                        )
-                    )}
-                </ComposedChart>
+                    {barKeys.map((bar) => (
+                        <Line
+                            key={bar.key}
+                            type="monotone"
+                            dataKey={bar.key}
+                            stroke={bar.color}
+                            strokeWidth={3}
+                            activeDot={{ r: 8, fill: bar.activeFill, stroke: bar.activeStroke, strokeWidth: 2 }}
+                        />
+                    ))}
+                </LineChart>
             </ResponsiveContainer>
         </div>
     );
