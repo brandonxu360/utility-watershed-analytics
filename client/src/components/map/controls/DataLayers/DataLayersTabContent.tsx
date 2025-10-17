@@ -2,6 +2,7 @@ import React from 'react';
 import { ChangeEvent } from 'react';
 import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
 import { FaQuestionCircle } from 'react-icons/fa';
+import { VegetationCover } from '../../../bottom-panels/VegetationCover';
 import { useBottomPanelStore } from '../../../../store/BottomPanelStore';
 
 type DataLayersTabContentProps = {
@@ -20,7 +21,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
         setLanduseLegend
     } = useWatershedOverlayStore();
 
-    const { shrubCover, treeCover } = useBottomPanelStore();
+    const { openPanel } = useBottomPanelStore();
 
     return (
         <div className="layerpicker-layers" id="layerpicker-layers">
@@ -47,7 +48,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                     </div>
                 </>
             )}
-            {activeTab === 'Coverage' && (
+            {activeTab === 'Surface Data' && (
                 <>
                     <div className="layerpicker-layer">
                         <button className="layerpicker-title">Land Use</button>
@@ -73,25 +74,16 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                     </div>
                 </>
             )}
-            {activeTab === 'Vegetation' && (
+            {activeTab === 'Coverage' && (
                 <>
                     <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Shrub Cover</button>
-                        <input
-                            type="checkbox"
-                            id="shrubCover"
-                            checked={shrubCover}
-                            onChange={handleChange}
-                        />
-                    </div>
-                    <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Tree Cover</button>
-                        <input
-                            type="checkbox"
-                            id="treeCover"
-                            checked={treeCover}
-                            onChange={handleChange}
-                        />
+                        <button className="layerpicker-title" onClick={
+                            () => {
+                                openPanel(<VegetationCover />);
+                            }
+                        }>
+                            Vegetation Cover
+                        </button>
                     </div>
                 </>
             )}

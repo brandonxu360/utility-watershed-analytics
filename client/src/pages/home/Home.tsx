@@ -29,7 +29,7 @@ function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
  */
 export default function Home(): JSX.Element {
   const watershedId = useContext(WatershedIDContext);
-  const { isOpen, content, closePanel } = useBottomPanelStore();
+  const { isOpen, content } = useBottomPanelStore();
 
   return (
     <div className='home-container'>
@@ -41,7 +41,6 @@ export default function Home(): JSX.Element {
         {isOpen && (
           <BottomPanel
             isOpen={isOpen}
-            onClose={closePanel}
           >
             {content}
           </BottomPanel>

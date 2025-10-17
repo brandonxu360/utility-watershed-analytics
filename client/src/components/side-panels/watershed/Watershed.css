@@ -101,7 +101,6 @@
 }
 
 .accordionItem {
-  /* overflow: hidden; */
   transition: border-color 0.25s;
 }
 
@@ -235,41 +234,6 @@
   outline-offset: 2px;
 }
 
-.vegetationSelector {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height .3s ease;
-  margin-top: 0;
-}
-
-.vegetationSelector.expanded {
-  max-height: 14rem;
-  padding-top: .5rem;
-  background-color: rgba(0, 168, 151, 0.3);
-}
-
-.veg-options {
-  padding: var(--size-100);
-  padding-left: var(--size-400);
-}
-
-.veg-options-container {
-  display: flex;
-  align-items: center;
-  gap: var(--size-200);
-  padding: var(--size-200) 0;
-}
-
-.vegetationSelector label {
-  font-size: var(--fs-100);
-  margin-left: var(--size-200);
-}
-
-.vegetationSelector input {
-  transform: scale(1.5);
-  margin: 0;
-}
-
 .clear-button {
   margin: var(--size-300) var(--size-400);
   padding: var(--size-100);
@@ -278,30 +242,4 @@
   color: var(--clr-primary-100);
   border-radius: 0;
   font-size: var(--fs-100);
-}
-
-.dateSelector label {
-  display: block;
-  font-size: .875rem;
-  margin-bottom: .25rem;
-}
-
-.dateSelector select {
-  width: 100%;
-  padding: .25rem;
-  font-size: 1rem;
-}
-
-.dateSelector.right-align {
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
-    width: auto;
-    min-width: 180px;
-    gap: 0.5rem;
-    margin-right: 1.75rem;
-}
-
-.dateSelector.right-align select {
-    width: 120px;
 }

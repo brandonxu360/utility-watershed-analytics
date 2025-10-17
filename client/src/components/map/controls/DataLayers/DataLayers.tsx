@@ -1,7 +1,5 @@
 import { ChangeEvent, useState } from 'react';
 import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
-import { useBottomPanelStore } from '../../../../store/BottomPanelStore';
-import { VegetationCover } from '../../../bottom-panels/VegetationCover';
 import DataLayersTabContent from './DataLayersTabContent';
 
 import {
@@ -29,20 +27,13 @@ export default function DataLayersControl() {
     reset
   } = useWatershedOverlayStore();
 
-  const {
-    openPanel,
-    setShrubCover,
-    setTreeCover,
-    closePanel
-  } = useBottomPanelStore();
-
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Hill Slopes');
 
   const navTabs = [
     { key: 'Hill Slopes', icon: <FaWater title="Hill Slopes" /> },
-    { key: 'Coverage', icon: <FaGlobe title="Coverage" /> },
-    { key: 'Vegetation', icon: <FaTree title="Vegetation" /> },
+    { key: 'Surface Data', icon: <FaGlobe title="Coverage" /> },
+    { key: 'Coverage', icon: <FaTree title="Vegetation" /> },
     { key: 'Soil Burn', icon: <FaFireAlt title="Soil Burn" /> },
   ];
 
@@ -67,26 +58,6 @@ export default function DataLayersControl() {
       setLanduse(checked);
       if (!checked) {
         reset();
-      }
-    }
-
-    if (id === 'shrubCover') {
-      setTreeCover(false);
-      setShrubCover(checked);
-      openPanel(<VegetationCover option="shrub" />);
-
-      if (!checked) {
-        closePanel();
-      }
-    }
-
-    if (id === 'treeCover') {
-      setShrubCover(false);
-      setTreeCover(checked);
-      openPanel(<VegetationCover option="tree" />);
-
-      if (!checked) {
-        closePanel();
       }
     }
   };
