@@ -99,3 +99,5 @@ export const VegetationCover: React.FC = () => {
         </div>
     );
 };
+
+export default VegetationCover;
