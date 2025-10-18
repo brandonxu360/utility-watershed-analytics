@@ -30,7 +30,7 @@ function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
  */
 export default function Home(): JSX.Element {
   useWatershedID(); // Custom hook to manage watershed ID state
-  const { isOpen, content, closePanel } = useBottomPanelStore();
+  const { isOpen, content } = useBottomPanelStore();
   const { id } = useWatershedIDStore();
 
   return (
@@ -43,7 +43,6 @@ export default function Home(): JSX.Element {
         {isOpen && (
           <BottomPanel
             isOpen={isOpen}
-            onClose={closePanel}
           >
             {content}
           </BottomPanel>

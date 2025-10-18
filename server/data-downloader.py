@@ -94,7 +94,7 @@ def download_watershed_data():
                 target.unlink()
             sys.exit(1)
 
-    print(f"\n==> Download Summary:")
+    print("\n==> Download Summary:")
     print(f"    ✓ Downloaded: {download_count} files")
     print(f"    - Skipped: {skip_count} files (already exist)")
     print(f"    ✓ Total processed: {download_count + skip_count} files")
