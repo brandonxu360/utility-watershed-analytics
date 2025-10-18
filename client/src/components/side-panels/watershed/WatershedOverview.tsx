@@ -1,10 +1,10 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
 import { useWatershedOverlayStore } from '../../../store/WatershedOverlayStore';
-import { WatershedIDContext } from '../../../context/watershed-id/WatershedIDContext';
 import { WatershedFeature } from '../../../types/WatershedFeature';
+import { useWatershedIDStore } from '../../../store/WatershedIDStore';
 import './Watershed.css'
 
 /** 
@@ -35,7 +35,7 @@ function SkeletonWatershedPanel() {
 
 export default function WatershedOverview() {
     const navigate = useNavigate();
-    const watershedId = useContext(WatershedIDContext);
+    const { id } = useWatershedIDStore();
     const { reset } = useWatershedOverlayStore();
 
     const { data: watersheds, isLoading, error } = useQuery({
@@ -44,11 +44,11 @@ export default function WatershedOverview() {
     });
 
     const watershed = useMemo(() => {
-        if (!watersheds?.features || !watershedId) return null;
+        if (!watersheds?.features || !id) return null;
         return watersheds.features.find(
-            (feature: WatershedFeature) => feature.id && feature.id.toString() === watershedId
+            (feature: WatershedFeature) => feature.id && feature.id.toString() === id
         );
-    }, [watersheds?.features, watershedId]);
+    }, [watersheds?.features, id]);
 
     if (isLoading) return <SkeletonWatershedPanel />;
     if (error) return <div>Error: {(error as Error).message}</div>;
@@ -92,7 +92,7 @@ export default function WatershedOverview() {
                     <p style={{ marginBottom: '0' }}><strong>Watershed Models</strong></p>
                 </div>
 
-                <div className='accordionGroup' key={watershedId}>
+                <div className='accordionGroup' key={id}>
                     <button
                         className='actionButton'
                         aria-label='View Calibrated WEPP Results'
