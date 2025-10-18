@@ -2,9 +2,8 @@ import React, { useRef } from 'react';
 import { FaGripLines } from 'react-icons/fa6';
 import './BottomPanel.css';
 
-interface BottomPanelProps {
+type BottomPanelProps = {
   isOpen: boolean;
-  onClose: () => void;
   children: React.ReactNode;
 }
 
@@ -23,7 +22,7 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   const onDrag = (e: MouseEvent) => {
     if (panelRef.current) {
       const newHeight = startHeight.current - (e.clientY - startY.current);
-      panelRef.current.style.height = `${Math.max(16, Math.min(window.innerHeight - 54, newHeight))}px`;
+      panelRef.current.style.height = `${Math.max(16, Math.min(450, newHeight))}px`;
     }
   };
 

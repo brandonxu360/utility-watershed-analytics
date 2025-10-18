@@ -123,7 +123,7 @@ export default function Map(): JSX.Element {
     const layer = e.sourceTarget;
     const feature = layer.feature;
 
-    closePanel();
+    closePanel(); // TODO: The panel should only close if watershed id changes
     navigate({
       to: `/watershed/${feature.id}`,
     });
