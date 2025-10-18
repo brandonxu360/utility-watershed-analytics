@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction, connection
+from django.db import transaction
 from server.watershed.models import Watershed, Subcatchment, Channel
 from server.watershed.load import run
 
