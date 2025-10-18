@@ -69,7 +69,6 @@ class Channel(models.Model):
     watershed = models.ForeignKey(to=Watershed, on_delete=models.CASCADE)
     topazid = models.BigIntegerField()
     weppid = models.BigIntegerField()
-    topaz_id = models.BigIntegerField()
     slope_scalar = models.FloatField()
     length_m = models.FloatField()
     width_m = models.FloatField()
