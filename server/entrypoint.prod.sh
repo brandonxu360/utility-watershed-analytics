@@ -4,7 +4,6 @@ echo "=== PRODUCTION STARTUP ==="
 
 # Run migrations
 echo "Running Migrations"
-python manage.py makemigrations
 python manage.py migrate
 
 # Health check
