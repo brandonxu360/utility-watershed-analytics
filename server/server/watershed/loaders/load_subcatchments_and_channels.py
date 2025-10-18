@@ -54,7 +54,6 @@ subcatchment_mapping = {
 channel_mapping = {
     'topazid': 'TopazID',
     'weppid': 'WeppID',
-    'topaz_id': 'topaz_id',
     'slope_scalar': 'slope_scalar',
     'length_m': 'length_m',
     'width_m': 'width_m',
