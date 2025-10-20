@@ -1,0 +1,52 @@
+name: Build & Deploy Client/Server
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual triggering from GitHub UI for testing
+
+jobs:
+  server-ci:
+    name: Reuse Server CI
+    uses: ./.github/workflows/server-ci.yml
+
+  client-ci:
+    name: Reuse Client CI
+    uses: ./.github/workflows/client-ci.yml
+
+  deploy:
+    name: Deploy
+    needs: [server-ci, client-ci]
+    runs-on: [self-hosted, Linux, X64, deploy]
+    defaults:
+      run:
+        working-directory: /workdir/utility-watershed-analytics
+    steps:
+      - name: Pull latest changes on server
+        run: git pull origin main
+
+      - name: Rebuild frontend static files
+        run: docker compose -f compose.prod.yml run --rm --build frontend-build
+
+      - name: Restart stack
+        run: |
+          docker compose -f compose.prod.yml up -d --build server
+          docker compose -f compose.prod.yml restart caddy
+
+      - name: Health Check
+        run: |
+          echo "Waiting for services to be healthy..."
+          sleep 10
+          
+          # Check if services are running
+          docker compose -f compose.prod.yml ps
+          
+          # Optional: Add actual health check endpoint
+          # curl -f http://localhost:80/api/health || exit 1
+      
+      - name: Deployment Summary
+        run: |
+          echo "### Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
+
