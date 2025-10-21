@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { useNavigate } from '@tanstack/react-router'
+import { useMatch, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
 import { useWatershedOverlayStore } from '../../../store/WatershedOverlayStore';
 import { WatershedFeature } from '../../../types/WatershedFeature';
-import { useWatershedIDStore } from '../../../store/WatershedIDStore';
+import { watershedOverviewRoute } from '../../../routes/router';
 import './Watershed.css'
 
 /** 
@@ -35,8 +35,10 @@ function SkeletonWatershedPanel() {
 
 export default function WatershedOverview() {
     const navigate = useNavigate();
-    const { id } = useWatershedIDStore();
     const { reset } = useWatershedOverlayStore();
+
+    const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
+    const watershedID = match?.params.webcloudRunId ?? null;
 
     const { data: watersheds, isLoading, error } = useQuery({
         queryKey: ["watersheds"],
@@ -44,11 +46,11 @@ export default function WatershedOverview() {
     });
 
     const watershed = useMemo(() => {
-        if (!watersheds?.features || !id) return null;
+        if (!watersheds?.features || !watershedID) return null;
         return watersheds.features.find(
-            (feature: WatershedFeature) => feature.id && feature.id.toString() === id
+            (feature: WatershedFeature) => feature.id && feature.id.toString() === watershedID
         );
-    }, [watersheds?.features, id]);
+    }, [watersheds?.features, watershedID]);
 
     if (isLoading) return <SkeletonWatershedPanel />;
     if (error) return <div>Error: {(error as Error).message}</div>;
@@ -92,7 +94,7 @@ export default function WatershedOverview() {
                     <p style={{ marginBottom: '0' }}><strong>Watershed Models</strong></p>
                 </div>
 
-                <div className='accordionGroup' key={id}>
+                <div className='accordionGroup' key={watershedID}>
                     <button
                         className='actionButton'
                         aria-label='View Calibrated WEPP Results'
