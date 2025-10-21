@@ -1,5 +1,4 @@
 import { createRoute, createRootRoute, createRouter, Outlet } from '@tanstack/react-router';
-import { WatershedIDProvider } from '../context/watershed-id/WatershedIDProvider';
 import Navbar from '../components/navbar/Navbar';
 import Home from '../pages/home/Home';
 import WatershedOverview from '../components/side-panels/watershed/WatershedOverview';
@@ -24,9 +23,7 @@ const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: () => (
-    <WatershedIDProvider>
-      <Home />
-    </WatershedIDProvider>
+    <Home />
   ),
 });
 

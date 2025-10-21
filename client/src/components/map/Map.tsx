@@ -1,14 +1,14 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { useMatch, useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
-import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
 import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
 import { Properties } from '../../types/WatershedFeature';
 import { LeafletMouseEvent, PathOptions } from 'leaflet';
 import { useBottomPanelStore } from '../../store/BottomPanelStore';
+import { watershedOverviewRoute } from '../../routes/router';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -95,9 +95,11 @@ function SubcatchmentLayer({ data, style }: {
 export default function Map(): JSX.Element {
   const navigate = useNavigate()
 
-  const watershedId = useContext(WatershedIDContext)
   const { subcatchment, channels, landuse } = useWatershedOverlayStore();
   const { setLanduseLegendMap } = useWatershedOverlayStore();
+
+  const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
+  const watershedID = match?.params.webcloudRunId ?? null;
 
   const { data: watersheds, error: watershedsError, isLoading: watershedsLoading } = useQuery({
     queryKey: ['watersheds'],
@@ -105,15 +107,15 @@ export default function Map(): JSX.Element {
   });
 
   const { data: subcatchments, error: subError, isLoading: subLoading } = useQuery({
-    queryKey: ['subcatchments', watershedId],
-    queryFn: () => fetchSubcatchments(watershedId!),
-    enabled: Boolean(subcatchment && watershedId),
+    queryKey: ['subcatchments', watershedID],
+    queryFn: () => fetchSubcatchments(watershedID!),
+    enabled: Boolean(subcatchment && watershedID),
   });
 
   const { data: channelData, error: channelError, isLoading: channelLoading } = useQuery({
-    queryKey: ['channels', watershedId],
-    queryFn: () => fetchChannels(watershedId!),
-    enabled: Boolean(channels && watershedId),
+    queryKey: ['channels', watershedID],
+    queryFn: () => fetchChannels(watershedID!),
+    enabled: Boolean(channels && watershedID),
   });
 
   const { closePanel } = useBottomPanelStore();
@@ -137,8 +139,8 @@ export default function Map(): JSX.Element {
   // Memoize style functions
   const watershedStyle = useCallback(
     (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) =>
-      feature?.id?.toString() === watershedId ? selectedStyle : defaultStyle,
-    [watershedId]
+      feature?.id?.toString() === watershedID ? selectedStyle : defaultStyle,
+    [watershedID]
   );
 
   useEffect(() => {
@@ -263,7 +265,7 @@ export default function Map(): JSX.Element {
         </div>
 
         {/* Handles URL navigation to a specified watershed */}
-        <MapEffect watershedId={watershedId} watersheds={memoWatersheds} />
+        <MapEffect watershedId={watershedID} watersheds={memoWatersheds} />
 
         {memoWatersheds && (
           <GeoJSON
@@ -287,7 +289,7 @@ export default function Map(): JSX.Element {
 
       <LandUseLegend />
 
-      {watershedId && (
+      {watershedID && (
         <div style={{ position: 'absolute', right: '10px', bottom: '30px' }}>
           <DataLayersControl />
         </div>

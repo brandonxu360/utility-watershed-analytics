@@ -1,6 +1,7 @@
-import React, { useContext } from 'react';
-import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContext';
+import React from 'react';
 import { useBottomPanelStore } from '../../store/BottomPanelStore';
+import { watershedOverviewRoute } from '../../routes/router';
+import { useMatch } from '@tanstack/react-router';
 import WatershedOverview from '../../components/side-panels/watershed/WatershedOverview';
 import HomeSidePanelContent from '../../components/side-panels/home-info/HomeInfoPanel';
 import BottomPanel from '../../components/bottom-panels/BottomPanel';
@@ -28,13 +29,14 @@ function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
  * @returns {JSX.Element} The main home page layout including a side panel and a map.
  */
 export default function Home(): JSX.Element {
-  const watershedId = useContext(WatershedIDContext);
   const { isOpen, content } = useBottomPanelStore();
+  const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
+  const watershedID = match?.params.webcloudRunId ?? null;
 
   return (
     <div className='home-container'>
       <SidePanel>
-        {watershedId ? <WatershedOverview /> : <HomeSidePanelContent />}
+        {watershedID ? <WatershedOverview /> : <HomeSidePanelContent />}
       </SidePanel>
       <div className='map-wrapper' style={{ position: 'relative' }}>
         <Map />
