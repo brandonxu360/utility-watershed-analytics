@@ -33,7 +33,7 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-/* Styles for selected and non selected watersheds */
+/* Feature Styles */
 const defaultStyle = {
   color: '#4a83ec',
   weight: 3,
@@ -45,6 +45,13 @@ const selectedStyle = {
   color: '#2c2c2c',
   weight: 3,
   fillColor: '#4a83ec',
+  fillOpacity: 0.5,
+};
+
+const highlightedStyle = {
+  color: '#f5f5f5',
+  weight: 2,
+  fillColor: '#a0b7e2ff',
   fillOpacity: 0.5,
 };
 
@@ -74,11 +81,22 @@ function SubcatchmentLayer({ data, style }: {
           ${props.aspect.toFixed(2) ?? 'N/A'}
           <br/><strong>Soil:</strong>
           ${props.soil ?? 'N/A'}</span>`,
-          { className: 'tooltip-bold' }
+          {
+            className: 'tooltip',
+            offset: [12, -50],
+          }
         );
         layer.on({
-          mouseover: () => layer.openTooltip(),
-          mouseout: () => layer.closeTooltip(),
+          mouseover: (e) => {
+            e.target.setStyle(highlightedStyle);
+            layer.openTooltip();
+          },
+        });
+        layer.on({
+          mouseout: (e) => {
+            e.target.setStyle(style(feature));
+            layer.closeTooltip();
+          },
         });
       }}
     />
@@ -281,7 +299,10 @@ export default function Map(): JSX.Element {
         )}
 
         {channels && memoChannels && (
-          <GeoJSON data={memoChannels} style={channelStyle} />
+          <GeoJSON
+            data={memoChannels}
+            style={channelStyle}
+          />
         )}
       </MapContainer>
 
