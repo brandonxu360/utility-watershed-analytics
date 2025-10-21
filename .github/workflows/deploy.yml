@@ -40,8 +40,10 @@ jobs:
           
           # Check if services are running
           docker compose -f compose.prod.yml ps
+
+          # TODO: design and implement actual health check
           
-          # Optional: Add actual health check endpoint
+          # Potentially a health check endpoint
           # curl -f http://localhost:80/api/health || exit 1
       
       - name: Deployment Summary
