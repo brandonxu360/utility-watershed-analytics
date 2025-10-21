@@ -173,7 +173,7 @@ export default function Map(): JSX.Element {
         color: '#2c2c2c',
         weight: 0.75,
         fillColor: '#4a83ec',
-        fillOpacity: 0.1,
+        fillOpacity: 0.75,
       };
     },
     [landuse]
@@ -182,7 +182,7 @@ export default function Map(): JSX.Element {
   const channelStyle = useCallback(
     () => ({
       color: '#ff6700',
-      fillOpacity: 0.1,
+      fillOpacity: 0.75,
       weight: 0.75
     }),
     []
@@ -267,7 +267,7 @@ export default function Map(): JSX.Element {
         {/* Handles URL navigation to a specified watershed */}
         <MapEffect watershedId={watershedID} watersheds={memoWatersheds} />
 
-        {memoWatersheds && (
+        {!subcatchment && memoWatersheds && (
           <GeoJSON
             data={memoWatersheds}
             style={watershedStyle}
