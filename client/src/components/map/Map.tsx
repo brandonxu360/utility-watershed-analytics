@@ -1,5 +1,5 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { MapContainer, TileLayer, GeoJSON, ScaleControl, useMap } from 'react-leaflet';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
@@ -7,8 +7,9 @@ import { WatershedIDContext } from '../../context/watershed-id/WatershedIDContex
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
 import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
 import { Properties } from '../../types/WatershedFeature';
-import { LeafletMouseEvent, PathOptions } from 'leaflet';
+import { LeafletEvent, LeafletMouseEvent, PathOptions } from 'leaflet';
 import { useBottomPanelStore } from '../../store/BottomPanelStore';
+import { zoomToFeature } from '../../utils/map/MapUtil';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -60,6 +61,29 @@ function SubcatchmentLayer({ data, style }: {
   data: GeoJSON.FeatureCollection
   style: (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => PathOptions
 }) {
+  const map = useMap();
+
+  // Track selected feature id and layer using refs so event handlers
+  // can read/update the current selection at event time without forcing rerenders.
+  const selectedIdRef = useRef<string | null>(null);
+  const selectedLayerRef = useRef<{
+    layer: LeafletEvent['target'];
+    feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | null;
+  } | null>(null);
+
+  const setSelection = (
+    id: string | null,
+    layer?: LeafletEvent['target'],
+    feature?: GeoJSON.Feature<GeoJSON.Geometry, Properties> | null
+  ) => {
+    selectedIdRef.current = id;
+    if (id && layer) {
+      selectedLayerRef.current = { layer, feature: feature ?? null };
+    } else {
+      selectedLayerRef.current = null;
+    }
+  };
+
   return (
     <GeoJSON
       data={data}
@@ -87,15 +111,51 @@ function SubcatchmentLayer({ data, style }: {
           }
         );
         layer.on({
+          click: (e) => {
+            const fid = feature?.id?.toString?.() ?? null;
+
+            if (selectedIdRef.current === fid) {
+              e.target.setStyle(style(feature));
+              setSelection(null);
+            } else {
+              // Clear previous selection if any
+              if (selectedLayerRef.current) {
+                selectedLayerRef.current.layer.setStyle(
+                  style(selectedLayerRef.current.feature ?? undefined)
+                );
+              }
+
+              // Set new selection
+              e.target.setStyle(selectedStyle);
+              setSelection(fid, e.target, feature);
+            }
+
+            zoomToFeature(map, layer);
+          }
+        });
+        layer.on({
           mouseover: (e) => {
-            e.target.setStyle(highlightedStyle);
+            const fid = feature?.id?.toString?.() ?? null;
+
+            if (selectedIdRef.current === fid) {
+              e.target.setStyle(selectedStyle);
+            } else {
+              e.target.setStyle(highlightedStyle);
+            }
+
             layer.openTooltip();
           },
         });
         layer.on({
           mouseout: (e) => {
-            e.target.setStyle(style(feature));
-            layer.closeTooltip();
+            const fid = feature?.id?.toString?.() ?? null;
+
+            if (selectedIdRef.current === fid) {
+              layer.closeTooltip();
+            } else {
+              e.target.setStyle(style(feature));
+              layer.closeTooltip();
+            }
           },
         });
       }}
