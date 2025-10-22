@@ -18,12 +18,17 @@ jobs:
     name: Deploy
     needs: [server-ci, client-ci]
     runs-on: [self-hosted, Linux, X64, deploy]
-    defaults:
-      run:
-        working-directory: /workdir/utility-watershed-analytics
+    environment: production
     steps:
-      - name: Pull latest changes on server
-        run: git pull origin main
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file from secrets
+        run: |
+          echo "Creating production .env file"
+          cat << EOF > .env
+          ${{ secrets.PRODUCTION_ENV }}
+          EOF
 
       - name: Rebuild frontend static files
         run: docker compose -f compose.prod.yml run --rm --build frontend-build
@@ -52,3 +57,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ Deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
 
+      - name: Cleanup
+        if: always()
+        run: rm -f .env
