@@ -36,7 +36,7 @@ jobs:
       - name: Restart stack
         run: |
           docker compose -f compose.prod.yml up -d --build server
-          docker compose -f compose.prod.yml restart caddy
+          docker compose -f compose.prod.yml up -d caddy
 
       - name: Health Check
         run: |
