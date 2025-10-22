@@ -1,16 +1,12 @@
 name: Server CI - Build & Test
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'server/**'
-      - '.github/workflows/server-ci.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'server/**'
       - '.github/workflows/server-ci.yml'
+  workflow_call:
 
 jobs:
   build-and-test:

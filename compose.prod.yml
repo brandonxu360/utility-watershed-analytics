@@ -8,6 +8,7 @@ services:
       dockerfile: Dockerfile.prod
     volumes:
       - frontend-build:/app/client/dist
+    command: sh -c "npm run build && echo 'Frontend build complete - static files ready in /app/client/dist'"
     profiles:
       - build
 
