@@ -28,8 +28,10 @@ const Select: React.FC<SelectProps> = ({ id, ariaLabel, value, options, onChange
     const selected = options.find((o) => o === value) ?? value;
 
     return (
-        <div id={id} className="select-wrapper" ref={wrapperRef}>
+        <div className="select-wrapper" ref={wrapperRef}>
             <button
+                id={id}
+                data-testid={id ? `select-${id}` : undefined}
                 type="button"
                 className="select-button"
                 aria-haspopup="listbox"
