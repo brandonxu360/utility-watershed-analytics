@@ -1,5 +1,6 @@
 import { ChangeEvent, useState } from 'react';
 import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
+import { useBottomPanelStore } from '../../../../store/BottomPanelStore';
 import DataLayersTabContent from './DataLayersTabContent';
 
 import {
@@ -27,6 +28,10 @@ export default function DataLayersControl() {
     reset
   } = useWatershedOverlayStore();
 
+  const {
+    clearSelectedHillslope,
+  } = useBottomPanelStore();
+
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Hill Slopes');
 
@@ -46,6 +51,7 @@ export default function DataLayersControl() {
       setSubcatchment(checked);
       if (!checked) {
         setLanduse(false);
+        clearSelectedHillslope();
       }
     }
 

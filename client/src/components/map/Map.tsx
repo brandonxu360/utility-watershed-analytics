@@ -63,6 +63,8 @@ function SubcatchmentLayer({ data, style }: {
 }) {
   const map = useMap();
 
+  const { setSelectedHillslope, clearSelectedHillslope } = useBottomPanelStore();
+
   // Track selected feature id and layer using refs so event handlers
   // can read/update the current selection at event time without forcing rerenders.
   const selectedIdRef = useRef<string | null>(null);
@@ -117,8 +119,8 @@ function SubcatchmentLayer({ data, style }: {
             if (selectedIdRef.current === fid) {
               e.target.setStyle(style(feature));
               setSelection(null);
+              clearSelectedHillslope();
             } else {
-              // Clear previous selection if any
               if (selectedLayerRef.current) {
                 selectedLayerRef.current.layer.setStyle(
                   style(selectedLayerRef.current.feature ?? undefined)
@@ -128,6 +130,7 @@ function SubcatchmentLayer({ data, style }: {
               // Set new selection
               e.target.setStyle(selectedStyle);
               setSelection(fid, e.target, feature);
+              setSelectedHillslope(feature.properties.weppid, feature.properties ?? null);
             }
 
             zoomToFeature(map, layer);
