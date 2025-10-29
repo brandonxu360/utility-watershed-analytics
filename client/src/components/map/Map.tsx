@@ -130,7 +130,7 @@ function SubcatchmentLayer({ data, style }: {
               // Set new selection
               e.target.setStyle(selectedStyle);
               setSelection(fid, e.target, feature);
-              setSelectedHillslope(feature.properties.weppid, feature.properties ?? null);
+              setSelectedHillslope(feature.properties.weppid, feature.properties);
             }
 
             zoomToFeature(map, layer);
