@@ -53,7 +53,7 @@ export const VegetationCover: React.FC = () => {
 
     const singleHillslopeData = useMemo(() => {
         if (!selectedHillslopeId || !selectedHillslopeProps) return null;
-        // const props = selectedHillslopeProps;
+        // TODO: Use selectedHillslopeProps to populate tree, shrub, and density values in future implementation.
         const tree = 0;
         const shrub = 0;
         const density = 0;
