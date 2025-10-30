@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
 import { useBottomPanelStore } from "../../store/BottomPanelStore";
 import CoverageBarChart from "../coverage-bar-chart/CoverageBarChart";
@@ -18,7 +18,7 @@ const treeData = [
 ];
 
 export const VegetationCover: React.FC = () => {
-    const { closePanel } = useBottomPanelStore();
+    const { closePanel, selectedHillslopeId, selectedHillslopeProps } = useBottomPanelStore();
 
     const [option, setOption] = useState<"All" | "Shrub" | "Tree">("All");
 
@@ -51,11 +51,34 @@ export const VegetationCover: React.FC = () => {
         return Array.from(map.values());
     };
 
-    const chartData =
-        option === "Shrub" ? shrubData : option === "Tree" ? treeData : getMergedData();
+    const singleHillslopeData = useMemo(() => {
+        if (!selectedHillslopeId || !selectedHillslopeProps) return null;
+        // TODO: Use selectedHillslopeProps to populate tree, shrub, and density values in future implementation.
+        const tree = 0;
+        const shrub = 0;
+        const density = 0;
 
-    const chartTitle =
-        option === "Shrub" ? `Shrub Coverage (${year})` : option === "Tree" ? `Tree Coverage (${year})` : `All Coverage (${year})`;
+        const name = `Hillslope ${selectedHillslopeId}`;
+
+        if (option === "Shrub") {
+            return [{ name, coverage: shrub, density }];
+        }
+        if (option === "Tree") {
+            return [{ name, coverage: tree, density }];
+        }
+
+        return [{ name, coverage: tree + shrub, density }];
+    }, [selectedHillslopeId, selectedHillslopeProps, option]);
+
+    const chartData = singleHillslopeData ?? (option === "Shrub" ? shrubData : option === "Tree" ? treeData : getMergedData());
+
+    const chartTitle = selectedHillslopeId
+        ? `${option} Coverage - Hillslope ${selectedHillslopeId} (${year})`
+        : option === "Shrub"
+            ? `Shrub Coverage (${year})`
+            : option === "Tree"
+                ? `Tree Coverage (${year})`
+                : `All Coverage (${year})`;
 
     return (
         <div>

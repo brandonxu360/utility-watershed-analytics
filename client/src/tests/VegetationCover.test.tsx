@@ -1,48 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react"
-import { CoverageBarChartProps } from "../components/coverage-bar-chart/CoverageBarChart";
-import { SelectProps } from "../components/select/Select";
+import { VegetationCover } from "../components/bottom-panels/VegetationCover";
+import { useBottomPanelStore } from "../store/BottomPanelStore";
+import { Properties } from "../types/WatershedFeature";
 
 const mockClose = vi.fn();
 
-vi.mock("../store/BottomPanelStore", () => {
-  return {
-    useBottomPanelStore: () => ({ closePanel: mockClose }),
-  };
-});
-
-vi.mock("../components/coverage-bar-chart/CoverageBarChart", () => {
-  return {
-    default: (props: CoverageBarChartProps) => (
-      <div data-testid="coverage-chart">{props.title}</div>
-    ),
-  };
-});
-
-vi.mock("../components/select/Select", () => {
-  return {
-    default: ({ value, onChange, options, ariaLabel, id }: SelectProps) => (
-      <select
-        data-testid={`select-${id}`}
-        id={id}
-        aria-label={ariaLabel}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((opt: string) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-    ),
-  };
-});
-
-import { VegetationCover } from "../components/bottom-panels/VegetationCover";
-
 beforeEach(() => {
   mockClose.mockClear();
+  useBottomPanelStore.setState({
+    closePanel: mockClose,
+    selectedHillslopeId: null,
+    selectedHillslopeProps: null,
+  });
+});
+
+afterEach(() => {
+  useBottomPanelStore.setState({ selectedHillslopeId: null, selectedHillslopeProps: null });
 });
 
 describe("VegetationCover", () => {
@@ -70,5 +44,24 @@ describe("VegetationCover", () => {
     }
 
     expect(mockClose).toHaveBeenCalled();
+  });
+
+  it("shows selected hillslope in chart title and reacts to option changes", () => {
+    useBottomPanelStore.setState({
+      selectedHillslopeId: '42',
+      selectedHillslopeProps: { cancov: 20, inrcov: 10, dom: 5, width_m: 12 } as Properties,
+    });
+
+    render(<VegetationCover />);
+
+    const chart = screen.getByTestId("coverage-chart");
+    expect(chart).toHaveTextContent("All Coverage - Hillslope 42 (2024)");
+
+    const selectButton = screen.getByTestId('select-veg-cover-title');
+    fireEvent.click(selectButton);
+    const treeOption = screen.getByRole('option', { name: 'Tree' });
+    fireEvent.click(treeOption);
+
+    expect(chart).toHaveTextContent("Tree Coverage - Hillslope 42 (2024)");
   });
 });

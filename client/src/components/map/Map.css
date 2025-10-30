@@ -32,10 +32,30 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.tooltip-bold strong {
+.tooltip {
+  background: rgba(255, 255, 255, 0.95);
+  color: #111;
+  border-radius: 6px;
+  padding: 8px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.leaflet-tooltip:before,
+.leaflet-tooltip:after {
+  display: none !important;
+}
+
+.tooltip strong {
   font-weight: bold;
 }

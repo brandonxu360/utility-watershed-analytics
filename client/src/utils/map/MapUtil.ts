@@ -11,7 +11,7 @@ export function zoomToFeature(map: Map, layer: L.Layer) {
   const bounds = (layer as L.GeoJSON).getBounds?.();
   if (bounds) {
     map.flyToBounds(bounds, {
-      maxZoom: 14,
+      maxZoom: 16,
     });
   }
 }
