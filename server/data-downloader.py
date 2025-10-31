@@ -11,7 +11,6 @@ from pathlib import Path
 import requests
 import yaml
 
-
 def download_watershed_data():
     """Download watershed data files from manifest to output directory."""
     
@@ -40,10 +39,21 @@ def download_watershed_data():
         print("WARNING: No items found in manifest")
         return
     
+    # Flatten manifest if it contains sections
+    items = []
+    for entry in manifest:
+        if "items" in entry:
+            # This is a section with nested items
+            print(f"==> Section: {entry.get('section', 'Unknown')}")
+            items.extend(entry["items"])
+        else:
+            # This is a direct item
+            items.append(entry)
+    
     download_count = 0
     skip_count = 0
     
-    for item in manifest:
+    for item in items:
         name = item["name"]
         url = item["url"]
         
