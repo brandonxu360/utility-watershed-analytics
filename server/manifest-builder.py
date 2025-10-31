@@ -19,7 +19,7 @@ cfg = "disturbed9002_wbt"
 for feature in data.get("features", []):
     runid = feature.get("properties", {}).get("runid")
     entry = {
-        "runid": runid,
+        "name": runid,
         # Subcatchments data file structure
         "url": f"https://wc-prod.bearhive.duckdns.org/weppcloud/runs/{runid}/{cfg}/download/dem/wbt/subcatchments.WGS.geojson",
         "target": f"subcatchments/{runid}.geojson"
