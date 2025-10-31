@@ -52,6 +52,8 @@ def download_watershed_data():
     
     download_count = 0
     skip_count = 0
+    total_downloaded_bytes = 0
+    total_skipped_bytes = 0
     
     for item in items:
         name = item["name"]
@@ -66,9 +68,11 @@ def download_watershed_data():
 
         # Skip if the data already exists
         if target.exists():
+            existing_size = target.stat().st_size
             print(f"    Skipping (already exists): {target}")
-            print(f"    Existing file size: {target.stat().st_size} bytes")
+            print(f"    Existing file size: {existing_size:,} bytes ({existing_size / (1024*1024):.2f} MB)")
             skip_count += 1
+            total_skipped_bytes += existing_size
             continue
 
         # Download and write the contents to the file system
@@ -88,8 +92,9 @@ def download_watershed_data():
                             
             file_size = target.stat().st_size
             print(f"    ✓ Downloaded to: {target}")
-            print(f"    ✓ File size: {file_size:,} bytes")
+            print(f"    ✓ File size: {file_size:,} bytes ({file_size / (1024*1024):.2f} MB)")
             download_count += 1
+            total_downloaded_bytes += file_size
             
         except requests.RequestException as e:
             print(f"    ✗ Network error downloading {url}: {e}")
@@ -105,9 +110,10 @@ def download_watershed_data():
             sys.exit(1)
 
     print("\n==> Download Summary:")
-    print(f"    ✓ Downloaded: {download_count} files")
-    print(f"    - Skipped: {skip_count} files (already exist)")
+    print(f"    ✓ Downloaded: {download_count} files ({total_downloaded_bytes:,} bytes / {total_downloaded_bytes / (1024*1024):.2f} MB)")
+    print(f"    - Skipped: {skip_count} files ({total_skipped_bytes:,} bytes / {total_skipped_bytes / (1024*1024):.2f} MB)")
     print(f"    ✓ Total processed: {download_count + skip_count} files")
+    print(f"    ✓ Total data size: {(total_downloaded_bytes + total_skipped_bytes):,} bytes ({(total_downloaded_bytes + total_skipped_bytes) / (1024*1024):.2f} MB / {(total_downloaded_bytes + total_skipped_bytes) / (1024*1024*1024):.2f} GB)")
     
     if download_count > 0:
         print("\n==> All downloads completed successfully!")
