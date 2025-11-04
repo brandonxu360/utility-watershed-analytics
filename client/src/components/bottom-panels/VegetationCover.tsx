@@ -136,7 +136,7 @@ export const VegetationCover: React.FC = () => {
         return chartSeries.length ? chartSeries : null;
     }, [selectedHillslopeId, rapTimeSeries, vegetationOption, startYear, endYear, selectedYear, BAND_MAPPING]);
 
-    const chartData = singleHillslopeChartData || []; // TODO: ensure chart handles empty data gracefully
+    const chartData = singleHillslopeChartData || [];
 
     const chartTitle = selectedHillslopeId
         ? `${vegetationOption} Coverage - Hillslope ${selectedHillslopeId} (${selectedYear})`
@@ -178,10 +178,6 @@ export const VegetationCover: React.FC = () => {
             </div>
 
             {rapStatus.state === 'loading' && <div style={{ textAlign: 'center', marginBottom: 8 }}>Loading vegetation data…</div>}
-
-            {rapStatus.state === 'error' && (
-                <div style={{ color: 'var(--clr-primary-error)', textAlign: 'center', marginBottom: 8 }}>{rapStatus.message}</div>
-            )}
 
             <CoverageBarChart
                 data={chartData}
