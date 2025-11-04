@@ -18,6 +18,15 @@ export const VegetationCover: React.FC = () => {
 
     const [vegetationOption, setVegetationOption] = useState<"All" | "Shrub" | "Tree">("All");
 
+    const barKeys = useMemo(() => {
+        const shrubKey = { key: 'shrub', color: '#4caf50', activeFill: '#a5d6a7', activeStroke: '#2e7d32' };
+        const treeKey = { key: 'tree', color: '#8B4513', activeFill: '#d7a17a', activeStroke: '#5c3317' };
+
+        if (vegetationOption === 'All') return [shrubKey, treeKey];
+        if (vegetationOption === 'Shrub') return [shrubKey];
+        return [treeKey];
+    }, [vegetationOption]);
+
     const startYear = 1986;
     const endYear = 2023;
 
@@ -85,31 +94,44 @@ export const VegetationCover: React.FC = () => {
         if (selectedYear !== 'All') {
             const yearNum = Number(selectedYear);
             let total = 0;
+            let shrub = 0;
+            let tree = 0;
             for (const row of rapTimeSeries) {
                 if (row.topaz_id !== selectedHillslopeId) continue;
                 if (row.year !== yearNum) continue;
-                if (allowedBands && !allowedBands.includes(row.band)) continue;
                 const valueNum = row.value;
-                total += valueNum;
+                // accumulate overall total for allowed bands
+                if (allowedBands && allowedBands.includes(row.band)) {
+                    total += valueNum;
+                }
+                // also accumulate shrub/tree separately
+                if (row.band === 5) shrub += valueNum;
+                if (row.band === 6) tree += valueNum;
             }
-            return [{ name: String(yearNum), coverage: total }];
+            return [{ name: String(yearNum), coverage: total, shrub, tree }];
         }
 
         // All years: initialize full year range so missing years show as 0
-        const valuesByYear = new Map<number, number>();
-        for (let y = startYear; y <= endYear; y++) valuesByYear.set(y, 0);
+        const valuesByYear = new Map<number, { coverage: number; shrub: number; tree: number }>();
+        for (let y = startYear; y <= endYear; y++) valuesByYear.set(y, { coverage: 0, shrub: 0, tree: 0 });
 
         for (const row of rapTimeSeries) {
             if (row.topaz_id !== selectedHillslopeId) continue;
-            if (allowedBands && !allowedBands.includes(row.band)) continue;
-            const currentSum = valuesByYear.get(row.year) ?? 0;
+            const yearEntry = valuesByYear.get(row.year);
+            if (!yearEntry) continue;
             const valueNum = row.value;
-            valuesByYear.set(row.year, currentSum + (Number.isFinite(valueNum) ? valueNum : 0));
+            // overall coverage only counts allowed bands
+            if (allowedBands && allowedBands.includes(row.band)) {
+                yearEntry.coverage += valueNum;
+            }
+            if (row.band === 5) yearEntry.shrub += valueNum;
+            if (row.band === 6) yearEntry.tree += valueNum;
+            valuesByYear.set(row.year, yearEntry);
         }
 
         const chartSeries = Array.from(valuesByYear.entries())
             .sort((a, b) => a[0] - b[0])
-            .map(([yr, value]) => ({ name: String(yr), coverage: value }));
+            .map(([yr, vals]) => ({ name: String(yr), coverage: vals.coverage, shrub: vals.shrub, tree: vals.tree }));
 
         return chartSeries.length ? chartSeries : null;
     }, [selectedHillslopeId, rapTimeSeries, vegetationOption, startYear, endYear, selectedYear, BAND_MAPPING]);
@@ -164,9 +186,7 @@ export const VegetationCover: React.FC = () => {
             <CoverageBarChart
                 data={chartData}
                 title={chartTitle}
-                barKeys={[
-                    { key: "coverage", color: "#8884d8", activeFill: "pink", activeStroke: "blue" },
-                ]}
+                barKeys={barKeys}
             />
         </div>
     );
