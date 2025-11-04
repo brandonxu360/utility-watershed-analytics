@@ -11,8 +11,13 @@ import {
     LineChart,
 } from 'recharts';
 
+type ChartData = {
+    name: string;
+    coverage: number;
+}[];
+
 export type CoverageBarChartProps = {
-    data: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    data: ChartData;
     title: string;
     barKeys: { key: string; color: string; activeFill: string; activeStroke: string }[];
 };

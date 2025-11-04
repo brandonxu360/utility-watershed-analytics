@@ -1,84 +1,124 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { FaXmark } from "react-icons/fa6";
 import { useBottomPanelStore } from "../../store/BottomPanelStore";
-import CoverageBarChart from "../coverage-bar-chart/CoverageBarChart";
+import { fetchRapTimeseries, RapRow } from '../../api/rapApi';
+import { useWatershedOverlayStore } from "../../store/WatershedOverlayStore";
+import CoverageBarChart from "../coverage-line-chart/CoverageLineChart";
 import Select from "../select/Select";
 import "./BottomPanel.css";
 
-const shrubData = [
-    { name: 'Zone 1', coverage: 120, density: 80 },
-    { name: 'Zone 2', coverage: 98, density: 65 },
-    { name: 'Zone 3', coverage: 86, density: 70 },
-];
-
-const treeData = [
-    { name: 'Zone 1', coverage: 150, density: 90 },
-    { name: 'Zone 2', coverage: 130, density: 85 },
-    { name: 'Zone 3', coverage: 110, density: 75 },
-];
+type RapStatus = {
+    state: 'loading' | 'ready' | 'error';
+    message?: string | null
+};
 
 export const VegetationCover: React.FC = () => {
-    const { closePanel, selectedHillslopeId, selectedHillslopeProps } = useBottomPanelStore();
+    const { selectedHillslopeId, closePanel, clearSelectedHillslope } = useBottomPanelStore();
+    const { setSubcatchment } = useWatershedOverlayStore();
 
-    const [option, setOption] = useState<"All" | "Shrub" | "Tree">("All");
+    const [vegetationOption, setVegetationOption] = useState<"All" | "Shrub" | "Tree">("All");
 
     const startYear = 1986;
-    const endYear = 2024;
+    const endYear = 2023;
 
     const years = Array.from(
         { length: endYear - startYear + 1 },
         (_, i) => String(startYear + i)
     );
 
-    const [year, setYear] = useState<string>(String(endYear));
+    const [selectedYear, setSelectedYear] = useState<string>('All');
 
-    const getMergedData = () => {
-        const map = new Map<string, { name: string; coverage: number; density: number }>();
+    // RAP timeseries fetched for selected hillslope (topaz id)
+    const [rapTimeSeries, setRapTimeSeries] = useState<RapRow[] | null>(null);
+    const [rapStatus, setRapStatus] = useState<RapStatus>({ state: 'ready' });
 
-        const add = (d: { name: string; coverage: number; density: number }) => {
-            const existing = map.get(d.name);
-            if (existing) {
-                existing.coverage += d.coverage;
-                existing.density += d.density;
-            } else {
-                map.set(d.name, { ...d });
+    // RAP band -> vegetation mapping
+    // RAP band codes:
+    // 1: annual forbs & grasses
+    // 2: bare ground
+    // 3: litter
+    // 4: perennial forbs & grasses
+    // 5: shrub
+    // 6: tree
+    const BAND_MAPPING: Record<"All" | "Shrub" | "Tree", number[]> = useMemo(() => ({
+        All: [1, 4, 5, 6],
+        Shrub: [5],
+        Tree: [6],
+    }), []);
+
+    useEffect(() => {
+        let mounted = true;
+        async function loadRap() {
+            if (!selectedHillslopeId) {
+                setRapTimeSeries(null);
+                setRapStatus({ state: 'ready' });
+                return;
             }
+
+            setRapStatus({ state: 'loading' });
+            try {
+                const rows = await fetchRapTimeseries(selectedHillslopeId, undefined, selectedYear === 'All' ? undefined : Number(selectedYear));
+                if (!mounted) return;
+                setRapTimeSeries(Array.isArray(rows) ? rows : []);
+                setRapStatus({ state: 'ready' });
+            } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+                if (!mounted) return;
+                setRapStatus({ state: 'error', message: err?.message ?? String(err) });
+                setRapTimeSeries(null);
+            }
+        }
+
+        loadRap();
+
+        return () => {
+            mounted = false;
         };
+    }, [selectedHillslopeId, selectedYear]);
 
-        shrubData.forEach(add);
-        treeData.forEach(add);
+    const singleHillslopeChartData = useMemo(() => {
+        if (!selectedHillslopeId) return null;
+        if (!rapTimeSeries || rapTimeSeries.length === 0) return null;
 
-        return Array.from(map.values());
-    };
+        const allowedBands = BAND_MAPPING[vegetationOption];
 
-    const singleHillslopeData = useMemo(() => {
-        if (!selectedHillslopeId || !selectedHillslopeProps) return null;
-        // TODO: Use selectedHillslopeProps to populate tree, shrub, and density values in future implementation.
-        const tree = 0;
-        const shrub = 0;
-        const density = 0;
-
-        const name = `Hillslope ${selectedHillslopeId}`;
-
-        if (option === "Shrub") {
-            return [{ name, coverage: shrub, density }];
+        // If a single year is selected, return a single-entry dataset for that year
+        if (selectedYear !== 'All') {
+            const yearNum = Number(selectedYear);
+            let total = 0;
+            for (const row of rapTimeSeries) {
+                if (row.topaz_id !== selectedHillslopeId) continue;
+                if (row.year !== yearNum) continue;
+                if (allowedBands && !allowedBands.includes(row.band)) continue;
+                const valueNum = row.value;
+                total += valueNum;
+            }
+            return [{ name: String(yearNum), coverage: total }];
         }
-        if (option === "Tree") {
-            return [{ name, coverage: tree, density }];
+
+        // All years: initialize full year range so missing years show as 0
+        const valuesByYear = new Map<number, number>();
+        for (let y = startYear; y <= endYear; y++) valuesByYear.set(y, 0);
+
+        for (const row of rapTimeSeries) {
+            if (row.topaz_id !== selectedHillslopeId) continue;
+            if (allowedBands && !allowedBands.includes(row.band)) continue;
+            const currentSum = valuesByYear.get(row.year) ?? 0;
+            const valueNum = row.value;
+            valuesByYear.set(row.year, currentSum + (Number.isFinite(valueNum) ? valueNum : 0));
         }
 
-        return [{ name, coverage: tree + shrub, density }];
-    }, [selectedHillslopeId, selectedHillslopeProps, option]);
+        const chartSeries = Array.from(valuesByYear.entries())
+            .sort((a, b) => a[0] - b[0])
+            .map(([yr, value]) => ({ name: String(yr), coverage: value }));
 
-    const chartData = singleHillslopeData ?? (option === "Shrub" ? shrubData : option === "Tree" ? treeData : getMergedData());
+        return chartSeries.length ? chartSeries : null;
+    }, [selectedHillslopeId, rapTimeSeries, vegetationOption, startYear, endYear, selectedYear, BAND_MAPPING]);
+
+    const chartData = singleHillslopeChartData || []; // TODO: ensure chart handles empty data gracefully
 
     const chartTitle = selectedHillslopeId
-        ? `${option} Coverage - Hillslope ${selectedHillslopeId} (${year})`
-        : option === "Shrub"
-            ? `Shrub Coverage (${year})`
-            : option === "Tree"
-                ? `Tree Coverage (${year})`
-                : `All Coverage (${year})`;
+        ? `${vegetationOption} Coverage - Hillslope ${selectedHillslopeId} (${selectedYear})`
+        : `${vegetationOption} Coverage (${selectedYear})`;
 
     return (
         <div>
@@ -88,8 +128,8 @@ export const VegetationCover: React.FC = () => {
                         <label htmlFor="veg-cover-title">Vegetation Cover:</label>
                         <Select
                             id="veg-cover-title"
-                            value={option}
-                            onChange={(v) => setOption(v as "All" | "Shrub" | "Tree")}
+                            value={vegetationOption}
+                            onChange={(v) => setVegetationOption(v as "All" | "Shrub" | "Tree")}
                             options={["All", "Shrub", "Tree"]}
                             ariaLabel="Select vegetation type"
                         />
@@ -101,22 +141,31 @@ export const VegetationCover: React.FC = () => {
                         <label htmlFor="veg-year">Select Year:</label>
                         <Select
                             id="veg-year"
-                            value={year}
-                            onChange={(v) => setYear(v)}
-                            options={years.slice().reverse()}
+                            value={selectedYear}
+                            onChange={(v) => setSelectedYear(v)}
+                            options={['All', ...years.slice().reverse()]}
                             ariaLabel="Select vegetation year"
                         />
                     </div>
-                    <FaXmark className="vegCloseButton" onClick={() => closePanel()} />
+                    <FaXmark className="vegCloseButton" onClick={() => {
+                        clearSelectedHillslope();
+                        setSubcatchment(false);
+                        closePanel()
+                    }} />
                 </div>
             </div>
+
+            {rapStatus.state === 'loading' && <div style={{ textAlign: 'center', marginBottom: 8 }}>Loading vegetation data…</div>}
+
+            {rapStatus.state === 'error' && (
+                <div style={{ color: 'var(--clr-primary-error)', textAlign: 'center', marginBottom: 8 }}>{rapStatus.message}</div>
+            )}
 
             <CoverageBarChart
                 data={chartData}
                 title={chartTitle}
                 barKeys={[
                     { key: "coverage", color: "#8884d8", activeFill: "pink", activeStroke: "blue" },
-                    { key: "density", color: "#82ca9d", activeFill: "gold", activeStroke: "purple" },
                 ]}
             />
         </div>

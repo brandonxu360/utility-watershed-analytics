@@ -29,6 +29,7 @@ export default function DataLayersControl() {
   } = useWatershedOverlayStore();
 
   const {
+    closePanel,
     clearSelectedHillslope,
   } = useBottomPanelStore();
 
@@ -50,6 +51,7 @@ export default function DataLayersControl() {
     if (id === 'subcatchment') {
       setSubcatchment(checked);
       if (!checked) {
+        closePanel();
         setLanduse(false);
         clearSelectedHillslope();
       }

@@ -18,6 +18,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
         subcatchment,
         channels,
         landuse,
+        setSubcatchment,
         setLanduseLegend
     } = useWatershedOverlayStore();
 
@@ -79,6 +80,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                     <div className="layerpicker-layer">
                         <button className="layerpicker-title" onClick={
                             () => {
+                                setSubcatchment(true);
                                 openPanel(<VegetationCover />);
                             }
                         }>
