@@ -66,31 +66,9 @@ DEBUG=true
     }
 }
 ```
-7. **Data**: Watershed data files are managed through a containerized downloader service. For the best developer experience, download data before starting the main application:
+7. **Data**: The current watershed data (watersheds, subcatchments, channels) is automatically loaded into the database. The data ingestion process can be found in the entrypoint script and will run upon the intial creation of the server container using `docker compose up`.
 
-    ```bash
-    # Recommended: Download data files first
-    docker compose --profile data-management run --rm data-downloader
-    
-    # Then start the application (data will be auto-loaded)
-    docker compose up
-    ```
-    
-    Alternatively, you can start the application first and download data later:
-    ```bash
-    # Start application first
-    docker compose up
-    
-    # Download data in another terminal
-    docker compose --profile data-management run --rm data-downloader
-    
-    # Restart server to auto-load data, or load manually
-    docker compose restart server
-    # OR
-    docker compose exec server python manage.py load_watershed_data
-    ```
-
-See the [data-manifest.yml](/server/data-manifest.yaml) to manage the data.
+See the [data-manifest.yml](/server/data-manifest.yaml) to manage the data that will be loaded.
 
 ### Usage
 1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. **Note**: If you are using VSCode with Dev Containers, you can skip this step—containers will start automatically when you open the project in a devcontainer.
@@ -100,7 +78,7 @@ docker compose up
 ```
 2. **Verify Services**:
 * **Client**: Access the React app at http://localhost:5173.
-* **Server**: Access the Django API at http://localhost:8000/admin. Note that the base url is http://localhost:8000, but I don't think there is an endpoint mapped to it.
+* **Server**: Access the Django API at http://localhost:8000. Note that this base url isn't mapped to a pattern - refer to url patterns for meaningful urls.
 * **pgAdmin**: Access pgAdmin at http://localhost:5050. Login with the credentials provided in the `.env` file and add the server if the `pgadmin-server.json` is not provided.
 * **Database**: PostgreSQL is running at localhost:5432.
 3. **Devcontainers Setup (VSCode)**: VSCode will detect the devcontainer configurations upon opening the project and will prompt you to reopen the project in a container. Choose the container based on which service you want to work on (you can open another VSCode window to work on both at the same time). You can reopen the project at any point without being prompted by opening the VSCode Command Palette and using `Dev Containers: Reopen in Container`.
@@ -128,10 +106,7 @@ docker compose logs -f client server
 To load watershed data into your development environment:
 
 ```bash
-# 1. Download data files first
-docker compose --profile data-management run --rm data-downloader
-
-# 2. Load data into database
+# Load data into database
 docker compose exec server python manage.py load_watershed_data
 
 # Available options for loading:
@@ -148,10 +123,7 @@ docker compose down -v
 # Remove the data file volume
 docker volume rm utility-watershed-analytics_watershed_data
 
-# Re-download data
-docker compose --profile data-management run --rm data-downloader
-
-# Reload data from current data files into database
+# Reload data into database
 docker compose exec server python manage.py load_watershed_data --force
 ```
 

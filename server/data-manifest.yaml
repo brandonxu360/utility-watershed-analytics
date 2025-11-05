@@ -1,25 +1,21 @@
-# This data manifest explicitly lists every data file and source required. The manifest supports
-# standalone entries in the form:
-# - name
-#   url: where the data can be accessed
-#   target: where to download the data
+# This data manifest explicitly lists every data file and source required. 
+# The manifest is structured in the following form:
 # 
-# It also supports nested entries to make navigating large numbers of entries easier in editors 
-# that support YAML folding. The sections take the form:
-# section: name of section
-# items:
-# - ... entries in the form described above
+# section
+#   - name: the name of the item (id or descriptor)
+#     url: where the data will be pulled from
+#     target: where to download the data (relative to the docker-specified location)
 #
-# The sections get flattened for the actual data processing.
+# Related items of the same schema should be grouped under the same section.
 
 # Watershed Borders
-- name: Washington and Oregon Watersheds 
-  url: https://bucket.bearhive.duckdns.org/WWS_Watersheds_HUC10_Merged.geojson
-  target: watersheds/WWS_Watersheds_HUC10_Merged.geojson
+Watersheds:
+  - name: Washington and Oregon Watersheds 
+    url: https://bucket.bearhive.duckdns.org/WWS_Watersheds_HUC10_Merged.geojson
+    target: watersheds/WWS_Watersheds_HUC10_Merged.geojson
 
 # Subcatchments
-- section: Subcatchments
-  items:
+Subcatchments:
   - name: batch;;nasa-roses-2025;;wa-0
     url: https://wc-prod.bearhive.duckdns.org/weppcloud/runs/batch;;nasa-roses-2025;;wa-0/disturbed9002_wbt/download/dem/wbt/subcatchments.WGS.geojson
     target: subcatchments/batch;;nasa-roses-2025;;wa-0.geojson
@@ -1207,8 +1203,7 @@
     target: subcatchments/batch;;nasa-roses-2025;;or-208.geojson
 
 # Channels
-- section: Channels
-  items:
+Channels:
   - name: batch;;nasa-roses-2025;;wa-0
     url: https://wc-prod.bearhive.duckdns.org/weppcloud/runs/batch;;nasa-roses-2025;;wa-0/disturbed9002_wbt/download/dem/wbt/channels.WGS.geojson
     target: channels/batch;;nasa-roses-2025;;wa-0.geojson
