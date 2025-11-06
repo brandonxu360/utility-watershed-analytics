@@ -20,7 +20,7 @@ export type CoverageBarChartProps = {
 export const CoverageBarChart: React.FC<CoverageBarChartProps> = ({ data, title, barKeys }) => {
     return (
         <div style={{ width: '100%', height: 300 }}>
-            <h3 style={{ textAlign: 'center', margin: '0 0 8px' }}>{title}</h3>
+            <h3 data-testid="coverage-chart" style={{ textAlign: 'center', margin: '0 0 8px' }}>{title}</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                     data={data}
