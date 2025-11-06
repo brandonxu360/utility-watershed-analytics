@@ -1,8 +1,10 @@
 import React, { useMemo, useState, useEffect } from "react";
+import fetchRap, { AggregatedRapRow } from '../../api/rapApi';
 import { FaXmark } from "react-icons/fa6";
 import { useBottomPanelStore } from "../../store/BottomPanelStore";
-import { fetchRapTimeseries, RapRow } from '../../api/rapApi';
 import { useWatershedOverlayStore } from "../../store/WatershedOverlayStore";
+import { useMatch } from '@tanstack/react-router';
+import { watershedOverviewRoute } from '../../routes/router';
 import CoverageBarChart from "../coverage-line-chart/CoverageLineChart";
 import Select from "../select/Select";
 import "./BottomPanel.css";
@@ -15,16 +17,19 @@ type RapStatus = {
 export const VegetationCover: React.FC = () => {
     const { selectedHillslopeId, closePanel, clearSelectedHillslope } = useBottomPanelStore();
     const { setSubcatchment } = useWatershedOverlayStore();
+    const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
+    const watershedID = match?.params.webcloudRunId ?? null;
+    // Temporary run id override for the current query engine dataset (hardcoded until new data is available)
+    // This should be removed when the app is pointed at the updated runs or when a mapping
+    // from route watershed id -> run id is available.
+    const RUN_ID_OVERRIDE = 'or,wa-108';
 
     const [vegetationOption, setVegetationOption] = useState<"All" | "Shrub" | "Tree">("All");
 
     const barKeys = useMemo(() => {
         const shrubKey = { key: 'shrub', color: '#4caf50', activeFill: '#a5d6a7', activeStroke: '#2e7d32' };
         const treeKey = { key: 'tree', color: '#8B4513', activeFill: '#d7a17a', activeStroke: '#5c3317' };
-
-        if (vegetationOption === 'All') return [shrubKey, treeKey];
-        if (vegetationOption === 'Shrub') return [shrubKey];
-        return [treeKey];
+        return vegetationOption === 'Shrub' ? [shrubKey] : vegetationOption === 'Tree' ? [treeKey] : [shrubKey, treeKey];
     }, [vegetationOption]);
 
     const startYear = 1986;
@@ -38,35 +43,21 @@ export const VegetationCover: React.FC = () => {
     const [selectedYear, setSelectedYear] = useState<string>('All');
 
     // RAP timeseries fetched for selected hillslope (topaz id)
-    const [rapTimeSeries, setRapTimeSeries] = useState<RapRow[] | null>(null);
+    const [rapTimeSeries, setRapTimeSeries] = useState<AggregatedRapRow[] | null>(null);
     const [rapStatus, setRapStatus] = useState<RapStatus>({ state: 'ready' });
-
-    // RAP band -> vegetation mapping
-    // RAP band codes:
-    // 1: annual forbs & grasses
-    // 2: bare ground
-    // 3: litter
-    // 4: perennial forbs & grasses
-    // 5: shrub
-    // 6: tree
-    const BAND_MAPPING: Record<"All" | "Shrub" | "Tree", number[]> = useMemo(() => ({
-        All: [1, 4, 5, 6],
-        Shrub: [5],
-        Tree: [6],
-    }), []);
 
     useEffect(() => {
         let mounted = true;
         async function loadRap() {
-            if (!selectedHillslopeId) {
-                setRapTimeSeries(null);
-                setRapStatus({ state: 'ready' });
-                return;
-            }
-
             setRapStatus({ state: 'loading' });
+
             try {
-                const rows = await fetchRapTimeseries(selectedHillslopeId, undefined, selectedYear === 'All' ? undefined : Number(selectedYear));
+                const rows = selectedHillslopeId
+                    ? await fetchRap({ mode: 'hillslope', topazId: selectedHillslopeId, runIdOrPath: RUN_ID_OVERRIDE, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
+                    : watershedID
+                        ? await fetchRap({ mode: 'watershed', weppId: 108, runIdOrPath: RUN_ID_OVERRIDE, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
+                        : null;
+
                 if (!mounted) return;
                 setRapTimeSeries(Array.isArray(rows) ? rows : []);
                 setRapStatus({ state: 'ready' });
@@ -78,63 +69,30 @@ export const VegetationCover: React.FC = () => {
         }
 
         loadRap();
-
         return () => {
             mounted = false;
         };
-    }, [selectedHillslopeId, selectedYear]);
+    }, [selectedHillslopeId, selectedYear, watershedID]);
 
     const singleHillslopeChartData = useMemo(() => {
-        if (!selectedHillslopeId) return null;
         if (!rapTimeSeries || rapTimeSeries.length === 0) return null;
 
-        const allowedBands = BAND_MAPPING[vegetationOption];
+        const rows = rapTimeSeries as AggregatedRapRow[];
+        const toSeries = (year: number, coverage: number, shrub: number, tree: number) => ({ name: String(year), coverage, shrub, tree });
 
-        // If a single year is selected, return a single-entry dataset for that year
         if (selectedYear !== 'All') {
-            const yearNum = Number(selectedYear);
-            let total = 0;
-            let shrub = 0;
-            let tree = 0;
-            for (const row of rapTimeSeries) {
-                if (row.topaz_id !== selectedHillslopeId) continue;
-                if (row.year !== yearNum) continue;
-                const valueNum = row.value;
-                // accumulate overall total for allowed bands
-                if (allowedBands && allowedBands.includes(row.band)) {
-                    total += valueNum;
-                }
-                // also accumulate shrub/tree separately
-                if (row.band === 5) shrub += valueNum;
-                if (row.band === 6) tree += valueNum;
-            }
-            return [{ name: String(yearNum), coverage: total, shrub, tree }];
+            const y = Number(selectedYear);
+            const r = rows.find((rr) => rr.year === y);
+            return [toSeries(y, r?.coverage ?? 0, r?.shrub ?? 0, r?.tree ?? 0)];
         }
 
-        // All years: initialize full year range so missing years show as 0
-        const valuesByYear = new Map<number, { coverage: number; shrub: number; tree: number }>();
-        for (let y = startYear; y <= endYear; y++) valuesByYear.set(y, { coverage: 0, shrub: 0, tree: 0 });
-
-        for (const row of rapTimeSeries) {
-            if (row.topaz_id !== selectedHillslopeId) continue;
-            const yearEntry = valuesByYear.get(row.year);
-            if (!yearEntry) continue;
-            const valueNum = row.value;
-            // overall coverage only counts allowed bands
-            if (allowedBands && allowedBands.includes(row.band)) {
-                yearEntry.coverage += valueNum;
-            }
-            if (row.band === 5) yearEntry.shrub += valueNum;
-            if (row.band === 6) yearEntry.tree += valueNum;
-            valuesByYear.set(row.year, yearEntry);
+        const map = new Map<number, { coverage: number; shrub: number; tree: number }>();
+        for (let y = startYear; y <= endYear; y++) map.set(y, { coverage: 0, shrub: 0, tree: 0 });
+        for (const r of rows) {
+            map.set(r.year, { coverage: r.coverage ?? 0, shrub: r.shrub ?? 0, tree: r.tree ?? 0 });
         }
-
-        const chartSeries = Array.from(valuesByYear.entries())
-            .sort((a, b) => a[0] - b[0])
-            .map(([yr, vals]) => ({ name: String(yr), coverage: vals.coverage, shrub: vals.shrub, tree: vals.tree }));
-
-        return chartSeries.length ? chartSeries : null;
-    }, [selectedHillslopeId, rapTimeSeries, vegetationOption, startYear, endYear, selectedYear, BAND_MAPPING]);
+        return Array.from(map.entries()).sort((a, b) => a[0] - b[0]).map(([yr, v]) => toSeries(yr, v.coverage, v.shrub, v.tree));
+    }, [rapTimeSeries, selectedYear]);
 
     const chartData = singleHillslopeChartData || [];
 
@@ -177,7 +135,7 @@ export const VegetationCover: React.FC = () => {
                 </div>
             </div>
 
-            {rapStatus.state === 'loading' && <div style={{ textAlign: 'center', marginBottom: 8 }}>Loading vegetation data…</div>}
+            {rapStatus.state === 'loading' && <div style={{ textAlign: 'center' }}>Loading vegetation data…</div>}
 
             <CoverageBarChart
                 data={chartData}

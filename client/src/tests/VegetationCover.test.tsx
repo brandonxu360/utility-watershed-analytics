@@ -1,14 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react"
-import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import { useBottomPanelStore } from "../store/BottomPanelStore";
-
-// Mock RAP API to avoid network calls during tests
-vi.mock("../api/rapApi", () => ({
-  fetchRapTimeseries: vi.fn().mockResolvedValue([]),
-}));
-
+import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import { Properties } from "../types/WatershedFeature";
+
+vi.mock('@tanstack/react-router', async (importOriginal) => {
+  const actual = await importOriginal();
+  // Use Object.assign to avoid TS spread-on-module issues in the test environment
+  return Object.assign({}, actual, { useMatch: () => ({ params: { webcloudRunId: 'or,wa-108' } }) });
+});
+
+vi.mock("../api/rapApi", () => ({
+  default: vi.fn().mockResolvedValue([{ year: 1986, shrub: 1, tree: 2, coverage: 3 }]),
+  fetchRap: vi.fn().mockResolvedValue([{ year: 1986, shrub: 1, tree: 2, coverage: 3 }]),
+}));
 
 const mockClose = vi.fn();
 
@@ -26,7 +31,7 @@ afterEach(() => {
 });
 
 describe("VegetationCover", () => {
-  it("renders controls and chart with default values", () => {
+  it("renders controls and chart with default values", async () => {
     render(<VegetationCover />);
 
     // labels/selects should be present
@@ -34,7 +39,7 @@ describe("VegetationCover", () => {
     expect(screen.getByLabelText("Select Year:")).toBeInTheDocument();
 
     // the mocked chart should render and show the default title (All Coverage (All))
-    const chart = screen.getByTestId("coverage-chart");
+    const chart = await screen.findByTestId("coverage-chart");
     expect(chart).toBeInTheDocument();
     expect(chart).toHaveTextContent("All Coverage (All)");
   });
@@ -52,7 +57,7 @@ describe("VegetationCover", () => {
     expect(mockClose).toHaveBeenCalled();
   });
 
-  it("shows selected hillslope in chart title and reacts to option changes", () => {
+  it("shows selected hillslope in chart title and reacts to option changes", async () => {
     useBottomPanelStore.setState({
       selectedHillslopeId: 42,
       selectedHillslopeProps: { cancov: 20, inrcov: 10, dom: 5, width_m: 12 } as Properties,
@@ -60,7 +65,7 @@ describe("VegetationCover", () => {
 
     render(<VegetationCover />);
 
-    const chart = screen.getByTestId("coverage-chart");
+    const chart = await screen.findByTestId("coverage-chart");
     expect(chart).toHaveTextContent("All Coverage - Hillslope 42 (All)");
 
     const selectButton = screen.getByTestId('select-veg-cover-title');
