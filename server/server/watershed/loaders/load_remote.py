@@ -6,8 +6,12 @@ import sys
 import yaml
 import time
 from pathlib import Path
+from django.contrib.gis.db.models import Model
+from urllib.parse import urlparse, unquote
 from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.gdal.layer import Layer
 from django.contrib.gis.utils import LayerMapping
+from django.contrib.gis.geos import Polygon, MultiPolygon
 from server.watershed.models import Watershed, Subcatchment, Channel
 
 # This is an auto-generated layer mapping created by ogrinspect. 
@@ -31,7 +35,7 @@ watershed_mapping = {
 subcatchment_mapping = {
     'topazid': 'TopazID', 
     'weppid': 'WeppID', 
-    'geom': 'POLYGON'
+    #'geom': 'POLYGON'
 }
 
 # This is an auto-generated layer mapping created by ogrinspect. 
@@ -39,7 +43,7 @@ channel_mapping = {
     'topazid': 'TopazID', 
     'weppid': 'WeppID', 
     'order': 'Order', 
-    'geom': 'POLYGON'
+    #'geom': 'POLYGON'
 }
 
 RETRY_ATTEMPTS = 6
@@ -58,6 +62,42 @@ def _open_datasource_with_retry(url: str):
             last_err = e
             _sleep_backoff(i)
     raise last_err
+
+def _extract_runid_from_url(url: str):
+    """
+    Returns the runid found immediately after the 'runs' path segment, or None.
+    Decodes percent-encoding first so '%3B%3B' becomes ';;'.
+    """
+    parsed = urlparse(url)
+    path = unquote(parsed.path)  # decode %3B etc.
+    parts = path.strip('/').split('/')
+    try:
+        i = parts.index('runs')
+        return parts[i + 1]
+    except (ValueError, IndexError):
+        return None
+
+def _save_watershed_associated_layer(layer: Layer, mapping: dict[str, str], associated_runid: str, model_class: type[Model]) -> int:
+    """Save a layer of features with a one-to-many relationship with watersheds (one watershed - many layer features) and returns the number of features saved."""
+
+    instances = []
+
+    for feature in layer:
+        # Gather the relevant OGR values from the data source
+        kwargs = {key: feature.get(value) for key, value in mapping.items()}
+
+        # Handle the geometry
+        geom = feature.geom.geos
+        kwargs['geom'] = MultiPolygon(geom) if isinstance(geom, Polygon) else geom
+
+        # Add the watershed foreign key reference
+        kwargs['watershed_id'] = associated_runid
+
+        instances.append(model_class(**kwargs))
+    
+    model_class.objects.bulk_create(instances)
+
+    return len(instances)
 
 def load_from_remote(verbose=True):
     # Load and parse the data manifest YAML
@@ -84,16 +124,20 @@ def load_from_remote(verbose=True):
     watershed_lm.save(strict=True, verbose=verbose)
 
     # Load subcatchments
+    saved_subcatchment_count = 0
     for subcatchment_entry in manifest['Subcatchments']:
+        associated_runid = _extract_runid_from_url(subcatchment_entry['url'])
         subcatchment_ds = _open_datasource_with_retry(subcatchment_entry['url'])
-        subcatchment_lm = LayerMapping(Subcatchment, subcatchment_ds, subcatchment_mapping)
-        subcatchment_lm.save(strict=True, verbose=verbose)
-
+        saved_subcatchment_count += _save_watershed_associated_layer(layer=subcatchment_ds[0], mapping=subcatchment_mapping, associated_runid=associated_runid, model_class=Subcatchment)
+    print(f"    Subcatchments saved: {saved_subcatchment_count}")
+    
     # Load channels
+    saved_channel_count = 0
     for channel_entry in manifest['Channels']:
+        associated_runid = _extract_runid_from_url(channel_entry['url'])
         channel_ds = _open_datasource_with_retry(channel_entry['url'])
-        channel_lm = LayerMapping(Channel, channel_ds, channel_mapping)
-        channel_lm.save(strict=True, verbose=verbose)
+        saved_channel_count += _save_watershed_associated_layer(layer=channel_ds[0], mapping=channel_mapping, associated_runid=associated_runid, model_class=Channel)
+    print(f"    Channels saved: {saved_channel_count}")
 
     
 
