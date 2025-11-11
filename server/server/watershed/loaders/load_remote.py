@@ -13,6 +13,8 @@ from django.contrib.gis.gdal.layer import Layer
 from django.contrib.gis.utils import LayerMapping
 from django.contrib.gis.geos import Polygon, MultiPolygon
 from server.watershed.models import Watershed, Subcatchment, Channel
+from collections import defaultdict
+from typing import Optional
 
 # This is an auto-generated layer mapping created by ogrinspect. 
 watershed_mapping = {
@@ -78,17 +80,48 @@ def _extract_runid_from_url(url: str):
         return None
 
 def _save_watershed_associated_layer(layer: Layer, mapping: dict[str, str], associated_runid: str, model_class: type[Model]) -> int:
-    """Save a layer of features with a one-to-many relationship with watersheds (one watershed - many layer features) and returns the number of features saved."""
+    """
+    Save a layer of features with a one-to-many relationship with watersheds (one watershed - many layer features).
+    Handles cases where the same entity (identified by topazid, weppid, and order for channels) may appear 
+    in multiple features with different polygons. All polygons for the same entity are merged into a single MultiPolygon.
+    Returns the number of unique entities saved.
+    """
 
-    instances = []
+    # Group features by their unique identifier
+    entities = defaultdict(lambda: {'attributes': {}, 'polygons': []})
 
     for feature in layer:
         # Gather the relevant OGR values from the data source
-        kwargs = {key: feature.get(value) for key, value in mapping.items()}
+        attributes = {key: feature.get(value) for key, value in mapping.items()}
 
-        # Handle the geometry
+        # Create a unique identifier based on the attributes
+        if model_class == Channel:
+            # For channels, use topazid + weppid + order
+            entity_key = (attributes['topazid'], attributes['weppid'], attributes['order'])
+        else:
+            # For subcatchments, use topazid + weppid
+            entity_key = (attributes['topazid'], attributes['weppid'])
+
+        # Store attributes (same for all features of the same entity)
+        if not entities[entity_key]['attributes']:
+            entities[entity_key]['attributes'] = attributes
+
+        # Collect the polygon
         geom = feature.geom.geos
-        kwargs['geom'] = MultiPolygon(geom) if isinstance(geom, Polygon) else geom
+        if isinstance(geom, Polygon):
+            entities[entity_key]['polygons'].append(geom)
+        elif isinstance(geom, MultiPolygon):
+            # If it's already a MultiPolygon, add each polygon individually
+            entities[entity_key]['polygons'].extend(list(geom))
+
+    # Create model instances
+    instances = []
+    for entity_key, entity_data in entities.items():
+        kwargs = entity_data['attributes']
+        
+        # Merge all polygons into a MultiPolygon
+        polygons = entity_data['polygons']
+        kwargs['geom'] = MultiPolygon(polygons) if len(polygons) > 1 else MultiPolygon(polygons[0])
 
         # Add the watershed foreign key reference
         kwargs['watershed_id'] = associated_runid
@@ -99,7 +132,16 @@ def _save_watershed_associated_layer(layer: Layer, mapping: dict[str, str], asso
 
     return len(instances)
 
-def load_from_remote(verbose=True):
+def load_from_remote(verbose=True, runids: Optional[list[str]] = None):
+    """
+    Load watershed data from remote GeoJSON files.
+    
+    Args:
+        verbose: Whether to print verbose output during loading
+        runids: Optional list of runids to load. If None, all watersheds are loaded.
+                If provided, only watersheds with matching runids and their associated
+                subcatchments and channels will be loaded.
+    """
     # Load and parse the data manifest YAML
     manifest_path = Path(__file__).resolve().parent.parent.parent.parent / "data-manifest.yaml"
     if not manifest_path.exists():
@@ -120,13 +162,42 @@ def load_from_remote(verbose=True):
     # Load watersheds
     watershed_url = manifest['Watersheds'][0]['url']
     watershed_ds = _open_datasource_with_retry(watershed_url)
-    watershed_lm = LayerMapping(Watershed, watershed_ds, watershed_mapping)
-    watershed_lm.save(strict=True, verbose=verbose)
+    
+    # If runids filter is specified, filter watersheds
+    if runids is not None:
+        runids_set = set(runids)
+        watershed_layer = watershed_ds[0]
+        instances = []
+        
+        for feature in watershed_layer:
+            feature_runid = feature.get('runid')
+            if feature_runid in runids_set:
+                kwargs = {key: feature.get(value) for key, value in watershed_mapping.items() if key != 'geom'}
+                geom = feature.geom.geos
+                kwargs['geom'] = MultiPolygon(geom) if isinstance(geom, Polygon) else geom
+                instances.append(Watershed(**kwargs))
+        
+        Watershed.objects.bulk_create(instances)
+        if verbose:
+            print(f"    Watersheds saved: {len(instances)} (filtered by runids)")
+        
+        # Use the filtered runids for loading subcatchments and channels
+        loaded_runids = runids_set
+    else:
+        # Load all watersheds using LayerMapping
+        watershed_lm = LayerMapping(Watershed, watershed_ds, watershed_mapping)
+        watershed_lm.save(strict=True, verbose=verbose)
+        loaded_runids = None
 
     # Load subcatchments
     saved_subcatchment_count = 0
     for subcatchment_entry in manifest['Subcatchments']:
         associated_runid = _extract_runid_from_url(subcatchment_entry['url'])
+        
+        # Skip if we're filtering and this runid is not in the filter
+        if loaded_runids is not None and associated_runid not in loaded_runids:
+            continue
+            
         subcatchment_ds = _open_datasource_with_retry(subcatchment_entry['url'])
         saved_subcatchment_count += _save_watershed_associated_layer(layer=subcatchment_ds[0], mapping=subcatchment_mapping, associated_runid=associated_runid, model_class=Subcatchment)
     print(f"    Subcatchments saved: {saved_subcatchment_count}")
@@ -135,6 +206,11 @@ def load_from_remote(verbose=True):
     saved_channel_count = 0
     for channel_entry in manifest['Channels']:
         associated_runid = _extract_runid_from_url(channel_entry['url'])
+        
+        # Skip if we're filtering and this runid is not in the filter
+        if loaded_runids is not None and associated_runid not in loaded_runids:
+            continue
+            
         channel_ds = _open_datasource_with_retry(channel_entry['url'])
         saved_channel_count += _save_watershed_associated_layer(layer=channel_ds[0], mapping=channel_mapping, associated_runid=associated_runid, model_class=Channel)
     print(f"    Channels saved: {saved_channel_count}")

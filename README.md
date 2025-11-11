@@ -106,13 +106,17 @@ docker compose logs -f client server
 To load watershed data into your development environment:
 
 ```bash
-# Load data into database
+# Load all data into database
 docker compose exec server python manage.py load_watershed_data
+
+# Load only specific watersheds by runid (and their subcatchments/channels)
+docker compose exec server python manage.py load_watershed_data --runids <runid1> <runid2> <runid3>
 
 # Available options for loading:
 # --force          Reload data even if it already exists
 # --dry-run        Preview what would be loaded
 # --verbosity=2    Detailed output for debugging
+# --runids         Load only specified watersheds (space-separated list)
 ```
 
 Useful commands for removing or resetting data:
@@ -125,6 +129,9 @@ docker volume rm utility-watershed-analytics_watershed_data
 
 # Reload data into database
 docker compose exec server python manage.py load_watershed_data --force
+
+# Reload specific watersheds
+docker compose exec server python manage.py load_watershed_data --force --runids <runid1> <runid2>
 ```
 
 ### Full Container Management
