@@ -77,9 +77,20 @@ def _extract_runid_from_url(url: str):
     except (ValueError, IndexError):
         return None
 
-def _save_watershed_associated_layer(layer: Layer, mapping: dict[str, str], associated_runid: str, model_class: type[Model]) -> int:
-    """Save a layer of features with a one-to-many relationship with watersheds (one watershed - many layer features) and returns the number of features saved."""
-
+def _save_watershed_associated_layer(layer: Layer, mapping: dict[str, str], associated_runid: str, model_class: type[Model], batch_size: int = None) -> int:
+    """
+    Save a layer of features with a one-to-many relationship with watersheds.
+    
+    Args:
+        layer: GDAL Layer containing features to save
+        mapping: Field mapping from GDAL to Django model
+        associated_runid: Foreign key to watershed
+        model_class: Django model class (Subcatchment or Channel)
+        batch_size: Number of instances to create per batch (None = all at once)
+    
+    Returns:
+        Number of features saved
+    """
     instances = []
 
     for feature in layer:
@@ -95,9 +106,17 @@ def _save_watershed_associated_layer(layer: Layer, mapping: dict[str, str], asso
 
         instances.append(model_class(**kwargs))
     
-    model_class.objects.bulk_create(instances)
-
-    return len(instances)
+    # Batch insert if batch_size specified, otherwise insert all at once
+    if batch_size and len(instances) > batch_size:
+        total_saved = 0
+        for i in range(0, len(instances), batch_size):
+            batch = instances[i:i + batch_size]
+            model_class.objects.bulk_create(batch)
+            total_saved += len(batch)
+        return total_saved
+    else:
+        model_class.objects.bulk_create(instances)
+        return len(instances)
 
 def load_from_remote(verbose=True):
     # Load and parse the data manifest YAML
