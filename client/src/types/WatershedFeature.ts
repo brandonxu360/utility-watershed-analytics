@@ -4,46 +4,56 @@ export interface Geometry {
 }
 
 export interface Properties {
-  area_m2: number;
-  aspect: number;
-  baseflow_mm: number;
-  baseflow_volume_m3: number;
-  cancov: number;
-  centroid_lat: number;
-  centroid_lon: number;
-  centroid_px: number;
-  centroid_py: number;
-  clay: number;
-  color: string;
-  deploss_kg: number;
-  desc: string;
-  direction: number;
-  disturbed_class: string;
-  dom: number;
-  elevation_m: number;
-  inrcov: number;
-  length_m: number;
-  ll: [number, number] | null;
-  mukey: string;
-  particulate_phosphorus_kg: number;
-  rilcov: number;
-  runoff_mm: number;
-  runoff_volume_m3: number;
-  sand: number;
-  sediment_deposition_kg: number;
-  sediment_yield_kg: number;
-  simple_texture: string;
-  slope_scalar: number;
-  soil: string;
-  soil_loss_kg: number;
-  solub_react_phosphorus_kg: number;
-  subrunoff_mm: number;
-  subrunoff_volume_m3: number;
+  // Core identifiers
   topazid: number;
-  total_phosphorus_kg: number;
-  watershed: string;
   weppid: number;
-  width_m: number;
+  watershed: string;
+  
+  // Hillslope data fields
+  slope_scalar: number | null;
+  length: number | null;
+  width: number | null;
+  direction: number | null;
+  aspect: number | null;
+  hillslope_area: number | null;
+  elevation: number | null;
+  centroid_px: number | null;
+  centroid_py: number | null;
+  centroid_lon: number | null;
+  centroid_lat: number | null;
+  
+  // Soil data fields
+  mukey: string | null;
+  soil_fname: string | null;
+  soils_dir: string | null;
+  soil_build_date: string | null;
+  soil_desc: string | null;
+  soil_color: string | null;
+  soil_area: number | null;
+  soil_pct_coverage: number | null;
+  clay: number | null;
+  sand: number | null;
+  avke: number | null;
+  ll: number | null;
+  bd: number | null;
+  simple_texture: string | null;
+  
+  // Land use data fields
+  landuse_key: number | null;
+  landuse_map: string | null;
+  man_fn: string | null;
+  man_dir: string | null;
+  landuse_desc: string | null;
+  landuse_color: string | null;
+  landuse_area: number | null;
+  landuse_pct_coverage: number | null;
+  cancov: number | null;
+  inrcov: number | null;
+  rilcov: number | null;
+  cancov_override: number | null;
+  inrcov_override: number | null;
+  rilcov_override: number | null;
+  disturbed_class: string | null;
 }
 
 export type WatershedFeature = {

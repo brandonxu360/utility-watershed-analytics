@@ -95,7 +95,18 @@ function SubcatchmentLayer({ data, style }: {
         layer.bindTooltip(
           `<span class="tooltip-bold"><strong>Hillslope ID</strong>
           <br/>TopazID: ${props.topazid ?? 'N/A'}, WeppID: ${props.weppid ?? 'N/A'}
-          <br/></span>`,
+          <br/><strong>Width:</strong>
+          ${props.width?.toFixed(2) ?? 'N/A'} m
+          <br/><strong>Length:</strong>
+          ${props.length?.toFixed(2) ?? 'N/A'} m
+          <br/><strong>Area:</strong>
+          ${props.hillslope_area ? (props.hillslope_area / 10000).toFixed(2) : 'N/A'} ha
+          <br/><strong>Slope:</strong>
+          ${props.slope_scalar?.toFixed(2) ?? 'N/A'}
+          <br/><strong>Aspect:</strong>
+          ${props.aspect?.toFixed(2) ?? 'N/A'}
+          <br/><strong>Soil:</strong>
+          ${props.simple_texture ?? 'N/A'}</span>`,
           {
             className: 'tooltip',
             offset: [12, -50],
@@ -217,8 +228,8 @@ export default function Map(): JSX.Element {
     if (landuse && memoSubcatchments) {
       const legend: Record<string, string> = {};
       for (const feature of memoSubcatchments.features) {
-        const color = feature.properties?.color;
-        const desc = feature.properties?.desc;
+        const color = feature.properties?.landuse_color;
+        const desc = feature.properties?.landuse_desc;
         if (color && desc && !(color in legend)) {
           legend[color] = desc;
         }
@@ -231,11 +242,11 @@ export default function Map(): JSX.Element {
 
   const subcatchmentStyle = useCallback(
     (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => {
-      if (landuse && feature?.properties?.color) {
+      if (landuse && feature?.properties?.landuse_color) {
         return {
           color: '#2c2c2c',
           weight: 0.75,
-          fillColor: feature.properties.color,
+          fillColor: feature.properties.landuse_color,
           fillOpacity: 1,
         };
       }
