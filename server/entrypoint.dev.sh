@@ -23,7 +23,10 @@ if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
 
     python manage.py load_watershed_data --verbosity=2 \
     --runids 'batch;;nasa-roses-2025;;or,wa-108' \
-            'batch;;nasa-roses-2025;;or,wa-205'
+            'batch;;nasa-roses-2025;;wa-174' \
+            'batch;;nasa-roses-2025;;or-6' \
+            'batch;;nasa-roses-2025;;or-202
+
 
 
     # Touch the flag file to indicate this logic has been run
