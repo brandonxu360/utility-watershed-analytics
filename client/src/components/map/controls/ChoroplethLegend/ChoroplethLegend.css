@@ -1,0 +1,113 @@
+.choropleth-legend {
+  position: absolute;
+  bottom: 40px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 180px;
+  max-width: 220px;
+}
+
+.choropleth-legend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.choropleth-legend-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin: 0;
+}
+
+.choropleth-legend-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: #666;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.choropleth-legend-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+.choropleth-legend-gradient {
+  height: 16px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  border: 1px solid #ddd;
+}
+
+.choropleth-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #666;
+}
+
+.choropleth-legend-label {
+  text-align: center;
+}
+
+.choropleth-legend-unit {
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.choropleth-legend-loading {
+  text-align: center;
+  padding: 8px;
+  color: #666;
+  font-size: 12px;
+}
+
+.choropleth-legend-error {
+  text-align: center;
+  padding: 8px;
+  color: #d32f2f;
+  font-size: 12px;
+}
+
+.choropleth-legend-year-selector {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.choropleth-legend-year-selector label {
+  display: block;
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.choropleth-legend-year-selector select {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
+.choropleth-legend-year-selector select:focus {
+  outline: none;
+  border-color: #4a83ec;
+}

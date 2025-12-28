@@ -1,37 +1,13 @@
-import { API_ENDPOINTS } from './apiEndpoints';
+import { buildRunPath, postQuery, addQueryFlags, toFiniteNumber } from './queryUtils';
+import { AggregatedRapRow, FetchRapOptions, FetchRapChoroplethOptions, RapChoroplethRow, RapRow, RapTimeseriesPayload } from './types';
 
-export type RapTimeseriesPayload = {
-    datasets: { path: string; alias?: string }[];
-    columns: string[];
-    filters?: Array<{ column: string; operator: string; value: string | number }>;
-    order_by?: string[];
-    include_schema?: boolean;
-    include_sql?: boolean;
-};
-
-export type RapRow = {
-    topaz_id: number;
-    year: number;
-    band: number;
-    value: number;
-};
-
-export type AggregatedRapRow = {
-    year: number;
-    shrub: number;
-    tree: number;
-    coverage: number;
-};
-
-export type FetchRapOptions = {
-    mode: 'hillslope' | 'watershed';
-    topazId?: number;
-    weppId?: number;
-    runIdOrPath?: string;
-    year?: number;
-    include_schema?: boolean;
-    include_sql?: boolean;
-};
+/** Build run path with optional topaz ID for hillslope mode */
+function buildRapRunPath(runIdOrPath?: string, mode?: 'hillslope' | 'watershed' | 'choropleth', topazId?: number): string {
+    if (mode === 'hillslope' && typeof topazId !== 'undefined' && !runIdOrPath) {
+        return buildRunPath(`wa-${topazId}`);
+    }
+    return buildRunPath(runIdOrPath);
+}
 
 /**
  * Build a RAP timeseries query payload for a single Topaz ID.
@@ -44,12 +20,19 @@ export type FetchRapOptions = {
  * - 6: tree
  */
 function buildRapTimeseriesPayload(topazId: number, year?: number): RapTimeseriesPayload {
+    // Validate topazId is a reasonable positive integer
+    const validTopazId = Number(topazId);
+    if (!Number.isInteger(validTopazId) || validTopazId < 0) {
+        throw new Error('Invalid topazId provided');
+    }
+
     const filters: RapTimeseriesPayload['filters'] = [
-        { column: 'rap.topaz_id', operator: '=', value: Number(topazId) }
+        { column: 'rap.topaz_id', operator: '=', value: validTopazId }
     ];
 
-    if (typeof year !== 'undefined' && year !== null) {
-        filters.push({ column: 'rap.year', operator: '=', value: Number(year) });
+    // Validate year if provided
+    if (typeof year === 'number' && Number.isInteger(year) && year >= 1900 && year <= 2100) {
+        filters.push({ column: 'rap.year', operator: '=', value: year });
     }
 
     return {
@@ -77,28 +60,26 @@ function buildRapTimeseriesPayload(topazId: number, year?: number): RapTimeserie
 export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[]> {
     const { mode, topazId, weppId, runIdOrPath, year, include_schema, include_sql } = opts;
 
-    // Build runPath
-    let runPath: string;
-    if (runIdOrPath) {
-        runPath = String(runIdOrPath).startsWith('batch;;') ? String(runIdOrPath) : `batch;;nasa-roses-2025;;${String(runIdOrPath)}`;
-    } else if (mode === 'hillslope' && typeof topazId !== 'undefined') {
-        runPath = `batch;;nasa-roses-2025;;wa-${topazId}`;
-    } else {
-        // Default placeholder if nothing provided (caller should usually provide runIdOrPath)
-        runPath = `batch;;nasa-roses-2025;;wa-`;
-    }
+    const runPath = buildRapRunPath(runIdOrPath, mode, topazId);
 
-    let payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    let payload: Record<string, unknown>;
 
     if (mode === 'hillslope') {
         if (typeof topazId === 'undefined') throw new Error('topazId required for hillslope mode');
         payload = buildRapTimeseriesPayload(topazId, year);
-        if (typeof include_schema !== 'undefined') payload.include_schema = include_schema;
-        if (typeof include_sql !== 'undefined') payload.include_sql = include_sql;
+        addQueryFlags(payload, include_schema, include_sql);
     } else {
         if (typeof weppId === 'undefined') throw new Error('weppId required for watershed mode');
 
-        const yearCondition = (typeof year !== 'undefined' && year !== null) ? ` AND rap.year = ${Number(year)}` : '';
+        // Validate weppId is a reasonable positive integer
+        const validWeppId = Number(weppId);
+        if (!Number.isInteger(validWeppId) || validWeppId < 0 || validWeppId > 1000000) {
+            throw new Error('Invalid weppId provided');
+        }
+
+        // Validate year is a reasonable integer
+        const validYear = (typeof year === 'number' && Number.isInteger(year) && year >= 1900 && year <= 2100) ? year : null;
+        const yearCondition = validYear !== null ? ` AND rap.year = ${validYear}` : '';
 
         payload = {
             datasets: [
@@ -108,55 +89,45 @@ export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[
             joins: [{ left: 'rap', right: 'hillslopes', on: ['topaz_id'] }],
             columns: ['rap.year AS year'],
             aggregations: [
-                { alias: 'shrub', expression: `SUM(CASE WHEN hillslopes.wepp_id = ${Number(weppId)}${yearCondition} AND rap.band = 5 THEN rap.value ELSE 0 END)` },
-                { alias: 'tree', expression: `SUM(CASE WHEN hillslopes.wepp_id = ${Number(weppId)}${yearCondition} AND rap.band = 6 THEN rap.value ELSE 0 END)` },
-                { alias: 'coverage', expression: `SUM(CASE WHEN hillslopes.wepp_id = ${Number(weppId)}${yearCondition} AND rap.band IN (1,4,5,6) THEN rap.value ELSE 0 END)` }
+                { alias: 'shrub', expression: `SUM(CASE WHEN hillslopes.wepp_id = ${validWeppId}${yearCondition} AND rap.band = 5 THEN rap.value ELSE 0 END)` },
+                { alias: 'tree', expression: `SUM(CASE WHEN hillslopes.wepp_id = ${validWeppId}${yearCondition} AND rap.band = 6 THEN rap.value ELSE 0 END)` },
+                { alias: 'coverage', expression: `SUM(CASE WHEN hillslopes.wepp_id = ${validWeppId}${yearCondition} AND rap.band IN (1,4,5,6) THEN rap.value ELSE 0 END)` }
             ],
             group_by: ['rap.year'],
             order_by: ['rap.year'],
         };
-        if (typeof include_schema !== 'undefined') payload.include_schema = include_schema;
-        if (typeof include_sql !== 'undefined') payload.include_sql = include_sql;
+        addQueryFlags(payload, include_schema, include_sql);
     }
 
-    const url = API_ENDPOINTS.QUERY_RUN(runPath);
-
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`RAP query failed: ${res.status} ${res.statusText} - ${text}`);
-    }
-
-    const json = await res.json();
-
-    const rawRows: any[] = Array.isArray(json) // eslint-disable-line @typescript-eslint/no-explicit-any
-        ? json
-        : Array.isArray(json.records)
-            ? json.records
-            : Array.isArray(json.rows)
-                ? json.rows
-                : Array.isArray(json.data)
-                    ? json.data
-                    : Array.isArray(json?.result?.records)
-                        ? json.result.records
-                        : [];
+    const rawRows = await postQuery(runPath, payload, 'RAP');
 
     if (mode === 'watershed') {
         // Map server-aggregated rows straight to AggregatedRapRow
         const rows = rawRows
-            .map((r) => ({ year: Number(r.year), shrub: Number(r.shrub ?? r.shub ?? 0), tree: Number(r.tree ?? 0), coverage: Number(r.coverage ?? r.cover ?? 0) }))
+            .map((r) => {
+                const row = r as Record<string, unknown>;
+                return {
+                    year: toFiniteNumber(row.year),
+                    shrub: toFiniteNumber(row.shrub ?? row.shub),
+                    tree: toFiniteNumber(row.tree),
+                    coverage: toFiniteNumber(row.coverage ?? row.cover),
+                };
+            })
             .filter((r) => Number.isFinite(r.year));
-        return rows as AggregatedRapRow[];
+        return rows;
     }
 
     // hillslope: raw band rows -> aggregate client-side to per-year
     const bandRows: RapRow[] = rawRows
-        .map((r) => ({ topaz_id: Number(r.topaz_id), year: Number(r.year), band: Number(r.band), value: Number(r.value) }))
+        .map((r) => {
+            const row = r as Record<string, unknown>;
+            return {
+                topaz_id: toFiniteNumber(row.topaz_id),
+                year: toFiniteNumber(row.year),
+                band: toFiniteNumber(row.band),
+                value: toFiniteNumber(row.value),
+            };
+        })
         .filter((r) => Number.isFinite(r.topaz_id) && Number.isFinite(r.year) && Number.isFinite(r.band) && Number.isFinite(r.value));
 
     const map = new Map<number, { coverage: number; shrub: number; tree: number }>();
@@ -175,3 +146,60 @@ export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[
 }
 
 export default fetchRap;
+
+/**
+ * Fetch RAP values aggregated by watershed (wepp_id) for building a choropleth.
+ * If `year` is provided the expression is restricted to that year, otherwise
+ * it averages across all years. Returns rows with { wepp_id, value }.
+ */
+export async function fetchRapChoropleth(opts: FetchRapChoroplethOptions): Promise<RapChoroplethRow[]> {
+    const { runIdOrPath, band, year, include_schema, include_sql } = opts;
+
+    const runPath = buildRunPath(runIdOrPath);
+
+    // Validate year is a reasonable integer
+    const validYear = (typeof year === 'number' && Number.isInteger(year) && year >= 1900 && year <= 2100) ? year : null;
+    const yearCondition = validYear !== null ? ` AND rap.year = ${validYear}` : '';
+
+    // Validate bands are integers 1-6 (known RAP band codes)
+    const validBands = (Array.isArray(band) ? band : [band])
+        .map(Number)
+        .filter(b => Number.isInteger(b) && b >= 1 && b <= 6);
+
+    if (validBands.length === 0) {
+        throw new Error('Invalid band values provided');
+    }
+
+    const bandExpression = validBands.length === 1
+        ? `rap.band = ${validBands[0]}`
+        : `rap.band IN (${validBands.join(',')})`;
+    const payload: Record<string, unknown> = {
+        datasets: [
+            { path: 'rap/rap_ts.parquet', alias: 'rap' },
+            { path: 'watershed/hillslopes.parquet', alias: 'hillslopes' }
+        ],
+        joins: [{ left: 'rap', right: 'hillslopes', on: ['topaz_id'] }],
+        columns: ['hillslopes.wepp_id AS wepp_id'],
+        aggregations: [
+            {
+                alias: 'value',
+                expression: `AVG(CASE WHEN ${bandExpression}${yearCondition} THEN rap.value ELSE NULL END)`
+            }
+        ],
+        group_by: ['hillslopes.wepp_id'],
+        order_by: ['hillslopes.wepp_id'],
+    };
+    addQueryFlags(payload, include_schema, include_sql);
+
+    const rawRows = await postQuery(runPath, payload, 'RAP Choropleth');
+
+    return rawRows
+        .map((r) => {
+            const row = r as Record<string, unknown>;
+            return {
+                wepp_id: toFiniteNumber(row.wepp_id),
+                value: toFiniteNumber(row.value ?? row.val),
+            };
+        })
+        .filter((r) => Number.isFinite(r.wepp_id));
+}

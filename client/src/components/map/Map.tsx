@@ -10,6 +10,7 @@ import { LeafletEvent, LeafletMouseEvent, PathOptions } from 'leaflet';
 import { useBottomPanelStore } from '../../store/BottomPanelStore';
 import { watershedOverviewRoute } from '../../routes/router';
 import { zoomToFeature } from '../../utils/map/MapUtil';
+import { useChoropleth } from '../../hooks/useChoropleth';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -18,6 +19,7 @@ import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
 import LandUseLegend from './controls/LandUseLegend/LandUseLegend';
+import ChoroplethLegend from './controls/ChoroplethLegend/ChoroplethLegend';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -176,8 +178,16 @@ function SubcatchmentLayer({ data, style }: {
 export default function Map(): JSX.Element {
   const navigate = useNavigate()
 
-  const { subcatchment, channels, landuse } = useWatershedOverlayStore();
+  const {
+    subcatchment,
+    channels,
+    landuse,
+  } = useWatershedOverlayStore();
+
   const { setLanduseLegendMap } = useWatershedOverlayStore();
+
+  // Use the choropleth hook for data fetching and styling
+  const { isActive: choroplethActive, getChoroplethStyle } = useChoropleth();
 
   const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
   const watershedID = match?.params.webcloudRunId ?? null;
@@ -242,6 +252,15 @@ export default function Map(): JSX.Element {
 
   const subcatchmentStyle = useCallback(
     (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => {
+      // Choropleth coloring takes precedence (uses weppid since RAP data is aggregated by wepp_id)
+      if (choroplethActive && feature?.properties?.weppid) {
+        const choroplethStyle = getChoroplethStyle(feature.properties.weppid);
+        if (choroplethStyle) {
+          return choroplethStyle;
+        }
+      }
+
+      // Land use coloring
       if (landuse && feature?.properties?.color) {
         return {
           color: '#2c2c2c',
@@ -250,6 +269,8 @@ export default function Map(): JSX.Element {
           fillOpacity: 1,
         };
       }
+
+      // Default style
       return {
         color: '#2c2c2c',
         weight: 0.75,
@@ -257,7 +278,7 @@ export default function Map(): JSX.Element {
         fillOpacity: 0.75,
       };
     },
-    [landuse]
+    [landuse, choroplethActive, getChoroplethStyle]
   );
 
   const channelStyle = useCallback(
@@ -372,6 +393,7 @@ export default function Map(): JSX.Element {
       </MapContainer>
 
       <LandUseLegend />
+      <ChoroplethLegend /> {/*TODO: Remove this replace with bottom panel version*/}
 
       {watershedID && (
         <div style={{ position: 'absolute', right: '10px', bottom: '30px' }}>

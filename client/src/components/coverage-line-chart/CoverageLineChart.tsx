@@ -16,13 +16,13 @@ type ChartData = {
     coverage: number;
 }[];
 
-export type CoverageBarChartProps = {
+export type CoverageLineChartProps = {
     data: ChartData;
     title: string;
     barKeys: { key: string; color: string; activeFill: string; activeStroke: string }[];
 };
 
-export const CoverageBarChart: React.FC<CoverageBarChartProps> = ({ data, title, barKeys }) => {
+export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({ data, title, barKeys }) => {
     const isEmpty = !data || data.length === 0;
 
     return (
@@ -80,4 +80,4 @@ export const CoverageBarChart: React.FC<CoverageBarChartProps> = ({ data, title,
     );
 };
 
-export default CoverageBarChart;
+export default CoverageLineChart;

@@ -18,11 +18,33 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
         subcatchment,
         channels,
         landuse,
+        choropleth,
         setSubcatchment,
-        setLanduseLegend
+        setLanduseLegend,
+        setChoropleth,
     } = useWatershedOverlayStore();
 
     const { openPanel } = useBottomPanelStore();
+
+    const handleEvapotranspirationChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { checked } = e.target;
+        if (checked) {
+            setSubcatchment(true);
+            setChoropleth('evapotranspiration');
+        } else {
+            setChoropleth('none');
+        }
+    };
+
+    const handleSoilMoistureChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { checked } = e.target;
+        if (checked) {
+            setSubcatchment(true);
+            setChoropleth('soilMoisture');
+        } else {
+            setChoropleth('none');
+        }
+    };
 
     return (
         <div className="layerpicker-layers" id="layerpicker-layers">
@@ -68,10 +90,22 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                         />
                     </div>
                     <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Evapotransportation</button>
+                        <button className="layerpicker-title">Evapotranspiration</button>
+                        <input
+                            type="checkbox"
+                            id="evapotranspiration"
+                            checked={choropleth === 'evapotranspiration'}
+                            onChange={handleEvapotranspirationChange}
+                        />
                     </div>
                     <div className="layerpicker-layer">
                         <button className="layerpicker-title">Soil Moisture</button>
+                        <input
+                            type="checkbox"
+                            id="soilMoisture"
+                            checked={choropleth === 'soilMoisture'}
+                            onChange={handleSoilMoistureChange}
+                        />
                     </div>
                 </>
             )}

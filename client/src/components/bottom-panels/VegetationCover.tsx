@@ -1,11 +1,12 @@
 import React, { useMemo, useState, useEffect } from "react";
-import fetchRap, { AggregatedRapRow } from '../../api/rapApi';
 import { FaXmark } from "react-icons/fa6";
 import { useBottomPanelStore } from "../../store/BottomPanelStore";
 import { useWatershedOverlayStore } from "../../store/WatershedOverlayStore";
 import { useMatch } from '@tanstack/react-router';
 import { watershedOverviewRoute } from '../../routes/router';
-import CoverageBarChart from "../coverage-line-chart/CoverageLineChart";
+import { CoverageLineChart } from "../coverage-line-chart/CoverageLineChart";
+import { AggregatedRapRow } from "../../api/types";
+import fetchRap from '../../api/rapApi';
 import Select from "../select/Select";
 import "./BottomPanel.css";
 
@@ -27,8 +28,9 @@ export const VegetationCover: React.FC = () => {
     const [vegetationOption, setVegetationOption] = useState<"All" | "Shrub" | "Tree">("All");
 
     const barKeys = useMemo(() => {
-        const shrubKey = { key: 'shrub', color: '#4caf50', activeFill: '#a5d6a7', activeStroke: '#2e7d32' };
-        const treeKey = { key: 'tree', color: '#8B4513', activeFill: '#d7a17a', activeStroke: '#5c3317' };
+        const shrubKey = { key: 'shrub', color: '#8B4513', activeFill: '#d7a17a', activeStroke: '#5c3317' };
+        const treeKey = { key: 'tree', color: '#4caf50', activeFill: '#a5d6a7', activeStroke: '#2e7d32' };
+
         return vegetationOption === 'Shrub' ? [shrubKey] : vegetationOption === 'Tree' ? [treeKey] : [shrubKey, treeKey];
     }, [vegetationOption]);
 
@@ -137,7 +139,7 @@ export const VegetationCover: React.FC = () => {
 
             {rapStatus.state === 'loading' && <div style={{ textAlign: 'center' }}>Loading vegetation data…</div>}
 
-            <CoverageBarChart
+            <CoverageLineChart
                 data={chartData}
                 title={chartTitle}
                 barKeys={barKeys}
