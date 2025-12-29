@@ -7,24 +7,28 @@ vi.mock('../hooks/useChoropleth', async (importOriginal) => {
     const actual = await importOriginal<typeof import('../hooks/useChoropleth')>();
     return {
         ...actual,
-        useChoropleth: vi.fn(() => ({
-            choropleth: useWatershedOverlayStore.getState().choropleth,
-            isLoading: useWatershedOverlayStore.getState().choroplethLoading,
-            error: useWatershedOverlayStore.getState().choroplethError,
-            getColor: () => null,
-            getChoroplethStyle: () => null,
-            isActive: useWatershedOverlayStore.getState().choropleth !== 'none',
-            config: useWatershedOverlayStore.getState().choropleth !== 'none'
-                ? actual.CHOROPLETH_CONFIG[useWatershedOverlayStore.getState().choropleth as keyof typeof actual.CHOROPLETH_CONFIG]
-                : null,
-        })),
+        useChoropleth: vi.fn(() => {
+            const state = useWatershedOverlayStore.getState();
+            const choroplethType = state.choropleth.type;
+            return {
+                choropleth: choroplethType,
+                isLoading: state.choropleth.loading,
+                error: state.choropleth.error,
+                getColor: () => null,
+                getChoroplethStyle: () => null,
+                isActive: choroplethType !== 'none',
+                config: choroplethType !== 'none'
+                    ? actual.CHOROPLETH_CONFIG[choroplethType as keyof typeof actual.CHOROPLETH_CONFIG]
+                    : null,
+            };
+        }),
     };
 });
 
 describe('ChoroplethLegend', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        useWatershedOverlayStore.getState().setChoropleth('none');
+        useWatershedOverlayStore.getState().setChoroplethType('none');
         useWatershedOverlayStore.getState().setChoroplethYear(null);
         useWatershedOverlayStore.getState().setChoroplethData(null, null);
         useWatershedOverlayStore.getState().setChoroplethLoading(false);
@@ -37,7 +41,7 @@ describe('ChoroplethLegend', () => {
     });
 
     it('renders legend when choropleth is active', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
 
         render(<ChoroplethLegend />);
 
@@ -45,7 +49,7 @@ describe('ChoroplethLegend', () => {
     });
 
     it('shows loading state', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
         useWatershedOverlayStore.getState().setChoroplethLoading(true);
 
         render(<ChoroplethLegend />);
@@ -54,7 +58,7 @@ describe('ChoroplethLegend', () => {
     });
 
     it('shows error state', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
         useWatershedOverlayStore.getState().setChoroplethError('Test error');
 
         render(<ChoroplethLegend />);
@@ -63,7 +67,7 @@ describe('ChoroplethLegend', () => {
     });
 
     it('displays value range when data is loaded', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
         useWatershedOverlayStore.getState().setChoroplethLoading(false);
         useWatershedOverlayStore.getState().setChoroplethError(null);
         useWatershedOverlayStore.getState().setChoroplethData(
@@ -79,7 +83,7 @@ describe('ChoroplethLegend', () => {
     });
 
     it('displays unit from config', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
         useWatershedOverlayStore.getState().setChoroplethLoading(false);
         useWatershedOverlayStore.getState().setChoroplethError(null);
         useWatershedOverlayStore.getState().setChoroplethData(
@@ -93,7 +97,7 @@ describe('ChoroplethLegend', () => {
     });
 
     it('renders year selector', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
 
         render(<ChoroplethLegend />);
 
@@ -102,18 +106,18 @@ describe('ChoroplethLegend', () => {
     });
 
     it('changes year when selector changes', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
 
         render(<ChoroplethLegend />);
 
         const select = screen.getByRole('combobox');
         fireEvent.change(select, { target: { value: '2020' } });
 
-        expect(useWatershedOverlayStore.getState().choroplethYear).toBe(2020);
+        expect(useWatershedOverlayStore.getState().choropleth.year).toBe(2020);
     });
 
     it('sets year to null when "All Years" is selected', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
         useWatershedOverlayStore.getState().setChoroplethYear(2020);
 
         render(<ChoroplethLegend />);
@@ -121,23 +125,23 @@ describe('ChoroplethLegend', () => {
         const select = screen.getByRole('combobox');
         fireEvent.change(select, { target: { value: 'all' } });
 
-        expect(useWatershedOverlayStore.getState().choroplethYear).toBeNull();
+        expect(useWatershedOverlayStore.getState().choropleth.year).toBeNull();
     });
 
     it('closes legend when close button is clicked', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
 
         render(<ChoroplethLegend />);
 
         const closeButton = screen.getByRole('button', { name: /close/i });
         fireEvent.click(closeButton);
 
-        expect(useWatershedOverlayStore.getState().choropleth).toBe('none');
-        expect(useWatershedOverlayStore.getState().choroplethYear).toBeNull();
+        expect(useWatershedOverlayStore.getState().choropleth.type).toBe('none');
+        expect(useWatershedOverlayStore.getState().choropleth.year).toBeNull();
     });
 
     it('renders gradient element', () => {
-        useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+        useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
         useWatershedOverlayStore.getState().setChoroplethLoading(false);
         useWatershedOverlayStore.getState().setChoroplethError(null);
         useWatershedOverlayStore.getState().setChoroplethData(

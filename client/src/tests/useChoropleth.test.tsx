@@ -14,7 +14,7 @@ const mockFetchRapChoropleth = vi.mocked(fetchRapChoropleth);
 describe('useChoropleth', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        useWatershedOverlayStore.getState().setChoropleth('none');
+        useWatershedOverlayStore.getState().setChoroplethType('none');
         useWatershedOverlayStore.getState().setChoroplethYear(null);
         useWatershedOverlayStore.getState().setChoroplethData(null, null);
         useWatershedOverlayStore.getState().setChoroplethLoading(false);
@@ -28,16 +28,23 @@ describe('useChoropleth', () => {
     describe('CHOROPLETH_CONFIG', () => {
         it('has configuration for evapotranspiration', () => {
             expect(CHOROPLETH_CONFIG.evapotranspiration).toBeDefined();
-            expect(CHOROPLETH_CONFIG.evapotranspiration.title).toBe('Vegetation Cover');
-            expect(CHOROPLETH_CONFIG.evapotranspiration.colormap).toBe('viridis');
+            expect(CHOROPLETH_CONFIG.evapotranspiration.title).toBe('Evapotranspiration');
+            expect(CHOROPLETH_CONFIG.evapotranspiration.colormap).toBe('et-blue');
             expect(CHOROPLETH_CONFIG.evapotranspiration.bands).toEqual([1, 4, 5, 6]);
         });
 
         it('has configuration for soilMoisture', () => {
             expect(CHOROPLETH_CONFIG.soilMoisture).toBeDefined();
-            expect(CHOROPLETH_CONFIG.soilMoisture.title).toBe('Shrub Cover');
+            expect(CHOROPLETH_CONFIG.soilMoisture.title).toBe('Soil Moisture');
             expect(CHOROPLETH_CONFIG.soilMoisture.colormap).toBe('winter');
-            expect(CHOROPLETH_CONFIG.soilMoisture.bands).toEqual([5]);
+            expect(CHOROPLETH_CONFIG.soilMoisture.bands).toEqual([2, 3]);
+        });
+
+        it('has configuration for vegetationCover', () => {
+            expect(CHOROPLETH_CONFIG.vegetationCover).toBeDefined();
+            expect(CHOROPLETH_CONFIG.vegetationCover.title).toBe('Vegetation Cover');
+            expect(CHOROPLETH_CONFIG.vegetationCover.colormap).toBe('viridis');
+            expect(CHOROPLETH_CONFIG.vegetationCover.bands).toEqual([5, 6]);
         });
     });
 
@@ -67,15 +74,15 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
                 expect(result.current.isActive).toBe(true);
             });
 
-            expect(result.current.choropleth).toBe('evapotranspiration');
-            expect(result.current.config).toEqual(CHOROPLETH_CONFIG.evapotranspiration);
+            expect(result.current.choropleth).toBe('vegetationCover');
+            expect(result.current.config).toEqual(CHOROPLETH_CONFIG.vegetationCover);
         });
 
         it('fetches data when choropleth type changes', async () => {
@@ -87,13 +94,13 @@ describe('useChoropleth', () => {
             renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
                 expect(mockFetchRapChoropleth).toHaveBeenCalledWith({
                     runIdOrPath: 'or,wa-108',
-                    band: [1, 4, 5, 6],
+                    band: [5, 6],
                     year: null,
                 });
             });
@@ -107,14 +114,14 @@ describe('useChoropleth', () => {
             renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
                 useWatershedOverlayStore.getState().setChoroplethYear(2020);
             });
 
             await waitFor(() => {
                 expect(mockFetchRapChoropleth).toHaveBeenCalledWith({
                     runIdOrPath: 'or,wa-108',
-                    band: [1, 4, 5, 6],
+                    band: [5, 6],
                     year: 2020,
                 });
             });
@@ -126,7 +133,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -140,7 +147,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -159,7 +166,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -182,7 +189,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -190,7 +197,7 @@ describe('useChoropleth', () => {
             });
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('none');
+                useWatershedOverlayStore.getState().setChoroplethType('none');
             });
 
             await waitFor(() => {
@@ -213,7 +220,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -231,7 +238,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -250,7 +257,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -278,7 +285,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoropleth('evapotranspiration');
+                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {

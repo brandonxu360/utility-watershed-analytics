@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import { PathOptions } from 'leaflet';
-import { useWatershedOverlayStore, ChoroplethType } from '../store/WatershedOverlayStore';
+import { useWatershedOverlayStore, ChoroplethType, VegetationBandType } from '../store/WatershedOverlayStore';
 import { fetchRapChoropleth } from '../api/rapApi';
 import { createColormap, normalizeValue, computeRobustRange, ColorArray } from '../utils/colormap';
 import { DEFAULT_RUN_ID } from '../api/queryUtils';
+
+// Band mapping for vegetation cover options
+const VEGETATION_BANDS: Record<VegetationBandType, number[]> = {
+    all: [5, 6],   // shrub + tree
+    shrub: [5],    // shrub only
+    tree: [6],     // tree only
+};
 
 export const CHOROPLETH_CONFIG: Record<Exclude<ChoroplethType, 'none'>, {
     title: string;
@@ -12,16 +19,22 @@ export const CHOROPLETH_CONFIG: Record<Exclude<ChoroplethType, 'none'>, {
     bands: number[];
 }> = {
     evapotranspiration: {
-        title: 'Vegetation Cover',
+        title: 'Evapotranspiration',
         unit: '% cover',
-        colormap: 'viridis',
+        colormap: 'et-blue',
         bands: [1, 4, 5, 6],
     },
     soilMoisture: {
-        title: 'Shrub Cover',
+        title: 'Soil Moisture',
         unit: '% cover',
         colormap: 'winter',
-        bands: [5],
+        bands: [2, 3],
+    },
+    vegetationCover: {
+        title: 'Vegetation Cover',
+        unit: '% cover',
+        colormap: 'viridis',
+        bands: [5, 6],
     },
 };
 
@@ -44,21 +57,32 @@ interface UseChoroplethResult {
 
 export function useChoropleth(): UseChoroplethResult {
     const {
-        choropleth,
-        choroplethYear,
-        choroplethData,
-        choroplethRange,
-        choroplethLoading,
-        choroplethError,
+        choropleth: {
+            type: choroplethType,
+            year: choroplethYear,
+            bands: choroplethBands,
+            data: choroplethData,
+            range: choroplethRange,
+            loading: choroplethLoading,
+            error: choroplethError,
+        },
         setChoroplethData,
         setChoroplethLoading,
         setChoroplethError,
     } = useWatershedOverlayStore();
 
-    const config = choropleth !== 'none' ? CHOROPLETH_CONFIG[choropleth] : null;
+    const config = choroplethType !== 'none' ? CHOROPLETH_CONFIG[choroplethType] : null;
+
+    const effectiveBands = useMemo(() => {
+        if (!config) return [];
+        if (choroplethType === 'vegetationCover') {
+            return VEGETATION_BANDS[choroplethBands];
+        }
+        return config.bands;
+    }, [config, choroplethType, choroplethBands]);
 
     useEffect(() => {
-        if (choropleth === 'none' || !config) {
+        if (choroplethType === 'none' || !config || effectiveBands.length === 0) {
             setChoroplethData(null, null);
             return;
         }
@@ -72,7 +96,7 @@ export function useChoropleth(): UseChoroplethResult {
             try {
                 const data = await fetchRapChoropleth({
                     runIdOrPath: DEFAULT_RUN_ID,
-                    band: config!.bands,
+                    band: effectiveBands,
                     year: choroplethYear,
                 });
 
@@ -110,7 +134,7 @@ export function useChoropleth(): UseChoroplethResult {
 
         loadData();
         return () => { mounted = false; };
-    }, [choropleth, choroplethYear, config, setChoroplethData, setChoroplethLoading, setChoroplethError]);
+    }, [choroplethType, choroplethYear, effectiveBands, config, setChoroplethData, setChoroplethLoading, setChoroplethError]);
 
     const colormap = useMemo(() => {
         if (!config) return null;
@@ -119,7 +143,7 @@ export function useChoropleth(): UseChoroplethResult {
 
     const getColor = useCallback((id: number | undefined): string | null => {
         if (
-            choropleth === 'none' ||
+            choroplethType === 'none' ||
             !choroplethData ||
             !choroplethRange ||
             !colormap ||
@@ -133,7 +157,7 @@ export function useChoropleth(): UseChoroplethResult {
 
         const normalized = normalizeValue(value, choroplethRange.min, choroplethRange.max);
         return colormap.map(normalized);
-    }, [choropleth, choroplethData, choroplethRange, colormap]);
+    }, [choroplethType, choroplethData, choroplethRange, colormap]);
 
     const getChoroplethStyle = useCallback((id: number | undefined): PathOptions | null => {
         const fillColor = getColor(id);
@@ -148,13 +172,13 @@ export function useChoropleth(): UseChoroplethResult {
     }, [getColor]);
 
     return {
-        choropleth,
+        choropleth: choroplethType,
         isLoading: choroplethLoading,
         error: choroplethError,
+        isActive: choroplethType !== 'none',
+        config,
         getColor,
         getChoroplethStyle,
-        isActive: choropleth !== 'none',
-        config,
     };
 }
 

@@ -1,9 +1,11 @@
 import React from 'react';
 import { ChangeEvent } from 'react';
-import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
+import { useWatershedOverlayStore, ChoroplethType } from '../../../../store/WatershedOverlayStore';
 import { FaQuestionCircle } from 'react-icons/fa';
 import { VegetationCover } from '../../../bottom-panels/VegetationCover';
+import { ChoroplethPanel } from '../../../bottom-panels/ChoroplethPanel';
 import { useBottomPanelStore } from '../../../../store/BottomPanelStore';
+import { useChoropleth } from '../../../../hooks/useChoropleth';
 
 type DataLayersTabContentProps = {
     activeTab: string;
@@ -18,32 +20,19 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
         subcatchment,
         channels,
         landuse,
-        choropleth,
+        choropleth: { type: choroplethType },
         setSubcatchment,
         setLanduseLegend,
-        setChoropleth,
+        setChoroplethType,
     } = useWatershedOverlayStore();
 
     const { openPanel } = useBottomPanelStore();
+    const { isActive } = useChoropleth();
 
-    const handleEvapotranspirationChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { checked } = e.target;
-        if (checked) {
-            setSubcatchment(true);
-            setChoropleth('evapotranspiration');
-        } else {
-            setChoropleth('none');
-        }
-    };
-
-    const handleSoilMoistureChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { checked } = e.target;
-        if (checked) {
-            setSubcatchment(true);
-            setChoropleth('soilMoisture');
-        } else {
-            setChoropleth('none');
-        }
+    const handleChoroplethClick = (type: Exclude<ChoroplethType, 'none'>) => () => {
+        setSubcatchment(true);
+        setChoroplethType(type);
+        openPanel(<ChoroplethPanel choroplethType={type} />);
     };
 
     return (
@@ -90,22 +79,22 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                         />
                     </div>
                     <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Evapotranspiration</button>
-                        <input
-                            type="checkbox"
-                            id="evapotranspiration"
-                            checked={choropleth === 'evapotranspiration'}
-                            onChange={handleEvapotranspirationChange}
-                        />
+                        <button
+                            className="layerpicker-title"
+                            onClick={handleChoroplethClick('evapotranspiration')}
+                            style={{ fontWeight: isActive && choroplethType === 'evapotranspiration' ? 'bold' : 'normal' }}
+                        >
+                            Evapotranspiration
+                        </button>
                     </div>
                     <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Soil Moisture</button>
-                        <input
-                            type="checkbox"
-                            id="soilMoisture"
-                            checked={choropleth === 'soilMoisture'}
-                            onChange={handleSoilMoistureChange}
-                        />
+                        <button
+                            className="layerpicker-title"
+                            onClick={handleChoroplethClick('soilMoisture')}
+                            style={{ fontWeight: isActive && choroplethType === 'soilMoisture' ? 'bold' : 'normal' }}
+                        >
+                            Soil Moisture
+                        </button>
                     </div>
                 </>
             )}
@@ -115,6 +104,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                         <button className="layerpicker-title" onClick={
                             () => {
                                 setSubcatchment(true);
+                                setChoroplethType('vegetationCover');
                                 openPanel(<VegetationCover />);
                             }
                         }>

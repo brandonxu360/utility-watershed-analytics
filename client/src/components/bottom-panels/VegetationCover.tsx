@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { FaXmark } from "react-icons/fa6";
 import { useBottomPanelStore } from "../../store/BottomPanelStore";
-import { useWatershedOverlayStore } from "../../store/WatershedOverlayStore";
+import { useWatershedOverlayStore, VegetationBandType } from "../../store/WatershedOverlayStore";
 import { useMatch } from '@tanstack/react-router';
 import { watershedOverviewRoute } from '../../routes/router';
 import { CoverageLineChart } from "../coverage-line-chart/CoverageLineChart";
@@ -17,7 +17,15 @@ type RapStatus = {
 
 export const VegetationCover: React.FC = () => {
     const { selectedHillslopeId, closePanel, clearSelectedHillslope } = useBottomPanelStore();
-    const { setSubcatchment } = useWatershedOverlayStore();
+
+    const {
+        choropleth: { year: choroplethYear, bands: choroplethBands },
+        setSubcatchment,
+        setChoroplethYear,
+        setChoroplethBands,
+        resetChoropleth,
+    } = useWatershedOverlayStore();
+
     const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
     const watershedID = match?.params.webcloudRunId ?? null;
     // Temporary run id override for the current query engine dataset (hardcoded until new data is available)
@@ -25,7 +33,22 @@ export const VegetationCover: React.FC = () => {
     // from route watershed id -> run id is available.
     const RUN_ID_OVERRIDE = 'or,wa-108';
 
-    const [vegetationOption, setVegetationOption] = useState<"All" | "Shrub" | "Tree">("All");
+    // Map UI option to band type
+    const vegetationOptionToBand: Record<"All" | "Shrub" | "Tree", VegetationBandType> = {
+        "All": "all",
+        "Shrub": "shrub",
+        "Tree": "tree",
+    };
+    const bandToVegetationOption: Record<VegetationBandType, "All" | "Shrub" | "Tree"> = {
+        "all": "All",
+        "shrub": "Shrub",
+        "tree": "Tree",
+    };
+
+    // Initialize from store state
+    const [vegetationOption, setVegetationOption] = useState<"All" | "Shrub" | "Tree">(
+        bandToVegetationOption[choroplethBands]
+    );
 
     const barKeys = useMemo(() => {
         const shrubKey = { key: 'shrub', color: '#8B4513', activeFill: '#d7a17a', activeStroke: '#5c3317' };
@@ -42,7 +65,23 @@ export const VegetationCover: React.FC = () => {
         (_, i) => String(startYear + i)
     );
 
-    const [selectedYear, setSelectedYear] = useState<string>('All');
+    // Initialize from store state
+    const [selectedYear, setSelectedYear] = useState<string>(
+        choroplethYear === null ? 'All' : String(choroplethYear)
+    );
+
+    // Sync vegetation option changes to choropleth store
+    const handleVegetationChange = (v: string) => {
+        const option = v as "All" | "Shrub" | "Tree";
+        setVegetationOption(option);
+        setChoroplethBands(vegetationOptionToBand[option]);
+    };
+
+    // Sync year changes to choropleth store
+    const handleYearChange = (v: string) => {
+        setSelectedYear(v);
+        setChoroplethYear(v === 'All' ? null : Number(v));
+    };
 
     // RAP timeseries fetched for selected hillslope (topaz id)
     const [rapTimeSeries, setRapTimeSeries] = useState<AggregatedRapRow[] | null>(null);
@@ -111,7 +150,7 @@ export const VegetationCover: React.FC = () => {
                         <Select
                             id="veg-cover-title"
                             value={vegetationOption}
-                            onChange={(v) => setVegetationOption(v as "All" | "Shrub" | "Tree")}
+                            onChange={handleVegetationChange}
                             options={["All", "Shrub", "Tree"]}
                             ariaLabel="Select vegetation type"
                         />
@@ -124,7 +163,7 @@ export const VegetationCover: React.FC = () => {
                         <Select
                             id="veg-year"
                             value={selectedYear}
-                            onChange={(v) => setSelectedYear(v)}
+                            onChange={handleYearChange}
                             options={['All', ...years.slice().reverse()]}
                             ariaLabel="Select vegetation year"
                         />
@@ -132,6 +171,7 @@ export const VegetationCover: React.FC = () => {
                     <FaXmark className="vegCloseButton" onClick={() => {
                         clearSelectedHillslope();
                         setSubcatchment(false);
+                        resetChoropleth();
                         closePanel()
                     }} />
                 </div>

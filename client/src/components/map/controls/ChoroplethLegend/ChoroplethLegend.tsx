@@ -7,13 +7,15 @@ import './ChoroplethLegend.css';
 
 const ChoroplethLegend: React.FC = () => {
     const {
-        choropleth,
-        choroplethRange,
-        choroplethLoading,
-        choroplethError,
-        choroplethYear,
-        setChoropleth,
+        choropleth: {
+            type: choroplethType,
+            range: choroplethRange,
+            loading: choroplethLoading,
+            error: choroplethError,
+            year: choroplethYear,
+        },
         setChoroplethYear,
+        resetChoropleth,
     } = useWatershedOverlayStore();
 
     const { config } = useChoropleth();
@@ -44,8 +46,7 @@ const ChoroplethLegend: React.FC = () => {
     };
 
     const handleClose = () => {
-        setChoropleth('none');
-        setChoroplethYear(null);
+        resetChoropleth();
     };
 
     const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -53,7 +54,7 @@ const ChoroplethLegend: React.FC = () => {
         setChoroplethYear(value === 'all' ? null : Number(value));
     };
 
-    if (choropleth === 'none' || !config) {
+    if (choroplethType === 'none' || !config) {
         return null;
     }
 
