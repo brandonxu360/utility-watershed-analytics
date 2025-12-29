@@ -1,9 +1,11 @@
-import React, { useMemo } from "react";
+// TODO: Placeholder file to be deleted for separate evapotranspiration and soil moisture panels
+
+import React from "react";
 import { FaXmark } from "react-icons/fa6";
 import { useBottomPanelStore } from "../../store/BottomPanelStore";
 import { useWatershedOverlayStore, ChoroplethType } from "../../store/WatershedOverlayStore";
 import { useChoropleth, CHOROPLETH_YEARS } from "../../hooks/useChoropleth";
-import { createColormap } from "../../utils/colormap";
+import { ChoroplethScale } from "../ChoroplethScale";
 import Select from "../select/Select";
 import "./BottomPanel.css";
 
@@ -21,31 +23,6 @@ export const ChoroplethPanel: React.FC<ChoroplethPanelProps> = ({ choroplethType
     } = useWatershedOverlayStore();
 
     const { config } = useChoropleth();
-
-    const gradientStyle = useMemo(() => {
-        if (!config) return {};
-
-        const cmap = createColormap({ colormap: config.colormap, nshades: 64, format: 'hex' });
-        const stops = Array.from({ length: cmap.length }, (_, i) => {
-            const percent = (i / (cmap.length - 1)) * 100;
-            return `${cmap[i]} ${percent.toFixed(1)}%`;
-        }).join(', ');
-
-        return {
-            background: `linear-gradient(to right, ${stops})`,
-        };
-    }, [config]);
-
-    const formatValue = (value: number): string => {
-        if (Math.abs(value) >= 1000) {
-            return value.toFixed(0);
-        } else if (Math.abs(value) >= 100) {
-            return value.toFixed(1);
-        } else if (Math.abs(value) >= 10) {
-            return value.toFixed(2);
-        }
-        return value.toFixed(3);
-    };
 
     const handleClose = () => {
         resetChoropleth();
@@ -96,34 +73,12 @@ export const ChoroplethPanel: React.FC<ChoroplethPanelProps> = ({ choroplethType
                     </div>
                 )}
 
-                {!choroplethLoading && !choroplethError && (
-                    <div className="choropleth-panel-legend">
-                        <div
-                            className="choropleth-panel-gradient"
-                            style={{
-                                ...gradientStyle,
-                                height: '20px',
-                                borderRadius: '4px',
-                                margin: '0.5rem 0',
-                            }}
-                        />
-
-                        {choroplethRange && (
-                            <div className="choropleth-panel-labels" style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                fontSize: '0.75rem',
-                            }}>
-                                <span>{formatValue(choroplethRange.min)}</span>
-                                <span>{formatValue((choroplethRange.min + choroplethRange.max) / 2)}</span>
-                                <span>{formatValue(choroplethRange.max)}</span>
-                            </div>
-                        )}
-
-                        <div style={{ textAlign: 'center', fontSize: '0.75rem', marginTop: '0.25rem', color: '#666' }}>
-                            {config.unit}
-                        </div>
-                    </div>
+                {!choroplethLoading && !choroplethError && choroplethRange && (
+                    <ChoroplethScale
+                        colormap={config.colormap}
+                        range={choroplethRange}
+                        unit={config.unit}
+                    />
                 )}
             </div>
         </div>

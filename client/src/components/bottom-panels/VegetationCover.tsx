@@ -6,6 +6,8 @@ import { useMatch } from '@tanstack/react-router';
 import { watershedOverviewRoute } from '../../routes/router';
 import { CoverageLineChart } from "../coverage-line-chart/CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
+import { useChoropleth } from "../../hooks/useChoropleth";
+import { ChoroplethScale } from "../ChoroplethScale";
 import fetchRap from '../../api/rapApi';
 import Select from "../select/Select";
 import "./BottomPanel.css";
@@ -19,12 +21,14 @@ export const VegetationCover: React.FC = () => {
     const { selectedHillslopeId, closePanel, clearSelectedHillslope } = useBottomPanelStore();
 
     const {
-        choropleth: { year: choroplethYear, bands: choroplethBands },
+        choropleth: { year: choroplethYear, bands: choroplethBands, range: choroplethRange, loading: choroplethLoading },
         setSubcatchment,
         setChoroplethYear,
         setChoroplethBands,
         resetChoropleth,
     } = useWatershedOverlayStore();
+
+    const { config } = useChoropleth();
 
     const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
     const watershedID = match?.params.webcloudRunId ?? null;
@@ -184,6 +188,17 @@ export const VegetationCover: React.FC = () => {
                 title={chartTitle}
                 barKeys={barKeys}
             />
+
+            {config && !choroplethLoading && choroplethRange && (
+                <div style={{ marginTop: '32px' }}>
+                    <ChoroplethScale
+                        colormap={config.colormap}
+                        range={choroplethRange}
+                        unit={config.unit}
+                        style={{ padding: '0 1rem', marginBottom: '0.5rem' }}
+                    />
+                </div>
+            )}
         </div>
     );
 };
