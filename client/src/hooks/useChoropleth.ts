@@ -102,7 +102,7 @@ export function useChoropleth(): UseChoroplethResult {
 
                 if (!mounted) return;
 
-                const dataMap = new globalThis.Map<number, number>();
+                const dataMap = new Map<number, number>();
                 const values: number[] = [];
 
                 for (const row of data) {
