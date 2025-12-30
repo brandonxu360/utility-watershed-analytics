@@ -109,7 +109,7 @@ export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[
                 const row = r as Record<string, unknown>;
                 return {
                     year: toFiniteNumber(row.year),
-                    shrub: toFiniteNumber(row.shrub ?? row.shub),
+                    shrub: toFiniteNumber(row.shrub),
                     tree: toFiniteNumber(row.tree),
                     coverage: toFiniteNumber(row.coverage ?? row.cover),
                 };
