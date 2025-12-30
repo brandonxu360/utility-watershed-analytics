@@ -1,3 +1,4 @@
+import { startYear, endYear } from '../utils/constants';
 import { buildRunPath, postQuery, addQueryFlags, toFiniteNumber } from './queryUtils';
 import { AggregatedRapRow, FetchRapOptions, FetchRapChoroplethOptions, RapChoroplethRow, RapRow, RapTimeseriesPayload } from './types';
 
@@ -131,15 +132,14 @@ export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[
         .filter((r) => Number.isFinite(r.topaz_id) && Number.isFinite(r.year) && Number.isFinite(r.band) && Number.isFinite(r.value));
 
     const map = new Map<number, { coverage: number; shrub: number; tree: number }>();
-    const startYear = 1986; const endYear = 2023;
-    for (let y = startYear; y <= endYear; y++) map.set(y, { coverage: 0, shrub: 0, tree: 0 });
+    for (let year = startYear; year <= endYear; year++) map.set(year, { coverage: 0, shrub: 0, tree: 0 });
 
-    for (const r of bandRows) {
-        const entry = map.get(r.year);
+    for (const row of bandRows) {
+        const entry = map.get(row.year);
         if (!entry) continue;
-        if ([1, 4, 5, 6].includes(r.band)) entry.coverage += r.value;
-        if (r.band === 5) entry.shrub += r.value;
-        if (r.band === 6) entry.tree += r.value;
+        if ([1, 4, 5, 6].includes(row.band)) entry.coverage += row.value;
+        if (row.band === 5) entry.shrub += row.value;
+        if (row.band === 6) entry.tree += row.value;
     }
 
     return Array.from(map.entries()).map(([yr, v]) => ({ year: yr, shrub: v.shrub, tree: v.tree, coverage: v.coverage }));

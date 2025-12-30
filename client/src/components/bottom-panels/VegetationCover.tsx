@@ -8,6 +8,7 @@ import { CoverageLineChart } from "../coverage-line-chart/CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { ChoroplethScale } from "../ChoroplethScale";
+import { endYear, startYear } from "../../utils/constants";
 import fetchRap from '../../api/rapApi';
 import Select from "../select/Select";
 import "./BottomPanel.css";
@@ -16,6 +17,8 @@ type RapStatus = {
     state: 'loading' | 'ready' | 'error';
     message?: string | null
 };
+
+type VegetationOption = "All" | "Shrub" | "Tree";
 
 export const VegetationCover: React.FC = () => {
     const { selectedHillslopeId, closePanel, clearSelectedHillslope } = useBottomPanelStore();
@@ -38,19 +41,22 @@ export const VegetationCover: React.FC = () => {
     const RUN_ID_OVERRIDE = 'or,wa-108';
 
     // Map UI option to band type
-    const vegetationOptionToBand: Record<"All" | "Shrub" | "Tree", VegetationBandType> = {
+    const vegetationOptionToBand: Record<VegetationOption, VegetationBandType> = {
         "All": "all",
         "Shrub": "shrub",
         "Tree": "tree",
     };
-    const bandToVegetationOption: Record<VegetationBandType, "All" | "Shrub" | "Tree"> = {
-        "all": "All",
-        "shrub": "Shrub",
-        "tree": "Tree",
-    };
+
+    // Derive reverse mapping from vegetationOptionToBand to avoid duplicated definitions
+    const bandToVegetationOption: Record<VegetationBandType, VegetationOption> = Object
+        .entries(vegetationOptionToBand)
+        .reduce((acc, [option, band]) => {
+            acc[band as VegetationBandType] = option as VegetationOption;
+            return acc;
+        }, {} as Record<VegetationBandType, VegetationOption>);
 
     // Initialize from store state
-    const [vegetationOption, setVegetationOption] = useState<"All" | "Shrub" | "Tree">(
+    const [vegetationOption, setVegetationOption] = useState<VegetationOption>(
         bandToVegetationOption[choroplethBands]
     );
 
@@ -60,9 +66,6 @@ export const VegetationCover: React.FC = () => {
 
         return vegetationOption === 'Shrub' ? [shrubKey] : vegetationOption === 'Tree' ? [treeKey] : [shrubKey, treeKey];
     }, [vegetationOption]);
-
-    const startYear = 1986;
-    const endYear = 2023;
 
     const years = Array.from(
         { length: endYear - startYear + 1 },

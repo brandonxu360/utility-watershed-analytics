@@ -1,16 +1,10 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import { PathOptions } from 'leaflet';
-import { useWatershedOverlayStore, ChoroplethType, VegetationBandType } from '../store/WatershedOverlayStore';
+import { useWatershedOverlayStore, ChoroplethType } from '../store/WatershedOverlayStore';
 import { fetchRapChoropleth } from '../api/rapApi';
 import { createColormap, normalizeValue, computeRobustRange, ColorArray } from '../utils/colormap';
 import { DEFAULT_RUN_ID } from '../api/queryUtils';
-
-// Band mapping for vegetation cover options
-const VEGETATION_BANDS: Record<VegetationBandType, number[]> = {
-    all: [5, 6],   // shrub + tree
-    shrub: [5],    // shrub only
-    tree: [6],     // tree only
-};
+import { VEGETATION_BANDS } from '../utils/constants';
 
 export const CHOROPLETH_CONFIG: Record<Exclude<ChoroplethType, 'none'>, {
     title: string;
