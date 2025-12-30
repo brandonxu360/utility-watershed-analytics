@@ -67,8 +67,7 @@ export async function postQuery(
     });
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`${errorPrefix} query failed: ${res.status} ${res.statusText} - ${text}`);
+        throw new Error(`${errorPrefix} query failed: ${res.status}`);
     }
 
     const json = await res.json();
