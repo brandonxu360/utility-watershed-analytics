@@ -1,9 +1,8 @@
 import React from 'react';
 import { ChangeEvent } from 'react';
-import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
 import { FaQuestionCircle } from 'react-icons/fa';
 import { VegetationCover } from '../../../bottom-panels/VegetationCover';
-import { useBottomPanelStore } from '../../../../store/BottomPanelStore';
+import { useAppStore } from '../../../../store/store';
 
 type DataLayersTabContentProps = {
     activeTab: string;
@@ -18,10 +17,9 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
         subcatchment,
         channels,
         landuse,
-        setLanduseLegend
-    } = useWatershedOverlayStore();
-
-    const { openPanel } = useBottomPanelStore();
+        setLanduseLegendVisible,
+        openPanel,
+    } = useAppStore();
 
     return (
         <div className="layerpicker-layers" id="layerpicker-layers">
@@ -55,7 +53,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                         {landuse && <span
                             className="layerpicker-help-icon"
                             title="Land Use Legend"
-                            onClick={() => { setLanduseLegend(true); }}
+                            onClick={() => { setLanduseLegendVisible(true); }}
                         >
                             <FaQuestionCircle />
                         </span>}

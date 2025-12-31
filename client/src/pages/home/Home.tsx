@@ -1,7 +1,7 @@
 import React from 'react';
-import { useBottomPanelStore } from '../../store/BottomPanelStore';
 import { watershedOverviewRoute } from '../../routes/router';
 import { useMatch } from '@tanstack/react-router';
+import { useAppStore } from '../../store/store';
 import WatershedOverview from '../../components/side-panels/watershed/WatershedOverview';
 import HomeSidePanelContent from '../../components/side-panels/home-info/HomeInfoPanel';
 import BottomPanel from '../../components/bottom-panels/BottomPanel';
@@ -29,7 +29,7 @@ function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
  * @returns {JSX.Element} The main home page layout including a side panel and a map.
  */
 export default function Home(): JSX.Element {
-  const { isOpen, content } = useBottomPanelStore();
+  const { isPanelOpen, panelContent } = useAppStore();
   const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
   const watershedID = match?.params.webcloudRunId ?? null;
 
@@ -40,11 +40,11 @@ export default function Home(): JSX.Element {
       </SidePanel>
       <div className='map-wrapper' style={{ position: 'relative' }}>
         <Map />
-        {isOpen && (
+        {isPanelOpen && (
           <BottomPanel
-            isOpen={isOpen}
+            isOpen={isPanelOpen}
           >
-            {content}
+            {panelContent}
           </BottomPanel>
         )}
       </div>
