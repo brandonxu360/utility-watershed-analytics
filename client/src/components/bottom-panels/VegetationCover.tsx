@@ -179,7 +179,7 @@ export const VegetationCover: React.FC = () => {
                         clearSelectedHillslope();
                         setSubcatchment(false);
                         resetChoropleth();
-                        closePanel()
+                        closePanel();
                     }} />
                 </div>
             </div>
