@@ -85,20 +85,23 @@ describe('rapApi validation', () => {
             await expect(fetchRap({ mode: 'watershed', weppId: 1000000 })).resolves.not.toThrow();
         });
 
-        it('validates year in SQL expression', async () => {
+        it('validates year in parameterized filters', async () => {
             await fetchRap({ mode: 'watershed', weppId: 108, year: 2020 });
             const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            const aggregations = payload.aggregations as Array<{ expression: string }>;
-            // Year should appear in the expression
-            expect(aggregations[0].expression).toContain('rap.year = 2020');
+            const filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            // Year should appear in filters array, not SQL expression
+            const yearFilter = filters.find(f => f.column === 'rap.year');
+            expect(yearFilter).toBeDefined();
+            expect(yearFilter?.value).toBe(2020);
         });
 
-        it('excludes invalid year from SQL expression', async () => {
+        it('excludes invalid year from parameterized filters', async () => {
             await fetchRap({ mode: 'watershed', weppId: 108, year: 3000 });
             const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            const aggregations = payload.aggregations as Array<{ expression: string }>;
-            // Invalid year should not appear
-            expect(aggregations[0].expression).not.toContain('rap.year');
+            const filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            // Invalid year should not appear in filters
+            const yearFilter = filters.find(f => f.column === 'rap.year');
+            expect(yearFilter).toBeUndefined();
         });
     });
 
@@ -124,9 +127,12 @@ describe('rapApi validation', () => {
         it('filters out invalid bands from mixed array', async () => {
             await fetchRapChoropleth({ band: [0, 1, 7, 5, -1] });
             const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            const aggregations = payload.aggregations as Array<{ expression: string }>;
-            // Should only include valid bands 1 and 5
-            expect(aggregations[0].expression).toContain('rap.band IN (1,5)');
+            const filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            // Should only include valid bands 1 and 5 in the filters
+            const bandFilter = filters.find(f => f.column === 'rap.band');
+            expect(bandFilter).toBeDefined();
+            expect(bandFilter?.operator).toBe('IN');
+            expect(bandFilter?.value).toEqual([1, 5]);
         });
 
         it('accepts all valid RAP bands (1-6)', async () => {
@@ -139,58 +145,79 @@ describe('rapApi validation', () => {
     });
 
     describe('fetchRapChoropleth - year validation', () => {
-        it('excludes year outside valid range from SQL', async () => {
+        it('excludes year outside valid range from filters', async () => {
             await fetchRapChoropleth({ band: 5, year: 1800 });
             const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            const aggregations = payload.aggregations as Array<{ expression: string }>;
-            expect(aggregations[0].expression).not.toContain('rap.year');
+            const filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            const yearFilter = filters.find(f => f.column === 'rap.year');
+            expect(yearFilter).toBeUndefined();
         });
 
-        it('excludes future year from SQL', async () => {
+        it('excludes future year from filters', async () => {
             await fetchRapChoropleth({ band: 5, year: 2200 });
             const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            const aggregations = payload.aggregations as Array<{ expression: string }>;
-            expect(aggregations[0].expression).not.toContain('rap.year');
+            const filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            const yearFilter = filters.find(f => f.column === 'rap.year');
+            expect(yearFilter).toBeUndefined();
         });
 
-        it('includes valid year in SQL expression', async () => {
+        it('includes valid year in parameterized filters', async () => {
             await fetchRapChoropleth({ band: 5, year: 2020 });
             const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            const aggregations = payload.aggregations as Array<{ expression: string }>;
-            expect(aggregations[0].expression).toContain('rap.year = 2020');
+            const filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            const yearFilter = filters.find(f => f.column === 'rap.year');
+            expect(yearFilter).toBeDefined();
+            expect(yearFilter?.value).toBe(2020);
         });
 
         it('handles null year gracefully', async () => {
             await fetchRapChoropleth({ band: 5, year: null });
             const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            const aggregations = payload.aggregations as Array<{ expression: string }>;
-            expect(aggregations[0].expression).not.toContain('rap.year');
+            const filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            const yearFilter = filters.find(f => f.column === 'rap.year');
+            expect(yearFilter).toBeUndefined();
         });
 
-        it('accepts boundary year values', async () => {
+        it('accepts boundary year values in filters', async () => {
             await fetchRapChoropleth({ band: 5, year: 1900 });
             let payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            let aggregations = payload.aggregations as Array<{ expression: string }>;
-            expect(aggregations[0].expression).toContain('rap.year = 1900');
+            let filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            let yearFilter = filters.find(f => f.column === 'rap.year');
+            expect(yearFilter?.value).toBe(1900);
 
             mockPostQuery.mockClear();
             await fetchRapChoropleth({ band: 5, year: 2100 });
             payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            aggregations = payload.aggregations as Array<{ expression: string }>;
-            expect(aggregations[0].expression).toContain('rap.year = 2100');
+            filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            yearFilter = filters.find(f => f.column === 'rap.year');
+            expect(yearFilter?.value).toBe(2100);
         });
     });
 
     describe('SQL injection prevention', () => {
-        it('uses validated integers in SQL expressions, not raw input', async () => {
-            // Even if someone tried to inject, the validation ensures only integers are used
+        it('uses parameterized filters instead of string interpolation', async () => {
+            // Parameters are now in the filters array, not embedded in SQL strings
             await fetchRap({ mode: 'watershed', weppId: 108, year: 2020 });
             const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
+            const filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
             const aggregations = payload.aggregations as Array<{ expression: string }>;
 
-            // The expression should contain clean integer values
-            expect(aggregations[0].expression).toMatch(/wepp_id = 108/);
-            expect(aggregations[0].expression).toMatch(/rap\.year = 2020/);
+            // Verify weppId is in filters, not in SQL expression
+            const weppFilter = filters.find(f => f.column === 'hillslopes.wepp_id');
+            expect(weppFilter).toBeDefined();
+            expect(weppFilter?.value).toBe(108);
+
+            // Verify year is in filters, not in SQL expression
+            const yearFilter = filters.find(f => f.column === 'rap.year');
+            expect(yearFilter).toBeDefined();
+            expect(yearFilter?.value).toBe(2020);
+
+            // Verify aggregations don't contain interpolated values
+            for (const agg of aggregations) {
+                expect(agg.expression).not.toContain('108');
+                expect(agg.expression).not.toContain('2020');
+                expect(agg.expression).not.toContain('wepp_id =');
+            }
         });
     });
 });

@@ -151,5 +151,5 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
         });
       }}
     />
-  )
+  );
 }

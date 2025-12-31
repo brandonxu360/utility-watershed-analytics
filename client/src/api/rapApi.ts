@@ -1,6 +1,23 @@
 import { startYear, endYear } from '../utils/constants';
-import { buildRunPath, postQuery, addQueryFlags, toFiniteNumber } from './queryUtils';
-import { AggregatedRapRow, FetchRapOptions, FetchRapChoroplethOptions, RapChoroplethRow, RapRow, RapTimeseriesPayload } from './types';
+
+import {
+    buildRunPath,
+    postQuery,
+    addQueryFlags,
+    toFiniteNumber,
+    createYearFilter,
+    createBandFilter,
+} from './queryUtils';
+
+import {
+    AggregatedRapRow,
+    FetchRapOptions,
+    FetchRapChoroplethOptions,
+    RapChoroplethRow,
+    RapRow,
+    RapTimeseriesPayload,
+    QueryFilter
+} from './types';
 
 /** Build run path with optional topaz ID for hillslope mode */
 function buildRapRunPath(runIdOrPath?: string, mode?: 'hillslope' | 'watershed' | 'choropleth', topazId?: number): string {
@@ -31,9 +48,10 @@ function buildRapTimeseriesPayload(topazId: number, year?: number): RapTimeserie
         { column: 'rap.topaz_id', operator: '=', value: validTopazId }
     ];
 
-    // Validate year if provided
-    if (typeof year === 'number' && Number.isInteger(year) && year >= 1900 && year <= 2100) {
-        filters.push({ column: 'rap.year', operator: '=', value: year });
+    // Add year filter if valid
+    const yearFilter = createYearFilter(year);
+    if (yearFilter) {
+        filters.push(yearFilter);
     }
 
     return {
@@ -78,9 +96,17 @@ export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[
             throw new Error('Invalid weppId provided');
         }
 
-        // Validate year is a reasonable integer
-        const validYear = (typeof year === 'number' && Number.isInteger(year) && year >= 1900 && year <= 2100) ? year : null;
-        const yearCondition = validYear !== null ? ` AND rap.year = ${validYear}` : '';
+        // Build parameterized filters array
+        const filters: QueryFilter[] = [
+            { column: 'hillslopes.wepp_id', operator: '=', value: validWeppId },
+            { column: 'rap.band', operator: 'IN', value: [1, 4, 5, 6] }
+        ];
+
+        // Add year filter if valid
+        const yearFilter = createYearFilter(year);
+        if (yearFilter) {
+            filters.push(yearFilter);
+        }
 
         payload = {
             datasets: [
@@ -89,10 +115,11 @@ export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[
             ],
             joins: [{ left: 'rap', right: 'hillslopes', on: ['topaz_id'] }],
             columns: ['rap.year AS year'],
+            filters,
             aggregations: [
-                { alias: 'shrub', expression: `SUM(CASE WHEN hillslopes.wepp_id = ${validWeppId}${yearCondition} AND rap.band = 5 THEN rap.value ELSE 0 END)` },
-                { alias: 'tree', expression: `SUM(CASE WHEN hillslopes.wepp_id = ${validWeppId}${yearCondition} AND rap.band = 6 THEN rap.value ELSE 0 END)` },
-                { alias: 'coverage', expression: `SUM(CASE WHEN hillslopes.wepp_id = ${validWeppId}${yearCondition} AND rap.band IN (1,4,5,6) THEN rap.value ELSE 0 END)` }
+                { alias: 'shrub', expression: 'SUM(CASE WHEN rap.band = 5 THEN rap.value ELSE 0 END)' },
+                { alias: 'tree', expression: 'SUM(CASE WHEN rap.band = 6 THEN rap.value ELSE 0 END)' },
+                { alias: 'coverage', expression: 'SUM(rap.value)' }
             ],
             group_by: ['rap.year'],
             order_by: ['rap.year'],
@@ -157,22 +184,15 @@ export async function fetchRapChoropleth(opts: FetchRapChoroplethOptions): Promi
 
     const runPath = buildRunPath(runIdOrPath);
 
-    // Validate year is a reasonable integer
-    const validYear = (typeof year === 'number' && Number.isInteger(year) && year >= 1900 && year <= 2100) ? year : null;
-    const yearCondition = validYear !== null ? ` AND rap.year = ${validYear}` : '';
+    // Build parameterized filters array using shared helpers
+    const filters: QueryFilter[] = [createBandFilter(band)];
 
-    // Validate bands are integers 1-6 (known RAP band codes)
-    const validBands = (Array.isArray(band) ? band : [band])
-        .map(Number)
-        .filter(b => Number.isInteger(b) && b >= 1 && b <= 6);
-
-    if (validBands.length === 0) {
-        throw new Error('Invalid band values provided');
+    // Add year filter if valid
+    const yearFilter = createYearFilter(year);
+    if (yearFilter) {
+        filters.push(yearFilter);
     }
 
-    const bandExpression = validBands.length === 1
-        ? `rap.band = ${validBands[0]}`
-        : `rap.band IN (${validBands.join(',')})`;
     const payload: Record<string, unknown> = {
         datasets: [
             { path: 'rap/rap_ts.parquet', alias: 'rap' },
@@ -180,10 +200,11 @@ export async function fetchRapChoropleth(opts: FetchRapChoroplethOptions): Promi
         ],
         joins: [{ left: 'rap', right: 'hillslopes', on: ['topaz_id'] }],
         columns: ['hillslopes.wepp_id AS wepp_id'],
+        filters,
         aggregations: [
             {
                 alias: 'value',
-                expression: `AVG(CASE WHEN ${bandExpression}${yearCondition} THEN rap.value ELSE NULL END)`
+                expression: 'AVG(rap.value)'
             }
         ],
         group_by: ['hillslopes.wepp_id'],

@@ -1,7 +1,15 @@
+export type QueryFilter = {
+    column: string;
+    operator: string;
+    value: number | number[] | string;
+};
+
+export const YEAR_BOUNDS = { min: 1900, max: 2100 } as const;
+
 export type RapTimeseriesPayload = {
     datasets: { path: string; alias?: string }[];
     columns: string[];
-    filters?: Array<{ column: string; operator: string; value: string | number }>;
+    filters?: QueryFilter[];
     order_by?: string[];
     include_schema?: boolean;
     include_sql?: boolean;

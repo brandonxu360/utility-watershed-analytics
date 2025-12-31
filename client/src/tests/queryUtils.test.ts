@@ -29,8 +29,8 @@ describe('queryUtils', () => {
             expect(() => buildRunPath('../etc/passwd')).toThrow('Invalid run path');
             expect(() => buildRunPath('valid/../sneaky')).toThrow('Invalid run path');
             expect(() => buildRunPath('..%2F..%2Fetc')).toThrow('Invalid run path'); // Still contains .. at start
-            // URL-encoded without literal .. is fine (decoded by server, not our concern)
-            expect(() => buildRunPath('%2e%2e/etc/passwd')).not.toThrow();
+            // URL-encoded path traversal attempts are also blocked (decoded before check)
+            expect(() => buildRunPath('%2e%2e/etc/passwd')).toThrow('Invalid run path');
         });
 
         it('throws error for path with double slashes', () => {

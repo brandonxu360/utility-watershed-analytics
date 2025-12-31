@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from './apiEndpoints';
+import { YEAR_BOUNDS, QueryFilter } from './types';
 
 export const DEFAULT_RUN_ID = 'or,wa-108';
 export const BATCH_PREFIX = 'batch;;nasa-roses-2025;;';
@@ -14,8 +15,10 @@ export const BATCH_PREFIX = 'batch;;nasa-roses-2025;;';
 export function buildRunPath(runIdOrPath?: string, defaultRunId: string = DEFAULT_RUN_ID): string {
     if (runIdOrPath) {
         const sanitized = String(runIdOrPath);
-        // Prevent path traversal attacks
-        if (sanitized.includes('..') || sanitized.includes('//')) {
+        // Decode URL encoding and check for path traversal attacks
+        const decoded = decodeURIComponent(sanitized);
+        if (decoded.includes('..') || decoded.includes('//') ||
+            sanitized.includes('..') || sanitized.includes('//')) {
             throw new Error('Invalid run path');
         }
         return sanitized.startsWith('batch;;')
@@ -93,4 +96,44 @@ export function addQueryFlags(
 export function toFiniteNumber(value: unknown, fallback: number = 0): number {
     const num = Number(value);
     return Number.isFinite(num) ? num : fallback;
+}
+
+/**
+ * Check if a year value is valid for query filtering.
+ */
+export function isValidYear(year: unknown): year is number {
+    return typeof year === 'number' &&
+        Number.isInteger(year) &&
+        year >= YEAR_BOUNDS.min &&
+        year <= YEAR_BOUNDS.max;
+}
+
+/**
+ * Create a year filter if the year is valid, otherwise return null.
+ */
+export function createYearFilter(year: unknown, column: string = 'rap.year'): QueryFilter | null {
+    if (!isValidYear(year)) return null;
+    return { column, operator: '=', value: year };
+}
+
+/**
+ * Create a band filter for valid RAP bands (1-6).
+ * Returns a single '=' filter for one band, or 'IN' filter for multiple.
+ * Throws if no valid bands are provided.
+ */
+export function createBandFilter(
+    bands: number | number[],
+    column: string = 'rap.band'
+): QueryFilter {
+    const validBands = (Array.isArray(bands) ? bands : [bands])
+        .map(Number)
+        .filter(b => Number.isInteger(b) && b >= 1 && b <= 6);
+
+    if (validBands.length === 0) {
+        throw new Error('Invalid band values provided');
+    }
+
+    return validBands.length === 1
+        ? { column, operator: '=', value: validBands[0] }
+        : { column, operator: 'IN', value: validBands };
 }
