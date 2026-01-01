@@ -14,7 +14,7 @@ export interface ChoroplethState {
     error: string | null;
 }
 
-const initialChoroplethState: ChoroplethState = {
+export const initialChoroplethState: ChoroplethState = {
     type: 'none',
     year: null,
     bands: 'all',
@@ -62,5 +62,3 @@ export const createChoroplethSlice: StateCreator<
     })),
     resetChoropleth: () => set({ choropleth: initialChoroplethState }),
 });
-
-export { initialChoroplethState };

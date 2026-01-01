@@ -1,4 +1,4 @@
-import { VegetationBandType } from "../store/WatershedOverlayStore";
+import { VegetationBandType } from "../store/slices/choroplethSlice";
 
 // Band mapping for vegetation cover options
 export const VEGETATION_BANDS: Record<VegetationBandType, number[]> = {

@@ -19,10 +19,10 @@ type ChartData = {
 export type CoverageLineChartProps = {
     data: ChartData;
     title: string;
-    barKeys: { key: string; color: string; activeFill: string; activeStroke: string }[];
+    lineKeys: { key: string; color: string; activeFill: string; activeStroke: string }[];
 };
 
-export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({ data, title, barKeys }) => {
+export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({ data, title, lineKeys }) => {
     const isEmpty = !data || data.length === 0;
 
     return (
@@ -62,14 +62,14 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({ data, titl
                             <YAxis />
                             <Tooltip />
                             <Legend />
-                            {barKeys.map((bar) => (
+                            {lineKeys.map((line) => (
                                 <Line
-                                    key={bar.key}
+                                    key={line.key}
                                     type="monotone"
-                                    dataKey={bar.key}
-                                    stroke={bar.color}
+                                    dataKey={line.key}
+                                    stroke={line.color}
                                     strokeWidth={3}
-                                    activeDot={{ r: 8, fill: bar.activeFill, stroke: bar.activeStroke, strokeWidth: 2 }}
+                                    activeDot={{ r: 8, fill: line.activeFill, stroke: line.activeStroke, strokeWidth: 2 }}
                                 />
                             ))}
                         </LineChart>

@@ -195,7 +195,7 @@ export const VegetationCover: React.FC = () => {
             <CoverageLineChart
                 data={chartData}
                 title={chartTitle}
-                barKeys={barKeys}
+                lineKeys={barKeys}
             />
 
             {config && !choroplethLoading && choroplethRange && (
