@@ -3,9 +3,9 @@ import { Properties } from '../../types/WatershedFeature';
 import { AppState } from '../store';
 
 export interface HillslopeSlice {
-    selectedHillslopeId: string | null;
+    selectedHillslopeId: number | null;
     selectedHillslopeProps: Properties | null;
-    setSelectedHillslope: (id: string | null, props?: Properties | null) => void;
+    setSelectedHillslope: (id: number | null, props?: Properties | null) => void;
     clearSelectedHillslope: () => void;
 }
 

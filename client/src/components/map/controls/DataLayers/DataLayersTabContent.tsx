@@ -2,7 +2,10 @@ import React from 'react';
 import { ChangeEvent } from 'react';
 import { FaQuestionCircle } from 'react-icons/fa';
 import { VegetationCover } from '../../../bottom-panels/VegetationCover';
+import { ChoroplethPanel } from '../../../bottom-panels/ChoroplethPanel';
+import { useChoropleth } from '../../../../hooks/useChoropleth';
 import { useAppStore } from '../../../../store/store';
+import { ChoroplethType } from '../../../../store/slices/choroplethSlice';
 
 type DataLayersTabContentProps = {
     activeTab: string;
@@ -17,9 +20,20 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
         subcatchment,
         channels,
         landuse,
+        choropleth: { type: choroplethType },
+        setSubcatchment,
         setLanduseLegendVisible,
+        setChoroplethType,
         openPanel,
     } = useAppStore();
+
+    const { isActive } = useChoropleth();
+
+    const handleChoroplethClick = (type: Exclude<ChoroplethType, 'none'>) => () => {
+        setSubcatchment(true);
+        setChoroplethType(type);
+        openPanel(<ChoroplethPanel choroplethType={type} />);
+    };
 
     return (
         <div className="layerpicker-layers" id="layerpicker-layers">
@@ -65,10 +79,22 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                         />
                     </div>
                     <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Evapotransportation</button>
+                        <button
+                            className="layerpicker-title"
+                            onClick={handleChoroplethClick('evapotranspiration')}
+                            style={{ fontWeight: isActive && choroplethType === 'evapotranspiration' ? 'bold' : 'normal' }}
+                        >
+                            Evapotranspiration
+                        </button>
                     </div>
                     <div className="layerpicker-layer">
-                        <button className="layerpicker-title">Soil Moisture</button>
+                        <button
+                            className="layerpicker-title"
+                            onClick={handleChoroplethClick('soilMoisture')}
+                            style={{ fontWeight: isActive && choroplethType === 'soilMoisture' ? 'bold' : 'normal' }}
+                        >
+                            Soil Moisture
+                        </button>
                     </div>
                 </>
             )}
@@ -77,6 +103,8 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                     <div className="layerpicker-layer">
                         <button className="layerpicker-title" onClick={
                             () => {
+                                setSubcatchment(true);
+                                setChoroplethType('vegetationCover');
                                 openPanel(<VegetationCover />);
                             }
                         }>

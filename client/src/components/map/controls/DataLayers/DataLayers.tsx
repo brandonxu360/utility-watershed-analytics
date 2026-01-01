@@ -25,6 +25,7 @@ export default function DataLayersControl() {
     setChannels,
     setLanduse,
     clearSelectedHillslope,
+    closePanel,
     resetOverlays,
   } = useAppStore();
 
@@ -46,6 +47,7 @@ export default function DataLayersControl() {
     if (id === 'subcatchment') {
       setSubcatchment(checked);
       if (!checked) {
+        closePanel();
         setLanduse(false);
         clearSelectedHillslope();
       }
