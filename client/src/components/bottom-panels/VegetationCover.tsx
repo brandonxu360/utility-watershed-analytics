@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { FaXmark } from "react-icons/fa6";
-import { useBottomPanelStore } from "../../store/BottomPanelStore";
-import { useWatershedOverlayStore, VegetationBandType } from "../../store/WatershedOverlayStore";
+import { useAppStore } from "../../store/store";
+import { VegetationBandType } from "../../store/slices/choroplethSlice";
 import { useMatch } from '@tanstack/react-router';
 import { watershedOverviewRoute } from '../../routes/router';
 import { CoverageLineChart } from "../coverage-line-chart/CoverageLineChart";
@@ -21,15 +21,21 @@ type RapStatus = {
 type VegetationOption = "All" | "Shrub" | "Tree";
 
 export const VegetationCover: React.FC = () => {
-    const { selectedHillslopeId, closePanel, clearSelectedHillslope } = useBottomPanelStore();
-
     const {
-        choropleth: { year: choroplethYear, bands: choroplethBands, range: choroplethRange, loading: choroplethLoading },
+        selectedHillslopeId,
+        choropleth: {
+            year: choroplethYear,
+            bands: choroplethBands,
+            range: choroplethRange,
+            loading: choroplethLoading
+        },
+        closePanel,
+        clearSelectedHillslope,
         setSubcatchment,
         setChoroplethYear,
         setChoroplethBands,
         resetChoropleth,
-    } = useWatershedOverlayStore();
+    } = useAppStore();
 
     const { config } = useChoropleth();
 

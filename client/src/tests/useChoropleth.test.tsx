@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChoropleth, CHOROPLETH_CONFIG, CHOROPLETH_YEARS } from '../hooks/useChoropleth';
-import { useWatershedOverlayStore } from '../store/WatershedOverlayStore';
+import { useAppStore } from '../store/store';
 
 vi.mock('../api/rapApi', () => ({
     fetchRapChoropleth: vi.fn(),
@@ -14,11 +14,11 @@ const mockFetchRapChoropleth = vi.mocked(fetchRapChoropleth);
 describe('useChoropleth', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        useWatershedOverlayStore.getState().setChoroplethType('none');
-        useWatershedOverlayStore.getState().setChoroplethYear(null);
-        useWatershedOverlayStore.getState().setChoroplethData(null, null);
-        useWatershedOverlayStore.getState().setChoroplethLoading(false);
-        useWatershedOverlayStore.getState().setChoroplethError(null);
+        useAppStore.getState().setChoroplethType('none');
+        useAppStore.getState().setChoroplethYear(null);
+        useAppStore.getState().setChoroplethData(null, null);
+        useAppStore.getState().setChoroplethLoading(false);
+        useAppStore.getState().setChoroplethError(null);
     });
 
     afterEach(() => {
@@ -74,7 +74,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -94,7 +94,7 @@ describe('useChoropleth', () => {
             renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -114,8 +114,8 @@ describe('useChoropleth', () => {
             renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
-                useWatershedOverlayStore.getState().setChoroplethYear(2020);
+                useAppStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethYear(2020);
             });
 
             await waitFor(() => {
@@ -133,7 +133,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -147,7 +147,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -166,7 +166,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -189,7 +189,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -197,7 +197,7 @@ describe('useChoropleth', () => {
             });
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('none');
+                useAppStore.getState().setChoroplethType('none');
             });
 
             await waitFor(() => {
@@ -220,7 +220,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -238,7 +238,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -257,7 +257,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {
@@ -285,7 +285,7 @@ describe('useChoropleth', () => {
             const { result } = renderHook(() => useChoropleth());
 
             act(() => {
-                useWatershedOverlayStore.getState().setChoroplethType('vegetationCover');
+                useAppStore.getState().setChoroplethType('vegetationCover');
             });
 
             await waitFor(() => {

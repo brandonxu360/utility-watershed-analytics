@@ -4,13 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useMatch, useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
 import { Properties } from '../../types/WatershedFeature';
 import { LeafletMouseEvent } from 'leaflet';
-import { useBottomPanelStore } from '../../store/BottomPanelStore';
 import { watershedOverviewRoute } from '../../routes/router';
 import { useChoropleth } from '../../hooks/useChoropleth';
 import { selectedStyle, defaultStyle } from './constants';
+import { useAppStore } from '../../store/store';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -50,13 +49,13 @@ export default function Map(): JSX.Element {
     subcatchment,
     channels,
     landuse,
-  } = useWatershedOverlayStore();
-
-  const { setLanduseLegendMap } = useWatershedOverlayStore();
+    closePanel,
+    setLanduseLegendMap,
+  } = useAppStore();
 
   // Use the choropleth hook for data fetching and styling
   const { isActive: choroplethActive, getChoroplethStyle, isLoading: choroplethLoading, choropleth } = useChoropleth();
-  const { choropleth: { year: choroplethYear, bands: choroplethBands } } = useWatershedOverlayStore();
+  const { choropleth: { year: choroplethYear, bands: choroplethBands } } = useAppStore();
 
   // Create a key that changes when choropleth state changes to force style updates
   const choroplethKey = useMemo(() =>
@@ -83,8 +82,6 @@ export default function Map(): JSX.Element {
     queryFn: () => fetchChannels(watershedID!),
     enabled: Boolean(channels && watershedID),
   });
-
-  const { closePanel } = useBottomPanelStore();
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {

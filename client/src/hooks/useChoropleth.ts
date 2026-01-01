@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import { PathOptions } from 'leaflet';
-import { useWatershedOverlayStore, ChoroplethType } from '../store/WatershedOverlayStore';
+import { useAppStore } from '../store/store';
+import { ChoroplethType } from '../store/slices/choroplethSlice';
 import { fetchRapChoropleth } from '../api/rapApi';
 import { createColormap, normalizeValue, computeRobustRange, ColorArray } from '../utils/colormap';
 import { DEFAULT_RUN_ID } from '../api/queryUtils';
@@ -63,7 +64,7 @@ export function useChoropleth(): UseChoroplethResult {
         setChoroplethData,
         setChoroplethLoading,
         setChoroplethError,
-    } = useWatershedOverlayStore();
+    } = useAppStore();
 
     const config = choroplethType !== 'none' ? CHOROPLETH_CONFIG[choroplethType] : null;
 

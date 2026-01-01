@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react"
-import { useBottomPanelStore } from "../store/BottomPanelStore";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import { Properties } from "../types/WatershedFeature";
+import { useAppStore } from "../store/store";
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual = await importOriginal();
@@ -25,8 +25,7 @@ const mockClose = vi.fn();
 
 beforeEach(() => {
   mockClose.mockClear();
-  mockFetchRap.mockClear();
-  useBottomPanelStore.setState({
+  useAppStore.setState({
     closePanel: mockClose,
     selectedHillslopeId: null,
     selectedHillslopeProps: null,
@@ -36,7 +35,7 @@ beforeEach(() => {
 afterEach(async () => {
   // Allow any pending state updates to flush
   await act(async () => {
-    useBottomPanelStore.setState({ selectedHillslopeId: null, selectedHillslopeProps: null });
+    useAppStore.setState({ selectedHillslopeId: null, selectedHillslopeProps: null });
   });
 });
 
@@ -90,7 +89,7 @@ describe("VegetationCover", () => {
 
   it("shows selected hillslope in chart title and reacts to option changes", async () => {
     await act(async () => {
-      useBottomPanelStore.setState({
+      useAppStore.setState({
         selectedHillslopeId: 42,
         selectedHillslopeProps: { cancov: 20, inrcov: 10, dom: 5, width_m: 12 } as Properties,
       });

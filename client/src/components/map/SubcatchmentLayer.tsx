@@ -1,6 +1,6 @@
 import { useMap, GeoJSON } from "react-leaflet";
 import { Properties } from "../../types/WatershedFeature";
-import { useBottomPanelStore } from "../../store/BottomPanelStore";
+import { useAppStore } from "../../store/store";
 import { useEffect, useRef } from "react";
 import { Layer, LeafletEvent, PathOptions } from "leaflet";
 import { zoomToFeature } from "../../utils/map/MapUtil";
@@ -15,7 +15,7 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
 }) {
   const map = useMap();
 
-  const { setSelectedHillslope, clearSelectedHillslope } = useBottomPanelStore();
+  const { setSelectedHillslope, clearSelectedHillslope } = useAppStore();
 
   // Use refs to always access the latest style and choroplethActive values in event handlers
   const styleRef = useRef(style);

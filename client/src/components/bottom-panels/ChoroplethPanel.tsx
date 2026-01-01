@@ -2,8 +2,8 @@
 
 import React from "react";
 import { FaXmark } from "react-icons/fa6";
-import { useBottomPanelStore } from "../../store/BottomPanelStore";
-import { useWatershedOverlayStore, ChoroplethType } from "../../store/WatershedOverlayStore";
+import { useAppStore } from "../../store/store";
+import { ChoroplethType } from "../../store/slices/choroplethSlice";
 import { useChoropleth, CHOROPLETH_YEARS } from "../../hooks/useChoropleth";
 import { ChoroplethScale } from "../ChoroplethScale";
 import Select from "../select/Select";
@@ -14,13 +14,13 @@ type ChoroplethPanelProps = {
 };
 
 export const ChoroplethPanel: React.FC<ChoroplethPanelProps> = ({ choroplethType }) => {
-    const { closePanel } = useBottomPanelStore();
     const {
+        closePanel,
         choropleth: { range: choroplethRange, loading: choroplethLoading, error: choroplethError, year: choroplethYear },
         setChoroplethYear,
         setSubcatchment,
         resetChoropleth,
-    } = useWatershedOverlayStore();
+    } = useAppStore();
 
     const { config } = useChoropleth();
 

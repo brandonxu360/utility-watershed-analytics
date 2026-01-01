@@ -1,11 +1,11 @@
 import React from 'react';
 import { ChangeEvent } from 'react';
-import { useWatershedOverlayStore, ChoroplethType } from '../../../../store/WatershedOverlayStore';
 import { FaQuestionCircle } from 'react-icons/fa';
 import { VegetationCover } from '../../../bottom-panels/VegetationCover';
 import { ChoroplethPanel } from '../../../bottom-panels/ChoroplethPanel';
-import { useBottomPanelStore } from '../../../../store/BottomPanelStore';
 import { useChoropleth } from '../../../../hooks/useChoropleth';
+import { useAppStore } from '../../../../store/store';
+import { ChoroplethType } from '../../../../store/slices/choroplethSlice';
 
 type DataLayersTabContentProps = {
     activeTab: string;
@@ -22,11 +22,11 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
         landuse,
         choropleth: { type: choroplethType },
         setSubcatchment,
-        setLanduseLegend,
+        setLanduseLegendVisible,
         setChoroplethType,
-    } = useWatershedOverlayStore();
+        openPanel,
+    } = useAppStore();
 
-    const { openPanel } = useBottomPanelStore();
     const { isActive } = useChoropleth();
 
     const handleChoroplethClick = (type: Exclude<ChoroplethType, 'none'>) => () => {
@@ -67,7 +67,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                         {landuse && <span
                             className="layerpicker-help-icon"
                             title="Land Use Legend"
-                            onClick={() => { setLanduseLegend(true); }}
+                            onClick={() => { setLanduseLegendVisible(true); }}
                         >
                             <FaQuestionCircle />
                         </span>}

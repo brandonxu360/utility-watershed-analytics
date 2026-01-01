@@ -1,18 +1,18 @@
-import { useWatershedOverlayStore } from '../../../../store/WatershedOverlayStore';
 import { FaXmark } from 'react-icons/fa6';
+import { useAppStore } from '../../../../store/store';
 import './LandUseLegend.css';
 
 export default function LandUseLegend() {
-    const { landuselegend, landuseLegendMap, setLanduseLegend } = useWatershedOverlayStore();
+    const { landuseLegendVisible, landuseLegendMap, setLanduseLegendVisible } = useAppStore();
 
-    if (!landuselegend) return null;
+    if (!landuseLegendVisible) return null;
 
     return (
         <div className="landuse-legend-wrapper" role="region" aria-label="Land use legend">
             <div className="landuse-legend">
                 <div className="landuse-legend-header">
                     <FaXmark
-                        onClick={() => setLanduseLegend(false)}
+                        onClick={() => setLanduseLegendVisible(false)}
                         className='landuse-close'
                         aria-label='Close land use legend panel'
                         title='Close land use legend panel'
