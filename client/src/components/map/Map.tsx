@@ -4,12 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useMatch, useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
 import { Properties } from '../../types/WatershedFeature';
 import { LeafletEvent, LeafletMouseEvent, PathOptions } from 'leaflet';
-import { useBottomPanelStore } from '../../store/BottomPanelStore';
 import { watershedOverviewRoute } from '../../routes/router';
 import { zoomToFeature } from '../../utils/map/MapUtil';
+import { useAppStore } from '../../store/store';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -63,7 +62,7 @@ function SubcatchmentLayer({ data, style }: {
 }) {
   const map = useMap();
 
-  const { setSelectedHillslope, clearSelectedHillslope } = useBottomPanelStore();
+  const { setSelectedHillslope, clearSelectedHillslope } = useAppStore();
 
   // Track selected feature id and layer using refs so event handlers
   // can read/update the current selection at event time without forcing rerenders.
@@ -176,8 +175,7 @@ function SubcatchmentLayer({ data, style }: {
 export default function Map(): JSX.Element {
   const navigate = useNavigate()
 
-  const { subcatchment, channels, landuse } = useWatershedOverlayStore();
-  const { setLanduseLegendMap } = useWatershedOverlayStore();
+  const { subcatchment, channels, landuse, setLanduseLegendMap, closePanel } = useAppStore();
 
   const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
   const watershedID = match?.params.webcloudRunId ?? null;
@@ -198,8 +196,6 @@ export default function Map(): JSX.Element {
     queryFn: () => fetchChannels(watershedID!),
     enabled: Boolean(channels && watershedID),
   });
-
-  const { closePanel } = useBottomPanelStore();
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {

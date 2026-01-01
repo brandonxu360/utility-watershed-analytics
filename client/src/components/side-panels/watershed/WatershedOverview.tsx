@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { useMatch, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
-import { useWatershedOverlayStore } from '../../../store/WatershedOverlayStore';
 import { WatershedFeature } from '../../../types/WatershedFeature';
 import { watershedOverviewRoute } from '../../../routes/router';
+import { useAppStore } from '../../../store/store';
 import './Watershed.css'
 
 /** 
@@ -35,7 +35,7 @@ function SkeletonWatershedPanel() {
 
 export default function WatershedOverview() {
     const navigate = useNavigate();
-    const { reset } = useWatershedOverlayStore();
+    const { resetOverlays } = useAppStore();
 
     const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
     const watershedID = match?.params.webcloudRunId ?? null;
@@ -62,7 +62,7 @@ export default function WatershedOverview() {
             <button
                 onClick={() => {
                     navigate({ to: "/" });
-                    reset();
+                    resetOverlays();
                 }}
                 className='closeButton'
                 aria-label='Close watershed panel'

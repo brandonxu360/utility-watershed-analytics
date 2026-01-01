@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react"
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
-import { useBottomPanelStore } from "../store/BottomPanelStore";
 import { Properties } from "../types/WatershedFeature";
+import { useAppStore } from "../store/store";
 
 const mockClose = vi.fn();
 
 beforeEach(() => {
   mockClose.mockClear();
-  useBottomPanelStore.setState({
+  useAppStore.setState({
     closePanel: mockClose,
     selectedHillslopeId: null,
     selectedHillslopeProps: null,
@@ -16,7 +16,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  useBottomPanelStore.setState({ selectedHillslopeId: null, selectedHillslopeProps: null });
+  useAppStore.setState({ selectedHillslopeId: null, selectedHillslopeProps: null });
 });
 
 describe("VegetationCover", () => {
@@ -47,7 +47,7 @@ describe("VegetationCover", () => {
   });
 
   it("shows selected hillslope in chart title and reacts to option changes", () => {
-    useBottomPanelStore.setState({
+    useAppStore.setState({
       selectedHillslopeId: '42',
       selectedHillslopeProps: { cancov: 20, inrcov: 10, dom: 5, width_m: 12 } as Properties,
     });

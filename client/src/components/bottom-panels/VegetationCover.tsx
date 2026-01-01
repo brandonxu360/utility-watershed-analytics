@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
-import { useBottomPanelStore } from "../../store/BottomPanelStore";
+import { useAppStore } from "../../store/store";
 import CoverageBarChart from "../coverage-bar-chart/CoverageBarChart";
 import Select from "../select/Select";
 import "./BottomPanel.css";
@@ -18,7 +18,7 @@ const treeData = [
 ];
 
 export const VegetationCover: React.FC = () => {
-    const { closePanel, selectedHillslopeId, selectedHillslopeProps } = useBottomPanelStore();
+    const { selectedHillslopeId, selectedHillslopeProps, closePanel } = useAppStore();
 
     const [option, setOption] = useState<"All" | "Shrub" | "Tree">("All");
 
