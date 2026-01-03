@@ -50,6 +50,9 @@ export default function Map(): JSX.Element {
     channels,
     landuse,
     closePanel,
+    setSubcatchment,
+    setChannels,
+    setLanduse,
     setLanduseLegendMap,
   } = useAppStore();
 
@@ -82,6 +85,39 @@ export default function Map(): JSX.Element {
     queryFn: () => fetchChannels(watershedID!),
     enabled: Boolean(channels && watershedID),
   });
+
+  // Auto-disable subcatchment if data unavailable
+  useEffect(() => {
+    if (subcatchment && !subLoading && watershedID) {
+      if (subError || !subcatchments || subcatchments.features?.length === 0) {
+        console.warn('No subcatchment data available - disabling subcatchment overlay');
+        setSubcatchment(false);
+        // TODO: Show toast notification when react-toastify is integrated
+      }
+    }
+  }, [subcatchment, subLoading, subError, subcatchments, watershedID, setSubcatchment]);
+
+  // Auto-disable channels if data unavailable
+  useEffect(() => {
+    if (channels && !channelLoading && watershedID) {
+      if (channelError || !channelData || channelData.features?.length === 0) {
+        console.warn('No channel data available - disabling channels overlay');
+        setChannels(false);
+        // TODO: Show toast notification when react-toastify is integrated
+      }
+    }
+  }, [channels, channelLoading, channelError, channelData, watershedID, setChannels]);
+
+  // Auto-disable landuse if data unavailable
+  useEffect(() => {
+    if (landuse && !subLoading && watershedID) {
+      if (subError || !subcatchments || subcatchments.features?.length === 0) {
+        console.warn('No landuse data available - disabling landuse overlay');
+        setLanduse(false);
+        // TODO: Show toast notification when react-toastify is integrated
+      }
+    }
+  }, [landuse, subLoading, subError, subcatchments, watershedID, setLanduse]);
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
@@ -184,9 +220,8 @@ export default function Map(): JSX.Element {
     }
   };
 
+  // Only crash on critical data failure (watersheds are required for the map to function)
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
-  if (subError) return <div>Error: {subError.message}</div>;
-  if (channelError) return <div>Error: {channelError.message}</div>;
 
   return (
     <div className="map-container">
@@ -241,7 +276,8 @@ export default function Map(): JSX.Element {
         {/* Handles URL navigation to a specified watershed */}
         <MapEffect watershedId={watershedID} watersheds={memoWatersheds} />
 
-        {!subcatchment && memoWatersheds && (
+        {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
+        {!memoSubcatchments.features?.length && memoWatersheds && (
           <GeoJSON
             data={memoWatersheds}
             style={watershedStyle}
@@ -249,7 +285,8 @@ export default function Map(): JSX.Element {
           />
         )}
 
-        {subcatchment && memoSubcatchments && (
+        {/* Show subcatchments only when enabled AND data exists with features */}
+        {memoSubcatchments.features?.length && (
           <SubcatchmentLayer
             data={memoSubcatchments}
             style={subcatchmentStyle}
