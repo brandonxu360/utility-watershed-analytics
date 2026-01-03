@@ -10,6 +10,7 @@ import { watershedOverviewRoute } from '../../routes/router';
 import { useChoropleth } from '../../hooks/useChoropleth';
 import { selectedStyle, defaultStyle } from './constants';
 import { useAppStore } from '../../store/store';
+import { toast } from 'react-toastify';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -74,50 +75,36 @@ export default function Map(): JSX.Element {
     queryFn: fetchWatersheds,
   });
 
-  const { data: subcatchments, error: subError, isLoading: subLoading } = useQuery({
+  const { data: subcatchments, isLoading: subLoading } = useQuery({
     queryKey: ['subcatchments', watershedID],
     queryFn: () => fetchSubcatchments(watershedID!),
     enabled: Boolean(subcatchment && watershedID),
   });
 
-  const { data: channelData, error: channelError, isLoading: channelLoading } = useQuery({
+  const { data: channelData, isLoading: channelLoading } = useQuery({
     queryKey: ['channels', watershedID],
     queryFn: () => fetchChannels(watershedID!),
     enabled: Boolean(channels && watershedID),
   });
 
-  // Auto-disable subcatchment if data unavailable
+  // Auto-disable features that depend on subcatchment data
   useEffect(() => {
-    if (subcatchment && !subLoading && watershedID) {
-      if (subError || !subcatchments || subcatchments.features?.length === 0) {
-        console.warn('No subcatchment data available - disabling subcatchment overlay');
-        setSubcatchment(false);
-        // TODO: Show toast notification when react-toastify is integrated
-      }
-    }
-  }, [subcatchment, subLoading, subError, subcatchments, watershedID, setSubcatchment]);
+    if (!watershedID || subLoading || subcatchments?.features?.length) return;
+
+    if (subcatchment) setSubcatchment(false);
+    if (landuse) setLanduse(false);
+    if (subcatchment || landuse) toast.error('No subcatchment data available');
+  }, [watershedID, subLoading, subcatchments, subcatchment, landuse, setSubcatchment, setLanduse]);
 
   // Auto-disable channels if data unavailable
   useEffect(() => {
-    if (channels && !channelLoading && watershedID) {
-      if (channelError || !channelData || channelData.features?.length === 0) {
-        console.warn('No channel data available - disabling channels overlay');
-        setChannels(false);
-        // TODO: Show toast notification when react-toastify is integrated
-      }
-    }
-  }, [channels, channelLoading, channelError, channelData, watershedID, setChannels]);
+    if (!watershedID || channelLoading || channelData?.features?.length) return;
 
-  // Auto-disable landuse if data unavailable
-  useEffect(() => {
-    if (landuse && !subLoading && watershedID) {
-      if (subError || !subcatchments || subcatchments.features?.length === 0) {
-        console.warn('No landuse data available - disabling landuse overlay');
-        setLanduse(false);
-        // TODO: Show toast notification when react-toastify is integrated
-      }
+    if (channels) {
+      setChannels(false);
+      toast.error('No channel data available');
     }
-  }, [landuse, subLoading, subError, subcatchments, watershedID, setLanduse]);
+  }, [watershedID, channelLoading, channelData, channels, setChannels]);
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
@@ -277,7 +264,7 @@ export default function Map(): JSX.Element {
         <MapEffect watershedId={watershedID} watersheds={memoWatersheds} />
 
         {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
-        {!memoSubcatchments.features?.length && memoWatersheds && (
+        {!memoSubcatchments?.features?.length && memoWatersheds && (
           <GeoJSON
             data={memoWatersheds}
             style={watershedStyle}
@@ -286,7 +273,7 @@ export default function Map(): JSX.Element {
         )}
 
         {/* Show subcatchments only when enabled AND data exists with features */}
-        {memoSubcatchments.features?.length && (
+        {memoSubcatchments?.features?.length && (
           <SubcatchmentLayer
             data={memoSubcatchments}
             style={subcatchmentStyle}
