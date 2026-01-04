@@ -89,22 +89,24 @@ export default function Map(): JSX.Element {
 
   // Auto-disable features that depend on subcatchment data
   useEffect(() => {
-    if (!watershedID || subLoading || subcatchments?.features?.length) return;
+    if (!watershedID || subLoading || !subcatchments) return;
 
-    if (subcatchment) setSubcatchment(false);
-    if (landuse) setLanduse(false);
-    if (subcatchment || landuse) toast.error('No subcatchment data available');
-  }, [watershedID, subLoading, subcatchments, subcatchment, landuse, setSubcatchment, setLanduse]);
+    if (subcatchments.features?.length === 0) {
+      if (subcatchment) setSubcatchment(false);
+      if (landuse) setLanduse(false);
+      if (subcatchment || landuse) toast.error('No subcatchment data available');
+    }
+  }, [watershedID, subcatchments, subLoading, subcatchments?.features?.length, subcatchment, landuse, setSubcatchment, setLanduse]);
 
   // Auto-disable channels if data unavailable
   useEffect(() => {
-    if (!watershedID || channelLoading || channelData?.features?.length) return;
+    if (!watershedID || channelLoading || !channelData) return;
 
-    if (channels) {
+    if (channelData.features?.length === 0 && channels) {
       setChannels(false);
       toast.error('No channel data available');
     }
-  }, [watershedID, channelLoading, channelData, channels, setChannels]);
+  }, [watershedID, channelData, channelLoading, channelData?.features?.length, channels, setChannels]);
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
