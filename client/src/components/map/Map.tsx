@@ -10,6 +10,7 @@ import { watershedOverviewRoute } from '../../routes/router';
 import { useChoropleth } from '../../hooks/useChoropleth';
 import { selectedStyle, defaultStyle } from './constants';
 import { useAppStore } from '../../store/store';
+import { toast } from 'react-toastify';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -50,6 +51,9 @@ export default function Map(): JSX.Element {
     channels,
     landuse,
     closePanel,
+    setSubcatchment,
+    setChannels,
+    setLanduse,
     setLanduseLegendMap,
   } = useAppStore();
 
@@ -71,17 +75,38 @@ export default function Map(): JSX.Element {
     queryFn: fetchWatersheds,
   });
 
-  const { data: subcatchments, error: subError, isLoading: subLoading } = useQuery({
+  const { data: subcatchments, isLoading: subLoading } = useQuery({
     queryKey: ['subcatchments', watershedID],
     queryFn: () => fetchSubcatchments(watershedID!),
     enabled: Boolean(subcatchment && watershedID),
   });
 
-  const { data: channelData, error: channelError, isLoading: channelLoading } = useQuery({
+  const { data: channelData, isLoading: channelLoading } = useQuery({
     queryKey: ['channels', watershedID],
     queryFn: () => fetchChannels(watershedID!),
     enabled: Boolean(channels && watershedID),
   });
+
+  // Auto-disable features that depend on subcatchment data
+  useEffect(() => {
+    if (!watershedID || subLoading || !subcatchments) return;
+
+    if (subcatchments.features?.length === 0) {
+      if (subcatchment) setSubcatchment(false);
+      if (landuse) setLanduse(false);
+      if (subcatchment || landuse) toast.error('No subcatchment data available');
+    }
+  }, [watershedID, subcatchments, subLoading, subcatchments?.features?.length, subcatchment, landuse, setSubcatchment, setLanduse]);
+
+  // Auto-disable channels if data unavailable
+  useEffect(() => {
+    if (!watershedID || channelLoading || !channelData) return;
+
+    if (channelData.features?.length === 0 && channels) {
+      setChannels(false);
+      toast.error('No channel data available');
+    }
+  }, [watershedID, channelData, channelLoading, channelData?.features?.length, channels, setChannels]);
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
@@ -184,9 +209,8 @@ export default function Map(): JSX.Element {
     }
   };
 
+  // Only crash on critical data failure (watersheds are required for the map to function)
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
-  if (subError) return <div>Error: {subError.message}</div>;
-  if (channelError) return <div>Error: {channelError.message}</div>;
 
   return (
     <div className="map-container">
@@ -241,7 +265,8 @@ export default function Map(): JSX.Element {
         {/* Handles URL navigation to a specified watershed */}
         <MapEffect watershedId={watershedID} watersheds={memoWatersheds} />
 
-        {!subcatchment && memoWatersheds && (
+        {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
+        {((!subcatchment) || !memoSubcatchments?.features?.length) && memoWatersheds && (
           <GeoJSON
             data={memoWatersheds}
             style={watershedStyle}
@@ -249,7 +274,8 @@ export default function Map(): JSX.Element {
           />
         )}
 
-        {subcatchment && memoSubcatchments && (
+        {/* Show subcatchments only when enabled AND data exists with features */}
+        {subcatchment && memoSubcatchments?.features?.length && (
           <SubcatchmentLayer
             data={memoSubcatchments}
             style={subcatchmentStyle}

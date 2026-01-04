@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
 import { useMap } from 'react-leaflet';
+import { toast } from 'react-toastify';
 import './Search.css';
 
 /**
@@ -20,7 +21,7 @@ export default function SearchControl() {
       setInput('');
       setIsSearchOpen(false);
     } else {
-      alert('Invalid coordinates. Please enter in "latitude, longitude" format.');
+      toast.error('Invalid coordinates. Please enter in "latitude, longitude" format.');
     }
   };
 
