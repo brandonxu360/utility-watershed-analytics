@@ -2,8 +2,10 @@ import React from 'react';
 import { watershedOverviewRoute } from '../../routes/router';
 import { useMatch } from '@tanstack/react-router';
 import { useAppStore } from '../../store/store';
+import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
 import WatershedOverview from '../../components/side-panels/watershed/WatershedOverview';
 import HomeSidePanelContent from '../../components/side-panels/home-info/HomeInfoPanel';
+import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
 import BottomPanel from '../../components/bottom-panels/BottomPanel';
 import Map from '../../components/map/Map';
 import './Home.css';
@@ -32,6 +34,11 @@ export default function Home(): JSX.Element {
   const { isPanelOpen, panelContent } = useAppStore();
   const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
   const watershedID = match?.params.webcloudRunId ?? null;
+  const isSmallScreen = useIsSmallScreen();
+
+  if (isSmallScreen) {
+    return <SmallScreenNotice />;
+  }
 
   return (
     <div className='home-container'>
