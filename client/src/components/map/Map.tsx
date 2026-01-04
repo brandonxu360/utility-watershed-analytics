@@ -264,7 +264,7 @@ export default function Map(): JSX.Element {
         <MapEffect watershedId={watershedID} watersheds={memoWatersheds} />
 
         {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
-        {!memoSubcatchments?.features?.length && memoWatersheds && (
+        {((!subcatchment) || !memoSubcatchments?.features?.length) && memoWatersheds && (
           <GeoJSON
             data={memoWatersheds}
             style={watershedStyle}
@@ -273,7 +273,7 @@ export default function Map(): JSX.Element {
         )}
 
         {/* Show subcatchments only when enabled AND data exists with features */}
-        {memoSubcatchments?.features?.length && (
+        {subcatchment && memoSubcatchments?.features?.length && (
           <SubcatchmentLayer
             data={memoSubcatchments}
             style={subcatchmentStyle}
