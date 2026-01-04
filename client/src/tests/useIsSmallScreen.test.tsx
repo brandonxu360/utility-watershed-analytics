@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
 
 function TestComp() {
@@ -8,7 +8,14 @@ function TestComp() {
 }
 
 describe('useIsSmallScreen', () => {
-    afterEach(() => cleanup());
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        cleanup();
+        vi.useRealTimers();
+    });
 
     it('returns true when width < 768', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,11 +40,17 @@ describe('useIsSmallScreen', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).innerWidth = 900;
         fireEvent(window, new Event('resize'));
+        act(() => {
+            vi.advanceTimersByTime(150);
+        });
         expect(screen.getByTestId('flag').textContent).toBe('large');
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).innerWidth = 600;
         fireEvent(window, new Event('resize'));
+        act(() => {
+            vi.advanceTimersByTime(150);
+        });
         expect(screen.getByTestId('flag').textContent).toBe('small');
     });
 });

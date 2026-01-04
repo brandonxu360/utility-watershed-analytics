@@ -10,9 +10,24 @@ export function useIsSmallScreen(): boolean {
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        const onResize = () => setIsSmall(window.innerWidth < 768);
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+        const onResize = () => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            timeoutId = setTimeout(() => {
+                setIsSmall(window.innerWidth < 768);
+            }, 150);
+        };
+
         window.addEventListener('resize', onResize);
-        return () => window.removeEventListener('resize', onResize);
+        return () => {
+            window.removeEventListener('resize', onResize);
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
     }, []);
 
     return isSmall;
