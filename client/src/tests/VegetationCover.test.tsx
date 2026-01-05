@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react"
-import { VegetationCover } from "../components/bottom-panels/VegetationCoverPanel";
+import { VegetationCoverPanel } from "../components/bottom-panels/VegetationCoverPanel";
 import { Properties } from "../types/WatershedFeature";
 import { useAppStore } from "../store/store";
 
@@ -42,7 +42,7 @@ afterEach(async () => {
 describe("VegetationCover", () => {
   it("renders controls and chart with default values", async () => {
     await act(async () => {
-      render(<VegetationCover />);
+      render(<VegetationCoverPanel />);
     });
 
     // labels/selects should be present
@@ -64,7 +64,7 @@ describe("VegetationCover", () => {
   it("calls closePanel when close button is clicked", async () => {
     let container: HTMLElement;
     await act(async () => {
-      const result = render(<VegetationCover />);
+      const result = render(<VegetationCoverPanel />);
       container = result.container;
     });
 
@@ -96,7 +96,7 @@ describe("VegetationCover", () => {
     });
 
     await act(async () => {
-      render(<VegetationCover />);
+      render(<VegetationCoverPanel />);
     });
 
     // Wait for the async data fetch to complete

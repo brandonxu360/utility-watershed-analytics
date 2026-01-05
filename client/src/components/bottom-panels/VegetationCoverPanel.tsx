@@ -20,7 +20,7 @@ type RapStatus = {
 
 type VegetationOption = "All" | "Shrub" | "Tree";
 
-export const VegetationCover: React.FC = () => {
+export const VegetationCoverPanel: React.FC = () => {
     const {
         selectedHillslopeId,
         choropleth: {
@@ -192,11 +192,19 @@ export const VegetationCover: React.FC = () => {
 
             {rapStatus.state === 'loading' && <div style={{ textAlign: 'center' }}>Loading vegetation data…</div>}
 
-            <CoverageLineChart
-                data={chartData}
-                title={chartTitle}
-                lineKeys={barKeys}
-            />
+            {rapStatus.state === 'error' && (
+                <div style={{ textAlign: 'center', padding: '1rem', color: '#d32f2f' }}>
+                    {rapStatus.message ?? 'Failed to load data'}
+                </div>
+            )}
+
+            {rapStatus.state === 'ready' && (
+                <CoverageLineChart
+                    data={chartData}
+                    title={chartTitle}
+                    lineKeys={barKeys}
+                />
+            )}
 
             {config && !choroplethLoading && choroplethRange && (
                 <div style={{ marginTop: '32px' }}>
@@ -212,4 +220,4 @@ export const VegetationCover: React.FC = () => {
     );
 };
 
-export default VegetationCover;
+export default VegetationCoverPanel;

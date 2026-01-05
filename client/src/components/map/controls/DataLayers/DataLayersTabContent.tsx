@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChangeEvent } from 'react';
 import { FaQuestionCircle } from 'react-icons/fa';
-import { VegetationCover } from '../../../bottom-panels/VegetationCoverPanel';
+import { VegetationCoverPanel } from '../../../bottom-panels/VegetationCoverPanel';
 import { ChoroplethPanel } from '../../../bottom-panels/ChoroplethPanel';
 import { EvapotranspirationPanel } from '../../../bottom-panels/EvapotranspirationPanel';
 import { useChoropleth } from '../../../../hooks/useChoropleth';
@@ -110,7 +110,7 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                             () => {
                                 setSubcatchment(true);
                                 setChoroplethType('vegetationCover');
-                                openPanel(<VegetationCover />);
+                                openPanel(<VegetationCoverPanel />);
                             }
                         }>
                             Vegetation Cover
