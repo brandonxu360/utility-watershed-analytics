@@ -6,7 +6,6 @@ import { useChoropleth, CHOROPLETH_YEARS } from "../../hooks/useChoropleth";
 import { ChoroplethScale } from "../ChoroplethScale";
 import { fetchRapChoropleth } from "../../api/rapApi";
 import { DEFAULT_RUN_ID } from "../../api/queryUtils";
-import { ET_BANDS } from "../../utils/constants";
 import Select from "../select/Select";
 import "./BottomPanel.css";
 
@@ -71,7 +70,7 @@ export const EvapotranspirationPanel: React.FC = () => {
                 if (yearToFetch !== null) {
                     const rows = await fetchRapChoropleth({
                         runIdOrPath: DEFAULT_RUN_ID,
-                        band: ET_BANDS,
+                        band: config?.bands ?? [],
                         year: yearToFetch,
                     });
 
@@ -90,7 +89,7 @@ export const EvapotranspirationPanel: React.FC = () => {
                     for (const year of CHOROPLETH_YEARS) {
                         const rows = await fetchRapChoropleth({
                             runIdOrPath: DEFAULT_RUN_ID,
-                            band: ET_BANDS,
+                            band: config?.bands ?? [],
                             year,
                         });
 
@@ -116,7 +115,7 @@ export const EvapotranspirationPanel: React.FC = () => {
 
         loadEtData();
         return () => { mounted = false; };
-    }, [selectedYear, selectedHillslopeId]);
+    }, [selectedYear, selectedHillslopeId, config]);
 
     const chartData = useMemo(() => {
         if (!etTimeSeries || etTimeSeries.length === 0) return [];

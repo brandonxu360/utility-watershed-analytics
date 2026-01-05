@@ -5,7 +5,7 @@ import { ChoroplethType } from '../store/slices/choroplethSlice';
 import { fetchRapChoropleth } from '../api/rapApi';
 import { createColormap, normalizeValue, computeRobustRange, ColorArray } from '../utils/colormap';
 import { DEFAULT_RUN_ID } from '../api/queryUtils';
-import { VEGETATION_BANDS } from '../utils/constants';
+import { VEGETATION_BANDS, ET_BANDS, SOIL_MOISTURE_BANDS } from '../utils/constants';
 
 export const CHOROPLETH_CONFIG: Record<Exclude<ChoroplethType, 'none'>, {
     title: string;
@@ -17,19 +17,19 @@ export const CHOROPLETH_CONFIG: Record<Exclude<ChoroplethType, 'none'>, {
         title: 'Evapotranspiration',
         unit: '% cover',
         colormap: 'et-blue',
-        bands: [1, 4, 5, 6],
+        bands: ET_BANDS,
     },
     soilMoisture: {
         title: 'Soil Moisture',
         unit: '% cover',
         colormap: 'winter',
-        bands: [2, 3],
+        bands: SOIL_MOISTURE_BANDS,
     },
     vegetationCover: {
         title: 'Vegetation Cover',
         unit: '% cover',
         colormap: 'viridis',
-        bands: [5, 6],
+        bands: VEGETATION_BANDS.all,
     },
 };
 

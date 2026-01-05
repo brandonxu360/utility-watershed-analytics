@@ -190,7 +190,7 @@ export const VegetationCoverPanel: React.FC = () => {
                 </div>
             </div>
 
-            {rapStatus.state === 'loading' && <div style={{ textAlign: 'center' }}>Loading vegetation data…</div>}
+            {rapStatus.state === 'loading' && <div style={{ textAlign: 'center', padding: '1rem' }}>Loading vegetation data…</div>}
 
             {rapStatus.state === 'error' && (
                 <div style={{ textAlign: 'center', padding: '1rem', color: '#d32f2f' }}>
