@@ -7,5 +7,8 @@ export const VEGETATION_BANDS: Record<VegetationBandType, number[]> = {
     tree: [6],     // tree only
 };
 
+// Evapotranspiration bands: annual forbs & grasses, perennial forbs & grasses, shrub, tree
+export const ET_BANDS = [1, 4, 5, 6];
+
 export const startYear = 1986;
 export const endYear = 2023;

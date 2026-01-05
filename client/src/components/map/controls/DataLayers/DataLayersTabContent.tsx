@@ -1,8 +1,9 @@
 import React from 'react';
 import { ChangeEvent } from 'react';
 import { FaQuestionCircle } from 'react-icons/fa';
-import { VegetationCover } from '../../../bottom-panels/VegetationCover';
+import { VegetationCover } from '../../../bottom-panels/VegetationCoverPanel';
 import { ChoroplethPanel } from '../../../bottom-panels/ChoroplethPanel';
+import { EvapotranspirationPanel } from '../../../bottom-panels/EvapotranspirationPanel';
 import { useChoropleth } from '../../../../hooks/useChoropleth';
 import { useAppStore } from '../../../../store/store';
 import { ChoroplethType } from '../../../../store/slices/choroplethSlice';
@@ -81,7 +82,11 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                     <div className="layerpicker-layer">
                         <button
                             className="layerpicker-title"
-                            onClick={handleChoroplethClick('evapotranspiration')}
+                            onClick={() => {
+                                setSubcatchment(true);
+                                setChoroplethType('evapotranspiration');
+                                openPanel(<EvapotranspirationPanel />);
+                            }}
                             style={{ fontWeight: isActive && choroplethType === 'evapotranspiration' ? 'bold' : 'normal' }}
                         >
                             Evapotranspiration

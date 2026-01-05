@@ -15,8 +15,8 @@ type ChoroplethPanelProps = {
 
 export const ChoroplethPanel: React.FC<ChoroplethPanelProps> = ({ choroplethType }) => {
     const {
-        closePanel,
         choropleth: { range: choroplethRange, loading: choroplethLoading, error: choroplethError, year: choroplethYear },
+        closePanel,
         setChoroplethYear,
         setSubcatchment,
         resetChoropleth,

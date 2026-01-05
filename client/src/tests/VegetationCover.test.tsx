@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react"
-import { VegetationCover } from "../components/bottom-panels/VegetationCover";
+import { VegetationCover } from "../components/bottom-panels/VegetationCoverPanel";
 import { Properties } from "../types/WatershedFeature";
 import { useAppStore } from "../store/store";
 
