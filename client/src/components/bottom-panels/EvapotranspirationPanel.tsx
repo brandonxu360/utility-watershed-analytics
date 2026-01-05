@@ -79,7 +79,7 @@ export const EvapotranspirationPanel: React.FC = () => {
 
                     const values = rows.map(r => r.value).filter(v => Number.isFinite(v));
                     const avgValue = values.length > 0
-                        ? values.reduce((a, b) => a + b, 0) / values.length
+                        ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100
                         : 0;
 
                     setEtTimeSeries([{ year: yearToFetch, value: avgValue }]);
@@ -96,7 +96,7 @@ export const EvapotranspirationPanel: React.FC = () => {
 
                         const values = rows.map(r => r.value).filter(v => Number.isFinite(v));
                         const avgValue = values.length > 0
-                            ? values.reduce((a, b) => a + b, 0) / values.length
+                            ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100
                             : 0;
 
                         allYearsData.push({ year, value: avgValue });
