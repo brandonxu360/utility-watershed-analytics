@@ -262,6 +262,7 @@ export default function Map(): JSX.Element {
           <GeoJSON
             data={memoChannels}
             style={channelStyle}
+            pane="markerPane"
           />
         )}
       </MapContainer>
