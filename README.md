@@ -186,6 +186,8 @@ docker compose logs -f
 
 As the featureset expands, we're working on integrating a test-driven development approach.
 
+### Backend
+
 To run backend tests (Django/DRF), use either of the following commands:
 
 ```bash
@@ -196,4 +198,23 @@ Or, if you are inside the backend container:
 
 ```bash
 python manage.py test
+```
+
+### Frontend
+
+To run frontend tests developers must first navigate to the client devcontainer from which they can run the following commands:
+
+```bash
+# To run all tests
+npm run test
+```
+
+```bash
+# To run a single test file
+npm run test <path_to_file>
+```
+
+```bash
+# To run tests with coverage
+npm run coverage
 ```
