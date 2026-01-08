@@ -14,10 +14,10 @@ createRoot(document.getElementById('root')!).render(
       <App />
     </QueryClientProvider>
     <ToastContainer
-      position="bottom-right"
-      autoClose={5000}
-      hideProgressBar={false}
-      newestOnTop={false}
+      position="top-center"
+      autoClose={3000}
+      hideProgressBar
+      newestOnTop={true}
       closeOnClick
       rtl={false}
       pauseOnFocusLoss
