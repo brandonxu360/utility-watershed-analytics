@@ -20,6 +20,7 @@ export default function LegendControl() {
         className="legend-button"
         aria-label={isLegendOpen ? 'Close legend' : 'Open legend'}
         title={isLegendOpen ? 'Close legend' : 'Open legend'}
+        data-testid="legend-toggle-button"
       >
         {isLegendOpen ? (
           <FaXmark className="legend-icon" />
@@ -29,7 +30,7 @@ export default function LegendControl() {
       </button>
 
       {isLegendOpen && (
-        <div className="legend-modal">
+        <div className="legend-modal" data-testid="legend-container">
           <div className="legend-content">
             <div className="watershed-container">
               <div className="watershed-left">
@@ -41,11 +42,13 @@ export default function LegendControl() {
                   className="legend-icon"
                   style={{ cursor: 'pointer' }}
                   onClick={() => alert('Show only icon clicked')}
+                  data-testid="tier1-show-icon"
                 />
                 <FaEye
                   className="legend-icon"
                   style={{ cursor: 'pointer' }}
                   onClick={() => alert('Hide icon clicked')}
+                  data-testid="tier1-hide-icon"
                 />
               </div>
             </div>
@@ -59,11 +62,13 @@ export default function LegendControl() {
                   className="legend-icon"
                   style={{ cursor: 'pointer' }}
                   onClick={() => alert('Show only icon clicked')}
+                  data-testid="tier2-show-icon"
                 />
                 <FaEye
                   className="legend-icon"
                   style={{ cursor: 'pointer' }}
                   onClick={() => alert('Hide icon clicked')}
+                  data-testid="tier2-hide-icon"
                 />
               </div>
             </div>
