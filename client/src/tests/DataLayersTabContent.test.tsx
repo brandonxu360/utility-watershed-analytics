@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAppStore } from "../store/store";
 import { initialChoroplethState } from "../store/slices/choroplethSlice";
 import DataLayersTabContent from "../components/map/controls/DataLayers/DataLayersTabContent";
+import type { ReactElement, ReactNode } from "react";
 
 const mockUseChoropleth = vi.fn();
 
@@ -21,11 +22,11 @@ vi.mock("../components/bottom-panels/VegetationCover", () => ({
 }));
 
 describe("DataLayersTabContent", () => {
-    const handleChange = vi.fn();
+    const handleChange = vi.fn<(e: React.ChangeEvent<HTMLInputElement>) => void>();
     const setSubcatchment = vi.fn();
     const setLanduseLegendVisible = vi.fn();
     const setChoroplethType = vi.fn();
-    const openPanel = vi.fn();
+    const openPanel = vi.fn<(node: ReactNode) => void>();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -141,8 +142,8 @@ describe("DataLayersTabContent", () => {
         expect(setChoroplethType).toHaveBeenCalledWith("evapotranspiration");
         expect(openPanel).toHaveBeenCalledTimes(1);
 
-        const element = openPanel.mock.calls[0][0] as any;
-        expect(element?.props?.choroplethType).toBe("evapotranspiration");
+        const element = openPanel.mock.calls[0]?.[0] as ReactElement<{ choroplethType?: string }>;
+        expect(element.props.choroplethType).toBe("evapotranspiration");
     });
 
     it("clicking Soil Moisture triggers subcatchment, sets type, and opens panel", () => {
@@ -154,8 +155,8 @@ describe("DataLayersTabContent", () => {
         expect(setChoroplethType).toHaveBeenCalledWith("soilMoisture");
         expect(openPanel).toHaveBeenCalledTimes(1);
 
-        const element = openPanel.mock.calls[0][0] as any;
-        expect(element?.props?.choroplethType).toBe("soilMoisture");
+        const element = openPanel.mock.calls[0]?.[0] as ReactElement<{ choroplethType?: string }>;
+        expect(element.props.choroplethType).toBe("soilMoisture");
     });
 
     it("renders Coverage tab and clicking Vegetation Cover opens the vegetation panel and sets choropleth type", () => {
@@ -167,8 +168,8 @@ describe("DataLayersTabContent", () => {
         expect(setChoroplethType).toHaveBeenCalledWith("vegetationCover");
         expect(openPanel).toHaveBeenCalledTimes(1);
 
-        const element = openPanel.mock.calls[0][0] as any;
-        expect(element?.type).toBeTruthy();
+        const element = openPanel.mock.calls[0]?.[0] as ReactElement;
+        expect(element.type).toBeTruthy();
     });
 
     it("renders Soil Burn tab and wires handleChange for checkboxes", () => {

@@ -1,9 +1,16 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAppStore } from "../store/store";
+import type { ChangeEvent } from "react";
 
 vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
-    default: ({ activeTab, handleChange }: { activeTab: string; handleChange: (e: any) => void }) => (
+    default: ({
+        activeTab,
+        handleChange,
+    }: {
+        activeTab: string;
+        handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    }) => (
         <div data-testid="tab-content">
             <div data-testid="active-tab">{activeTab}</div>
             <label>
