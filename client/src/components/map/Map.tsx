@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MapContainer, TileLayer, GeoJSON, ScaleControl, useMap } from 'react-leaflet';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { MapContainer, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import { useQuery } from '@tanstack/react-query';
 import { useMatch, useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { useWatershedOverlayStore } from '../../store/WatershedOverlayStore';
 import { Properties } from '../../types/WatershedFeature';
-import { LeafletEvent, LeafletMouseEvent, PathOptions } from 'leaflet';
-import { useBottomPanelStore } from '../../store/BottomPanelStore';
+import { LeafletMouseEvent } from 'leaflet';
 import { watershedOverviewRoute } from '../../routes/router';
-import { zoomToFeature } from '../../utils/map/MapUtil';
+import { useChoropleth } from '../../hooks/useChoropleth';
+import { selectedStyle, defaultStyle } from './constants';
+import { useAppStore } from '../../store/store';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -18,6 +18,7 @@ import LegendControl from './controls/Legend/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
 import LandUseLegend from './controls/LandUseLegend/LandUseLegend';
+import SubcatchmentLayer from './SubcatchmentLayer';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -34,138 +35,6 @@ const BOUNDS: [[number, number], [number, number]] = [
   [46.19 + 5, -116.93 + 5]  // Northeast corner [lat, lng]
 ];
 
-/* Feature Styles */
-const defaultStyle = {
-  color: '#4a83ec',
-  weight: 3,
-  fillColor: '#4a83ec',
-  fillOpacity: 0.25,
-};
-
-const selectedStyle = {
-  color: '#2c2c2c',
-  weight: 3,
-  fillColor: '#4a83ec',
-  fillOpacity: 0.5,
-};
-
-const highlightedStyle = {
-  color: '#f5f5f5',
-  weight: 2,
-  fillColor: '#a0b7e2ff',
-  fillOpacity: 0.5,
-};
-
-// Renders subcatchment hillslope polygons and binds hover-only tooltips
-function SubcatchmentLayer({ data, style }: {
-  data: GeoJSON.FeatureCollection
-  style: (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => PathOptions
-}) {
-  const map = useMap();
-
-  const { setSelectedHillslope, clearSelectedHillslope } = useBottomPanelStore();
-
-  // Track selected feature id and layer using refs so event handlers
-  // can read/update the current selection at event time without forcing rerenders.
-  const selectedIdRef = useRef<string | null>(null);
-  const selectedLayerRef = useRef<{
-    layer: LeafletEvent['target'];
-    feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | null;
-  } | null>(null);
-
-  const setSelection = (
-    id: string | null,
-    layer?: LeafletEvent['target'],
-    feature?: GeoJSON.Feature<GeoJSON.Geometry, Properties> | null
-  ) => {
-    selectedIdRef.current = id;
-    if (id && layer) {
-      selectedLayerRef.current = { layer, feature: feature ?? null };
-    } else {
-      selectedLayerRef.current = null;
-    }
-  };
-
-  return (
-    <GeoJSON
-      data={data}
-      style={style}
-      onEachFeature={(feature, layer) => {
-        const props = feature.properties ?? {};
-        layer.bindTooltip(
-          `<span class="tooltip-bold"><strong>Hillslope ID</strong>
-          <br/>TopazID: ${props.topazid ?? 'N/A'}, WeppID: ${props.weppid ?? 'N/A'}
-          <br/><strong>Width:</strong>
-          ${props.width?.toFixed(2) ?? 'N/A'} m
-          <br/><strong>Length:</strong>
-          ${props.length?.toFixed(2) ?? 'N/A'} m
-          <br/><strong>Area:</strong>
-          ${props.hillslope_area ? (props.hillslope_area / 10000).toFixed(2) : 'N/A'} ha
-          <br/><strong>Slope:</strong>
-          ${props.slope_scalar?.toFixed(2) ?? 'N/A'}
-          <br/><strong>Aspect:</strong>
-          ${props.aspect?.toFixed(2) ?? 'N/A'}
-          <br/><strong>Soil:</strong>
-          ${props.simple_texture ?? 'N/A'}</span>`,
-          {
-            className: 'tooltip',
-            offset: [12, -50],
-          }
-        );
-        layer.on({
-          click: (e) => {
-            const fid = feature?.id?.toString?.() ?? null;
-
-            if (selectedIdRef.current === fid) {
-              e.target.setStyle(style(feature));
-              setSelection(null);
-              clearSelectedHillslope();
-            } else {
-              if (selectedLayerRef.current) {
-                selectedLayerRef.current.layer.setStyle(
-                  style(selectedLayerRef.current.feature ?? undefined)
-                );
-              }
-
-              // Set new selection
-              e.target.setStyle(selectedStyle);
-              setSelection(fid, e.target, feature);
-              setSelectedHillslope(feature.properties.weppid, feature.properties);
-            }
-
-            zoomToFeature(map, layer);
-          }
-        });
-        layer.on({
-          mouseover: (e) => {
-            const fid = feature?.id?.toString?.() ?? null;
-
-            if (selectedIdRef.current === fid) {
-              e.target.setStyle(selectedStyle);
-            } else {
-              e.target.setStyle(highlightedStyle);
-            }
-
-            layer.openTooltip();
-          },
-        });
-        layer.on({
-          mouseout: (e) => {
-            const fid = feature?.id?.toString?.() ?? null;
-
-            if (selectedIdRef.current === fid) {
-              layer.closeTooltip();
-            } else {
-              e.target.setStyle(style(feature));
-              layer.closeTooltip();
-            }
-          },
-        });
-      }}
-    />
-  )
-}
-
 /**
  * Handles the map of our application and contains all of its controls
  * and watershed specific workflows.
@@ -176,8 +45,23 @@ function SubcatchmentLayer({ data, style }: {
 export default function Map(): JSX.Element {
   const navigate = useNavigate()
 
-  const { subcatchment, channels, landuse } = useWatershedOverlayStore();
-  const { setLanduseLegendMap } = useWatershedOverlayStore();
+  const {
+    subcatchment,
+    channels,
+    landuse,
+    closePanel,
+    setLanduseLegendMap,
+  } = useAppStore();
+
+  // Use the choropleth hook for data fetching and styling
+  const { isActive: choroplethActive, getChoroplethStyle, isLoading: choroplethLoading, choropleth } = useChoropleth();
+  const { choropleth: { year: choroplethYear, bands: choroplethBands } } = useAppStore();
+
+  // Create a key that changes when choropleth state changes to force style updates
+  const choroplethKey = useMemo(() =>
+    `${choropleth}-${choroplethYear ?? 'all'}-${choroplethBands}-${choroplethActive}`,
+    [choropleth, choroplethYear, choroplethBands, choroplethActive]
+  );
 
   const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
   const watershedID = match?.params.webcloudRunId ?? null;
@@ -198,8 +82,6 @@ export default function Map(): JSX.Element {
     queryFn: () => fetchChannels(watershedID!),
     enabled: Boolean(channels && watershedID),
   });
-
-  const { closePanel } = useBottomPanelStore();
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
@@ -242,6 +124,15 @@ export default function Map(): JSX.Element {
 
   const subcatchmentStyle = useCallback(
     (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => {
+      // Choropleth coloring takes precedence (uses weppid since RAP data is aggregated by wepp_id)
+      if (choroplethActive && feature?.properties?.weppid) {
+        const choroplethStyle = getChoroplethStyle(feature.properties.weppid);
+        if (choroplethStyle) {
+          return choroplethStyle;
+        }
+      }
+
+      // Land use coloring
       if (landuse && feature?.properties?.landuse_color) {
         return {
           color: '#2c2c2c',
@@ -250,6 +141,8 @@ export default function Map(): JSX.Element {
           fillOpacity: 1,
         };
       }
+
+      // Default style
       return {
         color: '#2c2c2c',
         weight: 0.75,
@@ -257,7 +150,7 @@ export default function Map(): JSX.Element {
         fillOpacity: 0.75,
       };
     },
-    [landuse]
+    [landuse, choroplethActive, getChoroplethStyle]
   );
 
   const channelStyle = useCallback(
@@ -312,7 +205,7 @@ export default function Map(): JSX.Element {
         preferCanvas
       >
 
-        {(watershedsLoading || subLoading || channelLoading) && (
+        {(watershedsLoading || subLoading || channelLoading || choroplethLoading) && (
           <div className="map-loading-overlay">
             <div className="loading-spinner" />
           </div>
@@ -360,6 +253,8 @@ export default function Map(): JSX.Element {
           <SubcatchmentLayer
             data={memoSubcatchments}
             style={subcatchmentStyle}
+            choroplethActive={choroplethActive}
+            choroplethKey={choroplethKey}
           />
         )}
 
@@ -367,6 +262,7 @@ export default function Map(): JSX.Element {
           <GeoJSON
             data={memoChannels}
             style={channelStyle}
+            pane="markerPane"
           />
         )}
       </MapContainer>
