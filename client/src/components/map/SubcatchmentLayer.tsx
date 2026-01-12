@@ -52,8 +52,7 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
 
   // Update all layer styles when choropleth data changes
   useEffect(() => {
-    layersRef.current.forEach(({ layer, feature }) => {
-      const fid = feature?.id?.toString?.() ?? null;
+    layersRef.current.forEach(({ layer, feature }, fid) => {
       if (selectedIdRef.current !== fid) {
         (layer as LeafletEvent['target']).setStyle(styleRef.current(feature));
       }
@@ -66,8 +65,14 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
       data={data}
       style={style}
       onEachFeature={(feature, layer) => {
-        const props = feature.properties ?? {};
+        const props = feature.properties;
         const fid = feature?.id?.toString?.() ?? null;
+
+        const width = typeof props?.width_m === 'number' ? props.width_m.toFixed(2) : 'N/A';
+        const length = typeof props?.length_m === 'number' ? props.length_m.toFixed(2) : 'N/A';
+        const area = typeof props?.area_m2 === 'number' ? (props.area_m2 / 10000).toFixed(2) : 'N/A';
+        const slope = typeof props?.slope_scalar === 'number' ? props.slope_scalar.toFixed(2) : 'N/A';
+        const aspect = typeof props?.aspect === 'number' ? props.aspect.toFixed(2) : 'N/A';
 
         if (fid) {
           layersRef.current.set(fid, { layer, feature });
@@ -75,19 +80,19 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
 
         layer.bindTooltip(
           `<span class="tooltip-bold"><strong>Hillslope ID</strong>
-          <br/>TopazID: ${props.topazid ?? 'N/A'}, WeppID: ${props.weppid ?? 'N/A'}
+          <br/>TopazID: ${props?.topazid ?? 'N/A'}, WeppID: ${props?.weppid ?? 'N/A'}
           <br/><strong>Width:</strong>
-          ${props.width_m.toFixed(2) ?? 'N/A'} m
+          ${width} m
           <br/><strong>Length:</strong>
-          ${props.length_m.toFixed(2) ?? 'N/A'} m
+          ${length} m
           <br/><strong>Area:</strong>
-          ${props.area_m2 ? (props.area_m2 / 10000).toFixed(2) : 'N/A'} ha
+          ${area} ha
           <br/><strong>Slope:</strong>
-          ${props.slope_scalar ? props.slope_scalar.toFixed(2) : 'N/A'}
+          ${slope}
           <br/><strong>Aspect:</strong>
-          ${props.aspect.toFixed(2) ?? 'N/A'}
+          ${aspect}
           <br/><strong>Soil:</strong>
-          ${props.soil ?? 'N/A'}</span>`,
+          ${props?.soil ?? 'N/A'}</span>`,
           {
             className: 'tooltip',
             offset: [12, -50],
@@ -110,8 +115,12 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
 
               // Set new selection
               e.target.setStyle(selectedStyle);
-              setSelection(clickFid, e.target, feature);
-              setSelectedHillslope(feature.properties.topazid, feature.properties);
+              setSelection(clickFid, e.target, feature.properties ? feature : null);
+
+              const topazid = feature.properties?.topazid;
+              if (typeof topazid === 'number') {
+                setSelectedHillslope(topazid, feature.properties);
+              }
             }
 
             zoomToFeature(map, layer);
