@@ -13,7 +13,7 @@ The key technologies include:
 The application is deployed on a managed virtual machine provided by the [University of Idaho’s Research Computing and Data Services (RCDS)](https://hpc.uidaho.edu/index.html), using Docker Compose and Caddy for secure reverse proxying. 
 
 For more deployment information, see [DEPLOYMENT.md](./DEPLOYMENT.md).
-For in-depth technical documentation on the backend and infrastructure, see the [docs/](./docs/) directory.
+
 ## Development Setup
 This section guides developers on how to set up, configure, and run the application locally using Docker and VSCode Dev Containers.
 
