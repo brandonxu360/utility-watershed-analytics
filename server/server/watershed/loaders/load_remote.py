@@ -1,6 +1,6 @@
-# This loader script takes advantage of the fact that all the data files are remote 
-# geojson files that can be read directly into a DataSource. This circumvents the need to
-# download data files in order to load the data into the database.
+# This loader script supports both local and remote data loading.
+# It checks for locally cached files first (from the data-downloader service),
+# and falls back to fetching from remote URLs if local files are not available.
 
 import sys
 import yaml
@@ -18,6 +18,10 @@ from django.contrib.gis.geos import Polygon, MultiPolygon
 from server.watershed.models import Watershed, Subcatchment, Channel
 from collections import defaultdict
 from typing import Optional
+
+# Local data directory where the data-downloader service stores cached files
+# This path corresponds to the watershed_data volume mount in the server container
+LOCAL_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 # This is an auto-generated layer mapping created by ogrinspect. 
 watershed_mapping = {
@@ -56,6 +60,43 @@ BASE_DELAY_S = 0.2
 
 def _sleep_backoff(i):
     time.sleep(BASE_DELAY_S * (2 ** i))  # 1,2,4,8,16,32s
+
+
+def _get_local_path(target: str) -> Path:
+    """Get the local file path for a manifest target."""
+    return LOCAL_DATA_DIR / target
+
+
+def _has_local_file(target: str) -> bool:
+    """Check if a local cached file exists for the given manifest target."""
+    local_path = _get_local_path(target)
+    return local_path.exists() and local_path.is_file()
+
+
+def _open_datasource(url: str, target: str = None, verbose: bool = False) -> DataSource:
+    """
+    Open a DataSource, checking for local cached file first.
+    
+    Args:
+        url: Remote URL to fetch from if local file not available
+        target: Optional manifest target path for local file lookup
+        verbose: Whether to print source information
+    
+    Returns:
+        DataSource from local file or remote URL
+    """
+    # Check for local file first
+    if target and _has_local_file(target):
+        local_path = _get_local_path(target)
+        if verbose:
+            print(f'    Loading from local cache: {local_path}')
+        return DataSource(str(local_path))
+    
+    # Fall back to remote with retry
+    if verbose:
+        print(f'    Fetching from remote: {url}')
+    return _open_datasource_with_retry(url)
+
 
 def _open_datasource_with_retry(url: str):
     last_err = None
@@ -137,7 +178,10 @@ def _save_watershed_associated_layer(layer: Layer, mapping: dict[str, str], asso
 
 def load_from_remote(verbose=True, runids: Optional[list[str]] = None):
     """
-    Load watershed data from remote GeoJSON files.
+    Load watershed data from GeoJSON files (local cache or remote URLs).
+    
+    Checks for locally cached files first (from data-downloader service),
+    and falls back to fetching from remote URLs if local files are not available.
     
     Args:
         verbose: Whether to print verbose output during loading
@@ -163,8 +207,10 @@ def load_from_remote(verbose=True, runids: Optional[list[str]] = None):
         return
 
     # Load watersheds
-    watershed_url = manifest['Watersheds'][0]['url']
-    watershed_ds = _open_datasource_with_retry(watershed_url)
+    watershed_entry = manifest['Watersheds'][0]
+    watershed_url = watershed_entry['url']
+    watershed_target = watershed_entry.get('target')
+    watershed_ds = _open_datasource(watershed_url, watershed_target, verbose)
     
     # If runids filter is specified, filter watersheds
     if runids is not None:
@@ -200,8 +246,10 @@ def load_from_remote(verbose=True, runids: Optional[list[str]] = None):
         # Skip if we're filtering and this runid is not in the filter
         if loaded_runids is not None and associated_runid not in loaded_runids:
             continue
-            
-        subcatchment_ds = _open_datasource_with_retry(subcatchment_entry['url'])
+        
+        subcatchment_url = subcatchment_entry['url']
+        subcatchment_target = subcatchment_entry.get('target')
+        subcatchment_ds = _open_datasource(subcatchment_url, subcatchment_target, verbose)
         saved_subcatchment_count += _save_watershed_associated_layer(layer=subcatchment_ds[0], mapping=subcatchment_mapping, associated_runid=associated_runid, model_class=Subcatchment)
     print(f"    Subcatchments saved: {saved_subcatchment_count}")
     
@@ -213,8 +261,10 @@ def load_from_remote(verbose=True, runids: Optional[list[str]] = None):
         # Skip if we're filtering and this runid is not in the filter
         if loaded_runids is not None and associated_runid not in loaded_runids:
             continue
-            
-        channel_ds = _open_datasource_with_retry(channel_entry['url'])
+        
+        channel_url = channel_entry['url']
+        channel_target = channel_entry.get('target')
+        channel_ds = _open_datasource(channel_url, channel_target, verbose)
         saved_channel_count += _save_watershed_associated_layer(layer=channel_ds[0], mapping=channel_mapping, associated_runid=associated_runid, model_class=Channel)
     print(f"    Channels saved: {saved_channel_count}")
 
@@ -238,6 +288,31 @@ def _load_parquet_with_retry(url: str, verbose: bool = False) -> pd.DataFrame:
                 print(f"    Retry {i+1}/{RETRY_ATTEMPTS} for parquet: {e}")
             _sleep_backoff(i)
     raise last_err
+
+
+def _load_parquet(url: str, target: str = None, verbose: bool = False) -> pd.DataFrame:
+    """
+    Load a parquet file, checking for local cached file first.
+    
+    Args:
+        url: Remote URL to fetch from if local file not available
+        target: Optional manifest target path for local file lookup
+        verbose: Whether to print source information
+    
+    Returns:
+        DataFrame from local file or remote URL
+    """
+    # Check for local file first
+    if target and _has_local_file(target):
+        local_path = _get_local_path(target)
+        if verbose:
+            print(f"      Loading from local cache: {local_path}")
+        return pd.read_parquet(local_path)
+    
+    # Fall back to remote with retry
+    if verbose:
+        print(f"      Fetching from remote: {url}")
+    return _load_parquet_with_retry(url, verbose)
 
 
 def _load_parquet_data(manifest: dict, loaded_runids: Optional[set[str]] = None, verbose: bool = True):
@@ -278,21 +353,24 @@ def _load_parquet_data(manifest: dict, loaded_runids: Optional[set[str]] = None,
             
             if runid in hillslopes_entries:
                 try:
-                    hillslopes_df = _load_parquet_with_retry(hillslopes_entries[runid]['url'], verbose)
+                    entry = hillslopes_entries[runid]
+                    hillslopes_df = _load_parquet(entry['url'], entry.get('target'), verbose)
                 except Exception as e:
                     if verbose:
                         print(f"    Warning: Could not load hillslopes for {runid}: {e}")
             
             if runid in soils_entries:
                 try:
-                    soils_df = _load_parquet_with_retry(soils_entries[runid]['url'], verbose)
+                    entry = soils_entries[runid]
+                    soils_df = _load_parquet(entry['url'], entry.get('target'), verbose)
                 except Exception as e:
                     if verbose:
                         print(f"    Warning: Could not load soils for {runid}: {e}")
             
             if runid in landuse_entries:
                 try:
-                    landuse_df = _load_parquet_with_retry(landuse_entries[runid]['url'], verbose)
+                    entry = landuse_entries[runid]
+                    landuse_df = _load_parquet(entry['url'], entry.get('target'), verbose)
                 except Exception as e:
                     if verbose:
                         print(f"    Warning: Could not load landuse for {runid}: {e}")

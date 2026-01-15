@@ -13,7 +13,7 @@ The key technologies include:
 The application is deployed on a managed virtual machine provided by the [University of Idaho’s Research Computing and Data Services (RCDS)](https://hpc.uidaho.edu/index.html), using Docker Compose and Caddy for secure reverse proxying. 
 
 For more deployment information, see [DEPLOYMENT.md](./DEPLOYMENT.md).
-
+For in-depth technical documentation on the backend and infrastructure, see the [docs/](./docs/) directory.
 ## Development Setup
 This section guides developers on how to set up, configure, and run the application locally using Docker and VSCode Dev Containers.
 
@@ -66,9 +66,9 @@ DEBUG=true
     }
 }
 ```
-7. **Data**: The current watershed data (watersheds, subcatchments, channels) is automatically loaded into the database. The data ingestion process can be found in the entrypoint script and will run upon the intial creation of the server container using `docker compose up`.
+7. **Data**: Watershed data (watersheds, subcatchments, channels) is loaded into the database via a Django management command. In development, the entrypoint script automatically loads a sample subset of watersheds on the first container startup. For production or custom data loading, see the Data Management section below.
 
-See the [data-manifest.yml](/server/data-manifest.yaml) to manage the data that will be loaded.
+The [data-manifest.yaml](server/data-manifest.yaml) defines all available watershed data sources and their download locations.
 
 ### Usage
 1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. **Note**: If you are using VSCode with Dev Containers, you can skip this step—containers will start automatically when you open the project in a devcontainer.
@@ -84,7 +84,11 @@ docker compose up
 3. **Devcontainers Setup (VSCode)**: VSCode will detect the devcontainer configurations upon opening the project and will prompt you to reopen the project in a container. Choose the container based on which service you want to work on (you can open another VSCode window to work on both at the same time). You can reopen the project at any point without being prompted by opening the VSCode Command Palette and using `Dev Containers: Reopen in Container`.
 
 **Additional Notes**:
-* All migrations, the creation of a superuser, and loading of the watershed data into the database is automatically handled by the `entrypoint.sh` file on container start.
+* On first container startup, the development entrypoint script automatically:
+  * Runs database migrations
+  * Creates a Django superuser (using environment variables)
+  * Loads a sample subset of watersheds for development
+* Subsequent container restarts skip the first-time initialization tasks.
 
 ## Development Container Management
 
@@ -103,34 +107,67 @@ docker compose logs -f client server
 ```
 
 ### Data Management (Development)
-To load watershed data into your development environment:
+
+The application uses a two-stage data pipeline:
+1. **Data Download** - Downloads GeoJSON/Parquet files from remote sources to a shared Docker volume
+2. **Data Loading** - Loads data into the PostgreSQL/PostGIS database
+
+The loader uses a **local-first approach**: it checks for cached files in the shared volume first, then falls back to fetching from remote URLs if local files aren't available.
+
+#### Pre-Caching Data (Optional)
+
+If you need to reload data into the database (e.g., after clearing the DB or first-time setup on a new volume), you can pre-cache the data files to avoid repeated network fetches:
 
 ```bash
-# Load all data into database
-docker compose exec server python manage.py load_watershed_data
-
-# Load only specific watersheds by runid (and their subcatchments/channels)
-docker compose exec server python manage.py load_watershed_data --runids <runid1> <runid2> <runid3>
-
-# Available options for loading:
-# --force          Reload data even if it already exists
-# --dry-run        Preview what would be loaded
-# --verbosity=2    Detailed output for debugging
-# --runids         Load only specified watersheds (space-separated list)
+# Download and cache development data subset
+docker compose --profile data-management run --rm data-downloader
 ```
 
-Useful commands for removing or resetting data:
+The `--dev` flag (default) downloads the same subset loaded by the development entrypoint. This cached data persists in the `watershed_data` volume until the volume is removed.
+
+#### Data Downloader Options
+
+The downloader's default is `--dev`, but you can override it by passing different arguments:
+
+```bash
+# Download development subset (default, recommended)
+docker compose --profile data-management run --rm data-downloader
+# or explicitly: docker compose --profile data-management run --rm data-downloader --dev
+
+# Download specific watersheds by runid
+docker compose --profile data-management run --rm data-downloader --runids <runid1> <runid2>
+
+# Download ALL data (warning: very large, production only)
+docker compose --profile data-management run --rm data-downloader --all
+```
+
+#### Loading Watershed Data
+```bash
+# Load development subset (uses cache if available, else fetches remote)
+docker compose exec server python manage.py load_watershed_data --runids <runid1> <runid2>
+
+# Preview what would be loaded (safe to test)
+docker compose exec server python manage.py load_watershed_data --dry-run
+
+# Force reload data (clears existing data first)
+docker compose exec server python manage.py load_watershed_data --force
+
+# Verbose output for debugging
+docker compose exec server python manage.py load_watershed_data --verbosity=2
+```
+
+#### Resetting Data
 ```bash
 # Remove all services and data (database + downloaded files)
 docker compose down -v
 
-# Remove the data file volume
+# Remove only the data file volume (clears cache)
 docker volume rm utility-watershed-analytics_watershed_data
 
-# Reload data into database
+# Force reload data into database
 docker compose exec server python manage.py load_watershed_data --force
 
-# Reload specific watersheds
+# Force reload specific watersheds only
 docker compose exec server python manage.py load_watershed_data --force --runids <runid1> <runid2>
 ```
 
