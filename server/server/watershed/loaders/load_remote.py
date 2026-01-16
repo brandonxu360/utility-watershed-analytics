@@ -336,7 +336,11 @@ def _load_parquet_with_retry(url: str, verbose: bool = False) -> pd.DataFrame:
         except Exception as e:
             last_err = e
             if verbose:
-                print(f"    Retry {i+1}/{RETRY_ATTEMPTS} for parquet: {e}")
+                err_type = type(e).__name__
+                print(
+                    f'    Attempt {i + 1}/{RETRY_ATTEMPTS} to open DataSource failed '
+                    f'with {err_type}: {e}'
+                )
             _sleep_backoff(i)
     raise last_err
 
