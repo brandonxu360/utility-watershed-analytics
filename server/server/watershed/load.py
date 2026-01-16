@@ -12,7 +12,7 @@ def run(verbose=True, runids: Optional[list[str]] = None):
         runids: Optional list of runids to load. If None, all watersheds are loaded.
     """
     # Load all the watershed data using the remote method
-    load_from_remote(verbose=False, runids=runids)
+    load_from_remote(verbose=verbose, runids=runids)
 
     # Update the simplified_geom field using PostGIS simplify (potentially more efficient than using geos simplify in the application)
     with connection.cursor() as cursor:
