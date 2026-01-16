@@ -258,7 +258,11 @@ def load_from_remote(verbose=True, runids: Optional[list[str]] = None):
         return
 
     # Load watersheds
-    watershed_entry = manifest['Watersheds'][0]
+    watersheds = manifest.get('Watersheds')
+    if not watersheds:
+        print("WARNING: No 'Watersheds' entries found in manifest")
+        return
+    watershed_entry = watersheds[0]
     watershed_url = watershed_entry['url']
     watershed_target = watershed_entry.get('target')
     watershed_ds = _open_datasource(watershed_url, watershed_target, verbose)
