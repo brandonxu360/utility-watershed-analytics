@@ -77,15 +77,15 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
           `<span class="tooltip-bold"><strong>Hillslope ID</strong>
           <br/>TopazID: ${props.topazid ?? 'N/A'}, WeppID: ${props.weppid ?? 'N/A'}
           <br/><strong>Width:</strong>
-          ${props.width.toFixed(2) ?? 'N/A'} m
+          ${props.width?.toFixed(2) ?? 'N/A'} m
           <br/><strong>Length:</strong>
-          ${props.length.toFixed(2) ?? 'N/A'} m
+          ${props.length?.toFixed(2) ?? 'N/A'} m
           <br/><strong>Area:</strong>
           ${props.hillslope_area ?? 'N/A'} m²
           <br/><strong>Slope:</strong>
-          ${props.slope_scalar ? props.slope_scalar.toFixed(2) : 'N/A'}
+          ${props.slope_scalar?.toFixed(2) ?? 'N/A'}
           <br/><strong>Aspect:</strong>
-          ${props.aspect.toFixed(2) ?? 'N/A'}
+          ${props.aspect?.toFixed(2) ?? 'N/A'}
           <br/><strong>Soil:</strong>
           ${props.simple_texture ?? 'N/A'}</span>`,
           {

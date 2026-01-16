@@ -59,7 +59,7 @@ RETRY_ATTEMPTS = 6
 BASE_DELAY_S = 0.2
 
 def _sleep_backoff(i):
-    time.sleep(BASE_DELAY_S * (2 ** i))  # 1,2,4,8,16,32s
+    time.sleep(BASE_DELAY_S * (2 ** i))  # 0.2,0.4,0.8,1.6,3.2,6.4s for i=0..5
 
 
 def _get_local_path(target: str) -> Path:
