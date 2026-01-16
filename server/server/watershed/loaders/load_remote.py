@@ -55,6 +55,57 @@ channel_mapping = {
     #'geom': 'POLYGON'
 }
 
+# Parquet field mappings: model_field -> parquet_column
+# Each tuple is (model_field, parquet_column, type_converter)
+HILLSLOPES_FIELD_MAP = [
+    ('slope_scalar', 'slope_scalar', float),
+    ('length', 'length', float),
+    ('width', 'width', float),
+    ('direction', 'direction', float),
+    ('aspect', 'aspect', float),
+    ('hillslope_area', 'area', int),
+    ('elevation', 'elevation', float),
+    ('centroid_px', 'centroid_px', int),
+    ('centroid_py', 'centroid_py', int),
+    ('centroid_lon', 'centroid_lon', float),
+    ('centroid_lat', 'centroid_lat', float),
+]
+
+SOILS_FIELD_MAP = [
+    ('mukey', 'mukey', str),
+    ('soil_fname', 'fname', str),
+    ('soils_dir', 'soils_dir', str),
+    ('soil_build_date', 'build_date', str),
+    ('soil_desc', 'desc', str),
+    ('soil_color', 'color', str),
+    ('soil_area', 'area', float),
+    ('soil_pct_coverage', 'pct_coverage', float),
+    ('clay', 'clay', float),
+    ('sand', 'sand', float),
+    ('avke', 'avke', float),
+    ('ll', 'll', float),
+    ('bd', 'bd', float),
+    ('simple_texture', 'simple_texture', str),
+]
+
+LANDUSE_FIELD_MAP = [
+    ('landuse_key', 'key', int),
+    ('landuse_map', '_map', str),
+    ('man_fn', 'man_fn', str),
+    ('man_dir', 'man_dir', str),
+    ('landuse_desc', 'desc', str),
+    ('landuse_color', 'color', str),
+    ('landuse_area', 'area', float),
+    ('landuse_pct_coverage', 'pct_coverage', float),
+    ('cancov', 'cancov', float),
+    ('inrcov', 'inrcov', float),
+    ('rilcov', 'rilcov', float),
+    ('cancov_override', 'cancov_override', float),
+    ('inrcov_override', 'inrcov_override', float),
+    ('rilcov_override', 'rilcov_override', float),
+    ('disturbed_class', 'disturbed_class', str),
+]
+
 RETRY_ATTEMPTS = 6
 BASE_DELAY_S = 0.2
 
@@ -315,6 +366,42 @@ def _load_parquet(url: str, target: str = None, verbose: bool = False) -> pd.Dat
     return _load_parquet_with_retry(url, verbose)
 
 
+def _apply_field_mapping(obj, row: pd.Series, field_map: list) -> bool:
+    """
+    Apply a field mapping from a parquet row to a model object.
+    
+    Args:
+        obj: The model instance to update
+        row: A pandas Series containing the parquet data
+        field_map: List of (model_field, parquet_column, type_converter) tuples
+    
+    Returns:
+        True if any field was updated, False otherwise
+    """
+    updated = False
+    for model_field, parquet_col, converter in field_map:
+        value = row.get(parquet_col)
+        if pd.notna(value):
+            setattr(obj, model_field, converter(value))
+            updated = True
+        else:
+            setattr(obj, model_field, None)
+    return updated
+
+
+def _load_parquet_for_runid(entries: dict, runid: str, verbose: bool) -> Optional[pd.DataFrame]:
+    """Load parquet data for a specific runid, returning None on failure."""
+    if runid not in entries:
+        return None
+    try:
+        entry = entries[runid]
+        return _load_parquet(entry['url'], entry.get('target'), verbose)
+    except Exception as e:
+        if verbose:
+            print(f"    Warning: Could not load data for {runid}: {e}")
+        return None
+
+
 def _load_parquet_data(manifest: dict, loaded_runids: Optional[set[str]] = None, verbose: bool = True):
     """
     Load hillslopes, soils, and landuse parquet files and update subcatchment records.
@@ -325,136 +412,69 @@ def _load_parquet_data(manifest: dict, loaded_runids: Optional[set[str]] = None,
         loaded_runids: Optional set of runids to filter by
         verbose: Whether to print verbose output
     """
+    # Build lookup dictionaries for each data type
+    parquet_sources = {
+        'hillslopes': ({item['name']: item for item in manifest.get('Hillslopes', [])}, HILLSLOPES_FIELD_MAP),
+        'soils': ({item['name']: item for item in manifest.get('Soils', [])}, SOILS_FIELD_MAP),
+        'landuse': ({item['name']: item for item in manifest.get('Landuse', [])}, LANDUSE_FIELD_MAP),
+    }
     
-    # Process each runid
-    hillslopes_entries = {item['name']: item for item in manifest.get('Hillslopes', [])}
-    soils_entries = {item['name']: item for item in manifest.get('Soils', [])}
-    landuse_entries = {item['name']: item for item in manifest.get('Landuse', [])}
+    # Determine which runids to process
+    all_runids = set()
+    for entries, _ in parquet_sources.values():
+        all_runids |= set(entries.keys())
     
-    # Get all unique runids to process
-    all_runids = set(hillslopes_entries.keys()) | set(soils_entries.keys()) | set(landuse_entries.keys())
-    
-    # Filter by loaded_runids if specified
     if loaded_runids is not None:
-        all_runids = all_runids & loaded_runids
+        all_runids &= loaded_runids
     
     updated_count = 0
     skipped_count = 0
+    
+    # Collect all fields that might be updated for bulk_update
+    all_update_fields = [field for _, field_map in parquet_sources.values() for field, _, _ in field_map]
     
     for runid in all_runids:
         try:
             if verbose:
                 print(f"  Processing parquet data for {runid}...")
             
-            # Load parquet files for this runid
-            hillslopes_df = None
-            soils_df = None
-            landuse_df = None
+            # Load all parquet dataframes for this runid
+            dataframes = {}
+            for name, (entries, _) in parquet_sources.items():
+                df = _load_parquet_for_runid(entries, runid, verbose)
+                if df is not None:
+                    # Index by TopazID for O(1) lookups
+                    dataframes[name] = df.set_index('TopazID')
             
-            if runid in hillslopes_entries:
-                try:
-                    entry = hillslopes_entries[runid]
-                    hillslopes_df = _load_parquet(entry['url'], entry.get('target'), verbose)
-                except Exception as e:
-                    if verbose:
-                        print(f"    Warning: Could not load hillslopes for {runid}: {e}")
-            
-            if runid in soils_entries:
-                try:
-                    entry = soils_entries[runid]
-                    soils_df = _load_parquet(entry['url'], entry.get('target'), verbose)
-                except Exception as e:
-                    if verbose:
-                        print(f"    Warning: Could not load soils for {runid}: {e}")
-            
-            if runid in landuse_entries:
-                try:
-                    entry = landuse_entries[runid]
-                    landuse_df = _load_parquet(entry['url'], entry.get('target'), verbose)
-                except Exception as e:
-                    if verbose:
-                        print(f"    Warning: Could not load landuse for {runid}: {e}")
-            
-            # Skip if no data was loaded
-            if hillslopes_df is None and soils_df is None and landuse_df is None:
+            if not dataframes:
                 skipped_count += 1
                 continue
             
             # Get all subcatchments for this watershed
-            subcatchments = Subcatchment.objects.filter(watershed_id=runid)
+            subcatchments = list(Subcatchment.objects.filter(watershed_id=runid))
+            updated_subcatchments = []
             
-            # Update each subcatchment with parquet data
             for subcatchment in subcatchments:
                 topaz_id = subcatchment.topazid
-                updated = False
+                was_updated = False
                 
-                # Update from hillslopes data
-                if hillslopes_df is not None:
-                    hill_row = hillslopes_df[hillslopes_df['TopazID'] == topaz_id]
-                    if not hill_row.empty:
-                        hill_row = hill_row.iloc[0]
-                        subcatchment.slope_scalar = float(hill_row['slope_scalar']) if pd.notna(hill_row['slope_scalar']) else None
-                        subcatchment.length = float(hill_row['length']) if pd.notna(hill_row['length']) else None
-                        subcatchment.width = float(hill_row['width']) if pd.notna(hill_row['width']) else None
-                        subcatchment.direction = float(hill_row['direction']) if pd.notna(hill_row['direction']) else None
-                        subcatchment.aspect = float(hill_row['aspect']) if pd.notna(hill_row['aspect']) else None
-                        subcatchment.hillslope_area = int(hill_row['area']) if pd.notna(hill_row['area']) else None
-                        subcatchment.elevation = float(hill_row['elevation']) if pd.notna(hill_row['elevation']) else None
-                        subcatchment.centroid_px = int(hill_row['centroid_px']) if pd.notna(hill_row['centroid_px']) else None
-                        subcatchment.centroid_py = int(hill_row['centroid_py']) if pd.notna(hill_row['centroid_py']) else None
-                        subcatchment.centroid_lon = float(hill_row['centroid_lon']) if pd.notna(hill_row['centroid_lon']) else None
-                        subcatchment.centroid_lat = float(hill_row['centroid_lat']) if pd.notna(hill_row['centroid_lat']) else None
-                        updated = True
+                # Apply each data source's field mapping
+                for name, (_, field_map) in parquet_sources.items():
+                    if name in dataframes and topaz_id in dataframes[name].index:
+                        row = dataframes[name].loc[topaz_id]
+                        if _apply_field_mapping(subcatchment, row, field_map):
+                            was_updated = True
                 
-                # Update from soils data
-                if soils_df is not None:
-                    soil_row = soils_df[soils_df['TopazID'] == topaz_id]
-                    if not soil_row.empty:
-                        soil_row = soil_row.iloc[0]
-                        subcatchment.mukey = str(soil_row['mukey']) if pd.notna(soil_row['mukey']) else None
-                        subcatchment.soil_fname = str(soil_row['fname']) if pd.notna(soil_row['fname']) else None
-                        subcatchment.soils_dir = str(soil_row['soils_dir']) if pd.notna(soil_row['soils_dir']) else None
-                        subcatchment.soil_build_date = str(soil_row['build_date']) if pd.notna(soil_row['build_date']) else None
-                        subcatchment.soil_desc = str(soil_row['desc']) if pd.notna(soil_row['desc']) else None
-                        subcatchment.soil_color = str(soil_row['color']) if pd.notna(soil_row['color']) else None
-                        subcatchment.soil_area = float(soil_row['area']) if pd.notna(soil_row['area']) else None
-                        subcatchment.soil_pct_coverage = float(soil_row['pct_coverage']) if pd.notna(soil_row['pct_coverage']) else None
-                        subcatchment.clay = float(soil_row['clay']) if pd.notna(soil_row['clay']) else None
-                        subcatchment.sand = float(soil_row['sand']) if pd.notna(soil_row['sand']) else None
-                        subcatchment.avke = float(soil_row['avke']) if pd.notna(soil_row['avke']) else None
-                        subcatchment.ll = float(soil_row['ll']) if pd.notna(soil_row['ll']) else None
-                        subcatchment.bd = float(soil_row['bd']) if pd.notna(soil_row['bd']) else None
-                        subcatchment.simple_texture = str(soil_row['simple_texture']) if pd.notna(soil_row['simple_texture']) else None
-                        updated = True
-                
-                # Update from landuse data
-                if landuse_df is not None:
-                    land_row = landuse_df[landuse_df['TopazID'] == topaz_id]
-                    if not land_row.empty:
-                        land_row = land_row.iloc[0]
-                        subcatchment.landuse_key = int(land_row['key']) if pd.notna(land_row['key']) else None
-                        subcatchment.landuse_map = str(land_row['_map']) if pd.notna(land_row['_map']) else None
-                        subcatchment.man_fn = str(land_row['man_fn']) if pd.notna(land_row['man_fn']) else None
-                        subcatchment.man_dir = str(land_row['man_dir']) if pd.notna(land_row['man_dir']) else None
-                        subcatchment.landuse_desc = str(land_row['desc']) if pd.notna(land_row['desc']) else None
-                        subcatchment.landuse_color = str(land_row['color']) if pd.notna(land_row['color']) else None
-                        subcatchment.landuse_area = float(land_row['area']) if pd.notna(land_row['area']) else None
-                        subcatchment.landuse_pct_coverage = float(land_row['pct_coverage']) if pd.notna(land_row['pct_coverage']) else None
-                        subcatchment.cancov = float(land_row['cancov']) if pd.notna(land_row['cancov']) else None
-                        subcatchment.inrcov = float(land_row['inrcov']) if pd.notna(land_row['inrcov']) else None
-                        subcatchment.rilcov = float(land_row['rilcov']) if pd.notna(land_row['rilcov']) else None
-                        subcatchment.cancov_override = float(land_row['cancov_override']) if pd.notna(land_row['cancov_override']) else None
-                        subcatchment.inrcov_override = float(land_row['inrcov_override']) if pd.notna(land_row['inrcov_override']) else None
-                        subcatchment.rilcov_override = float(land_row['rilcov_override']) if pd.notna(land_row['rilcov_override']) else None
-                        subcatchment.disturbed_class = str(land_row['disturbed_class']) if pd.notna(land_row['disturbed_class']) else None
-                        updated = True
-                
-                if updated:
-                    subcatchment.save()
-                    updated_count += 1
+                if was_updated:
+                    updated_subcatchments.append(subcatchment)
+            
+            # Bulk update all modified subcatchments at once
+            if updated_subcatchments:
+                Subcatchment.objects.bulk_update(updated_subcatchments, all_update_fields, batch_size=500)
+                updated_count += len(updated_subcatchments)
             
             if verbose:
-                print(f"    Updated {subcatchments.count()} subcatchments for {runid}")
+                print(f"    Updated {len(updated_subcatchments)} subcatchments for {runid}")
                 
         except Exception as e:
             print(f"  Error processing parquet data for {runid}: {e}")
