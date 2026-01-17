@@ -1,11 +1,11 @@
 import { StateCreator } from 'zustand';
-import { Properties } from '../../types/WatershedFeature';
+import { SubcatchmentProperties } from '../../types/SubcatchmentProperties';
 import { AppState } from '../store';
 
 export interface HillslopeSlice {
     selectedHillslopeId: number | null;
-    selectedHillslopeProps: Properties | null;
-    setSelectedHillslope: (id: number | null, props?: Properties | null) => void;
+    selectedHillslopeProps: SubcatchmentProperties | null;
+    setSelectedHillslope: (id: number | null, props?: SubcatchmentProperties | null) => void;
     clearSelectedHillslope: () => void;
 }
 

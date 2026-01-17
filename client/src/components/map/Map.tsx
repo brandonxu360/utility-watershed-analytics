@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useMatch, useNavigate } from '@tanstack/react-router';
 import { MapEffect } from '../../utils/map/MapEffectUtil';
 import { fetchChannels, fetchSubcatchments, fetchWatersheds } from '../../api/api';
-import { Properties } from '../../types/WatershedFeature';
+import { SubcatchmentProperties } from '../../types/SubcatchmentProperties';
+import { WatershedProperties } from '../../types/WatershedProperties';
 import { LeafletMouseEvent } from 'leaflet';
 import { watershedOverviewRoute } from '../../routes/router';
 import { useChoropleth } from '../../hooks/useChoropleth';
@@ -101,7 +102,7 @@ export default function Map(): JSX.Element {
 
   // Memoize style functions
   const watershedStyle = useCallback(
-    (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) =>
+    (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties> | undefined) =>
       feature?.id?.toString() === watershedID ? selectedStyle : defaultStyle,
     [watershedID]
   );
@@ -123,7 +124,7 @@ export default function Map(): JSX.Element {
   }, [landuse, memoSubcatchments, setLanduseLegendMap]);
 
   const subcatchmentStyle = useCallback(
-    (feature: GeoJSON.Feature<GeoJSON.Geometry, Properties> | undefined) => {
+    (feature: GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties> | undefined) => {
       // Choropleth coloring takes precedence (uses weppid since RAP data is aggregated by wepp_id)
       if (choroplethActive && feature?.properties?.weppid) {
         const choroplethStyle = getChoroplethStyle(feature.properties.weppid);

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useMatch, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query';
 import { fetchWatersheds } from '../../../api/api';
-import { WatershedFeature } from '../../../types/WatershedFeature';
+import { WatershedProperties } from '../../../types/WatershedProperties';
 import { watershedOverviewRoute } from '../../../routes/router';
 import { useAppStore } from '../../../store/store';
 import './Watershed.css'
@@ -48,7 +48,7 @@ export default function WatershedOverview() {
     const watershed = useMemo(() => {
         if (!watersheds?.features || !watershedID) return null;
         return watersheds.features.find(
-            (feature: WatershedFeature) => feature.id && feature.id.toString() === watershedID
+            (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>) => feature.id && feature.id.toString() === watershedID
         );
     }, [watersheds?.features, watershedID]);
 
@@ -81,8 +81,11 @@ export default function WatershedOverview() {
                     <strong>Area:</strong> {watershed.properties.shape_area ? `${watershed.properties.shape_area.toFixed(2)}` : "N/A"}
                 </p>
                 <p>
-                    <strong>Number of Customers:</strong>{" "}
+                    <strong>Number of Customers:</strong>{" "} {/* Placeholder for now - no data for now */}
                     {watershed.properties.num_customers ?? "N/A"}
+                </p>
+                <p>
+                    <strong>Source Name:</strong> {watershed.properties.srcname ?? "N/A"}
                 </p>
                 <p>
                     <strong>Source Type:</strong> {watershed.properties.srctype ?? "N/A"}
