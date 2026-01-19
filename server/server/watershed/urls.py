@@ -9,6 +9,6 @@ router.register('', WatershedViewSet, basename='watershed')
 # Make router routes accessible to project URL configuration
 urlpatterns = [
     path('', include(router.urls)),
-    path('<slug:webcloud_run_id>/subcatchments', WatershedSubcatchmentListView.as_view(), name='watershed-subcatchments'),
-    path('<slug:webcloud_run_id>/channels', WatershedChannelListView.as_view(), name='watershed-channels')
+    path('<str:runid>/subcatchments', WatershedSubcatchmentListView.as_view(), name='watershed-subcatchments'),
+    path('<str:runid>/channels', WatershedChannelListView.as_view(), name='watershed-channels')
 ]

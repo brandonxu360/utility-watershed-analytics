@@ -135,8 +135,8 @@ export default function Map(): JSX.Element {
     if (landuse && memoSubcatchments) {
       const legend: Record<string, string> = {};
       for (const feature of memoSubcatchments.features) {
-        const color = feature.properties?.color;
-        const desc = feature.properties?.desc;
+        const color = feature.properties?.landuse_color;
+        const desc = feature.properties?.landuse_desc;
         if (color && desc && !(color in legend)) {
           legend[color] = desc;
         }
@@ -158,11 +158,11 @@ export default function Map(): JSX.Element {
       }
 
       // Land use coloring
-      if (landuse && feature?.properties?.color) {
+      if (landuse && feature?.properties?.landuse_color) {
         return {
           color: '#2c2c2c',
           weight: 0.75,
-          fillColor: feature.properties.color,
+          fillColor: feature.properties.landuse_color,
           fillOpacity: 1,
         };
       }

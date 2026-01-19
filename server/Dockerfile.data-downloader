@@ -24,5 +24,10 @@ COPY data-manifest.yaml .
 # Make the script executable
 RUN chmod +x data-downloader.py
 
-# Default command
-CMD ["python", "data-downloader.py"]
+# ENTRYPOINT sets the base command, CMD provides default arguments
+# The CMD can be overridden when running the container:
+#   docker compose run --rm data-downloader          # uses --dev (default)
+#   docker compose run --rm data-downloader --all    # overrides with --all
+#   docker compose run --rm data-downloader --runids wa-0 wa-1
+ENTRYPOINT ["python", "data-downloader.py"]
+CMD ["--dev"]
