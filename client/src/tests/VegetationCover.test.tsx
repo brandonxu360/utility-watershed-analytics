@@ -91,7 +91,7 @@ describe("VegetationCover", () => {
     await act(async () => {
       useAppStore.setState({
         selectedHillslopeId: 42,
-        selectedHillslopeProps: { cancov: 20, inrcov: 10, dom: 5, width: 12 } as Partial<SubcatchmentProperties> as SubcatchmentProperties,
+        selectedHillslopeProps: {} as SubcatchmentProperties,
       });
     });
 
