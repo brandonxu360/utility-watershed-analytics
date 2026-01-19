@@ -451,8 +451,8 @@ def _load_parquet_data(manifest: dict, loaded_runids: Optional[set[str]] = None,
             for name, (entries, _) in parquet_sources.items():
                 df = _load_parquet_for_runid(entries, runid, verbose)
                 if df is not None:
-                    # Index by TopazID for O(1) lookups
-                    dataframes[name] = df.set_index('TopazID')
+                    # Index by topaz_id for O(1) lookups
+                    dataframes[name] = df.set_index('topaz_id')
             
             if not dataframes:
                 skipped_count += 1
