@@ -1,15 +1,15 @@
-export interface Geometry {
-  type: "MultiPolygon" | "Polygon" | string;
-  coordinates: number[][][][];
-}
-
-export interface Properties {
+/**
+ * Properties specific to subcatchment/hillslope features.
+ * These features represent individual hillslopes within a watershed.
+ * Based on the backend API schema for /api/watershed/{id}/subcatchments endpoint.
+ */
+export interface SubcatchmentProperties {
   // Core identifiers
   topazid: number;
   weppid: number;
   watershed: string;
   
-  // Hillslope data fields
+  // Hillslope geometry and characteristics
   slope_scalar: number | null;
   length: number | null;
   width: number | null;
@@ -55,10 +55,3 @@ export interface Properties {
   rilcov_override: number | null;
   disturbed_class: string | null;
 }
-
-export type WatershedFeature = {
-  type: "Feature";
-  id: number | string;
-  geometry: Geometry;
-  properties: Properties;
-};
