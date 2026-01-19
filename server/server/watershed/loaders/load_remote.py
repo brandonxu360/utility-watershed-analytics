@@ -410,6 +410,24 @@ def _load_parquet_for_runid(entries: dict, runid: str, verbose: bool) -> Optiona
         return None
 
 
+def _find_topaz_column(df: pd.DataFrame) -> Optional[str]:
+    """
+    Find the TopazID column in a DataFrame, trying multiple possible names. If there are duplicate topaz id columns,
+    the first one found will suffice as they should be identical.
+    
+    Args:
+        df: The DataFrame to search
+    
+    Returns:
+        The name of the TopazID column, or None if not found
+    """
+    possible_names = ['TopazID', 'topaz_id', 'topazid', 'TOPAZID', 'Topaz_ID', 'topaz_ID']
+    for name in possible_names:
+        if name in df.columns:
+            return name
+    return None
+
+
 def _load_parquet_data(manifest: dict, loaded_runids: Optional[set[str]] = None, verbose: bool = True):
     """
     Load hillslopes, soils, and landuse parquet files and update subcatchment records.
@@ -451,8 +469,12 @@ def _load_parquet_data(manifest: dict, loaded_runids: Optional[set[str]] = None,
             for name, (entries, _) in parquet_sources.items():
                 df = _load_parquet_for_runid(entries, runid, verbose)
                 if df is not None:
-                    # Index by topaz_id for O(1) lookups
-                    dataframes[name] = df.set_index('topaz_id')
+                    # Find and index by TopazID column (handle different naming conventions)
+                    topaz_col = _find_topaz_column(df)
+                    if topaz_col is None:
+                        print(f"    Warning: No TopazID column found in {name} for {runid}. Available columns: {df.columns.tolist()}")
+                        continue
+                    dataframes[name] = df.set_index(topaz_col)
             
             if not dataframes:
                 skipped_count += 1
