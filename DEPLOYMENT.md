@@ -66,15 +66,39 @@ ssh your_netid@unstable.wepp.cloud
 > You may need to connect to a VPN or authenticate to a firewall first.
 
 ### Project Location
+
+The project is managed by the GitHub Actions self-hosted runner and is located at:
+
 ```bash
-cd /workdir/utility-watershed-analytics
+cd /workdir/actions-runner/_work/utility-watershed-analytics/utility-watershed-analytics
 ```
+
+> **Note:** The nested directory structure is standard for GitHub Actions runners. The runner manages this directory, so avoid making manual changes that could conflict with automated deployments.
 
 ## Data Management
 
 Data loading is **not automated** by CI/CD and must be done manually when data updates are needed.
 
 The loader uses a **local-first approach**: it checks for cached files first, then falls back to fetching from remote URLs.
+
+### Running Long Data Operations
+
+Data loading can take a significant amount of time. Use `tmux` to run commands in a persistent session that survives SSH disconnections:
+
+```bash
+# Start a new tmux session
+tmux new -s data-load
+
+# Run your data loading command inside tmux
+cd /workdir/actions-runner/_work/utility-watershed-analytics/utility-watershed-analytics
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
+
+# Detach from session: Press Ctrl+B, then D
+# You can now safely disconnect from SSH
+
+# Later, reattach to check progress
+tmux attach -t data-load
+```
 
 ### Download Data Files
 
@@ -112,6 +136,28 @@ docker compose -f compose.prod.yml --profile data-management run --rm data-downl
 # 2. Load data into database
 docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
 ```
+
+### Major Schema or Data Source Updates
+
+When updating data sources or making significant schema changes, you may need to fully reset and reload the data:
+
+```bash
+# 1. Stop services and remove containers (⚠️ this WIPES the database - see note below)
+docker compose -f compose.prod.yml down
+
+# 2. Re-run the deploy action from GitHub Actions UI to rebuild containers
+
+# 3. After deployment completes, reload all watershed data
+tmux new -s data-load
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --force
+```
+
+> ⚠️ **Important:** The database currently has NO persistent volume configured. Running `docker compose down` removes the database container and **all data is lost**. This is acceptable while only loading watershed data, but a persistent volume must be added before storing user data.
+
+> **Future Consideration:** Before adding user data:
+> 1. Add a named volume for PostgreSQL data persistence in `compose.prod.yml`
+> 2. Implement migration strategies that preserve user data while updating watershed/geospatial data
+> 3. Consider separating user data into distinct tables with foreign key relationships that can survive watershed data reloads
 
 ## Useful Commands
 
