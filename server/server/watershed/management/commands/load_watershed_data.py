@@ -18,11 +18,17 @@ class Command(BaseCommand):
             action='store_true',
             help='Show what would be loaded without actually loading data',
         )
+        parser.add_argument(
+            '--runids',
+            nargs='+',
+            help='Load only watersheds with the specified runids (space-separated)',
+        )
     
     def handle(self, *args, **options):
         verbosity = options['verbosity']
         force = options['force']
         dry_run = options['dry_run']
+        runids = options.get('runids')
         
         if dry_run:
             self.stdout.write(
@@ -50,14 +56,21 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write('Would load watershed data with current configuration')
             self.stdout.write(f'  Verbosity: {verbosity}')
+            if runids:
+                self.stdout.write(f'  Filter by runids: {", ".join(runids)}')
+            else:
+                self.stdout.write('  Loading all watersheds')
             return
         
         try:
-            self.stdout.write('Loading watershed data...')
+            if runids:
+                self.stdout.write(f'Loading watershed data for runids: {", ".join(runids)}...')
+            else:
+                self.stdout.write('Loading all watershed data...')
             
             with transaction.atomic():
                 # Run the main data loading function (includes geometry simplification)
-                run(verbose=verbosity > 1)
+                run(verbose=verbosity > 1, runids=runids)
             
             # Report results
             final_watershed_count = Watershed.objects.count()

@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
+import { RouterProvider } from '@tanstack/react-router';
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAppStore } from "../store/store";
+import { router } from '../routes/router';
 import Home from "../pages/home/Home";
 
 const mockNavigate = vi.fn();
@@ -86,6 +88,13 @@ describe("Home Component Tests", () => {
             render(<Home />);
             expect(screen.getByTestId("bottom-panel")).toBeInTheDocument();
             expect(screen.getByText("Test Panel Content")).toBeInTheDocument();
+        });
+
+        it('shows the small-screen notice when width < 768px', () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (window as any).innerWidth = 500;
+            render(<RouterProvider router={router} />);
+            expect(screen.getByText(/Best viewed on larger screens/i)).toBeInTheDocument();
         });
     });
 });

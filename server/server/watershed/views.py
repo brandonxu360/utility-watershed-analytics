@@ -42,8 +42,10 @@ class WatershedSubcatchmentListView(generics.ListAPIView):
 
     # Override this method so only subcatchments belonging to the relevant watershed are returned
     def get_queryset(self):
-        watershed_id = self.kwargs['webcloud_run_id']
-        return Subcatchment.objects.filter(watershed_id=watershed_id)
+        runid = self.kwargs['runid']
+        # Subcatchment model references Watershed via the 'watershed' FK.
+        # Watershed has the 'runid' primary key, so filter through the relation.
+        return Subcatchment.objects.filter(watershed__runid=runid)
     
 class WatershedChannelListView(generics.ListAPIView):
     """
@@ -53,5 +55,7 @@ class WatershedChannelListView(generics.ListAPIView):
 
     # Override this method so only channels belonging to the relevant watershed are returned
     def get_queryset(self):
-        webcloud_run_id = self.kwargs['webcloud_run_id']
-        return Channel.objects.filter(watershed_id=webcloud_run_id)
+        runid = self.kwargs['runid']
+        # Channel model references Watershed via the 'watershed' FK.
+        # Watershed has the 'runid' primary key, so filter through the relation.
+        return Channel.objects.filter(watershed__runid=runid)

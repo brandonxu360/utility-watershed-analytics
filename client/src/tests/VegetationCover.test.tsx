@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react"
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
-import { Properties } from "../types/WatershedFeature";
+import { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import { useAppStore } from "../store/store";
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
@@ -91,7 +91,7 @@ describe("VegetationCover", () => {
     await act(async () => {
       useAppStore.setState({
         selectedHillslopeId: 42,
-        selectedHillslopeProps: { cancov: 20, inrcov: 10, dom: 5, width_m: 12 } as Properties,
+        selectedHillslopeProps: {} as SubcatchmentProperties,
       });
     });
 

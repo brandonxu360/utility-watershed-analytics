@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FaListUl, FaXmark, FaEye, FaExpand } from "react-icons/fa6";
+import { toast } from 'react-toastify';
 import './Legend.css'
 
 /**
@@ -41,13 +42,13 @@ export default function LegendControl() {
                 <FaExpand
                   className="legend-icon"
                   style={{ cursor: 'pointer' }}
-                  onClick={() => alert('Show only icon clicked')}
+                  onClick={() => toast.error('Feature not implemented yet')}
                   data-testid="tier1-show-icon"
                 />
                 <FaEye
                   className="legend-icon"
                   style={{ cursor: 'pointer' }}
-                  onClick={() => alert('Hide icon clicked')}
+                  onClick={() => toast.error('Feature not implemented yet')}
                   data-testid="tier1-hide-icon"
                 />
               </div>
@@ -61,13 +62,13 @@ export default function LegendControl() {
                 <FaExpand
                   className="legend-icon"
                   style={{ cursor: 'pointer' }}
-                  onClick={() => alert('Show only icon clicked')}
+                  onClick={() => toast.error('Feature not implemented yet')}
                   data-testid="tier2-show-icon"
                 />
                 <FaEye
                   className="legend-icon"
                   style={{ cursor: 'pointer' }}
-                  onClick={() => alert('Hide icon clicked')}
+                  onClick={() => toast.error('Feature not implemented yet')}
                   data-testid="tier2-hide-icon"
                 />
               </div>

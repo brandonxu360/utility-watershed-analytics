@@ -2,96 +2,120 @@
 This document provides information on how the Utility Watershed Analytics application is deployed in a production environment and provides guidelines for maintaining and managing the setup.
 
 ## Hosting Environment
-The application is deployed on a virtual machine (VM) provided by the [University of Idaho's Research Computing and Data Services (RCDS)](https://hpc.uidaho.edu/index.html), which provides managed services including proactive security patching, firewall management, software installations, and full user support.
+The application is deployed on a virtual machine (VM) provided by the [University of Idaho's Research Computing and Data Services (RCDS)](https://hpc.uidaho.edu/index.html).
 
 **Server Details:**
 * **Hostname:** wepp3
 * **OS:** Ubuntu 24.04.2 LTS
 * **Virtualization:** VMware
-* **Public Domain: `unstable.wepp.cloud`** 
+* **Public Domain:** `unstable.wepp.cloud`
 
-## Deployment Overview
+## CI/CD Overview
+
+Deployments are automated via **GitHub Actions** with a self-hosted runner on the production VM.
+
+### Workflow Summary
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `client-ci.yml` | PR to `main` (client changes) | Build & test frontend |
+| `server-ci.yml` | PR to `main` (server changes) | Build & test backend |
+| `deploy.yml` | Push to `main` | Build & deploy to production |
+
+### Automatic Deployment
+
+When code is pushed to the `main` branch:
+
+1. **CI checks run** - Server and client CI workflows validate the build
+2. **Deploy job starts** - Runs on the self-hosted runner on the production VM
+3. **Environment setup** - Creates `.env` from GitHub secrets (`PRODUCTION_ENV`)
+4. **Frontend rebuild** - Builds React static files into shared volume
+5. **Services restart** - Rebuilds server container and restarts Caddy
+6. **Health check** - Verifies services are running
+7. **Cleanup** - Removes temporary `.env` file
+
+### Manual Deployment
+
+You can also trigger deployment manually from the GitHub Actions UI:
+
+1. Go to **Actions** → **Build & Deploy Client/Server**
+2. Click **Run workflow** → Select `main` branch → **Run workflow**
+
+## Production Architecture
+
 The production deployment consists of four main services orchestrated with Docker Compose:
 
 1. **Frontend Build** - Builds React static files into a shared volume
-2. **Backend (Django)** - API server
+2. **Backend (Django)** - API server running with Gunicorn
 3. **Database (PostgreSQL + PostGIS)** - Geospatial database
 4. **Reverse Proxy (Caddy)** - Serves static frontend files and proxies API requests
 
 The frontend React application is built in a dedicated container that outputs static files to a shared Docker volume. Caddy serves these static files directly while proxying API routes (`/api/*`, `/admin/*`, `/silk/*`) to the Django backend.
 
-To ensure the Docker Compose stack autostarts, a [systemd service](/utility-watershed-analytics.service) is configured on the host VM.
+To ensure the Docker Compose stack autostarts on VM reboot, a [systemd service](utility-watershed-analytics.service) is configured on the host VM.
 
-## Maintaining the Deployment
+## Server Access & Manual Operations
+
+For tasks that require direct server access (data management, debugging, etc.):
 
 ### Accessing the Server
 SSH into the VM using your RCDS-provided credentials:
 ```bash
 ssh your_netid@unstable.wepp.cloud
 ```
-> You may need to connect to a VPN server or authenticate to a fireware first to successfully connect to the server.
+> You may need to connect to a VPN or authenticate to a firewall first.
 
-### Navigating to the Project
-The application is located at:
+### Project Location
+
+The project is managed by the GitHub Actions self-hosted runner and is located at:
+
 ```bash
-cd /workdir/utility-watershed-analytics
+cd /workdir/actions-runner/_work/utility-watershed-analytics/utility-watershed-analytics
 ```
 
-### Initial Deployment
-Build the frontend, download data, start services, and load data:
+> **Note:** The nested directory structure is standard for GitHub Actions runners. The runner manages this directory, so avoid making manual changes that could conflict with automated deployments.
+
+## Data Management
+
+Data loading is **not automated** by CI/CD and must be done manually when data updates are needed.
+
+The loader uses a **local-first approach**: it checks for cached files first, then falls back to fetching from remote URLs.
+
+### Running Long Data Operations
+
+Data loading can take a significant amount of time. Use `tmux` to run commands in a persistent session that survives SSH disconnections:
+
 ```bash
-# 1. Build frontend static files
-docker compose -f compose.prod.yml run --rm --build frontend-build
+# Start a new tmux session
+tmux new -s data-load
 
-# 2. Download data files
-docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
-
-# 3. Start all services (database needs to be running for data loading)
-docker compose -f compose.prod.yml up -d
-
-# 4. Load data into database
+# Run your data loading command inside tmux
+cd /workdir/actions-runner/_work/utility-watershed-analytics/utility-watershed-analytics
 docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
+
+# Detach from session: Press Ctrl+B, then D
+# You can now safely disconnect from SSH
+
+# Later, reattach to check progress
+tmux attach -t data-load
 ```
 
-### Deploying New Changes
-Navigate to the project directory and pull the latest changes:
+### Download Data Files
+
+The data downloader defaults to `--dev` mode. Override by passing arguments after the service name:
+
 ```bash
-cd /workdir/utility-watershed-analytics
-git pull origin main
+# Download ALL production data (required for production)
+docker compose -f compose.prod.yml --profile data-management run --rm data-downloader --all
+
+# Or download specific watersheds by runid
+docker compose -f compose.prod.yml --profile data-management run --rm data-downloader --runids <runid1> <runid2>
 ```
 
-#### For Frontend Changes:
-Rebuild frontend and restart services
-```bash
-docker compose -f compose.prod.yml run --rm --build frontend-build
-docker compose -f compose.prod.yml restart caddy
-```
-
-#### For Backend/Infrastructure Changes (Preserving Database):
-```bash
-# Restart only application containers (server + caddy)
-docker compose -f compose.prod.yml restart server caddy
-
-# Or rebuild and restart for major changes
-docker compose -f compose.prod.yml up --build server caddy -d
-```
-
-### Data Management
-The application includes a containerized data downloader service for managing watershed data files. Data is expected to be managed at the developer's discretion, so less automation exists in this area.
-
-#### Download Data Files
-To download the latest watershed data files:
+### Load Data into Database
 
 ```bash
-# Download data files to shared volume
-docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
-```
-
-#### Load Data into Database
-After downloading data files, load them into the database:
-
-```bash
-# Load data (first time or updates)
+# Load all data (first time or updates)
 docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
 
 # Preview what would be loaded (safe to test)
@@ -99,42 +123,83 @@ docker compose -f compose.prod.yml exec server python manage.py load_watershed_d
 
 # Force reload even if data already exists
 docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --force
-
-# Load with detailed output for debugging
-docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --verbosity=2
 ```
 
-#### Complete Data Setup (Download + Load)
+### Complete Data Setup (Download + Load)
+
 For initial deployment or major data updates:
 
 ```bash
-# 1. Download all data files
-docker compose -f compose.prod.yml --profile data-management run --rm data-downloader
+# 1. Download all production data files
+docker compose -f compose.prod.yml --profile data-management run --rm data-downloader --all
 
 # 2. Load data into database
 docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
 ```
 
-### Useful Commands
+### Major Schema or Data Source Updates
 
-**View service logs:**
-```bash
-docker compose -f compose.prod.yml logs -f [service_name]
-```
+When updating data sources or making significant schema changes, you may need to fully reset and reload the data:
 
-**Check service status:**
 ```bash
-docker compose -f compose.prod.yml ps
-```
-
-**Stop all services:**
-```bash
+# 1. Stop services and remove containers (⚠️ this WIPES the database - see note below)
 docker compose -f compose.prod.yml down
+
+# 2. Re-run the deploy action from GitHub Actions UI to rebuild containers
+
+# 3. After deployment completes, reload all watershed data
+tmux new -s data-load
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --force
 ```
 
-**Start services:**
+> ⚠️ **Important:** The database currently has NO persistent volume configured. Running `docker compose down` removes the database container and **all data is lost**. This is acceptable while only loading watershed data, but a persistent volume must be added before storing user data.
+
+> **Future Consideration:** Before adding user data:
+> 1. Add a named volume for PostgreSQL data persistence in `compose.prod.yml`
+> 2. Implement migration strategies that preserve user data while updating watershed/geospatial data
+> 3. Consider separating user data into distinct tables with foreign key relationships that can survive watershed data reloads
+
+## Useful Commands
+
 ```bash
+# View service logs
+docker compose -f compose.prod.yml logs -f [service_name]
+
+# Check service status
+docker compose -f compose.prod.yml ps
+
+# Stop all services
+docker compose -f compose.prod.yml down
+
+# Start services
 docker compose -f compose.prod.yml up -d
+
+# Restart a specific service
+docker compose -f compose.prod.yml restart server
+```
+
+## Troubleshooting
+
+### Deployment Failed
+Check the GitHub Actions logs for the failed workflow run. Common issues:
+- Docker build failures
+- Missing environment secrets
+- Service health check failures
+
+### Services Not Starting
+```bash
+# Check container status and logs
+docker compose -f compose.prod.yml ps
+docker compose -f compose.prod.yml logs server
+```
+
+### Database Issues
+```bash
+# Check database connectivity
+docker compose -f compose.prod.yml exec server python manage.py check
+
+# Run migrations manually if needed
+docker compose -f compose.prod.yml exec server python manage.py migrate
 ```
 
 ## Acknowledgements
