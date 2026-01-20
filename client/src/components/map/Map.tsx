@@ -95,7 +95,7 @@ export default function Map(): JSX.Element {
     if (subcatchments.features?.length === 0) {
       if (subcatchment) setSubcatchment(false);
       if (landuse) setLanduse(false);
-      if (subcatchment || landuse) toast.error('No subcatchment data available');
+      toast.error('No subcatchment data available');
     }
   }, [watershedID, subcatchments, subLoading, subcatchments?.features?.length, subcatchment, landuse, setSubcatchment, setLanduse]);
 
