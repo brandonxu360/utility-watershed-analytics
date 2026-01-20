@@ -31,20 +31,20 @@ const mockWatershedData = {
             id: "test-watershed-123",
             properties: {
                 pws_name: "Test Watershed",
-                county: "Test County",
-                area_m2: 50000,
+                county_nam: "Test County",
+                shape_area: 50000,
                 num_customers: 1500,
-                source_type: "Surface Water",
+                srctype: "Surface Water",
             },
         },
         {
             id: "test-watershed-456",
             properties: {
                 pws_name: "Another Watershed",
-                county: "Another County",
-                area_m2: 75000,
+                county_nam: "Another County",
+                shape_area: 75000,
                 num_customers: 2500,
-                source_type: "Ground Water",
+                srctype: "Ground Water",
             },
         },
     ],
@@ -187,12 +187,12 @@ describe("WatershedOverview", () => {
             });
         });
 
-        it("renders area converted to hectares", async () => {
+        it("renders area value", async () => {
             renderWithProviders(<WatershedOverview />);
 
             await waitFor(() => {
-                // 50000 m² = 5 ha
-                expect(screen.getByText(/5\.00 ha/)).toBeInTheDocument();
+                // shape_area is displayed as-is with toFixed(2)
+                expect(screen.getByText(/50000\.00/)).toBeInTheDocument();
             });
         });
 
@@ -279,10 +279,10 @@ describe("WatershedOverview", () => {
                         id: "test-watershed-na",
                         properties: {
                             pws_name: "Test Watershed NA",
-                            county: null,
-                            area_m2: null,
+                            county_nam: null,
+                            shape_area: null,
                             num_customers: null,
-                            source_type: null,
+                            srctype: null,
                         },
                     },
                 ],

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { toast } from "react-toastify";
 import SearchControl from "../components/map/controls/Search/Search";
 
 const mockSetView = vi.fn();
@@ -10,6 +11,14 @@ vi.mock("react-leaflet", async (importOriginal) => {
         useMap: () => ({ setView: mockSetView }),
     });
 });
+
+vi.mock("react-toastify", () => ({
+    toast: {
+        error: vi.fn(),
+    },
+}));
+
+const toastErrorMock = vi.mocked(toast.error);
 
 describe("Search Component Tests", () => {
     beforeEach(() => {
@@ -62,16 +71,15 @@ describe("Search Component Tests", () => {
             expect((screen.getByLabelText("Search bar") as HTMLInputElement).value).toBe("");
         });
 
-        it("alerts and does not call setView on invalid input", () => {
-            const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => { });
+        it("shows toast error and does not call setView on invalid input", () => {
             render(<SearchControl />);
 
             fireEvent.click(screen.getByRole("button", { name: /search location/i }));
             fireEvent.change(screen.getByLabelText("Search bar"), { target: { value: "not coords" } });
             fireEvent.click(screen.getByRole("button", { name: /go button/i }));
 
-            expect(alertSpy).toHaveBeenCalledTimes(1);
-            expect(alertSpy).toHaveBeenCalledWith(
+            expect(toastErrorMock).toHaveBeenCalledTimes(1);
+            expect(toastErrorMock).toHaveBeenCalledWith(
                 'Invalid coordinates. Please enter in "latitude, longitude" format.'
             );
             expect(mockSetView).not.toHaveBeenCalled();

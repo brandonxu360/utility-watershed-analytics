@@ -1,10 +1,21 @@
 import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { toast } from "react-toastify";
 import LegendControl from "../components/map/controls/Legend/Legend";
 
-const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => { });
+vi.mock("react-toastify", () => ({
+    toast: {
+        error: vi.fn(),
+    },
+}));
+
+const toastErrorMock = vi.mocked(toast.error);
 
 describe("Legend Component Tests", () => {
+    beforeEach(() => {
+        toastErrorMock.mockClear();
+    });
+
     describe("rendering", () => {
         it("renders without crashing", () => {
             render(<LegendControl />);
@@ -19,7 +30,7 @@ describe("Legend Component Tests", () => {
     });
 
     describe("interactions", () => {
-        it("shows alert when show icons are clicked", () => {
+        it("shows toast error when show icons are clicked", () => {
             const { getByTestId } = render(<LegendControl />);
             const legendButton = getByTestId("legend-toggle-button");
             fireEvent.click(legendButton);
@@ -31,11 +42,11 @@ describe("Legend Component Tests", () => {
 
             tier1Icons.forEach((icon) => {
                 fireEvent.click(icon);
-                expect(alertMock).toHaveBeenCalledWith(expect.stringContaining('Show only icon clicked'));
+                expect(toastErrorMock).toHaveBeenCalledWith('Feature not implemented yet');
             });
         });
 
-        it("shows alert when hide icons are clicked", () => {
+        it("shows toast error when hide icons are clicked", () => {
             const { getByTestId } = render(<LegendControl />);
             const legendButton = getByTestId("legend-toggle-button");
             fireEvent.click(legendButton);
@@ -47,7 +58,7 @@ describe("Legend Component Tests", () => {
 
             tier2Icons.forEach((icon) => {
                 fireEvent.click(icon);
-                expect(alertMock).toHaveBeenCalledWith(expect.stringContaining('Hide icon clicked'));
+                expect(toastErrorMock).toHaveBeenCalledWith('Feature not implemented yet');
             });
         });
     });

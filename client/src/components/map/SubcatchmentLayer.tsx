@@ -82,17 +82,17 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
           `<span class="tooltip-bold"><strong>Hillslope ID</strong>
           <br/>TopazID: ${props?.topazid ?? 'N/A'}, WeppID: ${props?.weppid ?? 'N/A'}
           <br/><strong>Width:</strong>
-          ${props.width?.toFixed(2) ?? 'N/A'} m
+          ${width} m
           <br/><strong>Length:</strong>
-          ${props.length?.toFixed(2) ?? 'N/A'} m
+          ${length} m
           <br/><strong>Area:</strong>
-          ${props.hillslope_area ?? 'N/A'} m²
+          ${area} ha
           <br/><strong>Slope:</strong>
-          ${props.slope_scalar?.toFixed(2) ?? 'N/A'}
+          ${slope}
           <br/><strong>Aspect:</strong>
-          ${props.aspect?.toFixed(2) ?? 'N/A'}
+          ${aspect}
           <br/><strong>Soil:</strong>
-          ${props.simple_texture ?? 'N/A'}</span>`,
+          ${props?.simple_texture ?? 'N/A'}</span>`,
           {
             className: 'tooltip',
             offset: [12, -50],
