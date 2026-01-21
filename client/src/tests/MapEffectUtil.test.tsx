@@ -14,10 +14,10 @@ vi.mock("../utils/map/MapUtil", () => ({
 }));
 
 const mockTempLayer = { getBounds: vi.fn() };
-const mockGeoJSON = vi.fn((_feature: unknown) => mockTempLayer);
+const mockGeoJSON = vi.fn().mockReturnValue(mockTempLayer);
 vi.mock("leaflet", () => ({
     default: {
-        geoJSON: (feature: unknown) => mockGeoJSON(feature),
+        geoJSON: (...args: unknown[]) => mockGeoJSON(...args),
     },
 }));
 
