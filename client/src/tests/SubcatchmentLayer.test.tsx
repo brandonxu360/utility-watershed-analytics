@@ -3,10 +3,10 @@ import { render, act } from "@testing-library/react";
 import { useAppStore } from "../store/store";
 import { highlightedStyle, selectedStyle } from "../components/map/constants";
 import type { PathOptions } from "leaflet";
-import type { Properties } from "../types/WatershedFeature";
+import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import SubcatchmentLayer from "../components/map/SubcatchmentLayer";
 
-type Feature = GeoJSON.Feature<GeoJSON.Geometry, Properties>;
+type Feature = GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>;
 
 const geometry: GeoJSON.Point = { type: "Point", coordinates: [0, 0] };
 
@@ -18,7 +18,7 @@ vi.mock("../utils/map/MapUtil", () => ({
 }));
 
 type GeoJsonProps = {
-    data: GeoJSON.FeatureCollection<GeoJSON.Geometry, Properties>;
+    data: GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>;
     style: (feature: Feature | undefined) => PathOptions;
     onEachFeature: (feature: Feature, layer: MockLayer) => void;
 };
@@ -36,7 +36,7 @@ vi.mock("react-leaflet", async (importOriginal) => {
     });
 });
 
-function createFeature(id: string, overrides?: Partial<Properties>): Feature {
+function createFeature(id: string, overrides?: Partial<SubcatchmentProperties>): Feature {
     return {
         type: "Feature",
         id,
@@ -44,14 +44,14 @@ function createFeature(id: string, overrides?: Partial<Properties>): Feature {
         properties: {
             topazid: 101,
             weppid: 202,
-            width_m: 10,
-            length_m: 20,
-            area_m2: 10000,
+            width: 10,
+            length: 20,
+            hillslope_area: 10000,
             slope_scalar: 0.25,
             aspect: 1.23,
-            soil: "Loam",
+            simple_texture: "Loam",
             ...(overrides ?? {}),
-        } as Properties,
+        } as SubcatchmentProperties,
     };
 }
 
@@ -103,7 +103,7 @@ describe("SubcatchmentLayer", () => {
     const data = {
         type: "FeatureCollection",
         features: [createFeature("1")],
-    } satisfies GeoJSON.FeatureCollection<GeoJSON.Geometry, Properties>;
+    } satisfies GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -138,7 +138,7 @@ describe("SubcatchmentLayer", () => {
         expect(String(html)).toContain("10.00");
         expect(String(html)).toContain("20.00");
         expect(String(html)).toContain("1.23");
-        expect(String(html)).toContain("1.00 ha");
+        expect(String(html)).toContain("10000 m²");
         expect(opts).toMatchObject({ className: "tooltip" });
     });
 
@@ -189,7 +189,7 @@ describe("SubcatchmentLayer", () => {
     it("switches selection between features and restores previous style", () => {
         render(
             <SubcatchmentLayer
-                data={{ type: "FeatureCollection", features: [createFeature("1"), createFeature("2", { topazid: 202 })] } satisfies GeoJSON.FeatureCollection<GeoJSON.Geometry, Properties>}
+                data={{ type: "FeatureCollection", features: [createFeature("1"), createFeature("2", { topazid: 202 })] } satisfies GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>}
                 style={styleFn}
                 choroplethActive={false}
                 choroplethKey="k1"
@@ -408,27 +408,27 @@ describe("SubcatchmentLayer", () => {
         expect(String(html)).toContain("Width:");
         expect(String(html)).toContain("N/A m");
         expect(String(html)).toContain("Area:");
-        expect(String(html)).toContain("N/A ha");
+        expect(String(html)).toContain("N/A m²");
     });
 
-    it("does not call setSelectedHillslope when properties/topazid is missing", () => {
+    it("calls setSelectedHillslope with undefined topazid when topazid is missing", () => {
         render(
             <SubcatchmentLayer data={data} style={styleFn} choroplethActive={false} choroplethKey="k1" />
         );
 
-        const featureMissingProps = {
+        const featureMissingTopazid = {
             type: "Feature",
             id: "1",
             geometry,
-            properties: undefined,
+            properties: { weppid: 202 },
         } as unknown as Feature;
 
         const layer = createLayer();
-        lastGeoJsonProps!.onEachFeature(featureMissingProps, layer);
+        lastGeoJsonProps!.onEachFeature(featureMissingTopazid, layer);
 
         layer.__handlers.click?.({ target: layer });
 
-        expect(setSelectedHillslope).not.toHaveBeenCalled();
+        expect(setSelectedHillslope).toHaveBeenCalledWith(undefined, { weppid: 202 });
         expect(mockZoomToFeature).toHaveBeenCalledWith(mockMap, layer);
     });
 
@@ -477,32 +477,26 @@ describe("SubcatchmentLayer", () => {
         expect(layer.closeTooltip).toHaveBeenCalledTimes(1);
     });
 
-    it("covers previous-selection restore with selectedLayerRef.current.feature = null", () => {
+    it("covers previous-selection restore when switching between features", () => {
         render(
             <SubcatchmentLayer
-                data={{ type: "FeatureCollection", features: [createFeature("1"), createFeature("2", { topazid: 202 })] } satisfies GeoJSON.FeatureCollection<GeoJSON.Geometry, Properties>}
+                data={{ type: "FeatureCollection", features: [createFeature("1"), createFeature("2", { topazid: 202 })] } satisfies GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>}
                 style={styleFn}
                 choroplethActive={false}
                 choroplethKey="k1"
             />
         );
 
-        const featureMissingProps = {
-            type: "Feature",
-            id: "1",
-            geometry,
-            properties: undefined,
-        } as unknown as Feature;
-
+        const feature1 = createFeature("1");
         const feature2 = createFeature("2", { topazid: 202 });
 
         const layer1 = createLayer();
         const layer2 = createLayer();
 
-        lastGeoJsonProps!.onEachFeature(featureMissingProps, layer1);
+        lastGeoJsonProps!.onEachFeature(feature1, layer1);
         lastGeoJsonProps!.onEachFeature(feature2, layer2);
 
-        // First selection stores feature=null in selectedLayerRef
+        // First selection
         layer1.__handlers.click?.({ target: layer1 });
 
         // Second selection triggers restore of previous selection style
@@ -512,9 +506,8 @@ describe("SubcatchmentLayer", () => {
 
         layer2.__handlers.click?.({ target: layer2 });
 
-        // The restore path calls styleRef.current(undefined)
-        expect(styleFn).toHaveBeenCalledWith(undefined);
-        expect(layer1.setStyle).toHaveBeenCalledWith(styleFn(undefined));
+        expect(styleFn).toHaveBeenCalledWith(feature1);
+        expect(layer1.setStyle).toHaveBeenCalledWith(styleFn(feature1));
     });
 
     it("event handlers use latest choroplethActive/style after rerender", async () => {
