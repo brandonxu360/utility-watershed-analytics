@@ -93,9 +93,14 @@ export default function Map(): JSX.Element {
     if (!watershedID || subLoading || !subcatchments) return;
 
     if (subcatchments.features?.length === 0) {
-      if (subcatchment) setSubcatchment(false);
-      if (landuse) setLanduse(false);
-      toast.error('No subcatchment data available');
+      if (subcatchment) {
+        setSubcatchment(false);
+        toast.error('No subcatchment data available');
+      }
+      if (landuse) {
+        setLanduse(false);
+        toast.error('No land use data available');
+      }
     }
   }, [watershedID, subcatchments, subLoading, subcatchments?.features?.length, subcatchment, landuse, setSubcatchment, setLanduse]);
 
