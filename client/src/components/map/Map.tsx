@@ -92,15 +92,13 @@ export default function Map(): JSX.Element {
   useEffect(() => {
     if (!watershedID || subLoading || !subcatchments) return;
 
-    if (subcatchments.features?.length === 0) {
-      if (subcatchment) {
-        setSubcatchment(false);
-        toast.error('No subcatchment data available');
-      }
-      if (landuse) {
-        setLanduse(false);
-        toast.error('No land use data available');
-      }
+    const noData = subcatchments.features?.length === 0;
+    const featuresEnabled = subcatchment || landuse;
+
+    if (noData && featuresEnabled) {
+      if (subcatchment) setSubcatchment(false);
+      if (landuse) setLanduse(false);
+      toast.error('No subcatchment data available');
     }
   }, [watershedID, subcatchments, subLoading, subcatchments?.features?.length, subcatchment, landuse, setSubcatchment, setLanduse]);
 
