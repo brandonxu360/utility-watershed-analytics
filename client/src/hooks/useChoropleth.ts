@@ -19,12 +19,6 @@ export const CHOROPLETH_CONFIG: Record<Exclude<ChoroplethType, 'none'>, {
         colormap: 'et-blue',
         bands: [1, 4, 5, 6],
     },
-    soilMoisture: {
-        title: 'Soil Moisture',
-        unit: '% cover',
-        colormap: 'winter',
-        bands: [2, 3],
-    },
     vegetationCover: {
         title: 'Vegetation Cover',
         unit: '% cover',
