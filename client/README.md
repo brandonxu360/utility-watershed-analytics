@@ -6,6 +6,7 @@ This section provides helpful commands for working within the frontend developme
 
 - `npm run build` - Build the application for production.
 - `npm run test` - Run the test suite with Vitest.
+- `npm run test <path_to_file>` - Run a specific test suite with Vitest.
 - `npm run coverage` - Run tests and generate a code coverage report in the `coverage/` folder.
 - `npm run lint` - Run ESLint to find potential issues in the codebase.
 
