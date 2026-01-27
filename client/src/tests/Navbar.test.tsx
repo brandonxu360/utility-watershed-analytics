@@ -5,9 +5,11 @@ import Navbar from "../components/navbar/Navbar";
 vi.mock("@tanstack/react-router", async (importOriginal) => {
     const actual = await importOriginal();
     return Object.assign({}, actual, {
-        Link: ({ children, to, ...props }: { children: React.ReactNode; to: string; [key: string]: unknown }) => (
-            <a href={to} {...props}>{children}</a>
-        ),
+        Link: ({ children, to, activeProps, ...props }: { children: React.ReactNode; to: string; activeProps?:
+        unknown; [key: string]: unknown }) => {
+            void activeProps;
+            return <a href={to} {...props}>{children}</a>;
+        },
     });
 });
 
