@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import BottomPanel from "../components/bottom-panels/BottomPanel";
 
@@ -9,11 +9,6 @@ vi.mock("react-icons/fa6", () => ({
 describe("BottomPanel", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-    });
-
-    afterEach(() => {
-        document.removeEventListener("mousemove", vi.fn());
-        document.removeEventListener("mouseup", vi.fn());
     });
 
     describe("rendering", () => {
