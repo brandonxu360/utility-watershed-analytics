@@ -11,8 +11,8 @@ vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
         activeTab: string;
         handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
     }) => (
-        <div data-testid="tab-content">
-            <div data-testid="active-tab">{activeTab}</div>
+        <div role="tabpanel" aria-label="Data layers tab content">
+            <span>{activeTab}</span>
             <label>
                 Subcatchments
                 <input aria-label="subcatchment" type="checkbox" id="subcatchment" onChange={handleChange} />
@@ -57,15 +57,16 @@ describe("DataLayersControl", () => {
     it("renders and is closed by default", () => {
         render(<DataLayersControl />);
         expect(screen.getByText(/Data Layers/i)).toBeInTheDocument();
-        expect(screen.queryByTestId("tab-content")).not.toBeInTheDocument();
+        expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
     });
 
     it("opens when clicking the header and shows default active tab", () => {
         render(<DataLayersControl />);
         fireEvent.click(screen.getByText(/Data Layers/i));
 
-        expect(screen.getByTestId("tab-content")).toBeInTheDocument();
-        expect(screen.getByTestId("active-tab")).toHaveTextContent("Hill Slopes");
+        const tabpanel = screen.getByRole("tabpanel");
+        expect(tabpanel).toBeInTheDocument();
+        expect(tabpanel).toHaveTextContent("Hill Slopes");
     });
 
     it("switches active tab when clicking a nav tab", () => {
@@ -79,7 +80,8 @@ describe("DataLayersControl", () => {
             fireEvent.click(surfaceTab);
         }
 
-        expect(screen.getByTestId("active-tab")).toHaveTextContent("Surface Data");
+        const tabpanel = screen.getByRole("tabpanel");
+        expect(tabpanel).toHaveTextContent("Surface Data");
     });
 
     it("handles subcatchment toggle and performs cleanup on uncheck", () => {

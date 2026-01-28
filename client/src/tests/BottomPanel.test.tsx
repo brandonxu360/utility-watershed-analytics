@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import BottomPanel from "../components/bottom-panels/BottomPanel";
 
 vi.mock("react-icons/fa6", () => ({
-    FaGripLines: () => <span data-testid="grip-lines-icon">GripLines</span>,
+    FaGripLines: () => <span aria-hidden="true">GripLines</span>,
 }));
 
 describe("BottomPanel", () => {
@@ -40,7 +40,7 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            expect(screen.getByTestId("grip-lines-icon")).toBeInTheDocument();
+            expect(screen.getByText("GripLines")).toBeInTheDocument();
         });
 
         it("renders children correctly", () => {

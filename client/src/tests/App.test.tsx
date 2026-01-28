@@ -6,7 +6,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
     const actual = await importOriginal();
     return Object.assign({}, actual, {
         RouterProvider: ({ router }: { router: unknown }) => (
-            <div data-testid="router-provider" data-router={router ? "provided" : "missing"}>
+            <div role="application" aria-label="Router" data-router={router ? "provided" : "missing"}>
                 Router Provider Mock
             </div>
         ),
@@ -20,12 +20,12 @@ vi.mock("../routes/router", () => ({
 describe("App Component Tests", () => {
     it("renders without crashing", () => {
         render(<App />);
-        expect(screen.getByTestId("router-provider")).toBeInTheDocument();
+        expect(screen.getByRole("application", { name: /router/i })).toBeInTheDocument();
     });
 
     it("provides router to RouterProvider", () => {
         render(<App />);
-        const routerProvider = screen.getByTestId("router-provider");
+        const routerProvider = screen.getByRole("application", { name: /router/i });
         expect(routerProvider).toHaveAttribute("data-router", "provided");
     });
 });
