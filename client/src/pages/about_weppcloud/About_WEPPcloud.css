@@ -1,0 +1,68 @@
+.weppcloud-container {
+    display: flex;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  
+  .weppcloud-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow-y: scroll;
+  }
+  
+  .side-panel {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    background: rgba(18, 18, 18, 0.9);
+    color: var(--clr-primary-100);
+  }
+  
+  .side-panel-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 10px 30px 0;
+    box-sizing: border-box;
+  }
+  
+  .side-panel h2 {
+    font-size: var(--fs-300);
+    font-weight: bold;
+    margin-bottom: var(--size-400);
+  }
+  
+  .side-panel h3 {
+    margin-bottom: var(--size-300);
+  }
+  
+  .side-panel h3,
+  .side-panel strong {
+    font-size: var(--fs-200);
+    font-weight: bold;
+  }
+  
+  .side-panel p {
+    font-size: var(--fs-200);
+    margin-bottom: var(--size-400);
+  }
+
+  #nutshell {
+    margin-top: 20px;
+  }
+  
+  #nutshell p {
+    margin-bottom: 20px;
+  }
+  
+  #nutshell span {
+    font-weight: 800;
+    color: #000;
+    background: #eee;
+    padding: 3px 6px;
+    border-radius: 4px;
+  }

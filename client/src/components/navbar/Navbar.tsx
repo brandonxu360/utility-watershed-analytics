@@ -6,7 +6,7 @@ const Navbar = () => {
     <nav>
       <div className="navbar-left">
         <a href="/" className="logo">
-          Utility Watershed Analytics
+          FireWISE Watersheds 
         </a>
       </div>
       <div className="navbar-right">
@@ -14,6 +14,16 @@ const Navbar = () => {
           <li>
             <Link to="/" activeProps={{ style: { color: 'cyan' } }}>
               Home
+            </Link>
+          </li>
+          <li>
+            <Link to="/team" activeProps={{ style: { color: 'cyan' } }}>
+              Team
+            </Link>
+          </li>
+          <li>
+            <Link to="/about" activeProps={{ style: { color: 'cyan' } }}>
+              About
             </Link>
           </li>
           <li>
