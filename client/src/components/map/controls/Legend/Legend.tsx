@@ -38,16 +38,22 @@ export default function LegendControl() {
                 <span className="legend-text" style={{ fontWeight: 'bold' }}>Tier 1 watersheds</span>
               </div>
               <div className="watershed-right">
-                <FaExpand
-                  className="legend-icon"
-                  style={{ cursor: 'pointer' }}
+                <button
+                  className="legend-icon-button"
+                  aria-label="Show Tier 1 watersheds"
+                  title="Show Tier 1 watersheds"
                   onClick={() => toast.error('Feature not implemented yet')}
-                />
-                <FaEye
-                  className="legend-icon"
-                  style={{ cursor: 'pointer' }}
+                >
+                  <FaExpand className="legend-icon" />
+                </button>
+                <button
+                  className="legend-icon-button"
+                  aria-label="Hide Tier 1 watersheds"
+                  title="Hide Tier 1 watersheds"
                   onClick={() => toast.error('Feature not implemented yet')}
-                />
+                >
+                  <FaEye className="legend-icon" />
+                </button>
               </div>
             </div>
             <div className="watershed-container">
@@ -56,16 +62,22 @@ export default function LegendControl() {
                 <span className="legend-text" style={{ fontWeight: 'bold' }}>Tier 2 watersheds</span>
               </div>
               <div className="watershed-right">
-                <FaExpand
-                  className="legend-icon"
-                  style={{ cursor: 'pointer' }}
+                <button
+                  className="legend-icon-button"
+                  aria-label="Show Tier 2 watersheds"
+                  title="Show Tier 2 watersheds"
                   onClick={() => toast.error('Feature not implemented yet')}
-                />
-                <FaEye
-                  className="legend-icon"
-                  style={{ cursor: 'pointer' }}
+                >
+                  <FaExpand className="legend-icon" />
+                </button>
+                <button
+                  className="legend-icon-button"
+                  aria-label="Hide Tier 2 watersheds"
+                  title="Hide Tier 2 watersheds"
                   onClick={() => toast.error('Feature not implemented yet')}
-                />
+                >
+                  <FaEye className="legend-icon" />
+                </button>
               </div>
             </div>
           </div>

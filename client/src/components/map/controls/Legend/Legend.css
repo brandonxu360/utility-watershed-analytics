@@ -43,6 +43,12 @@
     gap: var(--size-300);
 }
 
+.legend-icon-button {
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
 .legend-content div {
     display: flex;
     align-items: center;

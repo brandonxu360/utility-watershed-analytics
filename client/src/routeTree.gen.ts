@@ -8,127 +8,28 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as RouterImport } from './routes/router'
-import { Route as RegisterRouteImport } from './routes/RegisterRoute'
-import { Route as LoginRouteImport } from './routes/LoginRoute'
-
-// Create/Update Routes
-
-const RouterRoute = RouterImport.update({
-  id: '/router',
-  path: '/router',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const RegisterRouteRoute = RegisterRouteImport.update({
-  id: '/RegisterRoute',
-  path: '/RegisterRoute',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const LoginRouteRoute = LoginRouteImport.update({
-  id: '/LoginRoute',
-  path: '/LoginRoute',
-  getParentRoute: () => rootRoute,
-} as any)
-
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/LoginRoute': {
-      id: '/LoginRoute'
-      path: '/LoginRoute'
-      fullPath: '/LoginRoute'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/RegisterRoute': {
-      id: '/RegisterRoute'
-      path: '/RegisterRoute'
-      fullPath: '/RegisterRoute'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/router': {
-      id: '/router'
-      path: '/router'
-      fullPath: '/router'
-      preLoaderRoute: typeof RouterImport
-      parentRoute: typeof rootRoute
-    }
-  }
-}
-
-// Create and export the route tree
-
-export interface FileRoutesByFullPath {
-  '/LoginRoute': typeof LoginRouteRoute
-  '/RegisterRoute': typeof RegisterRouteRoute
-  '/router': typeof RouterRoute
-}
-
-export interface FileRoutesByTo {
-  '/LoginRoute': typeof LoginRouteRoute
-  '/RegisterRoute': typeof RegisterRouteRoute
-  '/router': typeof RouterRoute
-}
-
+export interface FileRoutesByFullPath {}
+export interface FileRoutesByTo {}
 export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/LoginRoute': typeof LoginRouteRoute
-  '/RegisterRoute': typeof RegisterRouteRoute
-  '/router': typeof RouterRoute
+  __root__: typeof rootRouteImport
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/LoginRoute' | '/RegisterRoute' | '/router'
+  fullPaths: never
   fileRoutesByTo: FileRoutesByTo
-  to: '/LoginRoute' | '/RegisterRoute' | '/router'
-  id: '__root__' | '/LoginRoute' | '/RegisterRoute' | '/router'
+  to: never
+  id: '__root__'
   fileRoutesById: FileRoutesById
 }
+export interface RootRouteChildren {}
 
-export interface RootRouteChildren {
-  LoginRouteRoute: typeof LoginRouteRoute
-  RegisterRouteRoute: typeof RegisterRouteRoute
-  RouterRoute: typeof RouterRoute
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {}
 }
 
-const rootRouteChildren: RootRouteChildren = {
-  LoginRouteRoute: LoginRouteRoute,
-  RegisterRouteRoute: RegisterRouteRoute,
-  RouterRoute: RouterRoute,
-}
-
-export const routeTree = rootRoute
+const rootRouteChildren: RootRouteChildren = {}
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/LoginRoute",
-        "/RegisterRoute",
-        "/router"
-      ]
-    },
-    "/LoginRoute": {
-      "filePath": "LoginRoute.tsx"
-    },
-    "/RegisterRoute": {
-      "filePath": "RegisterRoute.tsx"
-    },
-    "/router": {
-      "filePath": "router.tsx"
-    }
-  }
-}
-ROUTE_MANIFEST_END */
