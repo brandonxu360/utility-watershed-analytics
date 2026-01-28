@@ -100,10 +100,17 @@ export default function WatershedOverview() {
                 <div className='accordionGroup' key={watershedID}>
                     <button
                         className='actionButton'
-                        aria-label='View Calibrated WEPP Results'
-                        title='View Calibrated WEPP Results'
+                        aria-label='View Uncalibrated WEPP Results'
+                        title='View Uncalibrated WEPP Results'
+                        onClick={() =>
+                            window.open(
+                                `https://wepp.cloud/weppcloud/runs/${watershedID}/disturbed9002_wbt/gl-dashboard`,
+                                '_blank',
+                                'noopener,noreferrer'
+                            )
+                        }
                     >
-                        View Calibrated WEPP Results
+                        View Uncalibrated WEPP Results
                     </button>
 
                     <button
