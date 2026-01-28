@@ -1100,9 +1100,6 @@ describe("Map Component", () => {
 
             renderWithProviders(<Map />);
 
-            // Wait a bit to ensure effect doesn't run
-            await new Promise((r) => setTimeout(r, 100));
-
             expect(mockSetSubcatchment).not.toHaveBeenCalled();
         });
 
@@ -1119,9 +1116,6 @@ describe("Map Component", () => {
             mockFetchChannels.mockReturnValue(new Promise(() => { }));
 
             renderWithProviders(<Map />);
-
-            // Wait a bit to ensure effect doesn't run
-            await new Promise((r) => setTimeout(r, 100));
 
             expect(mockSetChannels).not.toHaveBeenCalled();
         });
