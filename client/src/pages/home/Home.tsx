@@ -16,6 +16,7 @@ const useStyles = tss.create(() => ({
     display: 'flex',
     flex: 1,
     height: 'calc(100vh - 64px)',
+    overflow: 'hidden',
   },
   sidePanel: {
     display: 'flex',
@@ -37,6 +38,7 @@ const useStyles = tss.create(() => ({
     flex: 1,
     minHeight: 0,
     position: 'relative',
+    overflow: 'hidden',
   },
   map: {
     width: '100%',
