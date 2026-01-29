@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { FaXmark } from "react-icons/fa6";
+import { tss } from "tss-react";
+import { useTheme } from '@mui/material/styles';
 import { useAppStore } from "../../store/store";
 import { VegetationBandType } from "../../store/slices/choroplethSlice";
 import { useMatch } from '@tanstack/react-router';
@@ -9,9 +10,13 @@ import { AggregatedRapRow } from "../../api/types";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { ChoroplethScale } from "../ChoroplethScale";
 import { endYear, startYear } from "../../utils/constants";
+import type { ThemeMode } from '../../utils/theme';
 import fetchRap from '../../api/rapApi';
 import Select from "../select/Select";
-import "./BottomPanel.css";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from '@mui/icons-material/Close';
 
 type RapStatus = {
     state: 'loading' | 'ready' | 'error';
@@ -19,6 +24,50 @@ type RapStatus = {
 };
 
 type VegetationOption = "All" | "Shrub" | "Tree";
+
+const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+    titleBar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        margin: '1rem 1.75rem',
+    },
+    vegCoverSelector: {
+        display: 'flex',
+        alignItems: 'center',
+        width: 'auto',
+        minWidth: 180,
+        gap: '1.25rem',
+    },
+    dateSelector: {
+        display: 'flex',
+        alignItems: 'center',
+        width: 'auto',
+        minWidth: 180,
+        gap: '1.25rem',
+    },
+    optionAlign: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        marginRight: '0.25rem',
+    },
+    optionAlignLabel: {
+        display: 'block',
+        whiteSpace: 'nowrap',
+        fontSize: '.875rem',
+    },
+    closeButton: {
+        backgroundColor: mode.colors.error,
+        color: mode.colors.primary100,
+        borderRadius: 2,
+        fontSize: '0.75rem',
+        cursor: 'pointer',
+        '&:hover': {
+            backgroundColor: mode.colors.error,
+        },
+    },
+}));
 
 export const VegetationCover: React.FC = () => {
     const {
@@ -41,10 +90,8 @@ export const VegetationCover: React.FC = () => {
 
     const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
     const watershedID = match?.params.webcloudRunId ?? null;
-    // Temporary run id override for the current query engine dataset (hardcoded until new data is available)
-    // This should be removed when the app is pointed at the updated runs or when a mapping
-    // from route watershed id -> run id is available.
-    const RUN_ID_OVERRIDE = 'or,wa-108';
+    // Extract run ID from the watershed URL slug (last part after ;;)
+    const runId = watershedID ? watershedID.split(';;').pop() : null;
 
     // Map UI option to band type
     const vegetationOptionToBand: Record<VegetationOption, VegetationBandType> = {
@@ -107,9 +154,9 @@ export const VegetationCover: React.FC = () => {
 
             try {
                 const rows = selectedHillslopeId
-                    ? await fetchRap({ mode: 'hillslope', topazId: selectedHillslopeId, runIdOrPath: RUN_ID_OVERRIDE, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
+                    ? await fetchRap({ mode: 'hillslope', topazId: selectedHillslopeId, runIdOrPath: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
                     : watershedID
-                        ? await fetchRap({ mode: 'watershed', weppId: 108, runIdOrPath: RUN_ID_OVERRIDE, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
+                        ? await fetchRap({ mode: 'watershed', weppId: 108, runIdOrPath: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
                         : null;
 
                 if (!mounted) return;
@@ -154,12 +201,16 @@ export const VegetationCover: React.FC = () => {
         ? `${vegetationOption} Coverage - Hillslope ${selectedHillslopeId} (${selectedYear})`
         : `${vegetationOption} Coverage (${selectedYear})`;
 
+    const theme = useTheme();
+    const mode = (theme as { mode: ThemeMode }).mode;
+    const { classes } = useStyles({ mode });
+
     return (
-        <div>
-            <div className="titleBar">
-                <div className="vegCoverSelector">
-                    <div className="option-align">
-                        <label htmlFor="veg-cover-title">Vegetation Cover:</label>
+        <Box>
+            <Box className={classes.titleBar}>
+                <Box className={classes.vegCoverSelector}>
+                    <Box className={classes.optionAlign}>
+                        <Typography className={classes.optionAlignLabel}>Vegetation Cover:</Typography>
                         <Select
                             id="veg-cover-title"
                             value={vegetationOption}
@@ -167,12 +218,12 @@ export const VegetationCover: React.FC = () => {
                             options={["All", "Shrub", "Tree"]}
                             ariaLabel="Select vegetation type"
                         />
-                    </div>
-                </div>
+                    </Box>
+                </Box>
 
-                <div className="dateSelector">
-                    <div className="option-align">
-                        <label htmlFor="veg-year">Select Year:</label>
+                <Box className={classes.dateSelector}>
+                    <Box className={classes.optionAlign}>
+                        <Typography className={classes.optionAlignLabel}>Select Year:</Typography>
                         <Select
                             id="veg-year"
                             value={selectedYear}
@@ -180,17 +231,19 @@ export const VegetationCover: React.FC = () => {
                             options={['All', ...years.slice().reverse()]}
                             ariaLabel="Select vegetation year"
                         />
-                    </div>
-                    <FaXmark className="vegCloseButton" onClick={() => {
+                    </Box>
+                    <IconButton className={classes.closeButton} onClick={() => {
                         clearSelectedHillslope();
                         setSubcatchment(false);
                         resetChoropleth();
                         closePanel();
-                    }} />
-                </div>
-            </div>
+                    }}>
+                        <CloseIcon />
+                    </IconButton>
+                </Box>
+            </Box>
 
-            {rapStatus.state === 'loading' && <div style={{ textAlign: 'center' }}>Loading vegetation data…</div>}
+            {rapStatus.state === 'loading' && <Typography align="center">Loading vegetation data…</Typography>}
 
             <CoverageLineChart
                 data={chartData}
@@ -199,16 +252,16 @@ export const VegetationCover: React.FC = () => {
             />
 
             {config && !choroplethLoading && choroplethRange && (
-                <div style={{ marginTop: '32px' }}>
+                <Box style={{ marginTop: '32px' }}>
                     <ChoroplethScale
                         colormap={config.colormap}
                         range={choroplethRange}
                         unit={config.unit}
                         style={{ padding: '0 1rem', marginBottom: '0.5rem' }}
                     />
-                </div>
+                </Box>
             )}
-        </div>
+        </Box>
     );
 };
 
