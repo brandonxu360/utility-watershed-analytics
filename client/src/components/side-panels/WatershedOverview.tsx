@@ -55,25 +55,42 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
             borderColor: '#646cff',
         },
     },
+    skeletonClose: {
+        marginTop: mode.space[300],
+        marginBottom: mode.space[400],
+    },
+    skeletonText: {
+        marginBottom: mode.space[200],
+    },
+    skeletonParagraph: {
+        marginBottom: mode.space[300],
+    },
+    skeletonGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: mode.space[300],
+        marginTop: mode.space[600],
+    },
 }));
 
 /** 
  * Renders the "skeleton" version of the watershed panel while loading.
  */
 function SkeletonWatershedPanel({ mode }: { mode: ThemeMode }) {
+    const { classes } = useStyles({ mode });
     return (
         <Box>
-            <Skeleton variant="rectangular" width="20%" height="1.75rem" sx={{ marginTop: mode.space[300], marginBottom: mode.space[400] }} />
-            <Skeleton variant="text" width="60%" height="1.75rem" sx={{ marginBottom: mode.space[200] }} />
+            <Skeleton variant="rectangular" width="20%" height="1.75rem" className={classes.skeletonClose} />
+            <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonText} />
 
-            <Skeleton variant="text" width="90%" height="1.75rem" sx={{ marginBottom: mode.space[300] }} />
-            <Skeleton variant="text" width="60%" height="1.75rem" sx={{ marginBottom: mode.space[300] }} />
-            <Skeleton variant="text" width="60%" height="1.75rem" sx={{ marginBottom: mode.space[300] }} />
-            <Skeleton variant="text" width="60%" height="1.75rem" sx={{ marginBottom: mode.space[300] }} />
-            <Skeleton variant="text" width="60%" height="1.75rem" sx={{ marginBottom: mode.space[300] }} />
-            <Skeleton variant="text" width="90%" height="1.75rem" sx={{ marginBottom: mode.space[300] }} />
+            <Skeleton variant="text" width="90%" height="1.75rem" className={classes.skeletonParagraph} />
+            <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonParagraph} />
+            <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonParagraph} />
+            <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonParagraph} />
+            <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonParagraph} />
+            <Skeleton variant="text" width="90%" height="1.75rem" className={classes.skeletonParagraph} />
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: mode.space[300], marginTop: mode.space[600] }}>
+            <Box className={classes.skeletonGroup}>
                 <Skeleton variant="rectangular" width="100%" height="3rem" />
                 <Skeleton variant="rectangular" width="100%" height="3rem" />
                 <Skeleton variant="rectangular" width="100%" height="3rem" />
