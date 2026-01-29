@@ -6,7 +6,7 @@
  */
 export default function HomeSidePanelContent(): JSX.Element {
   return (
-    <div className="home-panel">
+    <>
       <h2>Explore Watershed Analytics</h2>
       <p>
         Visualize and analyze hydrologic and environmental data for watersheds across the western United States.
@@ -22,6 +22,6 @@ export default function HomeSidePanelContent(): JSX.Element {
         Start analyzing now to uncover trends, compare models, and support data-driven decisions for watershed management.
       </p>
       <strong>Get Started: Select a watershed to explore its data.</strong>
-    </div>
+    </>
   );
 }

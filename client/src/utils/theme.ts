@@ -49,8 +49,10 @@ declare module "@mui/material/styles" {
     }
 }
 
+export type ThemeMode = typeof darkMode;
+
 // Dark Mode
-const darkMode = {
+export const darkMode = {
     colors: {
         primary100: "#F5F5F5",
         primary200: "#DCEDFF",
