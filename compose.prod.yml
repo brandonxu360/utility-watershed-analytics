@@ -12,18 +12,6 @@ services:
     profiles:
       - build
 
-  # Data downloader service - downloads watershed data files
-  data-downloader:
-    build:
-      context: ./server
-      dockerfile: Dockerfile.data-downloader
-    volumes:
-      - watershed_data:/data
-    environment:
-      - DATA_OUTPUT_DIR=/data
-    profiles:
-      - data-management
-
   # Backend Django server
   server:
     build:
