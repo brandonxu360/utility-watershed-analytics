@@ -1,8 +1,8 @@
 import { useState, FormEvent, FC } from "react";
 import { Link } from "@tanstack/react-router";
 import { tss } from "tss-react";
-import { useIsSmallScreen } from "../../../hooks/useIsSmallScreen";
-import SmallScreenNotice from "../../../components/small-screen-notice/SmallScreenNotice";
+import { useIsSmallScreen } from "../../hooks/useIsSmallScreen";
+import SmallScreenNotice from "../../components/small-screen-notice/SmallScreenNotice";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
