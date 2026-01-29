@@ -36,6 +36,7 @@ const useStyles = tss.create(() => ({
   mapWrapper: {
     flex: 1,
     minHeight: 0,
+    position: 'relative',
   },
   map: {
     width: '100%',
