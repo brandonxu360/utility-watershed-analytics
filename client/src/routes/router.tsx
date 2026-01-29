@@ -8,11 +8,9 @@ import RegisterRoute from './RegisterRoute';
 const rootRoute = createRootRoute({
   component: () => (
     <>
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <Navbar />
-        <div style={{ display: "flex", flex: 1, minHeight: 0, height: "100%" }}>
-          <Outlet />
-        </div>
+      <Navbar />
+      <div>
+        <Outlet />
       </div>
     </>
   ),
