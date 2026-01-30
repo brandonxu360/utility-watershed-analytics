@@ -102,7 +102,7 @@ tmux attach -t data-load
 
 ### Download Data Files (Optional)
 
-Pre-download data files to avoid repeated network fetches when reloading the database. Downloaded files are cached in `server/server/watershed/data/` and persist in the named volume.
+Pre-download data files to avoid repeated network fetches when reloading the database. Downloaded files are cached in the named Docker volume `watershed_data` (mounted at `/data` in the server container). The server Dockerfile creates `/data` and sets permissions so the loader can write files. You can pre-download from the container using the `download_data` management command.
 
 ```bash
 # Download ALL production data (recommended for production)

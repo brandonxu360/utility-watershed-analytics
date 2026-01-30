@@ -110,11 +110,11 @@ The application uses a two-stage data pipeline:
 1. **Data Download** - Downloads GeoJSON/Parquet files from remote sources to local storage
 2. **Data Loading** - Loads data into the PostgreSQL/PostGIS database
 
-The loader uses a **local-first approach**: it checks for cached files first, then falls back to fetching from remote URLs if local files aren't available. Downloaded files are cached in `server/server/watershed/data/` (gitignored) for faster subsequent loads.
+The loader uses a **local-first approach**: it checks for cached files first, then falls back to fetching from remote URLs if local files aren't available. Downloaded files are cached in the named Docker volume `watershed_data` and are mounted inside the server container at `/data` (controlled by `LOADER_DATA_DIR=/data`). The server Dockerfile creates `/data` and ensures it has the correct ownership so the loader can write files.
 
 #### Downloading Data (Optional)
 
-Pre-download data files to avoid repeated network fetches when reloading the database:
+Pre-download data files to avoid repeated network fetches when reloading the database. The `watershed_data` named volume stores cached files.
 
 ```bash
 # Download development subset (default, recommended)
@@ -149,15 +149,18 @@ docker compose exec server python manage.py load_watershed_data --force
 docker compose exec server python manage.py load_watershed_data --verbosity=2
 ```
 
-**Note:** Downloaded data files are stored locally in `server/server/watershed/data/` (gitignored) and persist across container restarts.
+**Note:** Downloaded files are stored in the named Docker volume `watershed_data` (mounted at `/data` in the server container) and persist across container restarts. To clear cached files remove the named volume.
 
 #### Resetting Data
 ```bash
 # Remove all services and database
+docker compose down
+
+# Remove all services and database (removes named volumes)
 docker compose down -v
 
-# Clear only the cached data files
-rm -rf server/server/watershed/data
+# Or remove only the watershed data volume (project-specific name shown by `docker volume ls`)
+docker volume rm watershed_data
 
 # Force reload data into database (clears DB first, then reloads)
 docker compose exec server python manage.py load_watershed_data --force
