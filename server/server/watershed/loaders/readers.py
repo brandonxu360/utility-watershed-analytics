@@ -10,7 +10,7 @@ import requests
 import pandas as pd
 from io import BytesIO
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional
 
 from django.contrib.gis.gdal import DataSource as GDALDataSource
 

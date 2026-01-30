@@ -41,7 +41,6 @@ class RetryConfig:
     @classmethod
     def from_environment(cls) -> "RetryConfig":
         """Create config from environment variables."""
-        defaults = cls()
         return cls(
             max_attempts=_get_env_int("LOADER_RETRY_ATTEMPTS", cls.max_attempts),
             base_delay_seconds=_get_env_float("LOADER_RETRY_BASE_DELAY", cls.base_delay_seconds),

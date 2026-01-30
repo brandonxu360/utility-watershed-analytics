@@ -16,7 +16,6 @@ Usage:
     python manage.py download_data --all
 """
 
-import sys
 from pathlib import Path
 
 import requests

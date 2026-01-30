@@ -6,9 +6,8 @@ logic without network or database access.
 """
 
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock
 from pathlib import Path
-from dataclasses import dataclass
 from typing import Optional, Iterator
 import pandas as pd
 
@@ -17,7 +16,6 @@ from server.watershed.loaders.loader import WatershedLoader
 from server.watershed.loaders.discovery import WatershedDataDiscovery, DataSource, UrlTemplates
 from server.watershed.loaders.config import LoaderConfig, RetryConfig, ApiConfig, GeometryConfig
 from server.watershed.loaders.readers import RemoteDataSourceReader
-from server.watershed.loaders.writers import DjangoDataWriter
 
 
 # =============================================================================

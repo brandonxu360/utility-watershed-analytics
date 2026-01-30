@@ -16,7 +16,6 @@ from django.db import connection
 
 from server.watershed.loaders.loader import load_with_discovery
 from server.watershed.loaders.config import LoaderConfig, get_config
-from server.watershed.loaders.exceptions import DataLoadError
 from server.watershed.utils.logging import configure_logging
 
 logger = logging.getLogger("watershed.loader")

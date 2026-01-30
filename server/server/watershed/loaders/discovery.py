@@ -19,7 +19,6 @@ from typing import Iterator, Optional
 from pathlib import Path
 from .config import LoaderConfig, get_config
 from .exceptions import DataSourceError
-from .protocols import DataSourceProvider
 
 logger = logging.getLogger("watershed.loader")
 
