@@ -13,7 +13,6 @@ import { endYear, startYear } from "../../utils/constants";
 import type { ThemeMode } from '../../utils/theme';
 import fetchRap from '../../api/rapApi';
 import Select from "../select/Select";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from '@mui/icons-material/Close';
@@ -206,10 +205,10 @@ export const VegetationCover: React.FC = () => {
     const { classes } = useStyles({ mode });
 
     return (
-        <Box>
-            <Box className={classes.titleBar}>
-                <Box className={classes.vegCoverSelector}>
-                    <Box className={classes.optionAlign}>
+        <div>
+            <div className={classes.titleBar}>
+                <div className={classes.vegCoverSelector}>
+                    <div className={classes.optionAlign}>
                         <Typography className={classes.optionAlignLabel}>Vegetation Cover:</Typography>
                         <Select
                             id="veg-cover-title"
@@ -218,11 +217,10 @@ export const VegetationCover: React.FC = () => {
                             options={["All", "Shrub", "Tree"]}
                             ariaLabel="Select vegetation type"
                         />
-                    </Box>
-                </Box>
-
-                <Box className={classes.dateSelector}>
-                    <Box className={classes.optionAlign}>
+                    </div>
+                </div>
+                <div className={classes.dateSelector}>
+                    <div className={classes.optionAlign}>
                         <Typography className={classes.optionAlignLabel}>Select Year:</Typography>
                         <Select
                             id="veg-year"
@@ -231,7 +229,7 @@ export const VegetationCover: React.FC = () => {
                             options={['All', ...years.slice().reverse()]}
                             ariaLabel="Select vegetation year"
                         />
-                    </Box>
+                    </div>
                     <IconButton className={classes.closeButton} onClick={() => {
                         clearSelectedHillslope();
                         setSubcatchment(false);
@@ -240,8 +238,8 @@ export const VegetationCover: React.FC = () => {
                     }}>
                         <CloseIcon />
                     </IconButton>
-                </Box>
-            </Box>
+                </div>
+            </div>
 
             {rapStatus.state === 'loading' && <Typography align="center">Loading vegetation data…</Typography>}
 
@@ -252,16 +250,16 @@ export const VegetationCover: React.FC = () => {
             />
 
             {config && !choroplethLoading && choroplethRange && (
-                <Box style={{ marginTop: '32px' }}>
+                <div style={{ marginTop: '32px' }}>
                     <ChoroplethScale
                         colormap={config.colormap}
                         range={choroplethRange}
                         unit={config.unit}
                         style={{ padding: '0 1rem', marginBottom: '0.5rem' }}
                     />
-                </Box>
+                </div>
             )}
-        </Box>
+        </div>
     );
 };
 

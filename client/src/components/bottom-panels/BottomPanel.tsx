@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import { tss } from "tss-react";
 import { useTheme } from '@mui/material/styles';
 import type { ThemeMode } from '../../utils/theme';
-import Box from "@mui/material/Box";
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 
 type BottomPanelProps = {
@@ -73,11 +72,11 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   if (!isOpen) return null;
 
   return (
-    <Box className={classes.bottomPanel} ref={panelRef}>
-      <Box className={classes.bottomPanelDrag} onMouseDown={handleDrag}>
+    <div className={classes.bottomPanel} ref={panelRef}>
+      <div className={classes.bottomPanelDrag} onMouseDown={handleDrag}>
         <DragHandleIcon />
-      </Box>
-      <Box className={classes.bottomPanelContent}>{children}</Box>
-    </Box>
+      </div>
+      <div className={classes.bottomPanelContent}>{children}</div>
+    </div>
   );
 }

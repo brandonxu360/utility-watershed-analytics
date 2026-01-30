@@ -2,7 +2,6 @@ import { FC, useEffect, useRef, useState } from "react";
 import { tss } from "tss-react";
 import { useTheme } from '@mui/material/styles';
 import type { ThemeMode } from '../../utils/theme';
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -79,7 +78,7 @@ const Select: FC<SelectProps> = ({ id, ariaLabel, value, options, onChange }) =>
     const selected = options.find((o) => o === value) ?? value;
 
     return (
-        <Box className={classes.selectWrapper} ref={wrapperRef}>
+        <div className={classes.selectWrapper} ref={wrapperRef}>
             <Button
                 id={id}
                 data-testid={id ? `select-${id}` : undefined}
@@ -94,9 +93,9 @@ const Select: FC<SelectProps> = ({ id, ariaLabel, value, options, onChange }) =>
             </Button>
 
             {open && (
-                <Box role="listbox" className={classes.selectMenu} tabIndex={-1}>
+                <div role="listbox" className={classes.selectMenu} tabIndex={-1}>
                     {options.map((opt) => (
-                        <Box
+                        <div
                             key={opt}
                             role="option"
                             aria-selected={opt === value}
@@ -107,11 +106,11 @@ const Select: FC<SelectProps> = ({ id, ariaLabel, value, options, onChange }) =>
                             }}
                         >
                             {opt}
-                        </Box>
+                        </div>
                     ))}
-                </Box>
+                </div>
             )}
-        </Box>
+        </div>
     );
 };
 

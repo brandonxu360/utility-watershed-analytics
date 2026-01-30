@@ -1,7 +1,6 @@
 import { FC } from "react";
 import { tss } from "tss-react";
 import { Link } from "@tanstack/react-router";
-import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -29,7 +28,7 @@ const Navbar: FC = () => {
   const { classes } = useStyles();
 
   return (
-    <Box className={classes.root}>
+    <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" className={classes.title}>
@@ -39,7 +38,7 @@ const Navbar: FC = () => {
           <Link to='/login' className={classes.link}>Login</Link>
         </Toolbar>
       </AppBar>
-    </Box>
+    </div>
   );
 };
 

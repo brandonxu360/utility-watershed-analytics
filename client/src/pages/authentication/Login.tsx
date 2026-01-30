@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import { tss } from "tss-react";
 import { useIsSmallScreen } from "../../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../../components/small-screen-notice/SmallScreenNotice";
-import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -95,17 +94,17 @@ const Login: FC<LoginProps> = ({ onSubmit }) => {
   };
 
   return (
-    <Box className={classes.root}>
-      <Box className={classes.formContainer}>
+    <div className={classes.root}>
+      <div className={classes.formContainer}>
         <Paper elevation={3} className={classes.authCard} component="form" onSubmit={handleSubmit} noValidate>
-          <Box>
+          <div>
             <Typography variant="h4" component="h1" align="center" fontWeight={700}>
               Welcome Back!
             </Typography>
             <Typography variant="subtitle1" align="center">
               Please enter your details
             </Typography>
-          </Box>
+          </div>
           <FormControl fullWidth variant="outlined">
             <InputLabel htmlFor="login-username">Username</InputLabel>
             <OutlinedInput
@@ -143,19 +142,19 @@ const Login: FC<LoginProps> = ({ onSubmit }) => {
               }
             />
           </FormControl>
-          <Box className={classes.forgotRow}>
+          <div className={classes.forgotRow}>
             <Link to="" className={classes.forgotRow}>Forgot password?</Link>
-          </Box>
+          </div>
           <Button type="submit" variant="contained" color="primary" fullWidth size="large">
             Log In
           </Button>
-          <Box className={classes.authFooter}>
+          <div className={classes.authFooter}>
             <Typography variant="body2">Don't have an account?</Typography>
             <Link to="/register" className={classes.linkButton}>Register</Link>
-          </Box>
+          </div>
         </Paper>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

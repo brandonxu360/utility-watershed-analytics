@@ -8,7 +8,6 @@ import HomeSidePanelContent from '../../components/side-panels/HomeInfoPanel';
 import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
 import BottomPanel from '../../components/bottom-panels/BottomPanel';
 import Map from '../../components/map/Map';
-import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 
 const useStyles = tss.create(() => ({
@@ -58,22 +57,22 @@ export default function Home(): JSX.Element {
   }
 
   return (
-    <Box className={classes.root}>
+    <div className={classes.root}>
       <Paper elevation={3} className={classes.sidePanel} square>
-        <Box className={classes.sidePanelContent}>
+        <div className={classes.sidePanelContent}>
           {watershedID ? <WatershedOverview /> : <HomeSidePanelContent />}
-        </Box>
+        </div>
       </Paper>
-      <Box className={classes.mapWrapper}>
-        <Box className={classes.map}>
+      <div className={classes.mapWrapper}>
+        <div className={classes.map}>
           <Map />
-        </Box>
+        </div>
         {isPanelOpen && (
           <BottomPanel isOpen={isPanelOpen}>
             {panelContent}
           </BottomPanel>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

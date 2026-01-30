@@ -9,7 +9,6 @@ import { tss } from "tss-react";
 import { useTheme } from '@mui/material/styles';
 import { ThemeMode } from '../../utils/theme';
 import { toast } from 'react-toastify';
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
@@ -79,7 +78,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
 function SkeletonWatershedPanel({ mode }: { mode: ThemeMode }) {
     const { classes } = useStyles({ mode });
     return (
-        <Box>
+        <div>
             <Skeleton variant="rectangular" width="20%" height="1.75rem" className={classes.skeletonClose} />
             <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonText} />
 
@@ -90,13 +89,13 @@ function SkeletonWatershedPanel({ mode }: { mode: ThemeMode }) {
             <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonParagraph} />
             <Skeleton variant="text" width="90%" height="1.75rem" className={classes.skeletonParagraph} />
 
-            <Box className={classes.skeletonGroup}>
+            <div className={classes.skeletonGroup}>
                 <Skeleton variant="rectangular" width="100%" height="3rem" />
                 <Skeleton variant="rectangular" width="100%" height="3rem" />
                 <Skeleton variant="rectangular" width="100%" height="3rem" />
                 <Skeleton variant="rectangular" width="100%" height="3rem" />
-            </Box>
-        </Box>
+            </div>
+        </div>
     );
 }
 
@@ -124,8 +123,8 @@ export default function WatershedOverview() {
     }, [watersheds?.features, watershedID]);
 
     if (isLoading) return <SkeletonWatershedPanel mode={mode} />;
-    if (error) return <Box>Error: {(error as Error).message}</Box>;
-    if (!watersheds?.features) return <Box>No watershed data found.</Box>;
+    if (error) return <div>Error: {(error as Error).message}</div>;
+    if (!watersheds?.features) return <div>No watershed data found.</div>;
 
     if (!watershed) {
         toast.error("Watershed not found.");
@@ -133,7 +132,7 @@ export default function WatershedOverview() {
     }
 
     return (
-        <Box>
+        <div>
             <Button
                 onClick={() => {
                     navigate({ to: "/" });
@@ -146,7 +145,7 @@ export default function WatershedOverview() {
             >
                 BACK
             </Button>
-            <Box className={classes.contentBox}>
+            <div className={classes.contentBox}>
                 <Typography variant="h6" className={classes.title}>
                     <strong>{watershed.properties.pws_name}</strong>
                 </Typography>
@@ -169,16 +168,15 @@ export default function WatershedOverview() {
                 <Typography variant="body1" className={classes.paragraph}>
                     <strong>Source Type:</strong> {watershed.properties.srctype ?? "N/A"}
                 </Typography>
-            </Box>
+            </div>
 
-            <Box className={classes.modelsBox}>
-                <Box>
+            <div className={classes.modelsBox}>
+                <div>
                     <Typography variant="body1">
                         <strong>Watershed Models</strong>
                     </Typography>
-                </Box>
-
-                <Box className={classes.accordionGroup} key={watershedID}>
+                </div>
+                <div className={classes.accordionGroup} key={watershedID}>
                     <Button
                         className={classes.actionButton}
                         aria-label='View Calibrated WEPP Results'
@@ -205,8 +203,8 @@ export default function WatershedOverview() {
                     >
                         WEPPcloud Watershed Analysis
                     </Button>
-                </Box>
-            </Box>
-        </Box>
+                </div>
+            </div>
+        </div>
     )
 }
