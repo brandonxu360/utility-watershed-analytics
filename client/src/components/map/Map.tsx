@@ -12,6 +12,8 @@ import { useChoropleth } from '../../hooks/useChoropleth';
 import { selectedStyle, defaultStyle } from './constants';
 import { useAppStore } from '../../store/store';
 import { toast } from 'react-toastify';
+import { tss } from 'tss-react';
+import { CircularProgress } from '@mui/material';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
@@ -22,7 +24,27 @@ import SettingsControl from './controls/Settings/Settings';
 import LandUseLegend from './controls/LandUseLegend/LandUseLegend';
 import SubcatchmentLayer from './SubcatchmentLayer';
 import 'leaflet/dist/leaflet.css';
-import './Map.css';
+
+const useStyles = tss.create(() => ({
+  mapContainer: {
+    height: '100%',
+    width: '100%',
+  },
+  mapLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(93, 91, 91, 0.7)',
+    zIndex: 1000,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '10px',
+  },
+}));
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -45,6 +67,7 @@ const BOUNDS: [[number, number], [number, number]] = [
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
 export default function Map(): JSX.Element {
+  const { classes } = useStyles();
   const navigate = useNavigate()
 
   const {
@@ -214,7 +237,7 @@ export default function Map(): JSX.Element {
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
 
   return (
-    <div className="map-container">
+    <div className={classes.mapContainer}>
       <MapContainer
         center={CENTER}
         zoom={7}
@@ -231,8 +254,8 @@ export default function Map(): JSX.Element {
       >
 
         {(watershedsLoading || subLoading || channelLoading || choroplethLoading) && (
-          <div className="map-loading-overlay">
-            <div className="loading-spinner" />
+          <div className={classes.mapLoadingOverlay}>
+            <CircularProgress size={50} />
           </div>
         )}
 
