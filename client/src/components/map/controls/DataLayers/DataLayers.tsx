@@ -11,7 +11,78 @@ import {
   FaFireAlt,
 } from 'react-icons/fa';
 
-import './DataLayers.css';
+import { tss } from 'tss-react';
+import { ThemeMode } from '../../../../utils/theme';
+import { useTheme } from '@mui/material/styles';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import { useQueryClient } from '@tanstack/react-query';
+
+const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+  root: {
+    display: 'flex',
+    flexDirection: 'column-reverse',
+    position: 'fixed',
+    right: '10px',
+    bottom: '25px',
+    width: '275px',
+    zIndex: 10000,
+  },
+  header: {
+    background: mode.colors.primary500,
+    display: 'flex',
+    alignContent: 'center',
+    justifyContent: 'space-between',
+    padding: '12px 16px',
+    fontSize: '14px',
+    fontWeight: 700,
+    color: mode.colors.primary100,
+    cursor: 'pointer',
+    borderBottom: '1px solid #E5E5E5',
+    height: '40px',
+  },
+  chevron: {
+    fontSize: '14px',
+    color: mode.colors.primary100,
+  },
+  tabContent: {
+    background: mode.colors.primary100,
+    padding: 0,
+    borderRadius: 0,
+  },
+  heading: {
+    fontSize: '14px',
+    fontWeight: 600,
+    color: mode.colors.primary500,
+    padding: '10px 16px 0 16px',
+  },
+  bottomNav: {
+    background: mode.colors.primary100,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '8px 0',
+    height: '40px',
+  },
+  navContainer: {
+    display: 'flex',
+    gap: '25px',
+  },
+  navButton: {
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    background: '#f2f7fb',
+    color: '#3a7bd5',
+    cursor: 'pointer',
+    '&.active': {
+      background: '#e6eef8',
+    },
+    '&:hover': {
+      background: '#e6eef8',
+    },
+  },
+}));
 
 /**
  * DataLayersControl - toggles visibility of map data layers:
@@ -20,6 +91,12 @@ import './DataLayers.css';
  * - Land Use
  */
 export default function DataLayersControl() {
+  const theme = useTheme();
+  const mode = (theme as { mode: ThemeMode }).mode;
+  const { classes } = useStyles({ mode });
+
+  const queryClient = useQueryClient();
+
   const {
     setSubcatchment,
     setChannels,
@@ -47,6 +124,7 @@ export default function DataLayersControl() {
     if (id === 'subcatchment') {
       setSubcatchment(checked);
       if (!checked) {
+        queryClient.cancelQueries({ queryKey: ['subcatchments'] });
         closePanel();
         setLanduse(false);
         clearSelectedHillslope();
@@ -55,6 +133,9 @@ export default function DataLayersControl() {
 
     if (id === 'channels') {
       setChannels(checked);
+      if (!checked) {
+        queryClient.cancelQueries({ queryKey: ['channels'] });
+      }
     }
 
     if (id === 'landuse') {
@@ -67,35 +148,31 @@ export default function DataLayersControl() {
   };
 
   return (
-    <div className="layerpicker leaflet-control">
+    <div className={classes.root}>
       <div>
-        <div className="layerpicker-header" onClick={toggleOpen}>
-          Data Layers <span className="layerpicker-chevron">{isOpen ? <FaChevronDown /> : <FaChevronUp />}</span>
+        <div className={classes.header} onClick={toggleOpen}>
+          Data Layers <span className={classes.chevron}>{isOpen ? <FaChevronDown /> : <FaChevronUp />}</span>
         </div>
         {isOpen && (
-          <div id="layerpicker-tab">
-            <div>
-              <div>
-                <div className="layerpicker-heading">{activeTab}</div>
-                <DataLayersTabContent
-                  activeTab={activeTab}
-                  handleChange={handleChange}
-                />
-              </div>
-            </div>
-          </div>
+          <Paper className={classes.tabContent}>
+            <div className={classes.heading}>{activeTab}</div>
+            <DataLayersTabContent
+              activeTab={activeTab}
+              handleChange={handleChange}
+            />
+          </Paper>
         )}
-        <div className="layerpicker-nav">
-          <div>
+        <div className={classes.bottomNav}>
+          <div className={classes.navContainer}>
             {navTabs.map(tab => (
-              <div
+              <IconButton
                 key={tab.key}
-                className={`layerpicker-navbutton${activeTab === tab.key ? ' open active' : ''}`}
-                data-layer-tab={tab.key}
+                className={`${classes.navButton}${activeTab === tab.key ? ' active' : ''}`}
                 onClick={() => setActiveTab(tab.key)}
+                size="small"
               >
                 {tab.icon}
-              </div>
+              </IconButton>
             ))}
           </div>
         </div>
