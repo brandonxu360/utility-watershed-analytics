@@ -172,7 +172,7 @@ export const VegetationCover: React.FC = () => {
         return () => {
             mounted = false;
         };
-    }, [selectedHillslopeId, selectedYear, watershedID]);
+    }, [selectedHillslopeId, selectedYear, watershedID, runId]);
 
     const singleHillslopeChartData = useMemo(() => {
         if (!rapTimeSeries || rapTimeSeries.length === 0) return null;

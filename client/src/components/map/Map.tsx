@@ -18,7 +18,7 @@ import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut/ZoomOut';
 import LayersControl from './controls/Layers/Layers';
-import LegendControl from './controls/Legend/Legend';
+import LegendControl from './controls/Legend';
 import SearchControl from './controls/Search/Search';
 import SettingsControl from './controls/Settings/Settings';
 import LandUseLegend from './controls/LandUseLegend/LandUseLegend';
