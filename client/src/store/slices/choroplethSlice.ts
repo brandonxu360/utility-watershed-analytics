@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand';
 import { AppState } from '../store';
 
-export type ChoroplethType = 'none' | 'evapotranspiration' | 'soilMoisture' | 'vegetationCover';
+export type ChoroplethType = 'none' | 'evapotranspiration' | 'vegetationCover';
 export type VegetationBandType = 'all' | 'shrub' | 'tree';
 
 export interface ChoroplethState {

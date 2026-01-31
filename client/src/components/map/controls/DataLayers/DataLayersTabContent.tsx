@@ -87,15 +87,6 @@ const DataLayersTabContent: React.FC<DataLayersTabContentProps> = ({
                             Evapotranspiration
                         </button>
                     </div>
-                    <div className="layerpicker-layer">
-                        <button
-                            className="layerpicker-title"
-                            onClick={handleChoroplethClick('soilMoisture')}
-                            style={{ fontWeight: isActive && choroplethType === 'soilMoisture' ? 'bold' : 'normal' }}
-                        >
-                            Soil Moisture
-                        </button>
-                    </div>
                 </>
             )}
             {activeTab === 'Coverage' && (

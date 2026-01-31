@@ -1,5 +1,3 @@
-// TODO: Placeholder file to be deleted for separate evapotranspiration and soil moisture panels
-
 import React from "react";
 import { FaXmark } from "react-icons/fa6";
 import { useAppStore } from "../../store/store";

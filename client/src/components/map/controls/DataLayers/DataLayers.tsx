@@ -87,16 +87,26 @@ export default function DataLayersControl() {
         )}
         <div className="layerpicker-nav">
           <div>
-            {navTabs.map(tab => (
-              <div
-                key={tab.key}
-                className={`layerpicker-navbutton${activeTab === tab.key ? ' open active' : ''}`}
-                data-layer-tab={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                {tab.icon}
-              </div>
-            ))}
+            {navTabs.map(tab => {
+              const isActive = activeTab === tab.key;
+              return (
+                <div
+                  key={tab.key}
+                  className={`layerpicker-navbutton${isActive ? ' open active' : ''}`}
+                  data-layer-tab={tab.key}
+                  onClick={() => {
+                    if (isActive) {
+                      toggleOpen();
+                    } else {
+                      setActiveTab(tab.key);
+                      setIsOpen(true);
+                    }
+                  }}
+                >
+                  {tab.icon}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

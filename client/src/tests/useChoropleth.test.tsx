@@ -33,13 +33,6 @@ describe('useChoropleth', () => {
             expect(CHOROPLETH_CONFIG.evapotranspiration.bands).toEqual([1, 4, 5, 6]);
         });
 
-        it('has configuration for soilMoisture', () => {
-            expect(CHOROPLETH_CONFIG.soilMoisture).toBeDefined();
-            expect(CHOROPLETH_CONFIG.soilMoisture.title).toBe('Soil Moisture');
-            expect(CHOROPLETH_CONFIG.soilMoisture.colormap).toBe('winter');
-            expect(CHOROPLETH_CONFIG.soilMoisture.bands).toEqual([2, 3]);
-        });
-
         it('has configuration for vegetationCover', () => {
             expect(CHOROPLETH_CONFIG.vegetationCover).toBeDefined();
             expect(CHOROPLETH_CONFIG.vegetationCover.title).toBe('Vegetation Cover');
