@@ -89,7 +89,6 @@ describe("DataLayersTabContent", () => {
         expect(screen.getByText("Land Use")).toBeInTheDocument();
         expect(container.querySelector("input#landuse[type='checkbox']")).toBeTruthy();
         expect(screen.getByRole("button", { name: "Evapotranspiration" })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: "Soil Moisture" })).toBeInTheDocument();
     });
 
     it("does not show the land use legend help icon when landuse is false", () => {
@@ -114,23 +113,6 @@ describe("DataLayersTabContent", () => {
         expect(screen.getByRole("button", { name: "Evapotranspiration" })).toHaveStyle(
             "font-weight: bold"
         );
-        expect(screen.getByRole("button", { name: "Soil Moisture" })).toHaveStyle(
-            "font-weight: normal"
-        );
-    });
-
-    it("bolds Soil Moisture when choropleth is active and type is soilMoisture", () => {
-        mockUseChoropleth.mockReturnValue({ isActive: true });
-        useAppStore.setState({ choropleth: { ...initialChoroplethState, type: "soilMoisture" } });
-
-        render(<DataLayersTabContent activeTab="Surface Data" handleChange={handleChange} />);
-
-        expect(screen.getByRole("button", { name: "Soil Moisture" })).toHaveStyle(
-            "font-weight: bold"
-        );
-        expect(screen.getByRole("button", { name: "Evapotranspiration" })).toHaveStyle(
-            "font-weight: normal"
-        );
     });
 
     it("clicking Evapotranspiration triggers subcatchment, sets type, and opens panel", () => {
@@ -144,19 +126,6 @@ describe("DataLayersTabContent", () => {
 
         const element = openPanel.mock.calls[0]?.[0] as ReactElement<{ choroplethType?: string }>;
         expect(element.props.choroplethType).toBe("evapotranspiration");
-    });
-
-    it("clicking Soil Moisture triggers subcatchment, sets type, and opens panel", () => {
-        render(<DataLayersTabContent activeTab="Surface Data" handleChange={handleChange} />);
-
-        fireEvent.click(screen.getByRole("button", { name: "Soil Moisture" }));
-
-        expect(setSubcatchment).toHaveBeenCalledWith(true);
-        expect(setChoroplethType).toHaveBeenCalledWith("soilMoisture");
-        expect(openPanel).toHaveBeenCalledTimes(1);
-
-        const element = openPanel.mock.calls[0]?.[0] as ReactElement<{ choroplethType?: string }>;
-        expect(element.props.choroplethType).toBe("soilMoisture");
     });
 
     it("renders Coverage tab and clicking Vegetation Cover opens the vegetation panel and sets choropleth type", () => {
