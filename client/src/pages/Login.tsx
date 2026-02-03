@@ -1,8 +1,8 @@
 import { useState, FormEvent, FC } from "react";
 import { Link } from "@tanstack/react-router";
 import { tss } from "tss-react";
-import { useIsSmallScreen } from "../../hooks/useIsSmallScreen";
-import SmallScreenNotice from "../../components/small-screen-notice/SmallScreenNotice";
+import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
+import SmallScreenNotice from "../components/SmallScreenNotice";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -14,13 +14,11 @@ import InputLabel from "@mui/material/InputLabel";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-export interface RegisterProps {
-  onSubmit?: (payload: {
-    username: string;
-    password: string;
-    confirmPassword: string;
-  }) => void;
-}
+type LoginProps = {
+  onSubmit?: (payload: { username: string; password: string }) => void;
+  onSwitchToRegister?: () => void;
+  forgotPasswordUrl?: string;
+};
 
 const useStyles = tss.create(() => ({
   root: {
@@ -50,6 +48,13 @@ const useStyles = tss.create(() => ({
     gap: '8px',
     marginTop: '16px',
   },
+  forgotRow: {
+    color: '#646cff',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    fontSize: '12px',
+    textDecoration: 'none',
+  },
   linkButton: {
     color: '#646cff',
     textDecoration: 'none',
@@ -57,13 +62,12 @@ const useStyles = tss.create(() => ({
   },
 }));
 
-const Register: FC<RegisterProps> = ({ onSubmit }) => {
+const Login: FC<LoginProps> = ({ onSubmit }) => {
   const { classes } = useStyles();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [hidden, setHidden] = useState({ password: true, confirm: true });
+  const [isHidden, setIsHidden] = useState<boolean>(true);
 
   const isSmallScreen = useIsSmallScreen();
 
@@ -73,12 +77,12 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const payload = { username, password, confirmPassword };
+    const payload = { username, password };
     if (onSubmit) onSubmit(payload);
   };
 
-  const toggleHidden = (field: 'password' | 'confirm') => {
-    setHidden((prev) => ({ ...prev, [field]: !prev[field] }));
+  const toggleHidden = () => {
+    setIsHidden((prev) => !prev);
   };
 
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -95,16 +99,16 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
         <Paper elevation={3} className={classes.authCard} component="form" onSubmit={handleSubmit} noValidate>
           <div>
             <Typography variant="h4" component="h1" align="center" fontWeight={700}>
-              Create an account!
+              Welcome Back!
             </Typography>
             <Typography variant="subtitle1" align="center">
               Please enter your details
             </Typography>
           </div>
           <FormControl fullWidth variant="outlined">
-            <InputLabel htmlFor="reg-username">Username</InputLabel>
+            <InputLabel htmlFor="login-username">Username</InputLabel>
             <OutlinedInput
-              id="reg-username"
+              id="login-username"
               label="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -113,63 +117,40 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
             />
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel htmlFor="reg-password">Password</InputLabel>
+            <InputLabel htmlFor="login-password">Password</InputLabel>
             <OutlinedInput
-              id="reg-password"
-              type={hidden.password ? "password" : "text"}
+              id="login-password"
+              type={isHidden ? "password" : "text"}
               label="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
+              autoComplete="current-password"
               required
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
-                    aria-label={hidden.password ? "Show password" : "Hide password"}
-                    onClick={() => toggleHidden("password")}
+                    aria-label={isHidden ? "Show password" : "Hide password"}
+                    onClick={toggleHidden}
                     onMouseDown={handleMouseDownPassword}
                     onMouseUp={handleMouseUpPassword}
                     edge="end"
                     size="small"
                   >
-                    {hidden.password ? <VisibilityOff /> : <Visibility />}
+                    {isHidden ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               }
             />
           </FormControl>
-          <FormControl fullWidth variant="outlined">
-            <InputLabel htmlFor="reg-confirm">Confirm Password</InputLabel>
-            <OutlinedInput
-              id="reg-confirm"
-              type={hidden.confirm ? "password" : "text"}
-              label="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-              required
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label={hidden.confirm ? "Show confirm password" : "Hide confirm password"}
-                    onClick={() => toggleHidden("confirm")}
-                    onMouseDown={handleMouseDownPassword}
-                    onMouseUp={handleMouseUpPassword}
-                    edge="end"
-                    size="small"
-                  >
-                    {hidden.confirm ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </FormControl>
+          <div className={classes.forgotRow}>
+            <Link to="" className={classes.forgotRow}>Forgot password?</Link>
+          </div>
           <Button type="submit" variant="contained" color="primary" fullWidth size="large">
-            Sign Up
+            Log In
           </Button>
           <div className={classes.authFooter}>
-            <Typography variant="body2">Already have an account?</Typography>
-            <Link to="/login" className={classes.linkButton}>Login</Link>
+            <Typography variant="body2">Don't have an account?</Typography>
+            <Link to="/register" className={classes.linkButton}>Register</Link>
           </div>
         </Paper>
       </div>
@@ -177,4 +158,4 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
   );
 };
 
-export default Register;
+export default Login;

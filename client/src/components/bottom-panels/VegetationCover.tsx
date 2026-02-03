@@ -12,7 +12,7 @@ import { ChoroplethScale } from "../ChoroplethScale";
 import { endYear, startYear } from "../../utils/constants";
 import type { ThemeMode } from '../../utils/theme';
 import fetchRap from '../../api/rapApi';
-import Select from "../select/Select";
+import Select from "../Select";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from '@mui/icons-material/Close';

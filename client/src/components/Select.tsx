@@ -1,7 +1,7 @@
 import { FC, useEffect, useRef, useState } from "react";
 import { tss } from "tss-react";
 import { useTheme } from '@mui/material/styles';
-import type { ThemeMode } from '../../utils/theme';
+import type { ThemeMode } from '../utils/theme';
 import Button from "@mui/material/Button";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 

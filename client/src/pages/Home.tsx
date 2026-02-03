@@ -1,13 +1,13 @@
-import { watershedOverviewRoute } from '../../routes/router';
+import { watershedOverviewRoute } from '../routes/router';
 import { useMatch } from '@tanstack/react-router';
-import { useAppStore } from '../../store/store';
-import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
+import { useAppStore } from '../store/store';
+import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
 import { tss } from 'tss-react';
-import WatershedOverview from '../../components/side-panels/WatershedOverview';
-import HomeSidePanelContent from '../../components/side-panels/HomeInfoPanel';
-import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
-import BottomPanel from '../../components/bottom-panels/BottomPanel';
-import Map from '../../components/map/Map';
+import WatershedOverview from '../components/side-panels/WatershedOverview';
+import HomeSidePanelContent from '../components/side-panels/HomeInfoPanel';
+import SmallScreenNotice from '../components/SmallScreenNotice';
+import BottomPanel from '../components/bottom-panels/BottomPanel';
+import Map from '../components/map/Map';
 import Paper from '@mui/material/Paper';
 
 const useStyles = tss.create(() => ({
