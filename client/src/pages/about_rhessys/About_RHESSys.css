@@ -1,4 +1,4 @@
-.rhessys-container {
+  .rhessys-container {
     display: flex;
     flex: 1;
     height: 100%;
@@ -65,4 +65,70 @@
     background: #eee;
     padding: 3px 6px;
     border-radius: 4px;
+  }
+
+  hr {
+    margin-top: 30px;
+  }
+    
+  .text-center {
+    text-align: center;
+  }
+    
+  .dash {
+    font-size: 3em;
+    font-weight: 100;
+  }
+    
+  #rhessys-container-main {
+    width: 100%;
+    text-align: left;
+    color: white;
+    background: #333;
+    padding: 0 40px 50px 40px;
+  }
+  
+  #rhessys-container-main h2 {
+    text-align: center;
+    font-size: 2em;
+    font-weight: 800;
+    padding-top: 30px;
+    margin-bottom: 30px;
+  }
+  
+  #rhessys-container-main h3 {
+    text-align: left;
+    font-size: 1.7em;
+    font-weight: 800;
+    padding-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  #rhessys-container-main h4 {
+    font-size: 1.3em;
+    font-weight: 800;
+    padding-top: 20px;
+    margin-bottom: 20px; 
+  }
+  
+  #rhessys-container-main p, #rhessys-container-main ul {
+    margin-bottom: 24px;
+  }
+  
+  #rhessys-container-main ul, ol {
+    padding-left: 50px;
+  }
+  
+  #rhessys-container-main ul li span, ol li span {
+    font-weight: 800;
+    font-style: italic;
+  }
+    
+  #rhessys-container-main section {
+    padding: 40px 40px 0 40px;
+  }
+  
+  #rhessys-container-main img {
+    width: 100%;
+    padding-top: 40px;
   }

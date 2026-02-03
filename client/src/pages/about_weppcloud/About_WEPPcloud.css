@@ -66,3 +66,72 @@
     padding: 3px 6px;
     border-radius: 4px;
   }
+
+  hr {
+    margin-top: 30px;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .dash {
+    font-size: 3em;
+    font-weight: 100;
+  }
+  
+  #weppcloud-container-main {
+    /*height: 100%;*/
+    width: 100%;
+    text-align: left;
+    color: white;
+    background: #333;
+    padding: 0 40px 50px 40px;
+  }
+  
+  #weppcloud-container-main h2 {
+    text-align: center;
+    font-size: 2em;
+    font-weight: 800;
+    padding-top: 30px;
+    margin-bottom: 30px;
+  }
+  
+  #weppcloud-container-main h3 {
+    text-align: left;
+    font-size: 1.7em;
+    font-weight: 800;
+    padding-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  #weppcloud-container-main h4 {
+    font-size: 1.3em;
+    font-weight: 800;
+    padding-top: 20px;
+    margin-bottom: 20px;
+    
+  }
+  
+  #weppcloud-container-main p, #weppcloud-container-main ul {
+    margin-bottom: 24px;
+  }
+  
+  #weppcloud-container-main ul {
+    padding-left: 50px;
+  }
+  
+  #weppcloud-container-main ul li span {
+    font-weight: 800;
+    font-style: italic;
+  }
+  
+    
+  #weppcloud-container-main section {
+    padding: 40px 40px 0 40px;
+  }
+  
+  #weppcloud-container-main img {
+    width: 100%;
+    padding-top: 40px;
+  }  

@@ -1,4 +1,4 @@
-.team-container {
+  .team-container {
     display: flex;
     flex: 1;
     height: 100%;
@@ -50,3 +50,70 @@
     font-size: var(--fs-200);
     margin-bottom: var(--size-400);
   }
+
+  #team-container-main {
+    width: 100%;
+    text-align: center;
+    color: white;
+    background: #333;
+  }
+  
+  #team-container-main section {
+    padding: 40px 40px 0 40px;
+  }
+  
+  #team-container-main img {
+    height: 190px;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  
+  .univ-heading {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size:larger;
+    text-align: center;
+  }
+  
+  .member-card {
+    display: inline-block;
+    padding: 10px;
+    margin: 10px;
+    width: 200px;
+    vertical-align: top;
+  }
+  
+  .member-card h4 {
+    padding-top: 10px;
+  }
+  
+  .member-card a, .partner-col ul li a, .partner-col p a {
+    font-weight: 800;
+    color: #a3a8fa;
+  }
+  
+  #partner_section {
+    display:block;
+    padding: 40px 40px 0 40px;
+    text-align: left;
+  }
+  
+  .partner-col {
+    display: inline-block;
+    padding: 20px 40px 40px 40px;
+    vertical-align: top;
+  }
+  
+  .partner-col .bold {
+    font-weight: 800;
+  }
+  
+  .partner-col ul {
+    padding-left: 30px;
+  }
+  
+  

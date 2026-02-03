@@ -65,7 +65,6 @@ services:
     # Build based on latest offical image 
     # (https://registry.hub.docker.com/r/postgis/postgis/)
     image: postgis/postgis
-    #platform: linux/amd64
     container_name: postgis
     ports:
       - "5432:5432"

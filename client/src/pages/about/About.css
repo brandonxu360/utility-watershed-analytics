@@ -1,3 +1,98 @@
+hr {
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+  
+.text-center {
+    text-align: center;
+}
+
+.dash {
+    font-size: 3em;
+    font-weight: 100;
+}
+
+section {
+    padding: 40px 40px 0 40px;
+}
+
+strong {
+    font-weight: 800;
+}
+
+.row {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 0;
+    display: block;
+    margin-top: calc(-1 * var(--bs-gutter-y));
+    margin-right: calc(-.5 * var(--bs-gutter-x));
+    margin-left: calc(-.5 * var(--bs-gutter-x));
+    
+}
+
+@media screen and (min-width: 1201px) {
+    .col {
+        width: 50%;
+        padding: 0.3rem 2rem;
+        display: inline-block;
+        vertical-align: top;
+    }
+
+    .col-1 {
+        width: 35%;
+        padding: 0.3rem;
+        display: inline-block;
+    }
+
+    .col-2 {
+        width: 65%;
+        padding: 0.3rem 2rem;
+        display: inline-block;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .col {
+        width: 100%;
+        padding: 0.3rem 2rem;
+        display:inline-block;
+        vertical-align: top;
+    }
+
+    .col-1 {
+        width: 100%;
+        padding: 0.3rem 2rem;
+        display: inline-block;
+    }
+
+    .col-2 {
+        width: 100%;
+        padding: 0.3rem 2rem;
+        display: inline-block;
+    }
+}
+
+
+.btn-link:hover {
+    background: #a3a8fa;
+    padding: 8px 16px;
+    border-radius: 4px;
+    color: #333;
+}
+
+.btn-link {
+    background: #000;
+    padding: 8px 16px;
+    border: 1px solid #a3a8fa;
+    border-radius: 4px;
+    color: #a3a8fa;
+}
+
+.institutions img {
+    width: 220px;
+    margin: 2rem auto;
+}
+
 .about-container {
     display: flex;
     flex: 1;
@@ -49,4 +144,41 @@
 .side-panel p {
     font-size: var(--fs-200);
     margin-bottom: var(--size-400);
+}
+
+#about-container-main {
+    width: 100%;
+    text-align: left;
+    color: white;
+    background: #333;
+    padding: 0 40px 50px 40px;
+}
+
+#about-container-main h2 {
+    text-align: center;
+    font-size: 2em;
+    font-weight: 800;
+    padding-top: 30px;
+    margin-bottom: 30px;
+}
+
+#about-container-main p img {
+    height: auto;
+    width: 100%;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#about-container-main p, #about-container-main ul {
+    margin-bottom: 24px;
+  }
+  
+#about-container-main ul {
+    padding-left: 50px;
+}
+  
+#about-container-main ul li span {
+    font-weight: 800;
+    font-style: italic;
 }
