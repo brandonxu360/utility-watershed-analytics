@@ -5,7 +5,7 @@ import { useAppStore } from "../../store/store";
 import { VegetationBandType } from "../../store/slices/choroplethSlice";
 import { useMatch } from '@tanstack/react-router';
 import { watershedOverviewRoute } from '../../routes/router';
-import { CoverageLineChart } from "../coverage-line-chart/CoverageLineChart";
+import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { ChoroplethScale } from "../ChoroplethScale";

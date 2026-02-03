@@ -17,7 +17,7 @@ import { CircularProgress } from '@mui/material';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut';
-import LayersControl from './controls/Layers/Layers';
+import LayersControl from './controls/Layers';
 import LegendControl from './controls/Legend';
 import SearchControl from './controls/Search';
 import SettingsControl from './controls/Settings';

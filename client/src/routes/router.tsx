@@ -1,5 +1,5 @@
 import { createRoute, createRootRoute, createRouter, Outlet } from '@tanstack/react-router';
-import Navbar from '../components/navbar/Navbar';
+import Navbar from '../components/Navbar';
 import Home from '../pages/Home';
 import WatershedOverview from '../components/side-panels/WatershedOverview';
 import LoginRoute from './LoginRoute';
