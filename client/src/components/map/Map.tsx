@@ -20,7 +20,7 @@ import ZoomOutControl from './controls/ZoomOut';
 import LayersControl from './controls/Layers/Layers';
 import LegendControl from './controls/Legend';
 import SearchControl from './controls/Search/Search';
-import SettingsControl from './controls/Settings/Settings';
+import SettingsControl from './controls/Settings';
 import LandUseLegend from './controls/LandUseLegend/LandUseLegend';
 import SubcatchmentLayer from './SubcatchmentLayer';
 import 'leaflet/dist/leaflet.css';
