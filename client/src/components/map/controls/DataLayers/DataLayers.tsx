@@ -164,16 +164,26 @@ export default function DataLayersControl() {
         )}
         <div className={classes.bottomNav}>
           <div className={classes.navContainer}>
-            {navTabs.map(tab => (
-              <IconButton
-                key={tab.key}
-                className={`${classes.navButton}${activeTab === tab.key ? ' active' : ''}`}
-                onClick={() => setActiveTab(tab.key)}
-                size="small"
-              >
-                {tab.icon}
-              </IconButton>
-            ))}
+            {navTabs.map(tab => {
+              const isActive = activeTab === tab.key;
+              return (
+                <IconButton
+                  key={tab.key}
+                  className={`${classes.navButton}${isActive ? ' active' : ''}`}
+                  onClick={() => {
+                    if (isActive) {
+                      toggleOpen();
+                    } else {
+                      setActiveTab(tab.key);
+                      setIsOpen(true);
+                    }
+                  }}
+                  size="small"
+                >
+                  {tab.icon}
+                </IconButton>
+              );
+            })}
           </div>
         </div>
       </div>
