@@ -207,10 +207,6 @@ class Command(BaseCommand):
         else:
             self.stdout.write("==> Downloading ALL data (discovering from API)")
         
-        # Initialize discovery
-        config = LoaderConfig.from_environment()
-        discovery = WatershedDataDiscovery(config=config)
-        
         # Discover runids if not filtered
         if runids_filter is None:
             self.stdout.write("\n==> Discovering available runids from API...")

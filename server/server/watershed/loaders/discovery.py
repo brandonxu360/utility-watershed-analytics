@@ -82,8 +82,8 @@ class WatershedDataDiscovery:
             process(source)
     """
     
-    # Static URL for the master watersheds GeoJSON
-    WATERSHEDS_URL = "https://bucket.bearhive.duckdns.org/WWS_Watersheds_HUC10_Merged.geojson"
+    # Filename for the master watersheds
+    WATERSHEDS_FILENAME = "WWS_Watersheds_HUC10_Merged.geojson"
     
     def __init__(
         self,
@@ -101,6 +101,10 @@ class WatershedDataDiscovery:
         self.templates = templates or UrlTemplates()
         self._cached_runids: Optional[list[str]] = None
         self._cached_watersheds_data: Optional[dict] = None
+
+        # Construct the watersheds URL from the configured bucket base URL
+        base = self.config.api.bucket_base_url.rstrip("/")
+        self.watersheds_url = f"{base}/{self.WATERSHEDS_FILENAME}"
     
     def discover_runids(self, force_refresh: bool = False) -> list[str]:
         """
@@ -118,16 +122,16 @@ class WatershedDataDiscovery:
         if self._cached_runids is not None and not force_refresh:
             return self._cached_runids
         
-        logger.info(f"Discovering runids from {self.WATERSHEDS_URL}")
+        logger.info(f"Discovering runids from {self.watersheds_url}")
         
         try:
-            response = requests.get(self.WATERSHEDS_URL, timeout=30)
+            response = requests.get(self.watersheds_url, timeout=30)
             response.raise_for_status()
             data = response.json()
         except requests.RequestException as e:
             raise DataSourceError(
                 f"Failed to fetch watersheds for discovery: {e}",
-                url=self.WATERSHEDS_URL
+                url=self.watersheds_url
             )
         
         self._cached_watersheds_data = data
@@ -145,10 +149,10 @@ class WatershedDataDiscovery:
     
     def get_watersheds_source(self) -> DataSource:
         """Get the data source for the master watersheds file."""
-        local_path = self.config.local_data_dir / "watersheds" / "WWS_Watersheds_HUC10_Merged.geojson"
+        local_path = self.config.local_data_dir / "watersheds" / self.WATERSHEDS_FILENAME
         return DataSource(
             name="watersheds",
-            url=self.WATERSHEDS_URL,
+            url=self.watersheds_url,
             local_path=local_path if local_path.exists() else None,
             data_type="watersheds",
         )
@@ -263,11 +267,11 @@ class WatershedDataDiscovery:
     
     def get_watersheds_url(self) -> str:
         """Get the URL for the master watersheds file."""
-        return self.WATERSHEDS_URL
+        return self.watersheds_url
     
     def get_watersheds_local_path(self) -> Optional[Path]:
         """Get the local cache path for watersheds, if available."""
-        local_path = self.config.local_data_dir / "watersheds" / "WWS_Watersheds_HUC10_Merged.geojson"
+        local_path = self.config.local_data_dir / "watersheds" / self.WATERSHEDS_FILENAME
         return local_path if local_path.exists() else None
     
     def iter_subcatchments_as_tuples(
