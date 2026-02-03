@@ -113,7 +113,7 @@ export function isValidYear(year: unknown): year is number {
  */
 export function createYearFilter(year: unknown, column: string = 'rap.year'): QueryFilter | null {
     if (!isValidYear(year)) return null;
-    return { column, operator: '=', value: year };
+    return { column, op: '=', value: year };
 }
 
 /**
@@ -134,6 +134,6 @@ export function createBandFilter(
     }
 
     return validBands.length === 1
-        ? { column, operator: '=', value: validBands[0] }
-        : { column, operator: 'IN', value: validBands };
+        ? { column, op: '=', value: validBands[0] }
+        : { column, op: 'IN', value: validBands };
 }

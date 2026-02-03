@@ -127,11 +127,11 @@ describe('rapApi validation', () => {
         it('filters out invalid bands from mixed array', async () => {
             await fetchRapChoropleth({ band: [0, 1, 7, 5, -1] });
             const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-            const filters = payload.filters as Array<{ column: string; operator: string; value: unknown }>;
+            const filters = payload.filters as Array<{ column: string; op: string; value: unknown }>;
             // Should only include valid bands 1 and 5 in the filters
             const bandFilter = filters.find(f => f.column === 'rap.band');
             expect(bandFilter).toBeDefined();
-            expect(bandFilter?.operator).toBe('IN');
+            expect(bandFilter?.op).toBe('IN');
             expect(bandFilter?.value).toEqual([1, 5]);
         });
 

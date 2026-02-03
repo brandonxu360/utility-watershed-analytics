@@ -45,7 +45,7 @@ function buildRapTimeseriesPayload(topazId: number, year?: number): RapTimeserie
     }
 
     const filters: RapTimeseriesPayload['filters'] = [
-        { column: 'rap.topaz_id', operator: '=', value: validTopazId }
+        { column: 'rap.topaz_id', op: '=', value: validTopazId }
     ];
 
     // Add year filter if valid
@@ -98,8 +98,8 @@ export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[
 
         // Build parameterized filters array
         const filters: QueryFilter[] = [
-            { column: 'hillslopes.wepp_id', operator: '=', value: validWeppId },
-            { column: 'rap.band', operator: 'IN', value: [1, 4, 5, 6] }
+            { column: 'hillslopes.wepp_id', op: '=', value: validWeppId },
+            { column: 'rap.band', op: 'IN', value: [1, 4, 5, 6] }
         ];
 
         // Add year filter if valid
