@@ -19,7 +19,7 @@ import ZoomInControl from './controls/ZoomIn';
 import ZoomOutControl from './controls/ZoomOut';
 import LayersControl from './controls/Layers/Layers';
 import LegendControl from './controls/Legend';
-import SearchControl from './controls/Search/Search';
+import SearchControl from './controls/Search';
 import SettingsControl from './controls/Settings';
 import LandUseLegend from './controls/LandUseLegend/LandUseLegend';
 import SubcatchmentLayer from './SubcatchmentLayer';
