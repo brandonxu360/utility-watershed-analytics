@@ -13,7 +13,10 @@ import pandas as pd
 
 from server.watershed.loaders.protocols import DataSourceReader, DataWriter
 from server.watershed.loaders.loader import WatershedLoader
-from server.watershed.loaders.discovery import WatershedDataDiscovery, DataSource, UrlTemplates
+from server.watershed.loaders.discovery import (
+    WatershedDataDiscovery, DataSource, UrlTemplates,
+    normalize_runid,
+)
 from server.watershed.loaders.config import LoaderConfig, RetryConfig, ApiConfig, GeometryConfig
 from server.watershed.loaders.readers import RemoteDataSourceReader
 
@@ -162,7 +165,7 @@ class MockDiscovery:
             retry=RetryConfig(max_attempts=1, base_delay_seconds=0.01),
             api=ApiConfig(
                 weppcloud_base_url="https://mock.test",
-                default_config="test_config",
+                weppcloud_batch_url="https://mock.test/batch/test",
             ),
             geometry=GeometryConfig(),
         )
@@ -403,15 +406,15 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         self.config = LoaderConfig(
             api=ApiConfig(
                 weppcloud_base_url="https://test.example.com/weppcloud",
-                default_config="test_config",
+                weppcloud_batch_url="https://test.example.com/weppcloud/batch/nasa-roses-2026-sbs",
             ),
         )
     
-    def test_get_urls_for_runid(self):
-        """Test URL generation for a runid."""
+    def test_get_urls_for_runid_short_format(self):
+        """Test URL generation for a short runid."""
         discovery = WatershedDataDiscovery(config=self.config)
         
-        urls = discovery.get_urls_for_runid("batch;;test;;wa-0")
+        urls = discovery.get_urls_for_runid("OR-20")
         
         self.assertIn("subcatchments", urls)
         self.assertIn("channels", urls)
@@ -419,23 +422,35 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         self.assertIn("soils", urls)
         self.assertIn("landuse", urls)
         
-        # Check URL format
-        self.assertIn("batch;;test;;wa-0", urls["subcatchments"])
-        self.assertIn("test_config", urls["subcatchments"])
+        # Check URL uses full runid with uppercase state code and disturbed_wbt config
+        expected_base = "https://test.example.com/weppcloud/runs/batch;;nasa-roses-2026-sbs;;OR-20/disturbed_wbt"
+        self.assertTrue(urls["subcatchments"].startswith(expected_base))
+    
+    def test_get_urls_for_runid_full_format(self):
+        """Test URL generation for a full batch runid."""
+        discovery = WatershedDataDiscovery(config=self.config)
+        
+        # Full runid format as it appears in the master watersheds file (lowercase)
+        urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;or-20")
+        
+        # Should normalize to uppercase state code
+        expected_base = "https://test.example.com/weppcloud/runs/batch;;nasa-roses-2026-sbs;;OR-20/disturbed_wbt"
+        self.assertTrue(urls["subcatchments"].startswith(expected_base))
     
     def test_custom_url_templates(self):
         """Test that custom URL templates are used."""
         custom_templates = UrlTemplates(
-            subcatchments="{api_base}/custom/{runid}/sub.geojson",
+            subcatchments="{weppcloud_base}/custom/{runid}/sub.geojson",
         )
         discovery = WatershedDataDiscovery(
             config=self.config,
             templates=custom_templates,
         )
         
-        urls = discovery.get_urls_for_runid("test-runid")
+        urls = discovery.get_urls_for_runid("or-10")
         
-        self.assertIn("/custom/test-runid/sub.geojson", urls["subcatchments"])
+        # Should use normalized runid with uppercase
+        self.assertIn("/custom/batch;;nasa-roses-2026-sbs;;OR-10/sub.geojson", urls["subcatchments"])
 
 
 class TestProtocolConformance(unittest.TestCase):
@@ -499,6 +514,25 @@ class TestParquetFieldMapping(unittest.TestCase):
         })
         
         self.assertIn("fname", df.columns)  # parquet column name
+
+
+class TestRunidConversion(unittest.TestCase):
+    """Test runid conversion utilities."""
+    
+    def test_normalize_runid_from_lowercase(self):
+        """Test normalizing runid with lowercase state code."""
+        normalized = normalize_runid("batch;;nasa-roses-2026-sbs;;or-20")
+        self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
+    
+    def test_normalize_runid_already_uppercase(self):
+        """Test that already uppercase runids are unchanged."""
+        normalized = normalize_runid("batch;;nasa-roses-2026-sbs;;OR-20")
+        self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
+    
+    def test_normalize_runid_from_short_id(self):
+        """Test normalizing from just a short ID builds full runid."""
+        normalized = normalize_runid("or-20")
+        self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
 
 
 if __name__ == "__main__":

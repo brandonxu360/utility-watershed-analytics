@@ -59,9 +59,10 @@ class RetryConfig:
 @dataclass
 class ApiConfig:
     """Configuration for external API endpoints."""
-    weppcloud_base_url: str = "https://wc-prod.bearhive.duckdns.org/weppcloud"
-    bucket_base_url: str = "https://bucket.bearhive.duckdns.org"
-    default_config: str = "disturbed9002_wbt"
+    # Base URL for WEPPcloud runs (used for data downloads)
+    weppcloud_base_url: str = "https://wepp.cloud/weppcloud"
+    # Batch URL for discovering available watersheds
+    weppcloud_batch_url: str = "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs"
     
     @classmethod
     def from_environment(cls) -> "ApiConfig":
@@ -71,13 +72,9 @@ class ApiConfig:
                 "WEPPCLOUD_BASE_URL",
                 cls.weppcloud_base_url
             ),
-            bucket_base_url=os.environ.get(
-                "BUCKET_BASE_URL",
-                cls.bucket_base_url
-            ),
-            default_config=os.environ.get(
-                "WEPPCLOUD_DEFAULT_CONFIG",
-                cls.default_config
+            weppcloud_batch_url=os.environ.get(
+                "WEPPCLOUD_BATCH_URL",
+                cls.weppcloud_batch_url
             ),
         )
 
