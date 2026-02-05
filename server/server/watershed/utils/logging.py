@@ -11,10 +11,6 @@ from dataclasses import dataclass, field
 from typing import Optional
 from enum import Enum
 
-# Configure module logger
-logger = logging.getLogger("watershed.loader")
-
-
 class LoadPhase(Enum):
     """Phases of the data loading pipeline."""
     INITIALIZING = "initializing"
@@ -99,7 +95,7 @@ class LoaderLogger:
     """
     
     def __init__(self, name: str = "watershed.loader"):
-        self.logger = logging.getLogger(name)
+        self._logger = logging.getLogger(name)
         self.progress = LoadingProgress()
         self._phase_stats: dict[LoadPhase, dict] = {}
     
@@ -110,14 +106,14 @@ class LoaderLogger:
         self.progress.processed_items = 0
         self.progress.phase_start_time = time.time()
         
-        self.logger.info(
+        self._logger.info(
             f"[{phase.value}] Starting: {total_items} items to process"
         )
     
     def item_start(self, item_name: str) -> None:
         """Mark the start of processing a single item."""
         self.progress.current_item = item_name
-        self.logger.debug(f"Processing: {item_name}")
+        self._logger.debug(f"Processing: {item_name}")
     
     def item_complete(self, item_name: str, records_saved: int = 0, extra_info: str = "") -> None:
         """
@@ -143,7 +139,7 @@ class LoaderLogger:
         if extra_info:
             msg += f" - {extra_info}"
         
-        self.logger.info(msg)
+        self._logger.info(msg)
     
     def item_skipped(self, item_name: str, reason: str = "") -> None:
         """Log that an item was skipped."""
@@ -151,18 +147,18 @@ class LoaderLogger:
         msg = f"Skipped: {item_name}"
         if reason:
             msg += f" ({reason})"
-        self.logger.debug(msg)
+        self._logger.debug(msg)
     
     def item_error(self, item_name: str, error: Exception) -> None:
         """Log an error for a specific item."""
         error_msg = f"{item_name}: {type(error).__name__}: {error}"
         self.progress.errors.append(error_msg)
-        self.logger.error(f"Error processing {error_msg}")
+        self._logger.error(f"Error processing {error_msg}")
     
     def warning(self, message: str) -> None:
         """Log a warning message."""
         self.progress.warnings.append(message)
-        self.logger.warning(message)
+        self._logger.warning(message)
     
     def end_phase(self, records_saved: int = 0) -> None:
         """
@@ -182,7 +178,7 @@ class LoaderLogger:
             "errors": len(self.progress.errors),
         }
         
-        self.logger.info(
+        self._logger.info(
             f"[{self.progress.phase.value}] Complete: "
             f"{self.progress.processed_items} items processed, "
             f"{records_saved} records saved in {elapsed_str}"
@@ -194,27 +190,27 @@ class LoaderLogger:
         error_count = len(self.progress.errors)
         warning_count = len(self.progress.warnings)
         
-        self.logger.info("=" * 60)
-        self.logger.info(f"Data loading complete in {total_elapsed}")
+        self._logger.info("=" * 60)
+        self._logger.info(f"Data loading complete in {total_elapsed}")
         
         for phase, stats in self._phase_stats.items():
-            self.logger.info(
+            self._logger.info(
                 f"  {phase.value}: {stats['records_saved']} records "
                 f"({stats['items_processed']} items, "
                 f"{self.progress.format_time(stats['elapsed_seconds'])})"
             )
         
         if error_count > 0:
-            self.logger.warning(f"  Errors: {error_count}")
+            self._logger.warning(f"  Errors: {error_count}")
             for error in self.progress.errors[:5]:  # Show first 5 errors
-                self.logger.warning(f"    - {error}")
+                self._logger.warning(f"    - {error}")
             if error_count > 5:
-                self.logger.warning(f"    ... and {error_count - 5} more")
+                self._logger.warning(f"    ... and {error_count - 5} more")
         
         if warning_count > 0:
-            self.logger.info(f"  Warnings: {warning_count}")
+            self._logger.info(f"  Warnings: {warning_count}")
         
-        self.logger.info("=" * 60)
+        self._logger.info("=" * 60)
 
 
 def configure_logging(level: int = logging.INFO, verbose: bool = False) -> None:

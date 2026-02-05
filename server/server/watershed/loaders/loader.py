@@ -7,7 +7,6 @@ This module provides the main loader implementation that:
 - Separates concerns between reading, writing, and orchestration
 """
 
-import logging
 from typing import Optional
 
 from .config import LoaderConfig, get_config
@@ -16,8 +15,6 @@ from .protocols import DataSourceReader, DataWriter
 from .readers import RemoteDataSourceReader
 from .writers import DjangoDataWriter
 from server.watershed.utils.logging import LoaderLogger, LoadPhase, configure_logging
-
-logger = logging.getLogger("watershed.loader")
 
 
 class WatershedLoader:
@@ -212,7 +209,7 @@ class WatershedLoader:
             try:
                 return self.reader.read_parquet(source.url, source.local_path)
             except Exception as e:
-                logger.warning(f"Could not load {data_type} for {runid}: {e}")
+                self.logger.warning(f"Could not load {data_type} for {runid}: {e}")
                 return None
         return None
 
