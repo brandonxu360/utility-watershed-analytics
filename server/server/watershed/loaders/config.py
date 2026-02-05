@@ -6,9 +6,12 @@ Values can be overridden via environment variables.
 """
 
 import os
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger("watershed.loader")
 
 def _get_env_int(key: str, default: int) -> int:
     """Get integer from environment variable with fallback."""
@@ -17,7 +20,10 @@ def _get_env_int(key: str, default: int) -> int:
         try:
             return int(value)
         except ValueError:
-            pass
+            logger.warning(
+                "Environment variable %s=%r is not an int; using default %s",
+                key, value, default
+            )
     return default
 
 
@@ -28,7 +34,10 @@ def _get_env_float(key: str, default: float) -> float:
         try:
             return float(value)
         except ValueError:
-            pass
+            logger.warning(
+                "Environment variable %s=%r is not a float; using default %s",
+                key, value, default
+            )
     return default
 
 
