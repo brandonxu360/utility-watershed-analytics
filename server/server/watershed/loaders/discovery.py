@@ -25,37 +25,32 @@ logger = logging.getLogger("watershed.loader")
 
 # Runid conversion utilities
 # Canonical runid format: "batch;;nasa-roses-2026-sbs;;OR-10" (uppercase state code)
-# Watershed file may contain lowercase: "batch;;nasa-roses-2026-sbs;;or-10"
+# Note: Watersheds file now contains correct uppercase state codes.
+# Normalization is kept for defensive programming.
 
-BATCH_NAME = "nasa-roses-2026-sbs"
+BATCH_NAME = "nasa-roses-2026-sbs"  # Used in URL templates
 
 
 def normalize_runid(runid: str) -> str:
     """
-    Normalize a runid to canonical format with uppercase state code.
+    Ensure runid has uppercase state code.
     
-    The watershed file contains runids like "batch;;nasa-roses-2026-sbs;;or-10"
-    but the canonical format uses uppercase: "batch;;nasa-roses-2026-sbs;;OR-10"
+    Defensive normalization since the data source now correctly provides
+    uppercase state codes. Kept to handle any edge cases gracefully.
     
     Args:
-        runid: Runid in any format (may have lowercase state code)
+        runid: Full runid format (e.g., "batch;;nasa-roses-2026-sbs;;or-10")
     
     Returns:
-        Normalized runid with uppercase state code
+        Runid with uppercase state code
         
     Examples:
-        "batch;;nasa-roses-2026-sbs;;or-10" -> "batch;;nasa-roses-2026-sbs;;OR-10"
         "batch;;nasa-roses-2026-sbs;;OR-10" -> "batch;;nasa-roses-2026-sbs;;OR-10"
-        "or-10" -> "batch;;nasa-roses-2026-sbs;;OR-10"
+        "batch;;nasa-roses-2026-sbs;;or-10" -> "batch;;nasa-roses-2026-sbs;;OR-10"
     """
-    if ";;" in runid:
-        parts = runid.split(";;")
-        # Uppercase the last segment (state code)
-        parts[-1] = parts[-1].upper()
-        return ";;".join(parts)
-    else:
-        # Short ID only - build full runid with uppercase
-        return f"batch;;{BATCH_NAME};;{runid.upper()}"
+    parts = runid.split(";;")
+    parts[-1] = parts[-1].upper()
+    return ";;".join(parts)
 
 
 @dataclass
@@ -120,7 +115,7 @@ class WatershedDataDiscovery:
         runids = discovery.discover_runids()
         
         # Generate URLs for a specific runid
-        urls = discovery.get_urls_for_runid("OR-20")
+        urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;OR-20")
         
         # Iterate through all subcatchment sources
         for source in discovery.iter_subcatchments():
@@ -155,13 +150,13 @@ class WatershedDataDiscovery:
         """
         Fetch watersheds GeoJSON and extract all runids.
         
-        Runids are normalized to canonical format (uppercase state codes).
+        Runids are in canonical format (uppercase state codes).
         
         Args:
             force_refresh: If True, ignore cache and fetch fresh data
         
         Returns:
-            List of all available runids in normalized format
+            List of all available runids in canonical format
         
         Raises:
             DataSourceError: If watersheds data cannot be fetched
@@ -187,7 +182,7 @@ class WatershedDataDiscovery:
         for feature in data.get("features", []):
             runid = feature.get("properties", {}).get("runid")
             if runid:
-                # Normalize to canonical format (uppercase state code)
+                # Normalize (defensive - data should already be uppercase)
                 runids.append(normalize_runid(runid))
         
         self._cached_runids = runids
@@ -223,7 +218,7 @@ class WatershedDataDiscovery:
             }
         """
         weppcloud_base = self.config.api.weppcloud_base_url.rstrip("/")
-        # Normalize runid to canonical format (uppercase state code)
+        # Normalize runid (defensive uppercase conversion)
         normalized = normalize_runid(runid)
         
         return {

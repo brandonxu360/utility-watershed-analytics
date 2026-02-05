@@ -411,10 +411,10 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         )
     
     def test_get_urls_for_runid_short_format(self):
-        """Test URL generation for a short runid."""
+        """Test URL generation for a full runid."""
         discovery = WatershedDataDiscovery(config=self.config)
         
-        urls = discovery.get_urls_for_runid("OR-20")
+        urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;OR-20")
         
         self.assertIn("subcatchments", urls)
         self.assertIn("channels", urls)
@@ -430,10 +430,10 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         """Test URL generation for a full batch runid."""
         discovery = WatershedDataDiscovery(config=self.config)
         
-        # Full runid format as it appears in the master watersheds file (lowercase)
+        # Test with lowercase (for defensive handling)
         urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;or-20")
         
-        # Should normalize to uppercase state code
+        # Should ensure uppercase state code
         expected_base = "https://test.example.com/weppcloud/runs/batch;;nasa-roses-2026-sbs;;OR-20/disturbed_wbt"
         self.assertTrue(urls["subcatchments"].startswith(expected_base))
     
@@ -447,9 +447,9 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
             templates=custom_templates,
         )
         
-        urls = discovery.get_urls_for_runid("or-10")
+        urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;or-10")
         
-        # Should use normalized runid with uppercase
+        # Should ensure uppercase state code
         self.assertIn("/custom/batch;;nasa-roses-2026-sbs;;OR-10/sub.geojson", urls["subcatchments"])
 
 
@@ -520,18 +520,13 @@ class TestRunidConversion(unittest.TestCase):
     """Test runid conversion utilities."""
     
     def test_normalize_runid_from_lowercase(self):
-        """Test normalizing runid with lowercase state code."""
+        """Test defensive uppercase conversion (for backwards compatibility)."""
         normalized = normalize_runid("batch;;nasa-roses-2026-sbs;;or-20")
         self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
     
     def test_normalize_runid_already_uppercase(self):
-        """Test that already uppercase runids are unchanged."""
+        """Test that correctly formatted runids are unchanged."""
         normalized = normalize_runid("batch;;nasa-roses-2026-sbs;;OR-20")
-        self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
-    
-    def test_normalize_runid_from_short_id(self):
-        """Test normalizing from just a short ID builds full runid."""
-        normalized = normalize_runid("or-20")
         self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
 
 
