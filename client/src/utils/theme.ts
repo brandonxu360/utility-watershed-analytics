@@ -89,6 +89,36 @@ const theme = createTheme({
         caption: { fontSize: "0.75rem" },
         button: { fontSize: "1rem" },
     },
+    components: {
+        MuiCssBaseline: {
+            styleOverrides: (themeParam) => ({
+                body: {
+                    scrollbarColor: `${themeParam.palette.muted.main} ${themeParam.palette.background.default}`,
+                    "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
+                        backgroundColor: themeParam.palette.background.default,
+                    },
+                    "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
+                        borderRadius: 8,
+                        backgroundColor: themeParam.palette.muted.main,
+                        minHeight: 24,
+                        border: `3px solid ${themeParam.palette.background.default}`,
+                    },
+                    "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus": {
+                        backgroundColor: themeParam.palette.accent.main,
+                    },
+                    "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active": {
+                        backgroundColor: themeParam.palette.accent.main,
+                    },
+                    "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover": {
+                        backgroundColor: themeParam.palette.accent.light,
+                    },
+                    "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
+                        backgroundColor: themeParam.palette.background.default,
+                    },
+                },
+            }),
+        },
+    },
 });
 
 // Light mode palette for future theme switching
