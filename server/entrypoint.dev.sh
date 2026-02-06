@@ -21,13 +21,8 @@ if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
         echo "Environment variables not set properly, could not create superuser"
     fi
 
-    python manage.py load_watershed_data --verbosity=2 \
-    --runids 'batch;;nasa-roses-2025;;or,wa-108' \
-            'batch;;nasa-roses-2025;;wa-174' \
-            'batch;;nasa-roses-2025;;or-6' \
-            'batch;;nasa-roses-2025;;or-202'
-
-
+    # Load development subset (defaults to dev runids)
+    python manage.py load_watershed_data --verbosity=2
 
     # Touch the flag file to indicate this logic has been run
     touch "$CONTAINER_ALREADY_STARTED"

@@ -28,6 +28,10 @@ WORKDIR /app/server
 RUN python3 -m venv /venv && \
     chown -R devcontainer:devcontainer /venv
 
+# Create data directory with proper ownership for watershed data caching
+RUN mkdir -p /data && \
+    chown -R devcontainer:devcontainer /data
+
 # Set environment path so virtual environment is used by default
 # when running python commands
 ENV VIRTUAL_ENV=/venv

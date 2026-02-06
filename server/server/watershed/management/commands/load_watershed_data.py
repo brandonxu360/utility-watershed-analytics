@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from server.watershed.models import Watershed, Subcatchment, Channel
 from server.watershed.load import run
+from server.watershed.constants import DEV_RUNIDS
 
 
 class Command(BaseCommand):
@@ -21,14 +22,31 @@ class Command(BaseCommand):
         parser.add_argument(
             '--runids',
             nargs='+',
-            help='Load only watersheds with the specified runids (space-separated)',
+            help='Load specific watersheds by runid (space-separated). Defaults to dev subset if omitted.',
+        )
+        parser.add_argument(
+            '--all',
+            action='store_true',
+            help='Load ALL watersheds (overrides default dev subset)',
         )
     
     def handle(self, *args, **options):
         verbosity = options['verbosity']
         force = options['force']
         dry_run = options['dry_run']
+        load_all = options['all']
         runids = options.get('runids')
+        
+        # Default to dev subset unless --all or explicit --runids provided
+        if not load_all and not runids:
+            runids = DEV_RUNIDS
+            self.stdout.write(
+                self.style.WARNING(
+                    'Loading development subset (use --all for all watersheds)'
+                )
+            )
+        elif load_all:
+            runids = None  # None means load all
         
         if dry_run:
             self.stdout.write(
@@ -57,14 +75,14 @@ class Command(BaseCommand):
             self.stdout.write('Would load watershed data with current configuration')
             self.stdout.write(f'  Verbosity: {verbosity}')
             if runids:
-                self.stdout.write(f'  Filter by runids: {", ".join(runids)}')
+                self.stdout.write(f'  Filter by runids ({len(runids)}): {', '.join(runids)}')
             else:
                 self.stdout.write('  Loading all watersheds')
             return
         
         try:
             if runids:
-                self.stdout.write(f'Loading watershed data for runids: {", ".join(runids)}...')
+                self.stdout.write(f'Loading watershed data for {len(runids)} runids: {', '.join(runids)}...')
             else:
                 self.stdout.write('Loading all watershed data...')
             
