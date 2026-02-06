@@ -3,14 +3,16 @@ import { useMatch } from '@tanstack/react-router';
 import { useAppStore } from '../store/store';
 import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
 import { tss } from 'tss-react';
+import { ThemeMode } from '../utils/theme';
 import WatershedOverview from '../components/side-panels/WatershedOverview';
 import HomeSidePanelContent from '../components/side-panels/HomeInfoPanel';
 import SmallScreenNotice from '../components/SmallScreenNotice';
 import BottomPanel from '../components/bottom-panels/BottomPanel';
 import Map from '../components/map/Map';
 import Paper from '@mui/material/Paper';
+import { useTheme } from '@mui/material';
 
-const useStyles = tss.create(() => ({
+const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
   root: {
     display: 'flex',
     flex: 1,
@@ -23,8 +25,8 @@ const useStyles = tss.create(() => ({
     height: '100%',
     width: '30%',
     minHeight: 0,
-    background: 'rgba(18, 18, 18, 0.9)',
-    color: '#F5F5F5',
+    background: mode.colors.background,
+    color: mode.colors.primary100,
   },
   sidePanelContent: {
     flex: 1,
@@ -46,7 +48,10 @@ const useStyles = tss.create(() => ({
 }));
 
 export default function Home(): JSX.Element {
-  const { classes } = useStyles();
+  const theme = useTheme();
+  const mode = (theme as { mode: ThemeMode }).mode;
+
+  const { classes } = useStyles({ mode });
   const { isPanelOpen, panelContent } = useAppStore();
   const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
   const watershedID = match?.params.webcloudRunId ?? null;
