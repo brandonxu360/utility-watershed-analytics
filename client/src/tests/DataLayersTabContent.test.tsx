@@ -11,12 +11,6 @@ vi.mock("../hooks/useChoropleth", () => ({
     useChoropleth: () => mockUseChoropleth(),
 }));
 
-vi.mock("../components/bottom-panels/ChoroplethPanel", () => ({
-    ChoroplethPanel: ({ choroplethType }: { choroplethType: string }) => (
-        <div data-testid="choropleth-panel" data-choropleth-type={choroplethType} />
-    ),
-}));
-
 vi.mock("../components/bottom-panels/VegetationCover", () => ({
     VegetationCover: () => <div data-testid="vegetation-cover" />,
 }));
@@ -113,19 +107,6 @@ describe("DataLayersTabContent", () => {
         expect(screen.getByRole("button", { name: "Evapotranspiration" })).toHaveStyle(
             "font-weight: bold"
         );
-    });
-
-    it("clicking Evapotranspiration triggers subcatchment, sets type, and opens panel", () => {
-        render(<DataLayersTabContent activeTab="Surface Data" handleChange={handleChange} />);
-
-        fireEvent.click(screen.getByRole("button", { name: "Evapotranspiration" }));
-
-        expect(setSubcatchment).toHaveBeenCalledWith(true);
-        expect(setChoroplethType).toHaveBeenCalledWith("evapotranspiration");
-        expect(openPanel).toHaveBeenCalledTimes(1);
-
-        const element = openPanel.mock.calls[0]?.[0] as ReactElement<{ choroplethType?: string }>;
-        expect(element.props.choroplethType).toBe("evapotranspiration");
     });
 
     it("renders Coverage tab and clicking Vegetation Cover opens the vegetation panel and sets choropleth type", () => {

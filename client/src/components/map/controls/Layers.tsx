@@ -1,21 +1,19 @@
 import { useState } from "react";
-import { tss } from "tss-react";
-import { useTheme } from "@mui/material/styles";
+import { tss } from "../../../utils/tss";
 import { Button, Paper, Radio, RadioGroup, FormControlLabel, Typography } from "@mui/material";
 import LayersIcon from "@mui/icons-material/Layers";
 import CloseIcon from "@mui/icons-material/Close";
-import type { ThemeMode } from "../../../utils/theme";
 
 type LayersControlProps = {
   selectedLayerId: 'Satellite' | 'Topographic';
   setSelectedLayerId: (id: 'Satellite' | 'Topographic') => void;
 };
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
   layersButton: {
     height: 36,
     minWidth: 36,
-    backgroundColor: mode.colors.primary500,
+    backgroundColor: theme.palette.primary.dark,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -25,7 +23,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
     borderStyle: 'outset',
     borderWidth: 2,
     borderRadius: 0,
-    borderColor: '#000',
+    borderColor: theme.palette.surface.border,
     boxSizing: 'border-box',
     '&:active': {
       borderStyle: 'inset',
@@ -33,41 +31,38 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
   },
   layersIcon: {
     fontSize: 28,
-    color: mode.colors.primary100,
+    color: theme.palette.primary.contrastText,
   },
   layersModal: {
     position: 'absolute',
     top: 0,
     right: 60,
-    background: 'rgba(0, 0, 0, 0.8)',
-    color: mode.colors.primary100,
-    padding: `${mode.space[300]} ${mode.space[400]}`,
-    borderRadius: mode.space[200],
+    background: theme.palette.surface.overlay,
+    color: theme.palette.primary.contrastText,
+    padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
+    borderRadius: theme.spacing(1),
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
     zIndex: 1000,
   },
   layersHeading: {
-    marginBottom: mode.space[200],
-    fontSize: mode.fs[100],
+    marginBottom: theme.spacing(1),
+    fontSize: theme.typography.body2.fontSize,
     fontWeight: 'bold',
-    color: mode.colors.primary100,
-  },
-  radioGroup: {
-    gap: mode.space[100],
+    color: theme.palette.primary.contrastText,
   },
   radio: {
-    color: mode.colors.primary100,
-    padding: mode.space[100],
+    color: theme.palette.primary.contrastText,
+    padding: theme.spacing(1),
     '&.Mui-checked': {
-      color: mode.colors.primary100,
+      color: theme.palette.primary.contrastText,
     },
   },
   radioLabel: {
-    fontSize: mode.fs[100],
-    color: mode.colors.primary100,
-    marginBottom: mode.space[100],
+    fontSize: theme.typography.body2.fontSize,
+    color: theme.palette.primary.contrastText,
+    marginBottom: theme.spacing(1),
     '& .MuiFormControlLabel-label': {
-      fontSize: mode.fs[100],
+      fontSize: theme.typography.body2.fontSize,
     },
   },
 }));
@@ -78,9 +73,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
  * @component
  */
 export default function LayersControl({ selectedLayerId, setSelectedLayerId }: LayersControlProps) {
-  const theme = useTheme();
-  const mode = (theme as { mode: ThemeMode }).mode;
-  const { classes } = useStyles({ mode });
+  const { classes } = useStyles();
 
   const [isLayersOpen, setIsLayersOpen] = useState(false);
 
@@ -112,7 +105,6 @@ export default function LayersControl({ selectedLayerId, setSelectedLayerId }: L
           <RadioGroup
             value={selectedLayerId}
             onChange={(e) => setSelectedLayerId(e.target.value as LayersControlProps['selectedLayerId'])}
-            className={classes.radioGroup}
           >
             {layers.map((layer) => (
               <FormControlLabel

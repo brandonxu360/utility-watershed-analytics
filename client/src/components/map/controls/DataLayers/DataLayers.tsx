@@ -11,14 +11,12 @@ import {
   FaFireAlt,
 } from 'react-icons/fa';
 
-import { tss } from 'tss-react';
-import { ThemeMode } from '../../../../utils/theme';
-import { useTheme } from '@mui/material/styles';
+import { tss } from '../../../../utils/tss';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import { useQueryClient } from '@tanstack/react-query';
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
   root: {
     display: 'flex',
     flexDirection: 'column-reverse',
@@ -29,57 +27,56 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
     zIndex: 10000,
   },
   header: {
-    background: mode.colors.primary500,
+    background: theme.palette.primary.dark,
     display: 'flex',
     alignContent: 'center',
     justifyContent: 'space-between',
-    padding: '12px 16px',
-    fontSize: '14px',
+    padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
+    fontSize: theme.typography.subtitle2.fontSize,
     fontWeight: 700,
-    color: mode.colors.primary100,
+    color: theme.palette.primary.contrastText,
     cursor: 'pointer',
-    borderBottom: '1px solid #E5E5E5',
+    borderBottom: `1px solid ${theme.palette.surface.light}`,
     height: '40px',
   },
   chevron: {
-    fontSize: '14px',
-    color: mode.colors.primary100,
+    fontSize: theme.typography.subtitle2.fontSize,
+    color: theme.palette.primary.contrastText,
   },
   tabContent: {
-    background: mode.colors.primary100,
+    background: theme.palette.primary.contrastText,
     padding: 0,
     borderRadius: 0,
   },
   heading: {
-    fontSize: '14px',
+    fontSize: theme.typography.subtitle2.fontSize,
     fontWeight: 600,
-    color: mode.colors.primary500,
-    padding: '10px 16px 0 16px',
+    color: theme.palette.primary.dark,
+    padding: `${theme.spacing(1)} ${theme.spacing(2)} 0 ${theme.spacing(2)}`,
   },
   bottomNav: {
-    background: mode.colors.primary100,
+    background: theme.palette.primary.contrastText,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '8px 0',
+    padding: `${theme.spacing(1)} 0`,
     height: '40px',
   },
   navContainer: {
     display: 'flex',
-    gap: '25px',
+    gap: theme.spacing(3),
   },
   navButton: {
     width: '40px',
     height: '40px',
     display: 'flex',
-    background: '#f2f7fb',
-    color: '#3a7bd5',
+    color: theme.palette.accent.main,
     cursor: 'pointer',
     '&.active': {
-      background: '#e6eef8',
+      background: theme.palette.text.secondary,
     },
     '&:hover': {
-      background: '#e6eef8',
+      background: theme.palette.text.secondary,
     },
   },
 }));
@@ -91,9 +88,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
  * - Land Use
  */
 export default function DataLayersControl() {
-  const theme = useTheme();
-  const mode = (theme as { mode: ThemeMode }).mode;
-  const { classes } = useStyles({ mode });
+  const { classes } = useStyles();
 
   const queryClient = useQueryClient();
 
@@ -179,6 +174,7 @@ export default function DataLayersControl() {
                     }
                   }}
                   size="small"
+                  data-layer-tab={tab.key}
                 >
                   {tab.icon}
                 </IconButton>

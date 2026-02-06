@@ -44,7 +44,7 @@ vi.mock("../components/ChoroplethScale", () => ({
   ),
 }));
 
-vi.mock("../components/coverage-line-chart/CoverageLineChart", () => ({
+vi.mock("../components/CoverageLineChart", () => ({
   CoverageLineChart: ({ data, title, lineKeys }: { data: unknown[]; title: string; lineKeys: unknown[] }) => (
     <div data-testid="coverage-chart">
       {title}
@@ -117,8 +117,8 @@ describe("VegetationCover", () => {
         render(<VegetationCover />);
       });
 
-      expect(screen.getByLabelText("Vegetation Cover:")).toBeInTheDocument();
-      expect(screen.getByLabelText("Select Year:")).toBeInTheDocument();
+      expect(screen.getByText("Vegetation Cover:")).toBeInTheDocument();
+      expect(screen.getByText("Select Year:")).toBeInTheDocument();
 
       await waitFor(() => {
         expect(mockFetchRap).toHaveBeenCalled();
@@ -334,11 +334,11 @@ describe("VegetationCover", () => {
         expect(mockFetchRap).toHaveBeenCalled();
       });
 
-      const closeButton = document.querySelector(".vegCloseButton");
+      const closeButton = screen.getByTestId("veg-close-button");
       expect(closeButton).toBeTruthy();
 
       await act(async () => {
-        fireEvent.click(closeButton!);
+        fireEvent.click(closeButton);
       });
 
       expect(mockClearSelectedHillslope).toHaveBeenCalled();

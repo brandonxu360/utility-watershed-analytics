@@ -12,7 +12,7 @@ import { useChoropleth } from '../../hooks/useChoropleth';
 import { selectedStyle, defaultStyle } from './constants';
 import { useAppStore } from '../../store/store';
 import { toast } from 'react-toastify';
-import { tss } from 'tss-react';
+import { tss } from '../../utils/tss';
 import { CircularProgress } from '@mui/material';
 import DataLayersControl from './controls/DataLayers/DataLayers';
 import ZoomInControl from './controls/ZoomIn';
@@ -25,7 +25,7 @@ import LandUseLegend from './controls/LandUseLegend';
 import SubcatchmentLayer from './SubcatchmentLayer';
 import 'leaflet/dist/leaflet.css';
 
-const useStyles = tss.create(() => ({
+const useStyles = tss.create(({ theme }) => ({
   mapContainer: {
     height: '100%',
     width: '100%',
@@ -36,13 +36,13 @@ const useStyles = tss.create(() => ({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(93, 91, 91, 0.7)',
+    backgroundColor: theme.palette.surface.overlay,
     zIndex: 1000,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '10px',
+    gap: theme.spacing(2),
   },
 }));
 
@@ -257,7 +257,7 @@ export default function Map(): JSX.Element {
       >
 
         {(watershedsLoading || subLoading || channelLoading || choroplethLoading) && (
-          <div className={classes.mapLoadingOverlay}>
+          <div className={classes.mapLoadingOverlay} data-testid="map-loading-overlay">
             <CircularProgress size={50} />
           </div>
         )}

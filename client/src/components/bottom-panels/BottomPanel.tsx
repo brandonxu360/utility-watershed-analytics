@@ -1,7 +1,5 @@
 import React, { useRef } from 'react';
-import { tss } from "tss-react";
-import { useTheme } from '@mui/material/styles';
-import type { ThemeMode } from '../../utils/theme';
+import { tss } from "../../utils/tss";
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 
 type BottomPanelProps = {
@@ -9,7 +7,7 @@ type BottomPanelProps = {
   children: React.ReactNode;
 }
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
   bottomPanel: {
     position: 'absolute',
     left: 0,
@@ -17,9 +15,9 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
     bottom: 0,
     minHeight: '16px',
     maxHeight: '450px',
-    background: '#222',
-    color: mode.colors.primary100,
-    borderTop: `0.5px solid ${mode.colors.primary500}`,
+    background: theme.palette.background.default,
+    color: theme.palette.primary.contrastText,
+    borderTop: `0.5px solid ${theme.palette.primary.dark}`,
     boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.2)',
     display: 'flex',
     flexDirection: 'column',
@@ -28,23 +26,20 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
   bottomPanelDrag: {
     height: '16px',
     cursor: 'ns-resize',
-    background: '#444',
+    background: theme.palette.primary.main,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
   bottomPanelContent: {
-    padding: '24px 16px 16px 16px',
+    padding: `${theme.spacing(3)} ${theme.spacing(2)} ${theme.spacing(2)} ${theme.spacing(2)}`,
     overflowY: 'auto',
     flex: 1,
   },
 }));
 
 export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
-  const theme = useTheme();
-  const mode = (theme as { mode: ThemeMode }).mode;
-
-  const { classes } = useStyles({ mode });
+  const { classes } = useStyles();
 
   const panelRef = useRef<HTMLDivElement>(null);
   const startY = useRef<number>(0);
@@ -72,9 +67,9 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   if (!isOpen) return null;
 
   return (
-    <div className={classes.bottomPanel} ref={panelRef}>
-      <div className={classes.bottomPanelDrag} onMouseDown={handleDrag}>
-        <DragHandleIcon />
+    <div className={classes.bottomPanel} ref={panelRef} data-testid="bottom-panel">
+      <div className={classes.bottomPanelDrag} onMouseDown={handleDrag} data-testid="bottom-panel-drag">
+        <DragHandleIcon data-testid="drag-handle-icon" />
       </div>
       <div className={classes.bottomPanelContent}>{children}</div>
     </div>

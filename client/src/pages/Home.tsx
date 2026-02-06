@@ -2,17 +2,15 @@ import { watershedOverviewRoute } from '../routes/router';
 import { useMatch } from '@tanstack/react-router';
 import { useAppStore } from '../store/store';
 import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
-import { tss } from 'tss-react';
-import { ThemeMode } from '../utils/theme';
+import { tss } from '../utils/tss';
 import WatershedOverview from '../components/side-panels/WatershedOverview';
 import HomeSidePanelContent from '../components/side-panels/HomeInfoPanel';
 import SmallScreenNotice from '../components/SmallScreenNotice';
 import BottomPanel from '../components/bottom-panels/BottomPanel';
 import Map from '../components/map/Map';
 import Paper from '@mui/material/Paper';
-import { useTheme } from '@mui/material';
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
   root: {
     display: 'flex',
     flex: 1,
@@ -25,13 +23,13 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
     height: '100%',
     width: '30%',
     minHeight: 0,
-    background: mode.colors.background,
-    color: mode.colors.primary100,
+    background: theme.palette.primary.dark,
+    color: theme.palette.primary.contrastText,
   },
   sidePanelContent: {
     flex: 1,
     minHeight: 0,
-    padding: '10px 30px 0',
+    padding: `${theme.spacing(1)} ${theme.spacing(4)} 0`,
     boxSizing: 'border-box',
     overflowY: 'auto',
   },
@@ -48,10 +46,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
 }));
 
 export default function Home(): JSX.Element {
-  const theme = useTheme();
-  const mode = (theme as { mode: ThemeMode }).mode;
-
-  const { classes } = useStyles({ mode });
+  const { classes } = useStyles();
   const { isPanelOpen, panelContent } = useAppStore();
   const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
   const watershedID = match?.params.webcloudRunId ?? null;

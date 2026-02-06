@@ -1,131 +1,118 @@
 import { createTheme } from "@mui/material/styles";
 
 declare module "@mui/material/styles" {
-    interface Theme {
-        mode: {
-            colors: {
-                primary100: string;
-                primary200: string;
-                primary300: string;
-                primary400: string;
-                primary500: string;
-                error: string;
-                text: string;
-                background: string;
-            };
-            fs: {
-                100: string;
-                200: string;
-                300: string;
-                400: string;
-                500: string;
-                body: string;
-                nav: string;
-                button: string;
-                primaryHeading: string;
-            };
-            fw: {
-                regular: number;
-            };
-            space: {
-                100: string;
-                200: string;
-                300: string;
-                400: string;
-                500: string;
-                600: string;
-                700: string;
-                800: string;
-                900: string;
-            };
-            misc: {
-                lineHeight: number;
-            };
+    interface Palette {
+        accent: Palette["primary"];
+        surface: {
+            main: string;
+            light: string;
+            dark: string;
+            overlay: string;
+            border: string;
+        };
+        muted: {
+            main: string;
         };
     }
-
-    interface ThemeOptions {
-        mode?: Partial<Theme["mode"]>;
+    interface PaletteOptions {
+        accent?: PaletteOptions["primary"];
+        surface?: {
+            main: string;
+            light: string;
+            dark: string;
+            overlay: string;
+            border: string;
+        };
+        muted?: {
+            main: string;
+        };
     }
 }
 
-export type ThemeMode = typeof darkMode;
-
-// Dark Mode
-export const darkMode = {
-    colors: {
-        primary100: "#F5F5F5",
-        primary200: "#DCEDFF",
-        primary300: "#00A896",
-        primary400: "#444444",
-        primary500: "#121212",
-        error: "#FF4B3E",
-        text: "#F5F5F5",
-        background: "#242424",
-    },
-    fs: {
-        100: "1rem",
-        200: "1.2rem",
-        300: "1.5rem",
-        400: "3rem",
-        500: "4.6875rem",
-        body: "1.2rem",
-        nav: "1rem",
-        button: "1rem",
-        primaryHeading: "3rem",
-    },
-    fw: {
-        regular: 500,
-    },
-    space: {
-        100: ".25rem",
-        200: ".5rem",
-        300: ".75rem",
-        400: "1rem",
-        500: "1.5rem",
-        600: "2rem",
-        700: "3rem",
-        800: "4rem",
-        900: "5rem",
-    },
-};
-
-// Light Mode
-const lightMode = {
-    colors: {
-        primary100: "#213547",
-        primary200: "#E6F2FF",
-        primary300: "#007B66",
-        primary400: "#F1F1F1",
-        primary500: "#FFFFFF",
-        error: "#D6473B",
-        text: "#213547",
-        background: "#FFFFFF",
-    },
-};
+// Custom spacing scale (in px) removed to use generic MUI spacing (8px base)
+// Usage: theme.spacing(1) = 8px, theme.spacing(2) = 16px, etc.
 
 const theme = createTheme({
     palette: {
-        mode: "dark", // TODO: implement theme switching
+        mode: "dark",
         primary: {
-            main: darkMode.colors.primary400,
-            light: darkMode.colors.primary200,
-            dark: darkMode.colors.primary500,
-            contrastText: darkMode.colors.primary100,
+            main: "#444444",
+            light: "#DCEDFF",
+            dark: "#121212",
+            contrastText: "#F5F5F5",
         },
-        error: { main: darkMode.colors.error },
-        background: { default: darkMode.colors.background, paper: darkMode.colors.primary400 },
-        text: { primary: darkMode.colors.text },
+        secondary: {
+            main: "#00A896",
+        },
+        error: {
+            main: "#FF4B3E",
+        },
+        background: {
+            default: "#242424",
+            paper: "#444444",
+        },
+        text: {
+            primary: "#F5F5F5",
+            secondary: "#DCEDFF",
+        },
+        // Custom palette colors
+        accent: {
+            main: "#646cff",
+            light: "#818cf8",
+            dark: "#535bf2",
+            contrastText: "#F5F5F5",
+        },
+        surface: {
+            main: "#444444",
+            light: "#F5F5F5",
+            dark: "#121212",
+            overlay: "rgba(0, 0, 0, 0.8)",
+            border: "#000000",
+        },
+        muted: {
+            main: "#666666",
+        },
     },
     typography: {
-        fontWeightRegular: darkMode.fw.regular,
-        h1: { fontSize: darkMode.fs[400] },
-    },
-    mode: {
-        ...darkMode,
+        fontWeightRegular: 500,
+        // Font size scale using rem
+        h1: { fontSize: "3rem" },
+        h2: { fontSize: "2.25rem" },
+        h3: { fontSize: "1.5rem" },
+        h4: { fontSize: "1.25rem" },
+        h5: { fontSize: "1.125rem" },
+        h6: { fontSize: "1rem" },
+        body1: { fontSize: "1.2rem" },
+        body2: { fontSize: "1rem" },
+        subtitle1: { fontSize: "1rem" },
+        subtitle2: { fontSize: "0.875rem" },
+        caption: { fontSize: "0.75rem" },
+        button: { fontSize: "1rem" },
     },
 });
 
-export const lightThemeTokens = lightMode;
+// Light mode palette for future theme switching
+export const lightPalette = {
+    primary: {
+        main: "#F1F1F1",
+        light: "#E6F2FF",
+        dark: "#FFFFFF",
+        contrastText: "#213547",
+    },
+    secondary: {
+        main: "#007B66",
+    },
+    error: {
+        main: "#D6473B",
+    },
+    background: {
+        default: "#FFFFFF",
+        paper: "#F1F1F1",
+    },
+    text: {
+        primary: "#213547",
+        secondary: "#E6F2FF",
+    },
+};
 
 export default theme;

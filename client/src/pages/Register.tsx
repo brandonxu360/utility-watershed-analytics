@@ -1,6 +1,6 @@
 import { useState, FormEvent, FC } from "react";
 import { Link } from "@tanstack/react-router";
-import { tss } from "tss-react";
+import { tss } from "../utils/tss";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import Paper from "@mui/material/Paper";
@@ -22,7 +22,7 @@ export interface RegisterProps {
   }) => void;
 }
 
-const useStyles = tss.create(() => ({
+const useStyles = tss.create(({ theme }) => ({
   root: {
     display: 'flex',
     flexDirection: 'column',
@@ -36,10 +36,10 @@ const useStyles = tss.create(() => ({
   },
   authCard: {
     width: '100%',
-    padding: '2rem 1rem',
+    padding: `${theme.spacing(4)} ${theme.spacing(2)}`,
     display: 'flex',
     flexDirection: 'column',
-    gap: '1.25rem',
+    gap: theme.spacing(2),
     boxSizing: 'border-box',
   },
   authFooter: {
@@ -47,13 +47,13 @@ const useStyles = tss.create(() => ({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
-    marginTop: '16px',
+    gap: theme.spacing(1),
+    marginTop: theme.spacing(2),
   },
   linkButton: {
-    color: '#646cff',
+    color: theme.palette.accent.main,
     textDecoration: 'none',
-    marginLeft: 4,
+    marginLeft: theme.spacing(0.5),
   },
 }));
 
@@ -152,6 +152,8 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
                 <InputAdornment position="end">
                   <IconButton
                     aria-label={hidden.confirm ? "Show confirm password" : "Hide confirm password"}
+                    title={hidden.confirm ? "Show confirm password" : "Hide confirm password"}
+                    aria-pressed={!hidden.confirm}
                     onClick={() => toggleHidden("confirm")}
                     onMouseDown={handleMouseDownPassword}
                     onMouseUp={handleMouseUpPassword}

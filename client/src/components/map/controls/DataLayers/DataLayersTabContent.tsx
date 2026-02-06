@@ -4,26 +4,24 @@ import { FaQuestionCircle } from 'react-icons/fa';
 import { VegetationCover } from '../../../bottom-panels/VegetationCover';
 import { useChoropleth } from '../../../../hooks/useChoropleth';
 import { useAppStore } from '../../../../store/store';
-import { tss } from 'tss-react';
-import { ThemeMode } from '../../../../utils/theme';
-import { useTheme } from '@mui/material/styles';
+import { tss } from '../../../../utils/tss';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
     layers: {
         maxHeight: '120px',
         overflowY: 'auto',
-        padding: '4px 0 8px 0',
+        padding: `${theme.spacing(0.5)} 0 ${theme.spacing(1)} 0`,
     },
     layer: {
         display: 'flex',
         alignItems: 'center',
-        padding: '6px 16px',
+        padding: `${theme.spacing(0.5)} ${theme.spacing(2)}`,
     },
     layerTitle: {
-        fontSize: '14px',
-        color: mode.colors.primary500,
+        fontSize: theme.typography.subtitle2.fontSize,
+        color: theme.palette.primary.dark,
         fontWeight: 500,
         cursor: 'pointer',
         flex: 1,
@@ -33,11 +31,11 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
         background: 'none',
     },
     layerCheckbox: {
-        marginLeft: '4px',
-        color: mode.colors.primary500,
+        marginLeft: theme.spacing(1),
+        color: theme.palette.primary.dark,
     },
     helpIcon: {
-        color: '#6a5acd',
+        color: theme.palette.accent.main,
         fontSize: '16px',
         cursor: 'pointer',
         display: 'flex',
@@ -54,9 +52,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
     activeTab,
     handleChange,
 }) => {
-    const theme = useTheme();
-    const mode = (theme as { mode: ThemeMode }).mode;
-    const { classes } = useStyles({ mode });
+    const { classes } = useStyles();
 
     const {
         subcatchment,

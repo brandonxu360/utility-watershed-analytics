@@ -1,18 +1,16 @@
 import { useState } from 'react';
 import { useMap } from 'react-leaflet';
 import { toast } from 'react-toastify';
-import { tss } from 'tss-react';
-import { useTheme } from '@mui/material/styles';
+import { tss } from '../../../utils/tss';
 import { Button, Paper, TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import type { ThemeMode } from '../../../utils/theme';
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
   searchButton: {
     height: 36,
     minWidth: 36,
-    backgroundColor: mode.colors.primary500,
+    backgroundColor: theme.palette.primary.dark,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -22,7 +20,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
     borderStyle: 'outset',
     borderWidth: 2,
     borderRadius: 0,
-    borderColor: '#000',
+    borderColor: theme.palette.surface.border,
     boxSizing: 'border-box',
     '&:active': {
       borderStyle: 'inset',
@@ -30,54 +28,51 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
   },
   searchIcon: {
     fontSize: 28,
-    color: mode.colors.primary100,
+    color: theme.palette.primary.contrastText,
   },
   searchModal: {
     position: 'absolute',
     top: 0,
     right: 60,
-    background: 'rgba(0, 0, 0, 0.8)',
-    color: mode.colors.primary100,
-    padding: mode.space[200],
-    borderRadius: mode.space[200],
+    background: theme.palette.surface.overlay,
+    color: theme.palette.primary.contrastText,
+    padding: theme.spacing(1),
+    borderRadius: theme.spacing(1),
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
     zIndex: 1000,
   },
   searchContent: {
     display: 'flex',
     alignItems: 'center',
-    gap: mode.space[300],
+    gap: theme.spacing(1.5),
   },
   searchInput: {
-    minWidth: 220,
+    minWidth: 260,
     '& .MuiInputBase-root': {
       height: 40,
-      backgroundColor: mode.colors.primary100,
-      color: mode.colors.primary500,
-      borderRadius: mode.space[100],
-      paddingLeft: mode.space[200],
+      backgroundColor: theme.palette.primary.contrastText,
+      color: theme.palette.primary.dark,
+      borderRadius: theme.spacing(0.5),
+      paddingLeft: theme.spacing(1),
     },
     '& .MuiOutlinedInput-notchedOutline': {
-      border: `1px solid ${mode.colors.primary100}`,
-    },
-    '& .MuiInputBase-input': {
-      padding: `${mode.space[200]} ${mode.space[300]}`,
+      border: `1px solid ${theme.palette.primary.contrastText}`,
     },
   },
   inputIcon: {
-    color: mode.colors.primary500,
+    color: theme.palette.primary.dark,
     fontSize: 20,
   },
   goButton: {
-    fontSize: mode.fs[100],
+    fontSize: theme.typography.body2.fontSize,
     transitionDuration: '0.4s',
-    backgroundColor: mode.colors.primary100,
-    color: mode.colors.primary500,
+    backgroundColor: theme.palette.primary.contrastText,
+    color: theme.palette.primary.dark,
     minWidth: 'auto',
-    padding: `${mode.space[100]} ${mode.space[200]}`,
+    padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
     height: 40,
     '&:hover': {
-      backgroundColor: mode.colors.primary200,
+      backgroundColor: theme.palette.primary.light,
     },
   },
 }));
@@ -89,9 +84,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
  */
 export default function SearchControl() {
   const map = useMap();
-  const theme = useTheme();
-  const mode = (theme as { mode: ThemeMode }).mode;
-  const { classes } = useStyles({ mode });
+  const { classes } = useStyles();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [input, setInput] = useState('');
@@ -131,7 +124,6 @@ export default function SearchControl() {
                 placeholder="Search coordinates"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                aria-label="Search bar"
                 className={classes.searchInput}
                 slotProps={{
                   input: {
@@ -140,6 +132,9 @@ export default function SearchControl() {
                         <SearchIcon className={classes.inputIcon} />
                       </InputAdornment>
                     ),
+                  },
+                  htmlInput: {
+                    'aria-label': 'Search bar',
                   },
                 }}
               />

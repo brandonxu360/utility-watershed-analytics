@@ -1,15 +1,13 @@
 import { useMap } from 'react-leaflet';
-import { tss } from 'tss-react';
-import { useTheme } from '@mui/material/styles';
+import { tss } from '../../../utils/tss';
 import { Button } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
-import type { ThemeMode } from '../../../utils/theme';
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
   zoomOutButton: {
     height: 36,
     minWidth: 36,
-    backgroundColor: mode.colors.primary500,
+    backgroundColor: theme.palette.primary.dark,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -19,7 +17,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
     borderStyle: 'outset',
     borderWidth: 2,
     borderRadius: 0,
-    borderColor: '#000',
+    borderColor: theme.palette.surface.border,
     boxSizing: 'border-box',
 
     '&:active': {
@@ -28,15 +26,13 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
   },
   zoomIcon: {
     fontSize: 28,
-    color: mode.colors.primary100,
+    color: theme.palette.primary.contrastText,
   },
 }));
 
 export default function ZoomOutControl() {
   const map = useMap();
-  const theme = useTheme();
-  const mode = (theme as { mode: ThemeMode }).mode;
-  const { classes } = useStyles({ mode });
+  const { classes } = useStyles();
 
   return (
     <div className="leaflet-control leaflet-bar">

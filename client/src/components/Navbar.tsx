@@ -1,25 +1,25 @@
 import { FC } from "react";
-import { tss } from "tss-react";
+import { tss } from "../utils/tss";
 import { Link } from "@tanstack/react-router";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 
-const useStyles = tss.create(() => ({
+const useStyles = tss.create(({ theme }) => ({
   root: {
     flexGrow: 1,
   },
   title: {
     flexGrow: 1,
-    fontSize: "1.2rem",
+    fontSize: theme.typography.body1.fontSize,
     fontWeight: "bold",
   },
   link: {
-    color: "#F5F5F5",
-    marginLeft: "1rem",
+    color: theme.palette.text.primary,
+    marginLeft: theme.spacing(2),
     textDecoration: "none",
     ":hover": {
-      color: "#535bf2",
+      color: theme.palette.accent.dark,
     },
   },
 }));

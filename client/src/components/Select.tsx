@@ -1,7 +1,5 @@
 import { FC, useEffect, useRef, useState } from "react";
-import { tss } from "tss-react";
-import { useTheme } from '@mui/material/styles';
-import type { ThemeMode } from '../utils/theme';
+import { tss } from "../utils/tss";
 import Button from "@mui/material/Button";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -13,7 +11,7 @@ export type SelectProps = {
     onChange: (value: string) => void;
 };
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
     selectWrapper: {
         position: 'relative',
         display: 'inline-block',
@@ -24,10 +22,10 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
-        padding: '.25rem .5rem',
-        fontSize: '1rem',
-        color: mode.colors.primary100,
-        backgroundColor: mode.colors.primary400,
+        padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
+        fontSize: theme.typography.body2.fontSize,
+        color: theme.palette.primary.contrastText,
+        backgroundColor: theme.palette.primary.main,
         cursor: 'pointer',
         textAlign: 'left',
         borderRadius: 0,
@@ -37,8 +35,8 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
         position: 'absolute',
         left: 0,
         width: '100%',
-        background: mode.colors.primary400,
-        color: mode.colors.primary100,
+        background: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
         boxShadow: '0 8px 18px rgba(0, 0, 0, 0.35)',
         zIndex: 20000,
         maxHeight: 'calc(4 * 2rem)',
@@ -46,7 +44,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
         overflowX: 'hidden',
     },
     selectItem: {
-        padding: '.35rem .5rem',
+        padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
         cursor: 'pointer',
         textAlign: 'center',
         whiteSpace: 'nowrap',
@@ -60,9 +58,7 @@ const Select: FC<SelectProps> = ({ id, ariaLabel, value, options, onChange }) =>
     const [open, setOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement | null>(null);
 
-    const theme = useTheme();
-    const mode = (theme as { mode: ThemeMode }).mode;
-    const { classes } = useStyles({ mode });
+    const { classes } = useStyles();
 
     // Close dropdown on outside click
     useEffect(() => {

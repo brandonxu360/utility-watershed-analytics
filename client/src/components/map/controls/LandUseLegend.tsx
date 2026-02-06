@@ -1,11 +1,9 @@
-import { tss } from 'tss-react';
-import { useTheme } from '@mui/material/styles';
+import { tss } from '../../../utils/tss';
 import { Paper, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAppStore } from '../../../store/store';
-import type { ThemeMode } from '../../../utils/theme';
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
     landuseLegendWrapper: {
         position: 'absolute',
         left: 10,
@@ -14,9 +12,9 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
         maxWidth: 360,
     },
     landuseLegend: {
-        background: 'rgba(0, 0, 0, 0.85)',
-        color: mode.colors.primary100,
-        padding: mode.space[300],
+        background: theme.palette.surface.overlay,
+        color: theme.palette.primary.contrastText,
+        padding: theme.spacing(1.5),
         borderRadius: 6,
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
     },
@@ -24,54 +22,52 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
         display: 'flex',
         alignItems: 'center',
         fontWeight: 'bold',
-        gap: mode.space[100],
-        marginBottom: mode.space[200],
+        gap: theme.spacing(0.5),
+        marginBottom: theme.spacing(1),
     },
     landuseClose: {
         cursor: 'pointer',
-        color: mode.colors.primary100,
-        padding: mode.space[100],
+        color: theme.palette.primary.contrastText,
+        padding: theme.spacing(0.5),
     },
     landuseLegendContent: {
         display: 'flex',
         flexDirection: 'column',
-        gap: mode.space[200],
+        gap: theme.spacing(1),
         overflow: 'auto',
         maxHeight: '50vh',
     },
     landuseItem: {
         display: 'flex',
         alignItems: 'center',
-        paddingRight: mode.space[400],
-        gap: mode.space[300],
+        paddingRight: theme.spacing(2),
+        gap: theme.spacing(1.5),
     },
     landuseSwatch: {
         width: 24,
         height: 24,
-        border: '1px solid #ccc',
+        border: `1px solid ${theme.palette.muted.main}`,
         borderRadius: 4,
         flex: '0 0 24px',
     },
     landuseDesc: {
-        fontSize: '0.95rem',
-        color: mode.colors.primary100,
+        fontSize: theme.typography.subtitle1.fontSize,
+        color: theme.palette.primary.contrastText,
     },
     landuseEmpty: {
-        fontSize: '0.9rem',
+        fontSize: theme.typography.subtitle2.fontSize,
         opacity: 0.85,
-        color: mode.colors.primary100,
+        color: theme.palette.primary.contrastText,
     },
     heading: {
-        color: mode.colors.primary100,
+        color: theme.palette.primary.contrastText,
         fontWeight: 'bold',
-        fontSize: mode.fs[100],
+        fontSize: theme.typography.body2.fontSize,
     },
 }));
 
 export default function LandUseLegend() {
-    const theme = useTheme();
-    const mode = (theme as { mode: ThemeMode }).mode;
-    const { classes } = useStyles({ mode });
+    const { classes } = useStyles();
 
     const { landuseLegendVisible, landuseLegendMap, setLanduseLegendVisible } = useAppStore();
 
@@ -99,7 +95,7 @@ export default function LandUseLegend() {
                     )}
 
                     {Object.entries(landuseLegendMap).map(([color, desc]) => (
-                        <div key={color} className={classes.landuseItem}>
+                        <div key={color} className={classes.landuseItem} data-testid="landuse-item">
                             <div className={classes.landuseSwatch} style={{ background: color }} />
                             <Typography className={classes.landuseDesc}>{desc}</Typography>
                         </div>

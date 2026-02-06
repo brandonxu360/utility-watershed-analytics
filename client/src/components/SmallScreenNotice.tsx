@@ -1,22 +1,22 @@
-import { tss } from "tss-react";
+import { tss } from "../utils/tss";
 
-const useStyles = tss.create(() => ({
+const useStyles = tss.create(({ theme }) => ({
     root: {
         position: 'fixed',
         inset: 0,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 32,
-        background: '#0f172a',
+        padding: theme.spacing(8),
+        background: theme.palette.primary.dark,
     },
     smallScreenTitle: {
-        fontSize: '1.5rem',
-        paddingBottom: 8,
-        color: '#DCEDFF',
+        fontSize: theme.typography.h3.fontSize,
+        paddingBottom: theme.spacing(1),
+        color: theme.palette.text.secondary,
     },
     smallScreenBody: {
-        color: '#F5F5F5',
+        color: theme.palette.text.primary,
     },
 }));
 

@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { tss } from 'tss-react';
-import { useTheme } from '@mui/material/styles';
+import { tss } from '../../../utils/tss';
 import { Button, Paper } from '@mui/material';
 import ListIcon from '@mui/icons-material/List';
 import CloseIcon from '@mui/icons-material/Close';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import type { ThemeMode } from '../../../utils/theme';
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const TIER1_COLOR = '#00FF7F';
+const TIER2_COLOR = '#0000FF';
+
+const useStyles = tss.create(({ theme }) => ({
   legendButton: {
     height: 36,
     minWidth: 36,
-    backgroundColor: mode.colors.primary500,
+    backgroundColor: theme.palette.primary.dark,
 
     display: 'flex',
     justifyContent: 'center',
@@ -25,7 +26,7 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
     borderStyle: 'outset',
     borderWidth: 2,
     borderRadius: 0,
-    borderColor: '#000',
+    borderColor: theme.palette.surface.border,
     boxSizing: 'border-box',
 
     '&:active': {
@@ -34,16 +35,16 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
   },
   legendIcon: {
     fontSize: 28,
-    color: mode.colors.primary100,
+    color: theme.palette.primary.contrastText,
   },
   legendModal: {
     position: 'absolute',
     top: 0,
     left: 60,
-    background: 'rgba(0, 0, 0, 0.8)',
-    color: mode.colors.primary100,
-    padding: mode.space[300],
-    borderRadius: mode.space[200],
+    background: theme.palette.surface.overlay,
+    color: theme.palette.primary.contrastText,
+    padding: theme.spacing(1.5),
+    borderRadius: theme.spacing(1),
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
     zIndex: 1000,
     width: 330,
@@ -52,26 +53,26 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
     '& > div': {
       display: 'flex',
       alignItems: 'center',
-      fontSize: mode.fs[100],
+      fontSize: theme.typography.body2.fontSize,
     },
   },
   watershedContainer: {
     display: 'flex',
     justifyContent: 'space-between',
-    padding: mode.space[300],
+    padding: theme.spacing(1.5),
   },
   watershedLeft: {
     display: 'flex',
     alignItems: 'center',
     '& > div': {
-      marginRight: mode.space[300],
+      marginRight: theme.spacing(1.5),
     },
   },
   watershedRight: {
     display: 'flex',
     alignItems: 'center',
-    marginLeft: mode.space[500],
-    gap: mode.space[300],
+    marginLeft: theme.spacing(3),
+    gap: theme.spacing(1.5),
   },
   legendText: {
     fontWeight: 'bold',
@@ -79,13 +80,13 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
   tier1Color: {
     width: 20,
     height: 20,
-    background: '#00FF7F',
+    background: TIER1_COLOR,
     borderRadius: 5,
   },
   tier2Color: {
     width: 20,
     height: 20,
-    background: '#0000FF',
+    background: TIER2_COLOR,
     borderRadius: 5,
   },
 }));
@@ -96,10 +97,8 @@ const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
  *
  * @component
  */
-export default function LegendControl() {
-  const theme = useTheme();
-  const mode = (theme as { mode: ThemeMode }).mode;
-  const { classes } = useStyles({ mode });
+export default function Legend() {
+  const { classes } = useStyles();
 
   const [isLegendOpen, setIsLegendOpen] = useState(false);
 
@@ -133,6 +132,10 @@ export default function LegendControl() {
                   className={classes.legendIcon}
                   style={{ cursor: 'pointer' }}
                   onClick={() => toast.error('Feature not implemented yet')}
+                  aria-label="Show Tier 1 watersheds"
+                  role="button"
+                  tabIndex={0}
+                  aria-hidden={false}
                 />
               </div>
             </div>
@@ -146,6 +149,10 @@ export default function LegendControl() {
                   className={classes.legendIcon}
                   style={{ cursor: 'pointer' }}
                   onClick={() => toast.error('Feature not implemented yet')}
+                  aria-label="Show Tier 2 watersheds"
+                  role="button"
+                  tabIndex={0}
+                  aria-hidden={false}
                 />
               </div>
             </div>

@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { tss } from "tss-react";
-import { useTheme } from '@mui/material/styles';
+import { tss } from "../../utils/tss";
 import { useAppStore } from "../../store/store";
 import { VegetationBandType } from "../../store/slices/choroplethSlice";
 import { useMatch } from '@tanstack/react-router';
@@ -10,7 +9,6 @@ import { AggregatedRapRow } from "../../api/types";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { ChoroplethScale } from "../ChoroplethScale";
 import { endYear, startYear } from "../../utils/constants";
-import type { ThemeMode } from '../../utils/theme';
 import fetchRap from '../../api/rapApi';
 import Select from "../Select";
 import Typography from "@mui/material/Typography";
@@ -24,51 +22,52 @@ type RapStatus = {
 
 type VegetationOption = "All" | "Shrub" | "Tree";
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
     titleBar: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        margin: '1rem 1.75rem',
+        margin: `${theme.spacing(2)} ${theme.spacing(3)}`,
     },
     vegCoverSelector: {
         display: 'flex',
         alignItems: 'center',
         width: 'auto',
         minWidth: 180,
-        gap: '1.25rem',
+        gap: theme.spacing(2),
     },
     dateSelector: {
         display: 'flex',
         alignItems: 'center',
         width: 'auto',
         minWidth: 180,
-        gap: '1.25rem',
+        gap: theme.spacing(2),
     },
     optionAlign: {
         display: 'flex',
         alignItems: 'center',
-        gap: '0.5rem',
-        marginRight: '0.25rem',
+        gap: theme.spacing(1),
+        marginRight: theme.spacing(0.5),
     },
     optionAlignLabel: {
         display: 'block',
         whiteSpace: 'nowrap',
-        fontSize: '.875rem',
+        fontSize: theme.typography.subtitle2.fontSize,
     },
     closeButton: {
-        backgroundColor: mode.colors.error,
-        color: mode.colors.primary100,
+        backgroundColor: theme.palette.error.main,
+        color: theme.palette.primary.contrastText,
         borderRadius: 2,
-        fontSize: '0.75rem',
+        fontSize: theme.typography.caption.fontSize,
         cursor: 'pointer',
         '&:hover': {
-            backgroundColor: mode.colors.error,
+            backgroundColor: theme.palette.error.main,
         },
     },
 }));
 
 export const VegetationCover: React.FC = () => {
+    const { classes } = useStyles();
     const {
         selectedHillslopeId,
         choropleth: {
@@ -200,10 +199,6 @@ export const VegetationCover: React.FC = () => {
         ? `${vegetationOption} Coverage - Hillslope ${selectedHillslopeId} (${selectedYear})`
         : `${vegetationOption} Coverage (${selectedYear})`;
 
-    const theme = useTheme();
-    const mode = (theme as { mode: ThemeMode }).mode;
-    const { classes } = useStyles({ mode });
-
     return (
         <div>
             <div className={classes.titleBar}>
@@ -230,7 +225,7 @@ export const VegetationCover: React.FC = () => {
                             ariaLabel="Select vegetation year"
                         />
                     </div>
-                    <IconButton className={classes.closeButton} onClick={() => {
+                    <IconButton className={classes.closeButton} data-testid="veg-close-button" onClick={() => {
                         clearSelectedHillslope();
                         setSubcatchment(false);
                         resetChoropleth();

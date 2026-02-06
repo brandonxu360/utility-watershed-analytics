@@ -5,82 +5,80 @@ import { fetchWatersheds } from '../../api/api';
 import { WatershedProperties } from '../../types/WatershedProperties';
 import { watershedOverviewRoute } from '../../routes/router';
 import { useAppStore } from '../../store/store';
-import { tss } from "tss-react";
-import { useTheme } from '@mui/material/styles';
-import { ThemeMode } from '../../utils/theme';
+import { tss } from "../../utils/tss";
 import { toast } from 'react-toastify';
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 
-const useStyles = tss.withParams<{ mode: ThemeMode }>().create(({ mode }) => ({
+const useStyles = tss.create(({ theme }) => ({
     closeButton: {
-        backgroundColor: mode.colors.error,
-        color: mode.colors.primary100,
-        fontSize: mode.fs[100],
-        marginTop: mode.space[300],
-        marginBottom: mode.space[200],
-        padding: '0.313rem 0.5rem',
+        backgroundColor: theme.palette.error.main,
+        color: theme.palette.primary.contrastText,
+        fontSize: theme.typography.body2.fontSize,
+        marginTop: theme.spacing(1.5),
+        marginBottom: theme.spacing(1),
+        padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
     },
     contentBox: {
-        marginTop: '1.15rem',
+        marginTop: theme.spacing(2),
     },
     modelsBox: {
-        marginTop: '1.5rem',
+        marginTop: theme.spacing(3),
     },
     title: {
-        marginBottom: mode.space[300],
-        fontSize: mode.fs[200],
+        marginBottom: theme.spacing(1.5),
+        fontSize: theme.typography.body1.fontSize,
     },
     paragraph: {
-        marginBottom: mode.space[200],
-        fontSize: mode.fs[200],
+        marginBottom: theme.spacing(2),
+        fontSize: theme.typography.body1.fontSize,
     },
     accordionGroup: {
-        marginTop: mode.space[400],
-        paddingBottom: mode.space[300],
+        marginTop: theme.spacing(2),
+        paddingBottom: theme.spacing(1.5),
         display: 'flex',
         flexDirection: 'column',
-        gap: mode.space[300],
+        gap: theme.spacing(1.5),
     },
     actionButton: {
         width: '100%',
-        color: mode.colors.primary100,
-        borderBottom: `1px solid ${mode.colors.primary100}`,
-        padding: `${mode.space[300]} ${mode.space[400]}`,
+        color: theme.palette.primary.contrastText,
+        borderBottom: `1px solid ${theme.palette.primary.contrastText}`,
+        padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
         justifyContent: 'flex-start',
-        fontSize: mode.fs[100],
+        fontSize: theme.typography.body2.fontSize,
         '&:hover': {
-            borderColor: '#646cff',
+            borderColor: theme.palette.accent.main,
         },
     },
     skeletonClose: {
-        marginTop: mode.space[300],
-        marginBottom: mode.space[400],
+        marginTop: theme.spacing(1.5),
+        marginBottom: theme.spacing(2),
     },
     skeletonText: {
-        marginBottom: mode.space[200],
+        marginBottom: theme.spacing(1),
     },
     skeletonParagraph: {
-        marginBottom: mode.space[300],
+        marginBottom: theme.spacing(1.5),
     },
     skeletonGroup: {
         display: 'flex',
         flexDirection: 'column',
-        gap: mode.space[300],
-        marginTop: mode.space[600],
+        gap: theme.spacing(1.5),
+        marginTop: theme.spacing(4),
     },
 }));
 
 /** 
  * Renders the "skeleton" version of the watershed panel while loading.
  */
-function SkeletonWatershedPanel({ mode }: { mode: ThemeMode }) {
-    const { classes } = useStyles({ mode });
+function SkeletonWatershedPanel() {
+    const { classes } = useStyles();
     return (
-        <div>
-            <Skeleton variant="rectangular" width="20%" height="1.75rem" className={classes.skeletonClose} />
-            <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonText} />
+        <div data-testid="skeleton-panel">
+            <Skeleton variant="rectangular" width="20%" height="1.75rem" className={classes.skeletonClose} data-testid="skeleton-close-button" />
+            <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonText} data-testid="skeleton-title-text" />
 
             <Skeleton variant="text" width="90%" height="1.75rem" className={classes.skeletonParagraph} />
             <Skeleton variant="text" width="60%" height="1.75rem" className={classes.skeletonParagraph} />
@@ -90,21 +88,19 @@ function SkeletonWatershedPanel({ mode }: { mode: ThemeMode }) {
             <Skeleton variant="text" width="90%" height="1.75rem" className={classes.skeletonParagraph} />
 
             <div className={classes.skeletonGroup}>
-                <Skeleton variant="rectangular" width="100%" height="3rem" />
-                <Skeleton variant="rectangular" width="100%" height="3rem" />
-                <Skeleton variant="rectangular" width="100%" height="3rem" />
-                <Skeleton variant="rectangular" width="100%" height="3rem" />
+                <Skeleton variant="rectangular" width="100%" height="3rem" data-testid="skeleton-button" />
+                <Skeleton variant="rectangular" width="100%" height="3rem" data-testid="skeleton-button" />
+                <Skeleton variant="rectangular" width="100%" height="3rem" data-testid="skeleton-button" />
+                <Skeleton variant="rectangular" width="100%" height="3rem" data-testid="skeleton-button" />
             </div>
         </div>
     );
 }
 
 export default function WatershedOverview() {
-    const theme = useTheme();
-    const mode = (theme as { mode: ThemeMode }).mode;
+    const { classes } = useStyles();
     const navigate = useNavigate();
 
-    const { classes } = useStyles({ mode });
     const { resetOverlays } = useAppStore();
 
     const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
@@ -122,7 +118,7 @@ export default function WatershedOverview() {
         );
     }, [watersheds?.features, watershedID]);
 
-    if (isLoading) return <SkeletonWatershedPanel mode={mode} />;
+    if (isLoading) return <SkeletonWatershedPanel />;
     if (error) return <div>Error: {(error as Error).message}</div>;
     if (!watersheds?.features) return <div>No watershed data found.</div>;
 
@@ -147,26 +143,26 @@ export default function WatershedOverview() {
             </Button>
             <div className={classes.contentBox}>
                 <Typography variant="h6" className={classes.title}>
-                    <strong>{watershed.properties.pws_name}</strong>
+                    <strong>{watershed?.properties?.pws_name}</strong>
                 </Typography>
                 <Typography variant="body1" className={classes.paragraph}>
                     This is where the description for the watershed will go. For now we have placeholder text.
                 </Typography>
                 <Typography variant="body1" className={classes.paragraph}>
-                    <strong>County:</strong> {watershed.properties.county_nam ?? "N/A"}
+                    <strong>County:</strong> {watershed?.properties?.county_nam ?? "N/A"}
                 </Typography>
                 <Typography variant="body1" className={classes.paragraph}>
-                    <strong>Area:</strong> {watershed.properties.shape_area ? `${watershed.properties.shape_area.toFixed(2)}` : "N/A"}
+                    <strong>Area:</strong> {watershed?.properties?.shape_area ? `${watershed?.properties?.shape_area.toFixed(2)}` : "N/A"}
                 </Typography>
                 <Typography variant="body1" className={classes.paragraph}>
                     <strong>Number of Customers:</strong>{" "}
-                    {watershed.properties.num_customers ?? "N/A"}
+                    {watershed?.properties?.num_customers ?? "N/A"}
                 </Typography>
                 <Typography variant="body1" className={classes.paragraph}>
-                    <strong>Source Name:</strong> {watershed.properties.srcname ?? "N/A"}
+                    <strong>Source Name:</strong> {watershed?.properties?.srcname ?? "N/A"}
                 </Typography>
                 <Typography variant="body1" className={classes.paragraph}>
-                    <strong>Source Type:</strong> {watershed.properties.srctype ?? "N/A"}
+                    <strong>Source Type:</strong> {watershed?.properties?.srctype ?? "N/A"}
                 </Typography>
             </div>
 
