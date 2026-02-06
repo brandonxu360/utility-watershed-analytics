@@ -10,7 +10,7 @@ Usage:
     python manage.py download_data --dev
     
     # Download specific watersheds by runid
-    python manage.py download_data --runids 'batch;;nasa-roses-2025;;wa-0' 'batch;;nasa-roses-2025;;wa-1'
+    python manage.py download_data --runids 'batch;;nasa-roses-2026-sbs;;or-20' 'batch;;nasa-roses-2026-sbs;;wa-174'
     
     # Download ALL data (production only - very large!)
     python manage.py download_data --all

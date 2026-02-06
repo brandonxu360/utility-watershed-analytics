@@ -23,6 +23,36 @@ from .exceptions import DataSourceError
 logger = logging.getLogger("watershed.loader")
 
 
+# Runid conversion utilities
+# Canonical runid format: "batch;;nasa-roses-2026-sbs;;OR-10" (uppercase state code)
+# Note: Watersheds file now contains correct uppercase state codes.
+# Normalization is kept for defensive programming.
+
+BATCH_NAME = "nasa-roses-2026-sbs"  # Used in URL templates
+
+
+def normalize_runid(runid: str) -> str:
+    """
+    Ensure runid has uppercase state code.
+    
+    Defensive normalization since the data source now correctly provides
+    uppercase state codes. Kept to handle any edge cases gracefully.
+    
+    Args:
+        runid: Full runid format (e.g., "batch;;nasa-roses-2026-sbs;;or-10")
+    
+    Returns:
+        Runid with uppercase state code
+        
+    Examples:
+        "batch;;nasa-roses-2026-sbs;;OR-10" -> "batch;;nasa-roses-2026-sbs;;OR-10"
+        "batch;;nasa-roses-2026-sbs;;or-10" -> "batch;;nasa-roses-2026-sbs;;OR-10"
+    """
+    parts = runid.split(";;")
+    parts[-1] = parts[-1].upper()
+    return ";;".join(parts)
+
+
 @dataclass
 class DataSource:
     """
@@ -49,14 +79,24 @@ class UrlTemplates:
     """
     URL templates for generating data source URLs.
     
-    Uses {runid} and {config} placeholders that get substituted
+    Uses {weppcloud_base} and {runid} placeholders that get substituted
     with actual values at runtime.
+    
+    NASA ROSES 2026 URL patterns using the disturbed_wbt config:
+    - Base: https://wepp.cloud/weppcloud/runs/{runid}/disturbed_wbt/download/...
+    - Subcatchments: /download/dem/wbt/subcatchments.WGS.geojson
+    - Channels: /download/dem/wbt/channels.WGS.geojson
+    - Hillslopes: /download/watershed/hillslopes.parquet
+    - Soils: /download/soils/soils.parquet
+    - Landuse: /download/landuse/landuse.parquet
+    
+    Where {runid} is the full normalized runid: batch;;nasa-roses-2026-sbs;;OR-10
     """
-    subcatchments: str = "{api_base}/runs/{runid}/{config}/download/dem/wbt/subcatchments.WGS.geojson"
-    channels: str = "{api_base}/runs/{runid}/{config}/download/dem/wbt/channels.WGS.geojson"
-    hillslopes: str = "{api_base}/runs/{runid}/{config}/browse/watershed/hillslopes.parquet?download"
-    soils: str = "{api_base}/runs/{runid}/{config}/browse/soils/soils.parquet?download"
-    landuse: str = "{api_base}/runs/{runid}/{config}/browse/landuse/landuse.parquet?download"
+    subcatchments: str = "{weppcloud_base}/runs/{runid}/disturbed_wbt/download/dem/wbt/subcatchments.WGS.geojson"
+    channels: str = "{weppcloud_base}/runs/{runid}/disturbed_wbt/download/dem/wbt/channels.WGS.geojson"
+    hillslopes: str = "{weppcloud_base}/runs/{runid}/disturbed_wbt/download/watershed/hillslopes.parquet"
+    soils: str = "{weppcloud_base}/runs/{runid}/disturbed_wbt/download/soils/soils.parquet"
+    landuse: str = "{weppcloud_base}/runs/{runid}/disturbed_wbt/download/landuse/landuse.parquet"
 
 
 class WatershedDataDiscovery:
@@ -75,15 +115,15 @@ class WatershedDataDiscovery:
         runids = discovery.discover_runids()
         
         # Generate URLs for a specific runid
-        urls = discovery.get_urls_for_runid("batch;;nasa-roses-2025;;wa-0")
+        urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;OR-20")
         
         # Iterate through all subcatchment sources
         for source in discovery.iter_subcatchments():
             process(source)
     """
     
-    # Filename for the master watersheds
-    WATERSHEDS_FILENAME = "WWS_Watersheds_HUC10_Merged.geojson"
+    # Filename for the master watersheds (NASA ROSES 2026)
+    WATERSHEDS_FILENAME = "nasa-roses-2026-sbs_completed.geojson"
     
     def __init__(
         self,
@@ -102,19 +142,21 @@ class WatershedDataDiscovery:
         self._cached_runids: Optional[list[str]] = None
         self._cached_watersheds_data: Optional[dict] = None
 
-        # Construct the watersheds URL from the configured bucket base URL
-        base = self.config.api.bucket_base_url.rstrip("/")
-        self.watersheds_url = f"{base}/{self.WATERSHEDS_FILENAME}"
+        # Construct the watersheds URL from the configured batch base URL
+        base = self.config.api.weppcloud_batch_url.rstrip("/")
+        self.watersheds_url = f"{base}/download/resources/{self.WATERSHEDS_FILENAME}"
     
     def discover_runids(self, force_refresh: bool = False) -> list[str]:
         """
         Fetch watersheds GeoJSON and extract all runids.
         
+        Runids are in canonical format (uppercase state codes).
+        
         Args:
             force_refresh: If True, ignore cache and fetch fresh data
         
         Returns:
-            List of all available runids
+            List of all available runids in canonical format
         
         Raises:
             DataSourceError: If watersheds data cannot be fetched
@@ -140,7 +182,8 @@ class WatershedDataDiscovery:
         for feature in data.get("features", []):
             runid = feature.get("properties", {}).get("runid")
             if runid:
-                runids.append(runid)
+                # Normalize (defensive - data should already be uppercase)
+                runids.append(normalize_runid(runid))
         
         self._cached_runids = runids
         logger.info(f"Discovered {len(runids)} runids")
@@ -162,29 +205,37 @@ class WatershedDataDiscovery:
         Generate all data URLs for a given runid.
         
         Args:
-            runid: The watershed runid (e.g., "batch;;nasa-roses-2025;;wa-0")
+            runid: The watershed runid (any format - will be normalized)
         
         Returns:
             Dictionary mapping data type to URL
+            
+        Example:
+            For runid "batch;;nasa-roses-2026-sbs;;or-10":
+            {
+                "subcatchments": "https://wepp.cloud/weppcloud/runs/batch;;nasa-roses-2026-sbs;;OR-10/disturbed_wbt/download/dem/wbt/subcatchments.WGS.geojson",
+                ...
+            }
         """
-        api_base = self.config.api.weppcloud_base_url
-        config = self.config.api.default_config
+        weppcloud_base = self.config.api.weppcloud_base_url.rstrip("/")
+        # Normalize runid (defensive uppercase conversion)
+        normalized = normalize_runid(runid)
         
         return {
             "subcatchments": self.templates.subcatchments.format(
-                api_base=api_base, runid=runid, config=config
+                weppcloud_base=weppcloud_base, runid=normalized
             ),
             "channels": self.templates.channels.format(
-                api_base=api_base, runid=runid, config=config
+                weppcloud_base=weppcloud_base, runid=normalized
             ),
             "hillslopes": self.templates.hillslopes.format(
-                api_base=api_base, runid=runid, config=config
+                weppcloud_base=weppcloud_base, runid=normalized
             ),
             "soils": self.templates.soils.format(
-                api_base=api_base, runid=runid, config=config
+                weppcloud_base=weppcloud_base, runid=normalized
             ),
             "landuse": self.templates.landuse.format(
-                api_base=api_base, runid=runid, config=config
+                weppcloud_base=weppcloud_base, runid=normalized
             ),
         }
     

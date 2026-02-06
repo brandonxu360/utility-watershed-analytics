@@ -46,9 +46,10 @@ SOILS_FIELD_MAP = [
     ('clay', 'clay', float),
     ('sand', 'sand', float),
     ('avke', 'avke', float),
-    ('ll', 'll', float),
     ('bd', 'bd', float),
     ('simple_texture', 'simple_texture', str),
+    ('soil_depth', 'soil_depth', float),
+    ('rock', 'rock', float),
 ]
 
 LANDUSE_FIELD_MAP = [
