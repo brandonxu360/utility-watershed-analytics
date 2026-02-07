@@ -44,27 +44,29 @@ export function AboutWeppCloudSidePanelContent() {
 
             <br />
 
-            <button
-                onClick={() => {
-                    navigate({ to: "/about-wepp" });
-                }}
-                className='actionButton'
-                aria-label='Learn about WEPP'
-                title='Learn about WEPP'
-            >
-                About WEPP
-            </button>
+            <div className='nav-buttons'>
+                <button
+                    onClick={() => {
+                        navigate({ to: "/about-wepp" });
+                    }}
+                    className='actionButton'
+                    aria-label='Learn about WEPP'
+                    title='Learn about WEPP'
+                >
+                    About WEPP
+                </button>
 
-            <button
-                onClick={() => {
-                    navigate({ to: "/about-rhessys" });
-                }}
-                className='actionButton'
-                aria-label='Learn about RHESSys'
-                title='Learn about RHESSys'
-            >
-                About RHESSys
-            </button>
+                <button
+                    onClick={() => {
+                        navigate({ to: "/about-rhessys" });
+                    }}
+                    className='actionButton'
+                    aria-label='Learn about RHESSys'
+                    title='Learn about RHESSys'
+                >
+                    About RHESSys
+                </button>
+            </div>
 
             <br /><br /><br />
         </div>

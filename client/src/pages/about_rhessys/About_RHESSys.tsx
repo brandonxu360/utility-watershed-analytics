@@ -41,27 +41,30 @@ export function AboutRHESSysSidePanelContent() {
       </div>
 
       <br />
-      <button
-        onClick={() => {
-          navigate({ to: "/about-wepp" });
-        }}
-        className='actionButton'
-        aria-label='Learn about WEPP'
-        title='Learn about WEPP'
-      >
-        About WEPP
-      </button>
 
-      <button
-        onClick={() => {
-          navigate({ to: "/about-wepp-cloud" });
-        }}
-        className='actionButton'
-        aria-label='Learn about WEPPcloud'
-        title='Learn about WEPPcloud'
-      >
-        About WEPPcloud
-      </button>
+      <div className='nav-buttons'>
+        <button
+          onClick={() => {
+            navigate({ to: "/about-wepp" });
+          }}
+          className='actionButton'
+          aria-label='Learn about WEPP'
+          title='Learn about WEPP'
+        >
+          About WEPP
+        </button>
+
+        <button
+          onClick={() => {
+            navigate({ to: "/about-wepp-cloud" });
+          }}
+          className='actionButton'
+          aria-label='Learn about WEPPcloud'
+          title='Learn about WEPPcloud'
+        >
+          About WEPPcloud
+        </button>
+      </div>
 
       <br /><br /><br />
     </div>

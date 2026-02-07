@@ -31,31 +31,40 @@ export function AboutSidePanelContent() {
       <br />
       <h2>Model Architecture</h2>
 
-      <button onClick={() => {
-        navigate({ to: "/about-wepp" });
-      }}
-        className='actionButton'
-        aria-label='Learn about WEPP'
-        title='Learn about WEPP'>WEPP
-      </button>
+      <div className='nav-buttons' style={{ marginBottom: '1rem' }}>
+        <button
+          onClick={() => {
+            navigate({ to: "/about-wepp" });
+          }}
+          className='actionButton'
+          aria-label='Learn about WEPP'
+          title='Learn about WEPP'
+        >
+          WEPP
+        </button>
 
-      <button onClick={() => {
-        navigate({ to: "/about-wepp-cloud" });
-      }}
-        className='actionButton'
-        aria-label='Learn about WEPPcloud'
-        title='Learn about WEPPcloud'>WEPPcloud
-      </button>
+        <button
+          onClick={() => {
+            navigate({ to: "/about-wepp-cloud" });
+          }}
+          className='actionButton'
+          aria-label='Learn about WEPPcloud'
+          title='Learn about WEPPcloud'
+        >
+          WEPPcloud
+        </button>
 
-      <button onClick={() => {
-        navigate({ to: "/about-rhessys" });
-      }}
-        className='actionButton'
-        aria-label='Learn about RHESSys'
-        title='Learn about RHESSys'>RHESSys
-      </button>
-
-      <br /><br /><br />
+        <button
+          onClick={() => {
+            navigate({ to: "/about-rhessys" });
+          }}
+          className='actionButton'
+          aria-label='Learn about RHESSys'
+          title='Learn about RHESSys'
+        >
+          RHESSys
+        </button>
+      </div>
 
       <div className="institutions">
         <h2>Participating Institutions</h2>
