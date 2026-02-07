@@ -35,6 +35,8 @@ const Navbar: FC = () => {
             FireWISE Watersheds
           </Typography>
           <Link to='/' className={classes.link}>Home</Link>
+          <Link to='/team' className={classes.link}>Team</Link>
+          <Link to='/about' className={classes.link}>About</Link>
           <Link to='/login' className={classes.link}>Login</Link>
         </Toolbar>
       </AppBar>

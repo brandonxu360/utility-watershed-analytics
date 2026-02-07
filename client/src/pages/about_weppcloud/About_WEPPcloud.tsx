@@ -1,14 +1,12 @@
-import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
+import SmallScreenNotice from '../../components/SmallScreenNotice';
 import weppcloud_diagram from '../../assets/images/weppcloud_diagram.png'
 import './About_WEPPcloud.css';
 
-
 /* ABOUT WEPPCLOUD: SIDE PANEL CONTENT */
 export function AboutWeppCloudSidePanelContent() {
-    const navigate = useNavigate();  
+    const navigate = useNavigate();
     return (
         <div className="about-weppcloud-panel">
             <button
@@ -29,17 +27,17 @@ export function AboutWeppCloudSidePanelContent() {
                 <h3>IN A NUTSHELL</h3>
                 <p>
                     <span>What it is:</span>&nbsp;
-                    WEPPcloud is an online interface for the <a href="about-wepp">WEPP watershed model</a>, built on a 
+                    WEPPcloud is an online interface for the <a href="about-wepp">WEPP watershed model</a>, built on a
                     Python software framework (wepppy).
                 </p>
                 <p>
-                    <span>Purpose:</span>&nbsp; 
-                    WEPPcloud is designed as a decision-support tool that makes the WEPP model more accessible to 
+                    <span>Purpose:</span>&nbsp;
+                    WEPPcloud is designed as a decision-support tool that makes the WEPP model more accessible to
                     land managers and practitioners.
                 </p>
                 <p>
-                    <span>How it works:</span>&nbsp;  
-                    WEPPcloud runs entirely through a web browser and stores all model runs on 
+                    <span>How it works:</span>&nbsp;
+                    WEPPcloud runs entirely through a web browser and stores all model runs on
                     remote cloud servers, eliminating local computing and storage limitations.
                 </p>
             </div>
@@ -67,19 +65,18 @@ export function AboutWeppCloudSidePanelContent() {
             >
                 About RHESSys
             </button>
-            
+
             <br /><br /><br />
         </div>
     )
 }
 
-
 /* ABOUT WEPPCLOUD: MAIN CONTENT */
 export function AboutWeppCloudMainContent() {
     return (
         <div id="weppcloud-container-main">
-            <img src={weppcloud_diagram} alt="diagram of inputs, processes and outputs of WEPP Cloud" /> 
-          
+            <img src={weppcloud_diagram} alt="diagram of inputs, processes and outputs of WEPP Cloud" />
+
             <h2>How WEPPcloud is Used</h2>
             <h3>Automated Input Creation</h3>
             <ul>
@@ -130,23 +127,11 @@ export function AboutWeppCloudMainContent() {
                 <li>State agencies</li>
                 <li>Water utilities</li>
             </ul>
-            
+
             <p>
                 It also supports scientists and researchers by providing a comprehensive, physically based hydrologic modeling framework with pre-processed data.
             </p>
 
-        </div>
-    )
-}
-
-
-/**
- * SidePanel component
- */
-function SidePanel({ children }: { children: React.ReactNode }) {
-    return (
-        <div className='side-panel'>
-            <div className='side-panel-content'>{children}</div>
         </div>
     )
 }
@@ -163,13 +148,15 @@ export default function AboutWeppCloud() {
 
     return (
         <div className='weppcloud-container'>
-            <SidePanel>
-                <AboutWeppCloudSidePanelContent />
-            </SidePanel>
+            <div className='side-panel'>
+                <div className='side-panel-content'>
+                    <AboutWeppCloudSidePanelContent />
+                </div>
+            </div>
             <div className='weppcloud-wrapper' style={{ position: 'relative' }}>
                 <AboutWeppCloudMainContent />
             </div>
         </div>
     )
-  
+
 }

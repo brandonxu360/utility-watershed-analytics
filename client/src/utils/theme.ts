@@ -29,9 +29,6 @@ declare module "@mui/material/styles" {
     }
 }
 
-// Custom spacing scale (in px) removed to use generic MUI spacing (8px base)
-// Usage: theme.spacing(1) = 8px, theme.spacing(2) = 16px, etc.
-
 const theme = createTheme({
     palette: {
         mode: "dark",

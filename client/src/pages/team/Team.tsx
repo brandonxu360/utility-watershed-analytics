@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
+import SmallScreenNotice from '../../components/SmallScreenNotice';
 import RogerLew from '../../assets/images/roger_lew.png'
 import MarianaDobre from '../../assets/images/mariana_dobre.png'
 import ErinBrooks from '../../assets/images/erin_brooks.png'
@@ -16,35 +16,34 @@ import RyanCole from '../../assets/images/ryan_cole.png'
 import PeteRobichaud from '../../assets/images/pete_robichaud.png'
 import './Team.css';
 
-
 const scrollToUniversity = (e: React.MouseEvent, name: string) => {
   e.preventDefault();
   const id = name.replace(/\s+/g, '_');
   const element = document.getElementById(id);
-  
+
   if (element) {
-      let scrollContainer = element.parentElement;
-      while (scrollContainer) {
-          const hasOverflow = window.getComputedStyle(scrollContainer).overflow;
-          if (hasOverflow === 'auto' || hasOverflow === 'scroll' || 
-              scrollContainer.scrollHeight > scrollContainer.clientHeight) {
-              break;
-          }
-          scrollContainer = scrollContainer.parentElement;
+    let scrollContainer = element.parentElement;
+    while (scrollContainer) {
+      const hasOverflow = window.getComputedStyle(scrollContainer).overflow;
+      if (hasOverflow === 'auto' || hasOverflow === 'scroll' ||
+        scrollContainer.scrollHeight > scrollContainer.clientHeight) {
+        break;
       }
-      
-      if (scrollContainer) {
-          const navbarHeight = 60;
-          const containerRect = scrollContainer.getBoundingClientRect();
-          const elementRect = element.getBoundingClientRect();
-          const relativeTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
-          const offsetPosition = relativeTop - navbarHeight;
-          
-          scrollContainer.scrollTo({
-              top: offsetPosition,
-              behavior: 'smooth'
-          });
-      }
+      scrollContainer = scrollContainer.parentElement;
+    }
+
+    if (scrollContainer) {
+      const navbarHeight = 60;
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      const relativeTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
+      const offsetPosition = relativeTop - navbarHeight;
+
+      scrollContainer.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
   }
 }
 
@@ -86,7 +85,7 @@ export function TeamSidePanelContent() {
       >
         University of Nevada, Reno
       </button>
-      
+
       <button
         className='actionButton'
         aria-label='Oregon State University'
@@ -116,13 +115,12 @@ export function TeamSidePanelContent() {
       >
         Partners
       </button>
-      
+
       <br /><br />
 
     </div>
   )
 }
-
 
 /* TEAM: MAIN CONTENT */
 interface TeamMember {
@@ -237,18 +235,17 @@ export function TeamMainContent() {
     return acc;
   }, {} as Record<string, TeamMember[]>);
 
-
   return (
-    <div id="team-container-main" className="scroll-container">  
+    <div id="team-container-main" className="scroll-container">
       <div>
         {Object.entries(groupedMembers).map(([university, members]) => (
           <section key={university} id={university.replace(/\s+/g, '_')}>
             <h3 className="univ-heading">{university}</h3>
             {members.map((person, index) => (
               <div key={index} className="member-card">
-                <img 
-                  src={person.img} 
-                  alt={person.name} 
+                <img
+                  src={person.img}
+                  alt={person.name}
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
@@ -256,11 +253,11 @@ export function TeamMainContent() {
                   <p className="text-gray-600">{person.role}</p>
                 </div>
               </div>
-            ))}      
+            ))}
           </section>
         ))}
       </div>
-      
+
       <div id="partner_section">
         <h2 className="univ-heading">Partner Institutions</h2>
         <div className="partner-col">
@@ -280,29 +277,17 @@ export function TeamMainContent() {
           <p><a href="https://doh.wa.gov/community-and-environment/drinking-water/office-drinking-water" target="_blank">Washington Department of Health – Office of Drinking Water</a></p>
           <br />
           <p><a href="https://www.waterrf.org/" target="_blank">The Water Research Foundation</a></p>
-        </div>   
+        </div>
       </div>
       <br /><br /><br />
     </div>
   )
 }
 
-
-/**
- * SidePanel component
- */
-function SidePanel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className='side-panel'>
-      <div className='side-panel-content'>{children}</div>
-    </div>
-  );
-}
-
 /**
  * Layout for the TEAM page.
  */
-export default function Team() { 
+export default function Team() {
   const isSmallScreen = useIsSmallScreen();
 
   if (isSmallScreen) {
@@ -311,9 +296,11 @@ export default function Team() {
 
   return (
     <div className='team-container'>
-      <SidePanel>
-        <TeamSidePanelContent />
-      </SidePanel>
+      <div className='side-panel'>
+        <div className='side-panel-content'>
+          <TeamSidePanelContent />
+        </div>
+      </div>
       <div className='team-wrapper' style={{ position: 'relative' }}>
         <TeamMainContent />
       </div>

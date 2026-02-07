@@ -1,7 +1,6 @@
-import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
+import SmallScreenNotice from '../../components/SmallScreenNotice';
 import wepp_diagram from '../../assets/images/wepp_diagram.png'
 import './About_WEPP.css';
 
@@ -12,7 +11,7 @@ export function AboutWeppSidePanelContent() {
     <div className="about-wepp-panel">
       <button
         onClick={() => {
-            navigate({ to: "/about" });
+          navigate({ to: "/about" });
         }}
         className='closeButton'
         aria-label='Close WEPP panel'
@@ -28,16 +27,16 @@ export function AboutWeppSidePanelContent() {
         <h3>IN A NUTSHELL</h3>
         <p>
           <span>What it is:</span>&nbsp;
-          The Water Erosion Prediction Project (WEPP) is a physically-based 
+          The Water Erosion Prediction Project (WEPP) is a physically-based
           computer model that simulates water erosion on hillslopes and small watersheds.
         </p>
         <p>
-          <span>Purpose:</span>&nbsp; 
+          <span>Purpose:</span>&nbsp;
           Used by conservationists for soil and water management, assessing conservation
           effectiveness, and understanding soil hydrology.
         </p>
         <p>
-          <span>How it works:</span>&nbsp;  
+          <span>How it works:</span>&nbsp;
           Uses inputs for climate, soil, topography, and management (like vegetation)
           to predict erosion, runoff, and plant growth.
         </p>
@@ -47,7 +46,7 @@ export function AboutWeppSidePanelContent() {
 
       <button
         onClick={() => {
-            navigate({ to: "/about-wepp-cloud" });
+          navigate({ to: "/about-wepp-cloud" });
         }}
         className='actionButton'
         aria-label='Learn about WEPPcloud'
@@ -58,7 +57,7 @@ export function AboutWeppSidePanelContent() {
 
       <button
         onClick={() => {
-            navigate({ to: "/about-rhessys" });
+          navigate({ to: "/about-rhessys" });
         }}
         className='actionButton'
         aria-label='Learn about RHESSys'
@@ -66,22 +65,21 @@ export function AboutWeppSidePanelContent() {
       >
         About RHESSys
       </button>
-      
-      <br /><br /><br />    
+
+      <br /><br /><br />
     </div>
   )
 }
-
 
 /* ABOUT WEPP: MAIN CONTENT */
 export function AboutWeppMainContent() {
   return (
     <div id="wepp-container-main">
-      <img src={wepp_diagram} alt="diagram of inputs, processes and outputs of WEPP" /> 
-      
+      <img src={wepp_diagram} alt="diagram of inputs, processes and outputs of WEPP" />
+
       <h2>What is WEPP?</h2>
-      <p> 
-        WEPP was designed to provide advanced erosion prediction technology for organizations involved in 
+      <p>
+        WEPP was designed to provide advanced erosion prediction technology for organizations involved in
         soil and water conservation, environmental planning, and land management.
       </p>
       <p>
@@ -101,19 +99,19 @@ export function AboutWeppMainContent() {
         <li>Sediment deposition in impoundments (supported, but not commonly applied)</li>
       </ul>
       <p>
-        WEPP provides spatial and temporal estimates of erosion and deposition and 
+        WEPP provides spatial and temporal estimates of erosion and deposition and
         can represent landscapes that range from simple to highly complex and nonuniform.
       </p>
 
       <div className="text-center dash">&mdash;</div>
-      
+
       <h2>Purpose and Applications</h2>
 
       <p>
-        The primary objective of WEPP is to support soil and water conservation and 
+        The primary objective of WEPP is to support soil and water conservation and
         environmental assessment. It was developed for use by agencies such as:
       </p>
-  
+
       <ul>
         <li>USDA–Natural Resources Conservation Service</li>
         <li>USDA–Forest Service</li>
@@ -121,22 +119,22 @@ export function AboutWeppMainContent() {
         <li>Other organizations involved in land and water resource management</li>
         <li>WEPP is widely used to evaluate erosion risks, sediment delivery, and the effects of land management practices across a variety of landscapes.</li>
       </ul>
-  
+
       <div className="text-center dash">&mdash;</div>
-      
+
       <h2>How WEPP Works</h2>
       <p>
-        WEPP operates by maintaining a continuous daily water balance and simulating the physical 
+        WEPP operates by maintaining a continuous daily water balance and simulating the physical
         processes that control runoff, plant growth, and erosion.
       </p>
-      
+
       <h3>Climate Inputs</h3>
 
       <p>
-        WEPP requires daily climate inputs to drive hydrology, plant growth, and erosion processes. 
+        WEPP requires daily climate inputs to drive hydrology, plant growth, and erosion processes.
         These inputs can be provided in several ways, depending on the application and interface being used.
       </p>
-      
+
       <h4>Observed or User-Defined Climate Data</h4>
       <p>
         Users may directly supply climate data for WEPP simulations, allowing maximum control over input conditions.
@@ -155,7 +153,7 @@ export function AboutWeppMainContent() {
           The WEPPcloud interface includes a Single Storm option, allowing users to define storm-specific parameters such as date, total precipitation, duration, and intensity.
         </li>
       </ul>
-      
+
       <h4>Gridded and Geospatial Climate Datasets</h4>
       <p>
         WEPP GIS-based interfaces, including WEPPcloud, can derive climate inputs from gridded datasets that are interpolated from historic observations and provide spatial coverage across complex watersheds.
@@ -193,7 +191,7 @@ export function AboutWeppMainContent() {
       <p>
         WEPP simulates surface and subsurface hydrologic processes using a continuous daily water balance. The model represents both infiltration-excess and saturation-excess runoff mechanisms, and simulates soil evaporation, plant transpiration, and deep percolation.
       </p>
-      
+
       <h4>Infiltration and Infiltration-Excess Runoff</h4>
       <p>
         The original WEPP formulation focused primarily on infiltration-excess runoff. Infiltration is calculated using a modified Green and Ampt infiltration equation, and surface runoff is routed using kinematic wave equations.
@@ -201,10 +199,10 @@ export function AboutWeppMainContent() {
       <ul>
         <li>
           <span>Infiltration-Excess Runoff (Hortonian Flow)</span><br />
-          This runoff mechanism occurs when rainfall intensity exceeds the soil's infiltration capacity. 
-          Rainfall excess is calculated as the difference between rainfall rate and infiltration rate, 
+          This runoff mechanism occurs when rainfall intensity exceeds the soil's infiltration capacity.
+          Rainfall excess is calculated as the difference between rainfall rate and infiltration rate,
           and the resulting runoff is routed downslope using kinematic wave equations.<br />
-          WEPP has been widely and successfully applied in environments where this process dominates, 
+          WEPP has been widely and successfully applied in environments where this process dominates,
           including erosion modeling on roads, harvested units, and burned areas.
         </li>
       </ul>
@@ -230,9 +228,9 @@ export function AboutWeppMainContent() {
 
       <h3>Importance for Water Quality Applications</h3>
       <p>
-        The ability to simulate both infiltration-excess and saturation-excess runoff makes WEPP a valuable 
-        tool for water quality and sediment transport assessments. Because runoff production areas differ 
-        substantially between these mechanisms, accurately representing both processes is critical for 
+        The ability to simulate both infiltration-excess and saturation-excess runoff makes WEPP a valuable
+        tool for water quality and sediment transport assessments. Because runoff production areas differ
+        substantially between these mechanisms, accurately representing both processes is critical for
         predicting the movement of sediment and agricultural chemicals across landscapes.
       </p>
 
@@ -242,7 +240,7 @@ export function AboutWeppMainContent() {
         <li>Growth is adjusted for heat, water, and temperature stress</li>
         <li>Tracks standing, flat, and buried residue and its decomposition</li>
       </ul>
-      
+
       <h3>Erosion</h3>
       <ul>
         <li>Uses a steady-state sediment continuity equation</li>
@@ -255,7 +253,6 @@ export function AboutWeppMainContent() {
         <li>Estimates selective deposition and sediment size distribution</li>
       </ul>
 
-
       <h3>Watershed and Channel Processes</h3>
       <ul>
         <li>Routes runoff and sediment through channels and impoundments</li>
@@ -265,7 +262,7 @@ export function AboutWeppMainContent() {
       <div className="text-center dash">&mdash;</div>
 
       <h2>Model Inputs and Outputs</h2>
-    
+
       <h3>Required Inputs</h3>
       <p>
         For <u>hillslope simulations</u>, WEPP requires four primary input files:
@@ -286,7 +283,7 @@ export function AboutWeppMainContent() {
         <li>Channel hydraulic characteristics</li>
         <li>Optional irrigation and impoundment information</li>
       </ul>
-    
+
       <h3>Outputs</h3>
       <p>
         WEPP produces multiple output types depending on user needs:
@@ -303,17 +300,6 @@ export function AboutWeppMainContent() {
 }
 
 /**
- * SidePanel component
- */
-function SidePanel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className='side-panel'>
-      <div className='side-panel-content'>{children}</div>
-    </div>
-  )
-}
-
-/**
  * Layout for the ABOUT WEPP page.
  */
 export default function AboutWepp() {
@@ -325,13 +311,15 @@ export default function AboutWepp() {
 
   return (
     <div className='wepp-container'>
-      <SidePanel>
-        <AboutWeppSidePanelContent />
-      </SidePanel>
+      <div className='side-panel'>
+        <div className='side-panel-content'>
+          <AboutWeppSidePanelContent />
+        </div>
+      </div>
       <div className='wepp-wrapper' style={{ position: 'relative' }}>
         <AboutWeppMainContent />
       </div>
     </div>
   )
-  
+
 }
