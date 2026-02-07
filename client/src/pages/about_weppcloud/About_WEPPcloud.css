@@ -1,137 +1,133 @@
 .weppcloud-container {
-    display: flex;
-    flex: 1;
-    height: 100%;
-    min-height: 0;
-    overflow: hidden;
-  }
+  display: flex;
+flex: 1;
+height: calc(100vh - 64px);
+overflow: hidden;
+}
   
-  .weppcloud-wrapper {
-    flex: 1;
-    min-height: 0;
-    overflow-y: scroll;
-  }
+.weppcloud-wrapper {
+flex: 1;
+min-height: 0;
+overflow-y: scroll;
+}
   
-  .side-panel {
-    width: 30%;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-    background: rgba(18, 18, 18, 0.9);
-    color: var(--clr-primary-100);
-  }
+.side-panel {
+width: 30%;
+display: flex;
+flex-direction: column;
+height: 100%;
+min-height: 0;
+background: rgba(18, 18, 18, 0.9);
+color: var(--clr-primary-100);
+}
   
-  .side-panel-content {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 10px 30px 0;
-    box-sizing: border-box;
-  }
+.side-panel-content {
+flex: 1;
+min-height: 0;
+overflow-y: auto;
+padding: 10px 30px 0;
+box-sizing: border-box;
+}
   
-  .side-panel h2 {
-    font-size: var(--fs-300);
-    font-weight: bold;
-    margin-bottom: var(--size-400);
-  }
+.side-panel h2 {
+font-size: var(--fs-300);
+font-weight: bold;
+margin-bottom: var(--size-400);
+}
   
-  .side-panel h3 {
-    margin-bottom: var(--size-300);
-  }
+.side-panel h3 {
+margin-bottom: var(--size-300);
+}
   
-  .side-panel h3,
-  .side-panel strong {
-    font-size: var(--fs-200);
-    font-weight: bold;
-  }
+.side-panel h3,
+.side-panel strong {
+font-size: var(--fs-200);
+font-weight: bold;
+}
   
-  .side-panel p {
-    font-size: var(--fs-200);
-    margin-bottom: var(--size-400);
-  }
+.side-panel p {
+font-size: var(--fs-200);
+margin-bottom: var(--size-400);
+}
 
-  #nutshell {
-    margin-top: 20px;
-  }
+#nutshell {
+margin-top: 20px;
+}
   
-  #nutshell p {
-    margin-bottom: 20px;
-  }
+#nutshell p {
+margin-bottom: 20px;
+}
   
-  #nutshell span {
-    font-weight: 800;
-    color: #000;
-    background: #eee;
-    padding: 3px 6px;
-    border-radius: 4px;
-  }
+#nutshell span {
+font-weight: 800;
+color: #000;
+background: #eee;
+padding: 3px 6px;
+border-radius: 4px;
+}
 
-  hr {
-    margin-top: 30px;
-  }
+hr {
+margin-top: 30px;
+}
   
-  .text-center {
-    text-align: center;
-  }
+.text-center {
+  text-align: center;
+}
   
-  .dash {
-    font-size: 3em;
-    font-weight: 100;
-  }
+.dash {
+  font-size: 3em;
+  font-weight: 100;
+}
   
-  #weppcloud-container-main {
-    /*height: 100%;*/
-    width: 100%;
-    text-align: left;
-    color: white;
-    background: #333;
-    padding: 0 40px 50px 40px;
-  }
+#weppcloud-container-main {
+  width: 100%;
+  text-align: left;
+  color: white;
+  background: #333;
+  padding: 0 40px 50px 40px;
+}
   
-  #weppcloud-container-main h2 {
-    text-align: center;
-    font-size: 2em;
-    font-weight: 800;
-    padding-top: 30px;
-    margin-bottom: 30px;
-  }
+#weppcloud-container-main h2 {
+  text-align: center;
+  font-size: 2em;
+  font-weight: 800;
+  padding-top: 30px;
+  margin-bottom: 30px;
+}
   
-  #weppcloud-container-main h3 {
-    text-align: left;
-    font-size: 1.7em;
-    font-weight: 800;
-    padding-top: 20px;
-    margin-bottom: 20px;
-  }
+#weppcloud-container-main h3 {
+  text-align: left;
+  font-size: 1.7em;
+  font-weight: 800;
+  padding-top: 20px;
+  margin-bottom: 20px;
+}
   
-  #weppcloud-container-main h4 {
-    font-size: 1.3em;
-    font-weight: 800;
-    padding-top: 20px;
-    margin-bottom: 20px;
+#weppcloud-container-main h4 {
+  font-size: 1.3em;
+  font-weight: 800;
+  padding-top: 20px;
+  margin-bottom: 20px;
+}
+  
+#weppcloud-container-main p, #weppcloud-container-main ul {
+  margin-bottom: 24px;
+}
+  
+#weppcloud-container-main ul {
+  padding-left: 50px;
+}
+  
+#weppcloud-container-main ul li span {
+  font-weight: 800;
+  font-style: italic;
+}  
     
-  }
+#weppcloud-container-main section {
+  padding: 40px 40px 0 40px;
+}
   
-  #weppcloud-container-main p, #weppcloud-container-main ul {
-    margin-bottom: 24px;
-  }
-  
-  #weppcloud-container-main ul {
-    padding-left: 50px;
-  }
-  
-  #weppcloud-container-main ul li span {
-    font-weight: 800;
-    font-style: italic;
-  }
-  
-    
-  #weppcloud-container-main section {
-    padding: 40px 40px 0 40px;
-  }
-  
-  #weppcloud-container-main img {
-    width: 100%;
-    padding-top: 40px;
-  }  
+#weppcloud-container-main img {
+  width: 100%;
+  padding-top: 40px;
+}  

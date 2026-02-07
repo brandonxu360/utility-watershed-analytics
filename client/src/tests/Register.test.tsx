@@ -1,6 +1,6 @@
 import { render, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import Register from "../pages/authentication/register/Register";
+import Register from "../pages/Register";
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
     const actual = await importOriginal();

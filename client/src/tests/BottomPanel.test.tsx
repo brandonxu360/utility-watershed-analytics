@@ -2,10 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import BottomPanel from "../components/bottom-panels/BottomPanel";
 
-vi.mock("react-icons/fa6", () => ({
-    FaGripLines: () => <span aria-hidden="true">GripLines</span>,
-}));
-
 describe("BottomPanel", () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -40,7 +36,7 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            expect(screen.getByText("GripLines")).toBeInTheDocument();
+            expect(screen.getByTestId("drag-handle-icon")).toBeInTheDocument();
         });
 
         it("renders children correctly", () => {
@@ -66,7 +62,7 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            const dragHandle = document.querySelector(".bottom-panel-drag")!;
+            const dragHandle = screen.getByTestId("bottom-panel-drag");
             fireEvent.mouseDown(dragHandle, { clientY: 500 });
 
             expect(addEventListenerSpy).toHaveBeenCalledWith(
@@ -89,8 +85,8 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            const panel = document.querySelector(".bottom-panel") as HTMLDivElement;
-            const dragHandle = document.querySelector(".bottom-panel-drag")!;
+            const panel = screen.getByTestId("bottom-panel") as HTMLDivElement;
+            const dragHandle = screen.getByTestId("bottom-panel-drag");
 
             Object.defineProperty(panel, "offsetHeight", {
                 value: 200,
@@ -110,8 +106,8 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            const panel = document.querySelector(".bottom-panel") as HTMLDivElement;
-            const dragHandle = document.querySelector(".bottom-panel-drag")!;
+            const panel = screen.getByTestId("bottom-panel") as HTMLDivElement;
+            const dragHandle = screen.getByTestId("bottom-panel-drag");
 
             Object.defineProperty(panel, "offsetHeight", {
                 value: 100,
@@ -132,8 +128,8 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            const panel = document.querySelector(".bottom-panel") as HTMLDivElement;
-            const dragHandle = document.querySelector(".bottom-panel-drag")!;
+            const panel = screen.getByTestId("bottom-panel") as HTMLDivElement;
+            const dragHandle = screen.getByTestId("bottom-panel-drag");
 
             Object.defineProperty(panel, "offsetHeight", {
                 value: 400,
@@ -159,7 +155,7 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            const dragHandle = document.querySelector(".bottom-panel-drag")!;
+            const dragHandle = screen.getByTestId("bottom-panel-drag");
 
             fireEvent.mouseDown(dragHandle, { clientY: 500 });
             fireEvent.mouseUp(document);
@@ -183,7 +179,7 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            const dragHandle = document.querySelector(".bottom-panel-drag")!;
+            const dragHandle = screen.getByTestId("bottom-panel-drag");
 
             fireEvent.mouseDown(dragHandle, { clientY: 500 });
 
@@ -199,8 +195,8 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            const panel = document.querySelector(".bottom-panel") as HTMLDivElement;
-            const dragHandle = document.querySelector(".bottom-panel-drag")!;
+            const panel = screen.getByTestId("bottom-panel") as HTMLDivElement;
+            const dragHandle = screen.getByTestId("bottom-panel-drag");
 
             Object.defineProperty(panel, "offsetHeight", {
                 value: 200,
@@ -230,8 +226,8 @@ describe("BottomPanel", () => {
                 </BottomPanel>
             );
 
-            const panel = document.querySelector(".bottom-panel") as HTMLDivElement;
-            const dragHandle = document.querySelector(".bottom-panel-drag")!;
+            const panel = screen.getByTestId("bottom-panel") as HTMLDivElement;
+            const dragHandle = screen.getByTestId("bottom-panel-drag");
 
             Object.defineProperty(panel, "offsetHeight", {
                 value: 0,

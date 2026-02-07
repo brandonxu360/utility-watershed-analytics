@@ -1,12 +1,14 @@
 import { describe, it, vi } from "vitest";
 import { render } from "@testing-library/react";
-import Navbar from "../components/navbar/Navbar";
+import Navbar from "../components/Navbar";
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
     const actual = await importOriginal();
     return Object.assign({}, actual, {
-        Link: ({ children, to, activeProps, ...props }: { children: React.ReactNode; to: string; activeProps?:
-        unknown; [key: string]: unknown }) => {
+        Link: ({ children, to, activeProps, ...props }: {
+            children: React.ReactNode; to: string; activeProps?:
+                unknown;[key: string]: unknown
+        }) => {
             void activeProps;
             return <a href={to} {...props}>{children}</a>;
         },

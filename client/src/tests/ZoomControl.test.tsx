@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import ZoomInControl from "../components/map/controls/ZoomIn/ZoomIn";
-import ZoomOutControl from "../components/map/controls/ZoomOut/ZoomOut";
+import ZoomInControl from "../components/map/controls/ZoomIn";
+import ZoomOutControl from "../components/map/controls/ZoomOut";
 
 const mockZoomIn = vi.fn();
 const mockZoomOut = vi.fn();

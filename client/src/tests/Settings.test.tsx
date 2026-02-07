@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { toast } from "react-toastify";
-import Settings from "../components/map/controls/Settings/Settings";
+import Settings from "../components/map/controls/Settings";
 
 vi.mock("react-toastify", () => ({
     toast: {

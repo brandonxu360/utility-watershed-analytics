@@ -1,17 +1,19 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { FaXmark } from "react-icons/fa6";
+import { tss } from "../../utils/tss";
 import { useAppStore } from "../../store/store";
 import { VegetationBandType } from "../../store/slices/choroplethSlice";
 import { useMatch } from '@tanstack/react-router';
 import { watershedOverviewRoute } from '../../routes/router';
-import { CoverageLineChart } from "../coverage-line-chart/CoverageLineChart";
+import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { ChoroplethScale } from "../ChoroplethScale";
 import { endYear, startYear } from "../../utils/constants";
 import fetchRap from '../../api/rapApi';
-import Select from "../select/Select";
-import "./BottomPanel.css";
+import Select from "../Select";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from '@mui/icons-material/Close';
 
 type RapStatus = {
     state: 'loading' | 'ready' | 'error';
@@ -20,7 +22,52 @@ type RapStatus = {
 
 type VegetationOption = "All" | "Shrub" | "Tree";
 
+const useStyles = tss.create(({ theme }) => ({
+    titleBar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        margin: `${theme.spacing(2)} ${theme.spacing(3)}`,
+    },
+    vegCoverSelector: {
+        display: 'flex',
+        alignItems: 'center',
+        width: 'auto',
+        minWidth: 180,
+        gap: theme.spacing(2),
+    },
+    dateSelector: {
+        display: 'flex',
+        alignItems: 'center',
+        width: 'auto',
+        minWidth: 180,
+        gap: theme.spacing(2),
+    },
+    optionAlign: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: theme.spacing(1),
+        marginRight: theme.spacing(0.5),
+    },
+    optionAlignLabel: {
+        display: 'block',
+        whiteSpace: 'nowrap',
+        fontSize: theme.typography.subtitle2.fontSize,
+    },
+    closeButton: {
+        backgroundColor: theme.palette.error.main,
+        color: theme.palette.primary.contrastText,
+        borderRadius: 2,
+        fontSize: theme.typography.caption.fontSize,
+        cursor: 'pointer',
+        '&:hover': {
+            backgroundColor: theme.palette.error.main,
+        },
+    },
+}));
+
 export const VegetationCover: React.FC = () => {
+    const { classes } = useStyles();
     const {
         selectedHillslopeId,
         choropleth: {
@@ -41,10 +88,8 @@ export const VegetationCover: React.FC = () => {
 
     const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
     const watershedID = match?.params.webcloudRunId ?? null;
-    // Temporary run id override for the current query engine dataset (hardcoded until new data is available)
-    // This should be removed when the app is pointed at the updated runs or when a mapping
-    // from route watershed id -> run id is available.
-    const RUN_ID_OVERRIDE = 'or,wa-108';
+    // Extract run ID from the watershed URL slug (last part after ;;)
+    const runId = watershedID ? watershedID.split(';;').pop() : null;
 
     // Map UI option to band type
     const vegetationOptionToBand: Record<VegetationOption, VegetationBandType> = {
@@ -107,9 +152,9 @@ export const VegetationCover: React.FC = () => {
 
             try {
                 const rows = selectedHillslopeId
-                    ? await fetchRap({ mode: 'hillslope', topazId: selectedHillslopeId, runIdOrPath: RUN_ID_OVERRIDE, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
+                    ? await fetchRap({ mode: 'hillslope', topazId: selectedHillslopeId, runIdOrPath: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
                     : watershedID
-                        ? await fetchRap({ mode: 'watershed', weppId: 108, runIdOrPath: RUN_ID_OVERRIDE, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
+                        ? await fetchRap({ mode: 'watershed', weppId: 108, runIdOrPath: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
                         : null;
 
                 if (!mounted) return;
@@ -126,7 +171,7 @@ export const VegetationCover: React.FC = () => {
         return () => {
             mounted = false;
         };
-    }, [selectedHillslopeId, selectedYear, watershedID]);
+    }, [selectedHillslopeId, selectedYear, watershedID, runId]);
 
     const singleHillslopeChartData = useMemo(() => {
         if (!rapTimeSeries || rapTimeSeries.length === 0) return null;
@@ -156,10 +201,10 @@ export const VegetationCover: React.FC = () => {
 
     return (
         <div>
-            <div className="titleBar">
-                <div className="vegCoverSelector">
-                    <div className="option-align">
-                        <label htmlFor="veg-cover-title">Vegetation Cover:</label>
+            <div className={classes.titleBar}>
+                <div className={classes.vegCoverSelector}>
+                    <div className={classes.optionAlign}>
+                        <Typography className={classes.optionAlignLabel}>Vegetation Cover:</Typography>
                         <Select
                             id="veg-cover-title"
                             value={vegetationOption}
@@ -169,10 +214,9 @@ export const VegetationCover: React.FC = () => {
                         />
                     </div>
                 </div>
-
-                <div className="dateSelector">
-                    <div className="option-align">
-                        <label htmlFor="veg-year">Select Year:</label>
+                <div className={classes.dateSelector}>
+                    <div className={classes.optionAlign}>
+                        <Typography className={classes.optionAlignLabel}>Select Year:</Typography>
                         <Select
                             id="veg-year"
                             value={selectedYear}
@@ -181,16 +225,18 @@ export const VegetationCover: React.FC = () => {
                             ariaLabel="Select vegetation year"
                         />
                     </div>
-                    <FaXmark className="vegCloseButton" onClick={() => {
+                    <IconButton className={classes.closeButton} data-testid="veg-close-button" onClick={() => {
                         clearSelectedHillslope();
                         setSubcatchment(false);
                         resetChoropleth();
                         closePanel();
-                    }} />
+                    }}>
+                        <CloseIcon />
+                    </IconButton>
                 </div>
             </div>
 
-            {rapStatus.state === 'loading' && <div style={{ textAlign: 'center' }}>Loading vegetation data…</div>}
+            {rapStatus.state === 'loading' && <Typography align="center">Loading vegetation data…</Typography>}
 
             <CoverageLineChart
                 data={chartData}

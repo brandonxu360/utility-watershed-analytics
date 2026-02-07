@@ -44,17 +44,17 @@ describe("ChoroplethScale", () => {
 
         it("applies custom styles when provided", () => {
             const customStyle = { backgroundColor: "red", padding: "10px" };
-            const { container } = render(
+            render(
                 <ChoroplethScale {...defaultProps} style={customStyle} />
             );
-            const legendDiv = container.querySelector(".choropleth-panel-legend");
+            const legendDiv = screen.getByTestId("choropleth-legend");
             expect(legendDiv).toHaveStyle("background-color: rgb(255, 0, 0)");
             expect(legendDiv).toHaveStyle("padding: 10px");
         });
 
         it("renders gradient div with correct classes", () => {
-            const { container } = render(<ChoroplethScale {...defaultProps} />);
-            const gradientDiv = container.querySelector(".choropleth-panel-gradient");
+            render(<ChoroplethScale {...defaultProps} />);
+            const gradientDiv = screen.getByTestId("choropleth-gradient");
             expect(gradientDiv).toBeInTheDocument();
             expect(gradientDiv).toHaveStyle("height: 20px");
             expect(gradientDiv).toHaveStyle("border-radius: 4px");
@@ -140,26 +140,26 @@ describe("ChoroplethScale", () => {
         });
 
         it("handles empty unit string", () => {
-            const { container } = render(<ChoroplethScale {...defaultProps} unit="" />);
+            render(<ChoroplethScale {...defaultProps} unit="" />);
             // Unit div should still render but be empty
-            const unitDiv = container.querySelector(".choropleth-panel-legend > div:last-child");
+            const unitDiv = screen.getByTestId("choropleth-unit");
             expect(unitDiv).toBeInTheDocument();
         });
     });
 
     describe("gradient generation", () => {
         it("renders gradient with background style", () => {
-            const { container } = render(<ChoroplethScale {...defaultProps} />);
-            const gradientDiv = container.querySelector(".choropleth-panel-gradient");
-            const style = window.getComputedStyle(gradientDiv!);
+            render(<ChoroplethScale {...defaultProps} />);
+            const gradientDiv = screen.getByTestId("choropleth-gradient");
+            const style = window.getComputedStyle(gradientDiv);
             expect(style.background).toContain("linear-gradient");
         });
     });
 
     describe("label styling", () => {
         it("renders labels container with flex layout", () => {
-            const { container } = render(<ChoroplethScale {...defaultProps} />);
-            const labelsDiv = container.querySelector(".choropleth-panel-labels");
+            render(<ChoroplethScale {...defaultProps} />);
+            const labelsDiv = screen.getByTestId("choropleth-labels");
             expect(labelsDiv).toBeInTheDocument();
             expect(labelsDiv).toHaveStyle("display: flex");
             expect(labelsDiv).toHaveStyle("justify-content: space-between");

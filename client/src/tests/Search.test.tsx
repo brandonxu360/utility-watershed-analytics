@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { toast } from "react-toastify";
-import SearchControl from "../components/map/controls/Search/Search";
+import Search from "../components/map/controls/Search";
 
 const mockSetView = vi.fn();
 
@@ -28,18 +28,18 @@ describe("Search Component Tests", () => {
 
     describe("rendering", () => {
         it("renders without crashing", () => {
-            render(<SearchControl />);
+            render(<Search />);
         });
 
         it("does not show the search modal by default", () => {
-            render(<SearchControl />);
+            render(<Search />);
             expect(screen.queryByLabelText("Search bar")).not.toBeInTheDocument();
         });
     });
 
     describe("interactions", () => {
         it("opens and closes the modal when clicking the search button", () => {
-            render(<SearchControl />);
+            render(<Search />);
 
             const toggleButton = screen.getByRole("button", { name: /search location/i });
             expect(screen.queryByLabelText("Search bar")).not.toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("Search Component Tests", () => {
         });
 
         it("calls map.setView with parsed coordinates and closes modal on valid input", () => {
-            render(<SearchControl />);
+            render(<Search />);
 
             fireEvent.click(screen.getByRole("button", { name: /search location/i }));
             const input = screen.getByLabelText("Search bar") as HTMLInputElement;
@@ -72,7 +72,7 @@ describe("Search Component Tests", () => {
         });
 
         it("shows toast error and does not call setView on invalid input", () => {
-            render(<SearchControl />);
+            render(<Search />);
 
             fireEvent.click(screen.getByRole("button", { name: /search location/i }));
             fireEvent.change(screen.getByLabelText("Search bar"), { target: { value: "not coords" } });
