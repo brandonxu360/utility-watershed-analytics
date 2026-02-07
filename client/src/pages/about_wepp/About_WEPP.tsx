@@ -16,7 +16,7 @@ export function AboutWeppSidePanelContent() {
         className='closeButton'
         aria-label='Close WEPP panel'
         title='Close WEPP panel'
-        style={{ padding: '0.313rem 0.5rem' }}
+        style={{ padding: '0.313rem 0.5rem', marginBottom: '1rem' }}
       >
         BACK
       </button>

@@ -20,6 +20,12 @@ strong {
     font-weight: 800;
 }
 
+.closeButton {
+    background: #FF4B3E;
+    border: none;
+    border-radius: 2px;
+}
+
 .row {
     --bs-gutter-x: 1.5rem;
     --bs-gutter-y: 0;

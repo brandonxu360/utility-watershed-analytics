@@ -16,7 +16,7 @@ export function AboutRHESSysSidePanelContent() {
         className='closeButton'
         aria-label='Close RHESSys panel'
         title='Close RHESSys panel'
-        style={{ padding: '0.313rem 0.5rem' }}
+        style={{ padding: '0.313rem 0.5rem', marginBottom: '1rem' }}
       >
         BACK
       </button>
