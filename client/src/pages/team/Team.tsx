@@ -55,69 +55,68 @@ export function TeamSidePanelContent() {
       <p>
         Select from the following to see our team of experts and partner institutions:
       </p>
-      <br />
 
-      <button
-        className='actionButton'
-        aria-label='Washington State University'
-        title='Washington State University'
-        id='wsu'
-        onClick={(e) => scrollToUniversity(e, "Washington_State_University")}
-      >
-        Washington State University
-      </button>
+      <div className="nav-buttons">
+        <button
+          className='actionButton'
+          aria-label='Washington State University'
+          title='Washington State University'
+          id='wsu'
+          onClick={(e) => scrollToUniversity(e, "Washington_State_University")}
+        >
+          Washington State University
+        </button>
 
-      <button
-        className='actionButton'
-        aria-label='University of Idaho'
-        title='University of Idaho'
-        id='ui'
-        onClick={(e) => scrollToUniversity(e, "University_of_Idaho")}
-      >
-        University of Idaho</button>
+        <button
+          className='actionButton'
+          aria-label='University of Idaho'
+          title='University of Idaho'
+          id='ui'
+          onClick={(e) => scrollToUniversity(e, "University_of_Idaho")}
+        >
+          University of Idaho
+        </button>
 
-      <button
-        className='actionButton'
-        aria-label='University of Nevada, Reno'
-        title='University of Nevada, Reno'
-        id='unr'
-        onClick={(e) => scrollToUniversity(e, "University_of_Nevada,_Reno")}
-      >
-        University of Nevada, Reno
-      </button>
+        <button
+          className='actionButton'
+          aria-label='University of Nevada, Reno'
+          title='University of Nevada, Reno'
+          id='unr'
+          onClick={(e) => scrollToUniversity(e, "University_of_Nevada,_Reno")}
+        >
+          University of Nevada, Reno
+        </button>
 
-      <button
-        className='actionButton'
-        aria-label='Oregon State University'
-        title='Oregon State University'
-        id='osu'
-        onClick={(e) => scrollToUniversity(e, "Oregon_State_University")}
-      >
-        Oregon State University
-      </button>
+        <button
+          className='actionButton'
+          aria-label='Oregon State University'
+          title='Oregon State University'
+          id='osu'
+          onClick={(e) => scrollToUniversity(e, "Oregon_State_University")}
+        >
+          Oregon State University
+        </button>
 
-      <button
-        className='actionButton'
-        aria-label='US Forest Service'
-        title='US Forest Service'
-        id='usfs'
-        onClick={(e) => scrollToUniversity(e, "US_Forest_Service,_Rocky_Mtn_Research_Station")}
-      >
-        US Forest Service
-      </button>
+        <button
+          className='actionButton'
+          aria-label='US Forest Service'
+          title='US Forest Service'
+          id='usfs'
+          onClick={(e) => scrollToUniversity(e, "US_Forest_Service,_Rocky_Mtn_Research_Station")}
+        >
+          US Forest Service
+        </button>
 
-      <button
-        className='actionButton'
-        aria-label='Partners'
-        title='Partners'
-        id='partners'
-        onClick={(e) => scrollToUniversity(e, "partner_section")}
-      >
-        Partners
-      </button>
-
-      <br /><br />
-
+        <button
+          className='actionButton'
+          aria-label='Partners'
+          title='Partners'
+          id='partners'
+          onClick={(e) => scrollToUniversity(e, "partner_section")}
+        >
+          Partners
+        </button>
+      </div>
     </div>
   )
 }
