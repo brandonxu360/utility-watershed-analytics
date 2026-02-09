@@ -1,3 +1,7 @@
+.side-panel button:hover {
+    background: #000 !important;
+    color: #a3a8fa !important;
+}
 hr {
     margin-top: 20px;
     margin-bottom: 30px;
@@ -72,6 +76,21 @@ strong {
     }
 }
 
+#nutshell {
+    margin-top: 20px;
+}
+  
+#nutshell p {
+    margin-bottom: 20px;
+}
+  
+#nutshell span {
+    font-weight: 800;
+    color: #000;
+    background: #eee;
+    padding: 3px 6px;
+    border-radius: 4px;
+}
 
 .btn-link:hover {
     background: #a3a8fa;
@@ -99,6 +118,10 @@ strong {
     height: 100%;
     min-height: 0;
     overflow: hidden;
+}
+
+.about-container p, .about-container ul, .about-container ol {
+    font-size: var(--fs-200);
 }
   
 .about-wrapper {
@@ -154,12 +177,31 @@ strong {
     padding: 0 40px 50px 40px;
 }
 
+#about-container-main p {
+    font-size: var(--fs-200);
+}
+
 #about-container-main h2 {
     text-align: center;
     font-size: 2em;
     font-weight: 800;
     padding-top: 30px;
     margin-bottom: 30px;
+}
+
+#about-container-main h3 {
+    text-align: left;
+    font-size: 1.7em;
+    font-weight: 800;
+    padding-top: 20px;
+    margin-bottom: 20px;
+}
+  
+#about-container-main h4 {
+    font-size: 1.3em;
+    font-weight: 800;
+    padding-top: 20px;
+    margin-bottom: 20px;  
 }
 
 #about-container-main p img {
@@ -174,11 +216,66 @@ strong {
     margin-bottom: 24px;
   }
   
-#about-container-main ul {
+#about-container-main ul, ol {
     padding-left: 50px;
 }
   
-#about-container-main ul li span {
+#about-container-main ul li span, ol li span {
     font-weight: 800;
     font-style: italic;
+}
+
+/* Specifically for Team page */
+.univ-heading {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size:larger;
+    text-align: center !important;
+}
+  
+.member-card {
+    display: inline-block;
+    padding: 10px;
+    margin: 10px;
+    width: 200px;
+    vertical-align: top;
+}
+  
+.member-card h4 {
+    padding-top: 10px;
+}
+  
+.member-card a, .partner-col ul li a, .partner-col p a {
+    font-weight: 800;
+    color: #a3a8fa;
+}
+
+.member-card img {
+    height: 190px;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+  
+#partner_section {
+    display:block;
+    padding: 40px 40px 0 40px;
+    text-align: left;
+}
+  
+.partner-col {
+    display: inline-block;
+    padding: 20px 40px 40px 40px;
+    vertical-align: top;
+}
+  
+.partner-col .bold {
+    font-weight: 800;
+}
+  
+.partner-col ul {
+    padding-left: 30px;
 }

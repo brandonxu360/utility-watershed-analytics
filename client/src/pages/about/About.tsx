@@ -55,6 +55,30 @@ export function AboutSidePanelContent() {
       aria-label='Learn about RHESSys'
       title='Learn about RHESSys'>RHESSys
       </button>
+
+      <button onClick={() => {
+          navigate({ to: "/about-sbs" });
+        }}
+        className='actionButton'
+        aria-label='Learn about Predicted SBS'
+        title='Learn about Predicted SBS'>Predicted-SBS
+      </button>
+
+      <button onClick={() => {
+          navigate({ to: "/about-watar" });
+        }}
+        className='actionButton'
+        aria-label='Learn about WATAR'
+        title='Learn about WATAR'>WATAR
+      </button>
+
+      <button onClick={() => {
+          navigate({ to: "/scenarios" });
+        }}
+        className='actionButton'
+        aria-label='Learn about Scenarios'
+        title='Learn about Scenarios'>Scenarios
+      </button>
       
       <br /><br /><br />
       
@@ -136,8 +160,8 @@ export function AboutMainContent() {
         <div className="col">
           <p>
             Leveraging NASA Earth observations—including Landsat, Sentinel-2, SMAP soil moisture, 
-            and MODIS vegetation metrics—along with advanced modeling systems such as RHESSys-WMFire, 
-            WEPP, and WATAR, users can explore how different watershed burn severity affects ash 
+            and MODIS vegetation metrics—along with advanced modeling systems such as <a href="about-rhessys">RHESSys-WMFire</a>, 
+            <a href="about-wepp">WEPP</a>, and <a href="about-watar">WATAR</a>, users can explore how different watershed burn severity affects ash 
             deposition, streamflow, sediment loads, changes in forest biomass, and nitrogen leaching.
           </p>
         </div>

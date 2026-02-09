@@ -3,13 +3,13 @@ import { useNavigate } from '@tanstack/react-router';
 import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
 import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
 import wepp_diagram from '../../assets/images/wepp_diagram.png'
-import './About_WEPP.css';
+import '../about/About.css';
 
 /* ABOUT WEPP: SIDE PANEL CONTENT */
 export function AboutWeppSidePanelContent() {
   const navigate = useNavigate();
   return (
-    <div className="about-wepp-panel">
+    <div className="about-panel">
       <button
         onClick={() => {
             navigate({ to: "/about" });
@@ -43,30 +43,6 @@ export function AboutWeppSidePanelContent() {
         </p>
       </div>
 
-      <br />
-
-      <button
-        onClick={() => {
-            navigate({ to: "/about-wepp-cloud" });
-        }}
-        className='actionButton'
-        aria-label='Learn about WEPPcloud'
-        title='Learn about WEPPcloud'
-      >
-        About WEPPcloud
-      </button>
-
-      <button
-        onClick={() => {
-            navigate({ to: "/about-rhessys" });
-        }}
-        className='actionButton'
-        aria-label='Learn about RHESSys'
-        title='Learn about RHESSys'
-      >
-        About RHESSys
-      </button>
-      
       <br /><br /><br />    
     </div>
   )
@@ -76,7 +52,7 @@ export function AboutWeppSidePanelContent() {
 /* ABOUT WEPP: MAIN CONTENT */
 export function AboutWeppMainContent() {
   return (
-    <div id="wepp-container-main">
+    <div id="about-container-main">
       <img src={wepp_diagram} alt="diagram of inputs, processes and outputs of WEPP" /> 
       
       <h2>What is WEPP?</h2>
@@ -324,11 +300,11 @@ export default function AboutWepp() {
   }
 
   return (
-    <div className='wepp-container'>
+    <div className='about-container'>
       <SidePanel>
         <AboutWeppSidePanelContent />
       </SidePanel>
-      <div className='wepp-wrapper' style={{ position: 'relative' }}>
+      <div className='about-wrapper' style={{ position: 'relative' }}>
         <AboutWeppMainContent />
       </div>
     </div>

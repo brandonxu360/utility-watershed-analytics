@@ -14,7 +14,7 @@ import JennyAdam from '../../assets/images/jenny_adam.png'
 import KevinBladon from '../../assets/images/kevin_bladon.png'
 import RyanCole from '../../assets/images/ryan_cole.png'
 import PeteRobichaud from '../../assets/images/pete_robichaud.png'
-import './Team.css';
+import '../about/About.css';
 
 
 const scrollToUniversity = (e: React.MouseEvent, name: string) => {
@@ -51,7 +51,7 @@ const scrollToUniversity = (e: React.MouseEvent, name: string) => {
 /* TEAM: SIDE PANEL CONTENT */
 export function TeamSidePanelContent() {
   return (
-    <div className="team-panel">
+    <div className="about-panel">
       <h2>Project Team & Partners</h2>
       <p>
         Select from the following to see our team of experts and partner institutions:
@@ -239,8 +239,8 @@ export function TeamMainContent() {
 
 
   return (
-    <div id="team-container-main" className="scroll-container">  
-      <div>
+    <div id="about-container-main" className="scroll-container">  
+      <div className="text-center">
         {Object.entries(groupedMembers).map(([university, members]) => (
           <section key={university} id={university.replace(/\s+/g, '_')}>
             <h3 className="univ-heading">{university}</h3>
@@ -310,11 +310,11 @@ export default function Team() {
   }
 
   return (
-    <div className='team-container'>
+    <div className='about-container'>
       <SidePanel>
         <TeamSidePanelContent />
       </SidePanel>
-      <div className='team-wrapper' style={{ position: 'relative' }}>
+      <div className='about-wrapper' style={{ position: 'relative' }}>
         <TeamMainContent />
       </div>
     </div>

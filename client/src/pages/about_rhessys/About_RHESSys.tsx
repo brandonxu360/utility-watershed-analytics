@@ -3,14 +3,14 @@ import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
 import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
 import { useNavigate } from '@tanstack/react-router';
 import rhessys_diagram from '../../assets/images/rhessys_diagram.png'
-import './About_RHESSys.css';
+import '../about/About.css';
  
 
 /* ABOUT RHYSSys: SIDE PANEL CONTENT */
 export function AboutRHESSysSidePanelContent() {
   const navigate = useNavigate();  
   return (
-    <div className="about-rhessys-panel">
+    <div className="about-panel">
       <button
         onClick={() => {
             navigate({ to: "/about" });
@@ -42,29 +42,6 @@ export function AboutRHESSysSidePanelContent() {
         </p>
       </div>
 
-      <br />
-      <button
-        onClick={() => {
-          navigate({ to: "/about-wepp" });
-        }}
-        className='actionButton'
-        aria-label='Learn about WEPP'
-        title='Learn about WEPP'
-      >
-        About WEPP
-      </button>
-      
-      <button
-        onClick={() => {
-          navigate({ to: "/about-wepp-cloud" });
-        }}
-        className='actionButton'
-        aria-label='Learn about WEPPcloud'
-        title='Learn about WEPPcloud'
-      >
-        About WEPPcloud
-      </button>
-      
       <br /><br /><br />
     </div>
   )
@@ -73,7 +50,7 @@ export function AboutRHESSysSidePanelContent() {
 /* ABOUT RHYSSys: MAIN CONTENT */
 export  function AboutRHESSysMainContent() {
   return (
-      <div id="rhessys-container-main">  
+      <div id="about-container-main">  
         <img src={rhessys_diagram} alt="diagram of inputs, processes and outputs of RHESSys" />
         
         <h2>
@@ -214,11 +191,11 @@ export default function AboutRHESSys() {
   }
 
   return (
-    <div className='rhessys-container'>
+    <div className='about-container'>
       <SidePanel>
         <AboutRHESSysSidePanelContent />
       </SidePanel>
-      <div className='rhessys-wrapper' style={{ position: 'relative' }}>
+      <div className='about-wrapper' style={{ position: 'relative' }}>
         <AboutRHESSysMainContent />
       </div>
     </div>

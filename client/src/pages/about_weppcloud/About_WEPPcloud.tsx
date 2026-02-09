@@ -3,14 +3,14 @@ import { useNavigate } from '@tanstack/react-router';
 import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
 import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
 import weppcloud_diagram from '../../assets/images/weppcloud_diagram.png'
-import './About_WEPPcloud.css';
+import '../about/About.css';
 
 
 /* ABOUT WEPPCLOUD: SIDE PANEL CONTENT */
 export function AboutWeppCloudSidePanelContent() {
     const navigate = useNavigate();  
     return (
-        <div className="about-weppcloud-panel">
+        <div className="about-panel">
             <button
                 onClick={() => {
                     navigate({ to: "/about" });
@@ -43,30 +43,6 @@ export function AboutWeppCloudSidePanelContent() {
                     remote cloud servers, eliminating local computing and storage limitations.
                 </p>
             </div>
-
-            <br />
-
-            <button
-                onClick={() => {
-                    navigate({ to: "/about-wepp" });
-                }}
-                className='actionButton'
-                aria-label='Learn about WEPP'
-                title='Learn about WEPP'
-            >
-                About WEPP
-            </button>
-
-            <button
-                onClick={() => {
-                    navigate({ to: "/about-rhessys" });
-                }}
-                className='actionButton'
-                aria-label='Learn about RHESSys'
-                title='Learn about RHESSys'
-            >
-                About RHESSys
-            </button>
             
             <br /><br /><br />
         </div>
@@ -77,7 +53,7 @@ export function AboutWeppCloudSidePanelContent() {
 /* ABOUT WEPPCLOUD: MAIN CONTENT */
 export function AboutWeppCloudMainContent() {
     return (
-        <div id="weppcloud-container-main">
+        <div id="about-container-main">
             <img src={weppcloud_diagram} alt="diagram of inputs, processes and outputs of WEPP Cloud" /> 
           
             <h2>How WEPPcloud is Used</h2>
@@ -162,11 +138,11 @@ export default function AboutWeppCloud() {
     }
 
     return (
-        <div className='weppcloud-container'>
+        <div className='about-container'>
             <SidePanel>
                 <AboutWeppCloudSidePanelContent />
             </SidePanel>
-            <div className='weppcloud-wrapper' style={{ position: 'relative' }}>
+            <div className='about-wrapper' style={{ position: 'relative' }}>
                 <AboutWeppCloudMainContent />
             </div>
         </div>
