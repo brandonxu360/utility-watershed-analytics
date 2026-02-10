@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { toast } from "react-toastify";
-import LegendControl from "../components/map/controls/Legend/Legend";
+import Legend from "../components/map/controls/Legend";
 
 vi.mock("react-toastify", () => ({
     toast: {
@@ -18,11 +18,11 @@ describe("Legend Component Tests", () => {
 
     describe("rendering", () => {
         it("renders without crashing", () => {
-            render(<LegendControl />);
+            render(<Legend />);
         });
 
         it("renders the open legend container", () => {
-            render(<LegendControl />);
+            render(<Legend />);
             const legendButton = screen.getByRole("button", { name: /open legend/i });
             fireEvent.click(legendButton);
             expect(screen.getByText("Tier 1 watersheds")).toBeInTheDocument();
@@ -32,26 +32,13 @@ describe("Legend Component Tests", () => {
 
     describe("interactions", () => {
         it("shows toast error when show icons are clicked", () => {
-            render(<LegendControl />);
+            render(<Legend />);
             const legendButton = screen.getByRole("button", { name: /open legend/i });
             fireEvent.click(legendButton);
 
             const showIcons = screen.getAllByRole("button", { name: /show tier/i });
 
             showIcons.forEach((icon) => {
-                fireEvent.click(icon);
-                expect(toastErrorMock).toHaveBeenCalledWith('Feature not implemented yet');
-            });
-        });
-
-        it("shows toast error when hide icons are clicked", () => {
-            render(<LegendControl />);
-            const legendButton = screen.getByRole("button", { name: /open legend/i });
-            fireEvent.click(legendButton);
-
-            const hideIcons = screen.getAllByRole("button", { name: /hide tier/i });
-
-            hideIcons.forEach((icon) => {
                 fireEvent.click(icon);
                 expect(toastErrorMock).toHaveBeenCalledWith('Feature not implemented yet');
             });

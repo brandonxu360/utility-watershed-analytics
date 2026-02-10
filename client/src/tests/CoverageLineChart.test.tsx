@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { CoverageLineChart } from "../components/coverage-line-chart/CoverageLineChart";
+import { CoverageLineChart } from "../components/CoverageLineChart";
 
 vi.mock("recharts", () => ({
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
@@ -154,7 +154,7 @@ describe("CoverageLineChart", () => {
 
             const grid = screen.getByTestId("cartesian-grid");
             expect(grid).toBeInTheDocument();
-            expect(grid).toHaveAttribute("data-stroke", "#f5f5f5");
+            expect(grid).toHaveAttribute("data-stroke", "#F5F5F5");
         });
 
         it("renders XAxis with name dataKey", () => {

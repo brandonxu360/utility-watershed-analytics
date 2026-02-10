@@ -3,7 +3,7 @@ import { RouterProvider } from '@tanstack/react-router';
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAppStore } from "../store/store";
 import { router } from '../routes/router';
-import Home from "../pages/home/Home";
+import Home from "../pages/Home";
 
 const mockNavigate = vi.fn();
 
@@ -23,7 +23,7 @@ vi.mock("../components/map/Map", () => ({
     default: () => <div role="region" aria-label="Map" />,
 }));
 
-vi.mock("../components/side-panels/watershed/WatershedOverview", () => ({
+vi.mock("../components/side-panels/WatershedOverview", () => ({
     default: () => <div role="region" aria-label="Watershed overview" />,
 }));
 
