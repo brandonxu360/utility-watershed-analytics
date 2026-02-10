@@ -249,11 +249,10 @@ export function TeamMainContent() {
                 <img 
                   src={person.img} 
                   alt={person.name} 
-                  className="w-full h-48 object-cover"
                 />
-                <div className="p-4">
-                  <h4 className="text-lg font-semibold text-gray-900"><a href={person.web} target="_blank">{person.name}</a></h4>
-                  <p className="text-gray-600">{person.role}</p>
+                <div>
+                  <h4><a href={person.web} target="_blank">{person.name}</a></h4>
+                  <p>{person.role}</p>
                 </div>
               </div>
             ))}      
@@ -264,7 +263,7 @@ export function TeamMainContent() {
       <div id="partner_section">
         <h2 className="univ-heading">Partner Institutions</h2>
         <div className="partner-col">
-          <p className="bold">Pacific Northwest water utilities:</p>
+          <p>Pacific Northwest water utilities:</p>
           <ul>
             <li><a href="https://www.seattle.gov/utilities" target="_blank">Seattle Public Utilities</a></li>
             <li><a href="https://www.portland.gov/water" target="_blank">Portland Water Bureau</a></li>

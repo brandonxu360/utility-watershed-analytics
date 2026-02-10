@@ -2,6 +2,11 @@
     background: #000 !important;
     color: #a3a8fa !important;
 }
+
+.actionButton {
+    font-size: 1.1rem;
+}
+
 hr {
     margin-top: 20px;
     margin-bottom: 30px;
@@ -79,9 +84,13 @@ strong {
 #nutshell {
     margin-top: 20px;
 }
+
+#nutshell h3 {
+    font-size: 1.5rem !important;
+}
   
 #nutshell p {
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
   
 #nutshell span {
@@ -120,8 +129,11 @@ strong {
     overflow: hidden;
 }
 
+
+
 .about-container p, .about-container ul, .about-container ol {
-    font-size: var(--fs-200);
+    /*font-size: var(--fs-100);*/
+    font-size: 1.2rem;
 }
   
 .about-wrapper {
@@ -132,6 +144,7 @@ strong {
   
 .side-panel {
     width: 30%;
+    min-width: 280px;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -149,7 +162,8 @@ strong {
 }
   
 .side-panel h2 {
-    font-size: var(--fs-300);
+    /*font-size: var(--fs-300);*/
+    font-size: 2rem;
     font-weight: bold;
     margin-bottom: var(--size-400);
 }
@@ -160,12 +174,13 @@ strong {
   
 .side-panel h3,
 .side-panel strong {
-    font-size: var(--fs-200);
+    /*font-size: var(--fs-200);*/
+    font-size: 1.7rem;
     font-weight: bold;
 }
   
 .side-panel p {
-    font-size: var(--fs-200);
+    font-size: 1.1rem;
     margin-bottom: var(--size-400);
 }
 
@@ -173,17 +188,22 @@ strong {
     width: 100%;
     text-align: left;
     color: white;
-    background: #333;
+    background: #121212;
     padding: 0 40px 50px 40px;
 }
 
+.about-container a {
+    color: #a3a8fa;
+    font-weight: 800;
+}
+
 #about-container-main p {
-    font-size: var(--fs-200);
+    font-size: 1.1rem;
 }
 
 #about-container-main h2 {
     text-align: center;
-    font-size: 2em;
+    font-size: 2rem;
     font-weight: 800;
     padding-top: 30px;
     margin-bottom: 30px;
@@ -225,6 +245,11 @@ strong {
     font-style: italic;
 }
 
+#about-container-main li {
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+}
+
 /* Specifically for Team page */
 .univ-heading {
     border-bottom: 1px solid #ccc;
@@ -232,7 +257,7 @@ strong {
     margin-bottom: 10px;
     text-transform: uppercase;
     font-weight: bold;
-    font-size:larger;
+    font-size:1.5rem;
     text-align: center !important;
 }
   
@@ -246,6 +271,7 @@ strong {
   
 .member-card h4 {
     padding-top: 10px;
+    margin-bottom: 10px !important;
 }
   
 .member-card a, .partner-col ul li a, .partner-col p a {
@@ -261,7 +287,7 @@ strong {
 }
   
 #partner_section {
-    display:block;
+    display: block;
     padding: 40px 40px 0 40px;
     text-align: left;
 }
@@ -273,7 +299,7 @@ strong {
 }
   
 .partner-col .bold {
-    font-weight: 800;
+    font-weight: 600;
 }
   
 .partner-col ul {

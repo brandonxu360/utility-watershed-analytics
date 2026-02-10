@@ -76,16 +76,17 @@ export function AboutWeppCloudMainContent() {
             </ul>
 
             <h3>Scenario Analysis</h3>
+            <p>
+                Allows users to evaluate management alternatives and disturbance scenarios, such as:
+            </p>
+                
             <ul>
-                <li>Allows users to evaluate management alternatives and disturbance scenarios, such as:
-                    <ul>
-                        <li>Undisturbed conditions</li>
-                        <li>Forest thinning</li>
-                        <li>Prescribed fire</li>
-                        <li>Varying wildfire severities</li>
-                    </ul>
-                </li>
+                <li>Undisturbed conditions</li>
+                <li>Forest thinning</li>
+                <li>Prescribed fire</li>
+                <li>Varying wildfire severities</li>
             </ul>
+            
 
             <h3>Output Visualization</h3>
             <ul>
