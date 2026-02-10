@@ -3,7 +3,7 @@ import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
 import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
 import { useNavigate } from '@tanstack/react-router';
 import sbs_diagram from '../../assets/images/sbs_diagram.png'
-import '../About/About.css';
+import '../about/About.css';
 
 
 /* ABOUT SBS: SIDE PANEL CONTENT */
