@@ -14,7 +14,8 @@ import JennyAdam from '../../assets/images/jenny_adam.png'
 import KevinBladon from '../../assets/images/kevin_bladon.png'
 import RyanCole from '../../assets/images/ryan_cole.png'
 import PeteRobichaud from '../../assets/images/pete_robichaud.png'
-import './Team.css';
+import '../about/About.css';
+
 
 const scrollToUniversity = (e: React.MouseEvent, name: string) => {
   e.preventDefault();
@@ -50,7 +51,7 @@ const scrollToUniversity = (e: React.MouseEvent, name: string) => {
 /* TEAM: SIDE PANEL CONTENT */
 export function TeamSidePanelContent() {
   return (
-    <div className="team-panel">
+    <div className="about-panel">
       <h2>Project Team & Partners</h2>
       <p>
         Select from the following to see our team of experts and partner institutions:
@@ -235,21 +236,20 @@ export function TeamMainContent() {
   }, {} as Record<string, TeamMember[]>);
 
   return (
-    <div id="team-container-main" className="scroll-container">
-      <div>
+    <div id="about-container-main" className="scroll-container">  
+      <div className="text-center">
         {Object.entries(groupedMembers).map(([university, members]) => (
           <section key={university} id={university.replace(/\s+/g, '_')}>
             <h3 className="univ-heading">{university}</h3>
             {members.map((person, index) => (
               <div key={index} className="member-card">
-                <img
-                  src={person.img}
-                  alt={person.name}
-                  className="w-full h-48 object-cover"
+                <img 
+                  src={person.img} 
+                  alt={person.name} 
                 />
-                <div className="p-4">
-                  <h4 className="text-lg font-semibold text-gray-900"><a href={person.web} target="_blank">{person.name}</a></h4>
-                  <p className="text-gray-600">{person.role}</p>
+                <div>
+                  <h4><a href={person.web} target="_blank">{person.name}</a></h4>
+                  <p>{person.role}</p>
                 </div>
               </div>
             ))}
@@ -260,7 +260,7 @@ export function TeamMainContent() {
       <div id="partner_section">
         <h2 className="univ-heading">Partner Institutions</h2>
         <div className="partner-col">
-          <p className="bold">Pacific Northwest water utilities:</p>
+          <p>Pacific Northwest water utilities:</p>
           <ul>
             <li><a href="https://www.seattle.gov/utilities" target="_blank">Seattle Public Utilities</a></li>
             <li><a href="https://www.portland.gov/water" target="_blank">Portland Water Bureau</a></li>
@@ -283,6 +283,13 @@ export function TeamMainContent() {
   )
 }
 
+function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
+  return (
+    <div className='side-panel'>
+      <div className='side-panel-content'>{children}</div>
+    </div>
+  );
+}
 /**
  * Layout for the TEAM page.
  */
@@ -294,13 +301,11 @@ export default function Team() {
   }
 
   return (
-    <div className='team-container'>
-      <div className='side-panel'>
-        <div className='side-panel-content'>
-          <TeamSidePanelContent />
-        </div>
-      </div>
-      <div className='team-wrapper' style={{ position: 'relative' }}>
+    <div className='about-container'>
+      <SidePanel>
+        <TeamSidePanelContent />
+      </SidePanel>
+      <div className='about-wrapper' style={{ position: 'relative' }}>
         <TeamMainContent />
       </div>
     </div>

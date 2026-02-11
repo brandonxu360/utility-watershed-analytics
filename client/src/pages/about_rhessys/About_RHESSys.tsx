@@ -2,13 +2,14 @@ import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
 import SmallScreenNotice from '../../components/SmallScreenNotice';
 import { useNavigate } from '@tanstack/react-router';
 import rhessys_diagram from '../../assets/images/rhessys_diagram.png'
-import './About_RHESSys.css';
+import '../about/About.css';
+ 
 
 /* ABOUT RHYSSys: SIDE PANEL CONTENT */
 export function AboutRHESSysSidePanelContent() {
   const navigate = useNavigate();
   return (
-    <div className="about-rhessys-panel">
+    <div className="about-panel">
       <button
         onClick={() => {
           navigate({ to: "/about" });
@@ -40,32 +41,6 @@ export function AboutRHESSysSidePanelContent() {
         </p>
       </div>
 
-      <br />
-
-      <div className='nav-buttons'>
-        <button
-          onClick={() => {
-            navigate({ to: "/about-wepp" });
-          }}
-          className='actionButton'
-          aria-label='Learn about WEPP'
-          title='Learn about WEPP'
-        >
-          About WEPP
-        </button>
-
-        <button
-          onClick={() => {
-            navigate({ to: "/about-wepp-cloud" });
-          }}
-          className='actionButton'
-          aria-label='Learn about WEPPcloud'
-          title='Learn about WEPPcloud'
-        >
-          About WEPPcloud
-        </button>
-      </div>
-
       <br /><br /><br />
     </div>
   )
@@ -74,24 +49,24 @@ export function AboutRHESSysSidePanelContent() {
 /* ABOUT RHYSSys: MAIN CONTENT */
 export function AboutRHESSysMainContent() {
   return (
-    <div id="rhessys-container-main">
-      <img src={rhessys_diagram} alt="diagram of inputs, processes and outputs of RHESSys" />
-
-      <h2>
-        Purpose and Applications
-      </h2>
-      <p>
-        The primary purpose of RHESSys (Regional Hydro-Ecological Simulation System) is to simulate the fluxes (movement) and storage of water, carbon, and nitrogen over spatially variable terrain. It bridges the gap between traditional hydrological models (which often ignore dynamic vegetation growth) and ecological models (which often ignore the lateral movement of water and nutrients across a landscape).
-      </p>
-      <p>
-        RHESSys is used primarily by researchers and watershed managers to answer "what if" questions regarding:
-      </p>
-      <ul>
-        <li><span>Climate Change:</span> How will shifting rainfall patterns or rising temperatures alter streamflow, snowpack, and forest health?</li>
-        <li><span>Land Use Change:</span> What happens to water quality or yield if a forest is logged, a road is built, or a sub-division is developed (urbanization)?</li>
-        <li><span>Disturbances:</span> Modeling the impact of wildfires, drought stress, or insect outbreaks on a watershed's long-term recovery.</li>
-        <li><span>Nutrient Cycling:</span> Tracking nitrogen pollution (nitrification/denitrification) and how it moves from hillslopes into streams</li>
-      </ul>
+      <div id="about-container-main">  
+        <img src={rhessys_diagram} alt="diagram of inputs, processes and outputs of RHESSys" />
+        
+        <h2>
+          Purpose and Applications
+        </h2>
+        <p>
+          The primary purpose of RHESSys (Regional Hydro-Ecological Simulation System) is to simulate the fluxes (movement) and storage of water, carbon, and nitrogen over spatially variable terrain. It bridges the gap between traditional hydrological models (which often ignore dynamic vegetation growth) and ecological models (which often ignore the lateral movement of water and nutrients across a landscape).
+        </p>
+        <p>
+          RHESSys is used primarily by researchers and watershed managers to answer "what if" questions regarding:
+        </p>
+        <ul>
+          <li><span>Climate Change:</span> How will shifting rainfall patterns or rising temperatures alter streamflow, snowpack, and forest health?</li>
+          <li><span>Land Use Change:</span> What happens to water quality or yield if a forest is logged, a road is built, or a sub-division is developed (urbanization)?</li>
+          <li><span>Disturbances:</span> Modeling the impact of wildfires, drought stress, or insect outbreaks on a watershed's long-term recovery.</li>
+          <li><span>Nutrient Cycling:</span> Tracking nitrogen pollution (nitrification/denitrification) and how it moves from hillslopes into streams</li>
+        </ul>
 
       <div className="text-center dash">&mdash;</div>
 
@@ -193,6 +168,14 @@ export function AboutRHESSysMainContent() {
   )
 }
 
+function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
+  return (
+    <div className='side-panel'>
+      <div className='side-panel-content'>{children}</div>
+    </div>
+  );
+}
+
 /**
  * Layout for the ABOUT RHESSys page.
  */
@@ -204,13 +187,11 @@ export default function AboutRHESSys() {
   }
 
   return (
-    <div className='rhessys-container'>
-      <div className='side-panel'>
-        <div className='side-panel-content'>
-          <AboutRHESSysSidePanelContent />
-        </div>
-      </div>
-      <div className='rhessys-wrapper' style={{ position: 'relative' }}>
+    <div className='about-container'>
+      <SidePanel>
+        <AboutRHESSysSidePanelContent />
+      </SidePanel>
+      <div className='about-wrapper' style={{ position: 'relative' }}>
         <AboutRHESSysMainContent />
       </div>
     </div>

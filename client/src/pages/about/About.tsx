@@ -43,29 +43,49 @@ export function AboutSidePanelContent() {
           WEPP
         </button>
 
-        <button
-          onClick={() => {
-            navigate({ to: "/about-wepp-cloud" });
-          }}
-          className='actionButton'
-          aria-label='Learn about WEPPcloud'
-          title='Learn about WEPPcloud'
-        >
-          WEPPcloud
+        <button onClick={() => {
+          navigate({ to: "/about-wepp-cloud" });
+        }}
+        className='actionButton'
+        aria-label='Learn about WEPPcloud'
+        title='Learn about WEPPcloud'>WEPPcloud
+        </button>
+        
+        <button onClick={() => {
+          navigate({ to: "/about-rhessys" });
+        }}
+        className='actionButton'
+        aria-label='Learn about RHESSys'
+        title='Learn about RHESSys'>RHESSys
         </button>
 
-        <button
-          onClick={() => {
-            navigate({ to: "/about-rhessys" });
+        <button onClick={() => {
+            navigate({ to: "/about-sbs" });
           }}
           className='actionButton'
-          aria-label='Learn about RHESSys'
-          title='Learn about RHESSys'
-        >
-          RHESSys
+          aria-label='Learn about Predicted SBS'
+          title='Learn about Predicted SBS'>Predicted-SBS
+        </button>
+
+        <button onClick={() => {
+            navigate({ to: "/about-watar" });
+          }}
+          className='actionButton'
+          aria-label='Learn about WATAR'
+          title='Learn about WATAR'>WATAR
+        </button>
+
+        <button onClick={() => {
+            navigate({ to: "/scenarios" });
+          }}
+          className='actionButton'
+          aria-label='Learn about Scenarios'
+          title='Learn about Scenarios'>Scenarios
         </button>
       </div>
-
+      
+      <br /><br /><br />
+      
       <div className="institutions">
         <h2>Participating Institutions</h2>
         <p className="text-center"><img src={wsu} alt="Washington State University logo" /></p>
@@ -85,10 +105,23 @@ export function AboutMainContent() {
       <h2>FireWISE Watersheds Overview</h2>
 
       <div className="row">
-        <div className="col-1">
+        <div className="col">
           <p className="text-center"><img src={fire_image} /></p>
         </div>
-        <div className="col-2">
+        <div className="col">
+        <p>
+          <strong>FireWISE (Water, Impacts, Sediment, Erosion) Watersheds</strong> is a decision-support tool for water utilities that conveniently brings together 
+          climatological, hydrological, and environmental data into a predictive modeling tool, allowing 
+          users to explore <strong>short-term changes</strong> in post-fire erosion, ash transport, and runoff and <strong>longer-term 
+          watershed recovery dynamics</strong> by assessing vegetation regrowth and nitrogen leaching in watersheds 
+          across the US West. 
+        </p>
+          
+        </div>
+      </div>
+
+      <div className="row">
+        <div className="col">
           <p>
             Wildfires are increasingly recognized as a threat to water supply. Fires have the potential to
             increase erosion and runoff in watersheds which can create threaten water quality for millions
@@ -96,22 +129,19 @@ export function AboutMainContent() {
             watershed management before fires can help reduce the negative effects of wildfire, and prime
             forests to weather fires and recover from fire events more robustly.
           </p>
+        </div>
+        <div className="col">
           <p>
-            <strong>FireWISE (Water, Impacts, Sediment, Erosion) Watersheds</strong> is a decision-support tool for water utilities that conveniently brings together
-            climatological, hydrological, and environmental data into a predictive modeling tool, allowing
-            users to explore short-term changes in post-fire erosion, ash transport, and runoff and longer-term
-            watershed recovery dynamics by assessing vegetation regrowth and nitrogen leaching in watersheds
-            across the US West.
-          </p>
-          <p>
-            Developed in partnership with Pacific Northwest water utilities, the tool is designed to be used
-            by managers for scenario-based planning, real-time analysis, and long-term resilience assessments.
-            It is designed to guide preparedness, treatment operations, and watershed management decisions
+            Developed in partnership with Pacific Northwest water utilities, <strong>FireWISE Watersheds</strong> is designed to be used 
+            by managers for <a href="scenarios">scenario-based planning</a>, real-time analysis, and long-term resilience assessments. 
+            It is designed to guide preparedness, treatment operations, and watershed management decisions 
             following wildfire disturbances.
           </p>
         </div>
       </div>
 
+      
+      
       <h2>Underlying Architecture</h2>
       <div className="row">
         <div className="col">
@@ -143,9 +173,9 @@ export function AboutMainContent() {
         </div>
         <div className="col">
           <p>
-            Leveraging NASA Earth observations—including Landsat, Sentinel-2, SMAP soil moisture,
-            and MODIS vegetation metrics—along with advanced modeling systems such as RHESSys-WMFire,
-            WEPP, and WATAR, users can explore how different watershed burn severity affects ash
+            Leveraging NASA Earth observations—including Landsat, Sentinel-2, SMAP soil moisture, 
+            and MODIS vegetation metrics—along with advanced modeling systems such as <a href="about-rhessys">RHESSys-WMFire</a>, 
+            <a href="about-wepp">WEPP</a>, and <a href="about-watar">WATAR</a>, users can explore how different watershed burn severity affects ash 
             deposition, streamflow, sediment loads, changes in forest biomass, and nitrogen leaching.
           </p>
         </div>

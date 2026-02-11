@@ -2,13 +2,14 @@ import { useNavigate } from '@tanstack/react-router';
 import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
 import SmallScreenNotice from '../../components/SmallScreenNotice';
 import weppcloud_diagram from '../../assets/images/weppcloud_diagram.png'
-import './About_WEPPcloud.css';
+import '../about/About.css';
+
 
 /* ABOUT WEPPCLOUD: SIDE PANEL CONTENT */
 export function AboutWeppCloudSidePanelContent() {
     const navigate = useNavigate();
     return (
-        <div className="about-weppcloud-panel">
+        <div className="about-panel">
             <button
                 onClick={() => {
                     navigate({ to: "/about" });
@@ -41,33 +42,7 @@ export function AboutWeppCloudSidePanelContent() {
                     remote cloud servers, eliminating local computing and storage limitations.
                 </p>
             </div>
-
-            <br />
-
-            <div className='nav-buttons'>
-                <button
-                    onClick={() => {
-                        navigate({ to: "/about-wepp" });
-                    }}
-                    className='actionButton'
-                    aria-label='Learn about WEPP'
-                    title='Learn about WEPP'
-                >
-                    About WEPP
-                </button>
-
-                <button
-                    onClick={() => {
-                        navigate({ to: "/about-rhessys" });
-                    }}
-                    className='actionButton'
-                    aria-label='Learn about RHESSys'
-                    title='Learn about RHESSys'
-                >
-                    About RHESSys
-                </button>
-            </div>
-
+            
             <br /><br /><br />
         </div>
     )
@@ -76,9 +51,9 @@ export function AboutWeppCloudSidePanelContent() {
 /* ABOUT WEPPCLOUD: MAIN CONTENT */
 export function AboutWeppCloudMainContent() {
     return (
-        <div id="weppcloud-container-main">
-            <img src={weppcloud_diagram} alt="diagram of inputs, processes and outputs of WEPP Cloud" />
-
+        <div id="about-container-main">
+            <img src={weppcloud_diagram} alt="diagram of inputs, processes and outputs of WEPP Cloud" /> 
+          
             <h2>How WEPPcloud is Used</h2>
             <h3>Automated Input Creation</h3>
             <ul>
@@ -99,16 +74,17 @@ export function AboutWeppCloudMainContent() {
             </ul>
 
             <h3>Scenario Analysis</h3>
+            <p>
+                Allows users to evaluate management alternatives and disturbance scenarios, such as:
+            </p>
+                
             <ul>
-                <li>Allows users to evaluate management alternatives and disturbance scenarios, such as:
-                    <ul>
-                        <li>Undisturbed conditions</li>
-                        <li>Forest thinning</li>
-                        <li>Prescribed fire</li>
-                        <li>Varying wildfire severities</li>
-                    </ul>
-                </li>
+                <li>Undisturbed conditions</li>
+                <li>Forest thinning</li>
+                <li>Prescribed fire</li>
+                <li>Varying wildfire severities</li>
             </ul>
+            
 
             <h3>Output Visualization</h3>
             <ul>
@@ -138,6 +114,14 @@ export function AboutWeppCloudMainContent() {
     )
 }
 
+function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
+    return (
+      <div className='side-panel'>
+        <div className='side-panel-content'>{children}</div>
+      </div>
+    );
+}
+
 /**
  * Layout for the ABOUT WEPPCLOUD page.
  */
@@ -149,13 +133,11 @@ export default function AboutWeppCloud() {
     }
 
     return (
-        <div className='weppcloud-container'>
-            <div className='side-panel'>
-                <div className='side-panel-content'>
-                    <AboutWeppCloudSidePanelContent />
-                </div>
-            </div>
-            <div className='weppcloud-wrapper' style={{ position: 'relative' }}>
+        <div className='about-container'>
+            <SidePanel>
+                <AboutWeppCloudSidePanelContent />
+            </SidePanel>
+            <div className='about-wrapper' style={{ position: 'relative' }}>
                 <AboutWeppCloudMainContent />
             </div>
         </div>
