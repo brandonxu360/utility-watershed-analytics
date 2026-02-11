@@ -1,3 +1,25 @@
+.nav-buttons button {
+    background: transparent;
+    border: none;
+    border-bottom: var(--clr-primary-100) 1px solid;
+    border-radius: 0;
+    padding: 8px 16px;
+    color: var(--clr-primary-100);
+    cursor: pointer;
+    text-align: left;
+    font-size: 18px;
+}
+   
+.nav-buttons button:hover {
+    border-bottom: 1px solid #a3a8fa;
+}
+
+.nav-buttons {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .side-panel button:hover {
     background: #000 !important;
     color: #a3a8fa !important;
@@ -29,12 +51,6 @@ strong {
     font-weight: 800;
 }
 
-.closeButton {
-    background: #FF4B3E;
-    border: none;
-    border-radius: 2px;
-}
-
 .row {
     --bs-gutter-x: 1.5rem;
     --bs-gutter-y: 0;
@@ -42,7 +58,6 @@ strong {
     margin-top: calc(-1 * var(--bs-gutter-y));
     margin-right: calc(-.5 * var(--bs-gutter-x));
     margin-left: calc(-.5 * var(--bs-gutter-x));
-    
 }
 
 @media screen and (min-width: 1201px) {
@@ -133,8 +148,6 @@ strong {
     height: calc(100vh - 64px);
     overflow: hidden;
 }
-
-
 
 .about-container p, .about-container ul, .about-container ol {
     /*font-size: var(--fs-100);*/
@@ -309,4 +322,19 @@ strong {
   
 .partner-col ul {
     padding-left: 30px;
+}
+
+button.closeButton {
+    background: #FF4B3E;
+    border: none;
+    border-radius: 3px;
+    color: white;
+}
+
+button.closeButton:hover {
+    background: #FF4B3E !important;
+    border: none;
+    border-radius: 3px !important;
+    color: white !important;
+    cursor: pointer;
 }
