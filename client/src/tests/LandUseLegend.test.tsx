@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAppStore } from "../store/store";
-import LandUseLegend from "../components/map/controls/LandUseLegend/LandUseLegend";
+import LandUseLegend from "../components/map/controls/LandUseLegend";
 
 describe("Land Use Legend Component Tests", () => {
     beforeEach(() => {
@@ -41,7 +41,7 @@ describe("Land Use Legend Component Tests", () => {
         expect(screen.getByText("Forest")).toBeInTheDocument();
         expect(screen.getByText("Grass")).toBeInTheDocument();
 
-        const items = container.querySelectorAll(".landuse-item");
+        const items = container.querySelectorAll("[data-testid='landuse-item']");
         expect(items).toHaveLength(2);
     });
 

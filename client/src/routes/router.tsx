@@ -1,7 +1,7 @@
 import { createRoute, createRootRoute, createRouter, Outlet } from '@tanstack/react-router';
-import Navbar from '../components/navbar/Navbar';
-import Home from '../pages/home/Home';
-import WatershedOverview from '../components/side-panels/watershed/WatershedOverview';
+import Navbar from '../components/Navbar';
+import Home from '../pages/Home';
+import WatershedOverview from '../components/side-panels/WatershedOverview';
 import LoginRoute from './LoginRoute';
 import RegisterRoute from './RegisterRoute';
 import About from '../pages/about/About';
@@ -17,11 +17,9 @@ import Scenarios from '../pages/scenarios/Scenarios'
 const rootRoute = createRootRoute({
   component: () => (
     <>
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <Navbar />
-        <div style={{ display: "flex", flex: 1, minHeight: 0, height: "100%" }}>
-          <Outlet />
-        </div>
+      <Navbar />
+      <div>
+        <Outlet />
       </div>
     </>
   ),

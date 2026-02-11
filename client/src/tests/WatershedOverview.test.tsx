@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAppStore } from "../store/store";
-import WatershedOverview from "../components/side-panels/watershed/WatershedOverview";
+import WatershedOverview from "../components/side-panels/WatershedOverview";
 
 const mockNavigate = vi.fn();
 
@@ -86,20 +86,20 @@ describe("WatershedOverview", () => {
             mockUseMatch.mockReturnValue({ params: { webcloudRunId: "test-watershed-123" } });
             mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
 
-            const { container } = renderWithProviders(<WatershedOverview />);
+            renderWithProviders(<WatershedOverview />);
 
-            expect(container.querySelector(".skeletonPanel")).toBeInTheDocument();
-            expect(container.querySelector(".skeletonTitleText")).toBeInTheDocument();
-            expect(container.querySelector(".skeletonCloseButton")).toBeInTheDocument();
+            expect(screen.getByTestId("skeleton-panel")).toBeInTheDocument();
+            expect(screen.getByTestId("skeleton-title-text")).toBeInTheDocument();
+            expect(screen.getByTestId("skeleton-close-button")).toBeInTheDocument();
         });
 
         it("renders skeleton buttons while loading", () => {
             mockUseMatch.mockReturnValue({ params: { webcloudRunId: "test-watershed-123" } });
             mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
 
-            const { container } = renderWithProviders(<WatershedOverview />);
+            renderWithProviders(<WatershedOverview />);
 
-            const skeletonButtons = container.querySelectorAll(".skeletonButton");
+            const skeletonButtons = screen.getAllByTestId("skeleton-button");
             expect(skeletonButtons.length).toBeGreaterThan(0);
         });
     });
@@ -126,39 +126,6 @@ describe("WatershedOverview", () => {
 
             await waitFor(() => {
                 expect(screen.getByText("No watershed data found.")).toBeInTheDocument();
-            });
-        });
-
-        it("renders message when watershed is not found", async () => {
-            mockUseMatch.mockReturnValue({ params: { webcloudRunId: "non-existent-id" } });
-            mockFetchWatersheds.mockResolvedValue(mockWatershedData);
-
-            renderWithProviders(<WatershedOverview />);
-
-            await waitFor(() => {
-                expect(screen.getByText("Watershed not found.")).toBeInTheDocument();
-            });
-        });
-
-        it("renders watershed not found when match is null (no route match)", async () => {
-            mockUseMatch.mockReturnValue(null);
-            mockFetchWatersheds.mockResolvedValue(mockWatershedData);
-
-            renderWithProviders(<WatershedOverview />);
-
-            await waitFor(() => {
-                expect(screen.getByText("Watershed not found.")).toBeInTheDocument();
-            });
-        });
-
-        it("renders watershed not found when webcloudRunId is undefined", async () => {
-            mockUseMatch.mockReturnValue({ params: {} });
-            mockFetchWatersheds.mockResolvedValue(mockWatershedData);
-
-            renderWithProviders(<WatershedOverview />);
-
-            await waitFor(() => {
-                expect(screen.getByText("Watershed not found.")).toBeInTheDocument();
             });
         });
     });

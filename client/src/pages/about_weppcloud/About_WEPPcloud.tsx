@@ -1,14 +1,13 @@
-import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
+import SmallScreenNotice from '../../components/SmallScreenNotice';
 import weppcloud_diagram from '../../assets/images/weppcloud_diagram.png'
 import '../about/About.css';
 
 
 /* ABOUT WEPPCLOUD: SIDE PANEL CONTENT */
 export function AboutWeppCloudSidePanelContent() {
-    const navigate = useNavigate();  
+    const navigate = useNavigate();
     return (
         <div className="about-panel">
             <button
@@ -18,7 +17,7 @@ export function AboutWeppCloudSidePanelContent() {
                 className='closeButton'
                 aria-label='Close WEPPcloud panel'
                 title='Close WEPPcloud panel'
-                style={{ padding: '0.313rem 0.5rem' }}
+                style={{ padding: '0.313rem 0.5rem', marginBottom: '1rem' }}
             >
                 BACK
             </button>
@@ -29,17 +28,17 @@ export function AboutWeppCloudSidePanelContent() {
                 <h3>IN A NUTSHELL</h3>
                 <p>
                     <span>What it is:</span>&nbsp;
-                    WEPPcloud is an online interface for the <a href="about-wepp">WEPP watershed model</a>, built on a 
+                    WEPPcloud is an online interface for the <a href="about-wepp">WEPP watershed model</a>, built on a
                     Python software framework (wepppy).
                 </p>
                 <p>
-                    <span>Purpose:</span>&nbsp; 
-                    WEPPcloud is designed as a decision-support tool that makes the WEPP model more accessible to 
+                    <span>Purpose:</span>&nbsp;
+                    WEPPcloud is designed as a decision-support tool that makes the WEPP model more accessible to
                     land managers and practitioners.
                 </p>
                 <p>
-                    <span>How it works:</span>&nbsp;  
-                    WEPPcloud runs entirely through a web browser and stores all model runs on 
+                    <span>How it works:</span>&nbsp;
+                    WEPPcloud runs entirely through a web browser and stores all model runs on
                     remote cloud servers, eliminating local computing and storage limitations.
                 </p>
             </div>
@@ -48,7 +47,6 @@ export function AboutWeppCloudSidePanelContent() {
         </div>
     )
 }
-
 
 /* ABOUT WEPPCLOUD: MAIN CONTENT */
 export function AboutWeppCloudMainContent() {
@@ -107,7 +105,7 @@ export function AboutWeppCloudMainContent() {
                 <li>State agencies</li>
                 <li>Water utilities</li>
             </ul>
-            
+
             <p>
                 It also supports scientists and researchers by providing a comprehensive, physically based hydrologic modeling framework with pre-processed data.
             </p>
@@ -116,16 +114,12 @@ export function AboutWeppCloudMainContent() {
     )
 }
 
-
-/**
- * SidePanel component
- */
-function SidePanel({ children }: { children: React.ReactNode }) {
+function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
     return (
-        <div className='side-panel'>
-            <div className='side-panel-content'>{children}</div>
-        </div>
-    )
+      <div className='side-panel'>
+        <div className='side-panel-content'>{children}</div>
+      </div>
+    );
 }
 
 /**
@@ -148,5 +142,5 @@ export default function AboutWeppCloud() {
             </div>
         </div>
     )
-  
+
 }

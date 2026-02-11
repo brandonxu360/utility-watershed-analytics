@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/small-screen-notice/SmallScreenNotice';
+import SmallScreenNotice from '../../components/SmallScreenNotice';
 import { useNavigate } from '@tanstack/react-router';
 import watar_diagram from '../../assets/images/watar_diagram.png'
 import '../about/About.css';

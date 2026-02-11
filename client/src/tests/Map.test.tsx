@@ -99,15 +99,15 @@ vi.mock("../components/map/controls/DataLayers/DataLayers", () => ({
     default: () => <div data-testid="data-layers-control" />,
 }));
 
-vi.mock("../components/map/controls/ZoomIn/ZoomIn", () => ({
+vi.mock("../components/map/controls/ZoomIn", () => ({
     default: () => <div data-testid="zoom-in-control" />,
 }));
 
-vi.mock("../components/map/controls/ZoomOut/ZoomOut", () => ({
+vi.mock("../components/map/controls/ZoomOut", () => ({
     default: () => <div data-testid="zoom-out-control" />,
 }));
 
-vi.mock("../components/map/controls/Layers/Layers", () => ({
+vi.mock("../components/map/controls/Layers", () => ({
     default: ({
         selectedLayerId,
         setSelectedLayerId,
@@ -131,19 +131,19 @@ vi.mock("../components/map/controls/Layers/Layers", () => ({
     ),
 }));
 
-vi.mock("../components/map/controls/Legend/Legend", () => ({
+vi.mock("../components/map/controls/Legend", () => ({
     default: () => <div data-testid="legend-control" />,
 }));
 
-vi.mock("../components/map/controls/Search/Search", () => ({
+vi.mock("../components/map/controls/Search", () => ({
     default: () => <div data-testid="search-control" />,
 }));
 
-vi.mock("../components/map/controls/Settings/Settings", () => ({
+vi.mock("../components/map/controls/Settings", () => ({
     default: () => <div data-testid="settings-control" />,
 }));
 
-vi.mock("../components/map/controls/LandUseLegend/LandUseLegend", () => ({
+vi.mock("../components/map/controls/LandUseLegend", () => ({
     default: () => <div data-testid="landuse-legend" />,
 }));
 
@@ -387,12 +387,10 @@ describe("Map Component", () => {
         it("shows loading overlay when watersheds are loading", async () => {
             mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
 
-            const { container } = renderWithProviders(<Map />);
+            renderWithProviders(<Map />);
 
             await waitFor(() => {
-                expect(
-                    container.querySelector(".map-loading-overlay")
-                ).toBeInTheDocument();
+                expect(screen.getByTestId("map-loading-overlay")).toBeInTheDocument();
             });
         });
 
@@ -404,12 +402,10 @@ describe("Map Component", () => {
                 getChoroplethStyle: mockGetChoroplethStyle,
             });
 
-            const { container } = renderWithProviders(<Map />);
+            renderWithProviders(<Map />);
 
             await waitFor(() => {
-                expect(
-                    container.querySelector(".map-loading-overlay")
-                ).toBeInTheDocument();
+                expect(screen.getByTestId("map-loading-overlay")).toBeInTheDocument();
             });
         });
     });

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import HomeSidePanelContent from "../components/side-panels/home-info/HomeInfoPanel";
+import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 
 describe("HomeSidePanelContent", () => {
     describe("rendering", () => {
@@ -60,17 +60,18 @@ describe("HomeSidePanelContent", () => {
         });
 
         it("renders the get started message as strong/bold", () => {
-            const { container } = render(<HomeSidePanelContent />);
-            const strongElement = container.querySelector("strong");
-            expect(strongElement).toBeInTheDocument();
-            expect(strongElement).toHaveTextContent("Get Started");
+            render(<HomeSidePanelContent />);
+            const strongElements = screen.getAllByText((content, element) => {
+                return element?.tagName.toLowerCase() === 'strong' && content.includes('Get Started');
+            });
+            expect(strongElements.length).toBeGreaterThan(0);
         });
     });
 
     describe("structure", () => {
         it("renders with correct container class", () => {
-            const { container } = render(<HomeSidePanelContent />);
-            const homePanel = container.querySelector(".home-panel");
+            render(<HomeSidePanelContent />);
+            const homePanel = screen.getByTestId("home-panel");
             expect(homePanel).toBeInTheDocument();
         });
 
