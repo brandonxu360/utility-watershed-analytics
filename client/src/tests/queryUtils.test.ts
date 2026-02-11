@@ -1,51 +1,49 @@
 import { describe, it, expect } from 'vitest';
-import { buildRunPath, extractRows, toFiniteNumber, DEFAULT_RUN_ID, BATCH_PREFIX } from '../api/queryUtils';
+import { buildRunPath, extractRows, toFiniteNumber } from '../api/queryUtils';
 
 describe('queryUtils', () => {
     describe('buildRunPath', () => {
-        it('returns default path when no argument provided', () => {
-            const result = buildRunPath();
-            expect(result).toBe(`${BATCH_PREFIX}${DEFAULT_RUN_ID}`);
+        it('returns the run ID as-is when valid', () => {
+            const runPath = 'batch;;nasa-roses-2026-sbs;;OR-20';
+            const result = buildRunPath(runPath);
+            expect(result).toBe(runPath);
         });
 
-        it('prepends batch prefix to simple run ID', () => {
-            const result = buildRunPath('my-run-123');
-            expect(result).toBe(`${BATCH_PREFIX}my-run-123`);
+        it('preserves valid run IDs with slashes', () => {
+            const runPath = 'batch;;some-batch;;my-run';
+            const result = buildRunPath(runPath);
+            expect(result).toBe(runPath);
         });
 
-        it('preserves already prefixed batch paths', () => {
-            const fullPath = 'batch;;some-batch;;my-run';
-            const result = buildRunPath(fullPath);
-            expect(result).toBe(fullPath);
+        it('trims whitespace from run ID', () => {
+            const result = buildRunPath('  batch;;test;;run  ');
+            expect(result).toBe('batch;;test;;run');
         });
 
-        it('uses custom default run ID when provided', () => {
-            const result = buildRunPath(undefined, 'custom-default');
-            expect(result).toBe(`${BATCH_PREFIX}custom-default`);
+        it('throws error when run ID is missing', () => {
+            expect(() => buildRunPath(undefined as unknown as string)).toThrow('Run ID is required');
+            expect(() => buildRunPath(null as unknown as string)).toThrow('Run ID is required');
+            expect(() => buildRunPath('')).toThrow('Run ID is required');
+            expect(() => buildRunPath('   ')).toThrow('Run ID is required');
         });
 
-        // Security: Path traversal prevention
-        it('throws error for path traversal with ..', () => {
-            expect(() => buildRunPath('../etc/passwd')).toThrow('Invalid run path');
-            expect(() => buildRunPath('valid/../sneaky')).toThrow('Invalid run path');
-            expect(() => buildRunPath('..%2F..%2Fetc')).toThrow('Invalid run path'); // Still contains .. at start
-            // URL-encoded path traversal attempts are also blocked (decoded before check)
-            expect(() => buildRunPath('%2e%2e/etc/passwd')).toThrow('Invalid run path');
+        // Security: ID traversal prevention
+        it('throws error for ID traversal with ..', () => {
+            expect(() => buildRunPath('../etc/passwd')).toThrow('Invalid run ID');
+            expect(() => buildRunPath('valid/../sneaky')).toThrow('Invalid run ID');
+            expect(() => buildRunPath('..%2F..%2Fetc')).toThrow('Invalid run ID');
+            // URL-encoded ID traversal attempts are also blocked (decoded before check)
+            expect(() => buildRunPath('%2e%2e/etc/passwd')).toThrow('Invalid run ID');
         });
 
-        it('throws error for path with double slashes', () => {
-            expect(() => buildRunPath('path//to//file')).toThrow('Invalid run path');
-            expect(() => buildRunPath('//root')).toThrow('Invalid run path');
+        it('throws error for ID with double slashes', () => {
+            expect(() => buildRunPath('path//to//file')).toThrow('Invalid run ID');
+            expect(() => buildRunPath('//root')).toThrow('Invalid run ID');
         });
 
-        it('allows valid paths with single slashes', () => {
+        it('allows valid IDs with single slashes', () => {
             expect(() => buildRunPath('or/wa-108')).not.toThrow();
-            expect(buildRunPath('or/wa-108')).toBe(`${BATCH_PREFIX}or/wa-108`);
-        });
-
-        it('handles empty string', () => {
-            const result = buildRunPath('');
-            expect(result).toBe(`${BATCH_PREFIX}${DEFAULT_RUN_ID}`);
+            expect(buildRunPath('or/wa-108')).toBe('or/wa-108');
         });
     });
 

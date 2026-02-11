@@ -31,16 +31,16 @@ export type AggregatedRapRow = {
 
 export type FetchRapOptions = {
     mode: 'hillslope' | 'watershed';
+    runId: string;
     topazId?: number;
     weppId?: number;
-    runIdOrPath?: string;
     year?: number;
     include_schema?: boolean;
     include_sql?: boolean;
 };
 
 export type FetchRapChoroplethOptions = {
-    runIdOrPath?: string;
+    runId: string;
     band: number | number[];
     year?: number | null;
     include_schema?: boolean;

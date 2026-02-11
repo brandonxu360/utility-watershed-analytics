@@ -1,31 +1,33 @@
 import { API_ENDPOINTS } from './apiEndpoints';
 import { YEAR_BOUNDS, QueryFilter } from './types';
 
-export const DEFAULT_RUN_ID = 'or,wa-108';
-export const BATCH_PREFIX = 'batch;;nasa-roses-2025;;';
-
 /**
- * Build the run path for the query engine.
- * Handles both raw run IDs and pre-formatted batch paths.
+ * Validate and sanitize a run ID for the query engine.
+ * The run ID should be the complete batch path (e.g., 'batch;;nasa-roses-2026-sbs;;OR-20')
+ * as provided by the watershed URL.
  * 
- * @param runIdOrPath - Optional run ID or full batch path
- * @param defaultRunId - Fallback run ID if none provided
- * @returns Formatted batch path for the query engine
+ * @param runId - The complete run ID from the watershed URL
+ * @returns Validated run ID for the query engine
+ * @throws Error if the run ID is invalid or missing
  */
-export function buildRunPath(runIdOrPath?: string, defaultRunId: string = DEFAULT_RUN_ID): string {
-    if (runIdOrPath) {
-        const sanitized = String(runIdOrPath);
-        // Decode URL encoding and check for path traversal attacks
-        const decoded = decodeURIComponent(sanitized);
-        if (decoded.includes('..') || decoded.includes('//') ||
-            sanitized.includes('..') || sanitized.includes('//')) {
-            throw new Error('Invalid run path');
-        }
-        return sanitized.startsWith('batch;;')
-            ? sanitized
-            : `${BATCH_PREFIX}${sanitized}`;
+export function buildRunPath(runId: string): string {
+    if (!runId || typeof runId !== 'string') {
+        throw new Error('Run ID is required');
     }
-    return `${BATCH_PREFIX}${defaultRunId}`;
+
+    const sanitized = String(runId).trim();
+    if (!sanitized) {
+        throw new Error('Run ID is required');
+    }
+
+    // Decode URL encoding and check for path traversal attacks
+    const decoded = decodeURIComponent(sanitized);
+    if (decoded.includes('..') || decoded.includes('//') ||
+        sanitized.includes('..') || sanitized.includes('//')) {
+        throw new Error('Invalid run ID');
+    }
+
+    return sanitized;
 }
 
 /**

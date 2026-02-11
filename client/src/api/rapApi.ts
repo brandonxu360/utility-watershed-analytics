@@ -19,14 +19,6 @@ import {
     QueryFilter
 } from './types';
 
-/** Build run path with optional topaz ID for hillslope mode */
-function buildRapRunPath(runIdOrPath?: string, mode?: 'hillslope' | 'watershed' | 'choropleth', topazId?: number): string {
-    if (mode === 'hillslope' && typeof topazId !== 'undefined' && !runIdOrPath) {
-        return buildRunPath(`wa-${topazId}`);
-    }
-    return buildRunPath(runIdOrPath);
-}
-
 /**
  * Build a RAP timeseries query payload for a single Topaz ID.
  * RAP band codes (kept as reference):
@@ -77,9 +69,9 @@ function buildRapTimeseriesPayload(topazId: number, year?: number): RapTimeserie
  * (per-year rows with shrub/tree/coverage fields) which is the shape the UI needs.
  */
 export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[]> {
-    const { mode, topazId, weppId, runIdOrPath, year, include_schema, include_sql } = opts;
+    const { mode, topazId, weppId, runId, year, include_schema, include_sql } = opts;
 
-    const runPath = buildRapRunPath(runIdOrPath, mode, topazId);
+    const runPath = buildRunPath(runId);
 
     let payload: Record<string, unknown>;
 
@@ -180,9 +172,9 @@ export default fetchRap;
  * it averages across all years. Returns rows with { wepp_id, value }.
  */
 export async function fetchRapChoropleth(opts: FetchRapChoroplethOptions): Promise<RapChoroplethRow[]> {
-    const { runIdOrPath, band, year, include_schema, include_sql } = opts;
+    const { runId, band, year, include_schema, include_sql } = opts;
 
-    const runPath = buildRunPath(runIdOrPath);
+    const runPath = buildRunPath(runId);
 
     // Build parameterized filters array using shared helpers
     const filters: QueryFilter[] = [createBandFilter(band)];

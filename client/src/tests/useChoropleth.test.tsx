@@ -3,6 +3,15 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChoropleth, CHOROPLETH_CONFIG, CHOROPLETH_YEARS } from '../hooks/useChoropleth';
 import { useAppStore } from '../store/store';
 
+const mockUseMatch = vi.fn(() => ({ params: { webcloudRunId: 'batch;;test-batch;;test-run' } }));
+
+vi.mock("@tanstack/react-router", async (importOriginal) => {
+    const actual = await importOriginal();
+    return Object.assign({}, actual, {
+        useMatch: () => mockUseMatch(),
+    });
+});
+
 vi.mock('../api/rapApi', () => ({
     fetchRapChoropleth: vi.fn(),
 }));
@@ -14,6 +23,7 @@ const mockFetchRapChoropleth = vi.mocked(fetchRapChoropleth);
 describe('useChoropleth', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseMatch.mockReturnValue({ params: { webcloudRunId: 'batch;;test-batch;;test-run' } });
         useAppStore.getState().setChoroplethType('none');
         useAppStore.getState().setChoroplethYear(null);
         useAppStore.getState().setChoroplethData(null, null);
@@ -92,7 +102,7 @@ describe('useChoropleth', () => {
 
             await waitFor(() => {
                 expect(mockFetchRapChoropleth).toHaveBeenCalledWith({
-                    runIdOrPath: 'or,wa-108',
+                    runId: 'batch;;test-batch;;test-run',
                     band: [5, 6],
                     year: null,
                 });
@@ -113,7 +123,7 @@ describe('useChoropleth', () => {
 
             await waitFor(() => {
                 expect(mockFetchRapChoropleth).toHaveBeenCalledWith({
-                    runIdOrPath: 'or,wa-108',
+                    runId: 'batch;;test-batch;;test-run',
                     band: [5, 6],
                     year: 2020,
                 });

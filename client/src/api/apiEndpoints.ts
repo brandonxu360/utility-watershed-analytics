@@ -1,6 +1,6 @@
 // API base URL configuration
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://unstable.wepp.cloud/api';
-const QUERY_RUN_PATH = 'https://wc-prod.bearhive.duckdns.org/query-engine/runs';
+const QUERY_RUN_PATH = 'https://wepp.cloud/query-engine/runs';
 
 // API endpoints
 export const API_ENDPOINTS = {
