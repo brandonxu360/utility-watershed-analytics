@@ -50,9 +50,10 @@ class Subcatchment(models.Model):
     clay = models.FloatField(null=True, blank=True)
     sand = models.FloatField(null=True, blank=True)
     avke = models.FloatField(null=True, blank=True)
-    ll = models.FloatField(null=True, blank=True)
     bd = models.FloatField(null=True, blank=True)
     simple_texture = models.CharField(max_length=100, null=True, blank=True)
+    soil_depth = models.FloatField(null=True, blank=True)
+    rock = models.FloatField(null=True, blank=True)
     
     # Land use data fields
     landuse_key = models.IntegerField(null=True, blank=True)

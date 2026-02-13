@@ -100,29 +100,35 @@ docker compose -f compose.prod.yml exec server python manage.py load_watershed_d
 tmux attach -t data-load
 ```
 
-### Download Data Files
+### Download Data Files (Optional)
 
-The data downloader defaults to `--dev` mode. Override by passing arguments after the service name:
+Pre-download data files to avoid repeated network fetches when reloading the database. Downloaded files are cached in the named Docker volume `watershed_data` (mounted at `/data` in the server container). The server Dockerfile creates `/data` and sets permissions so the loader can write files. You can pre-download from the container using the `download_data` management command.
 
 ```bash
-# Download ALL production data (required for production)
-docker compose -f compose.prod.yml --profile data-management run --rm data-downloader --all
+# Download ALL production data (recommended for production)
+docker compose -f compose.prod.yml exec server python manage.py download_data --all
 
 # Or download specific watersheds by runid
-docker compose -f compose.prod.yml --profile data-management run --rm data-downloader --runids <runid1> <runid2>
+docker compose -f compose.prod.yml exec server python manage.py download_data --runids <runid1> <runid2>
 ```
 
 ### Load Data into Database
 
 ```bash
-# Load all data (first time or updates)
+# Load ALL watersheds (production - discovers all from API)
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --all
+
+# Load specific watersheds by runid
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --runids <runid1> <runid2>
+
+# Load development subset only (defaults if no args provided - testing only)
 docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
 
 # Preview what would be loaded (safe to test)
 docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --dry-run
 
 # Force reload even if data already exists
-docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --force
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --force --all
 ```
 
 ### Complete Data Setup (Download + Load)
@@ -130,12 +136,14 @@ docker compose -f compose.prod.yml exec server python manage.py load_watershed_d
 For initial deployment or major data updates:
 
 ```bash
-# 1. Download all production data files
-docker compose -f compose.prod.yml --profile data-management run --rm data-downloader --all
+# 1. (Optional) Pre-download all production data files to avoid network fetches
+docker compose -f compose.prod.yml exec server python manage.py download_data --all
 
-# 2. Load data into database
-docker compose -f compose.prod.yml exec server python manage.py load_watershed_data
+# 2. Load all watershed data into database
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --all
 ```
+
+**Note:** The download step is optional — the loader will fetch from remote URLs if cached files aren't available. Pre-downloading can be faster for subsequent reloads.
 
 ### Major Schema or Data Source Updates
 
@@ -149,7 +157,7 @@ docker compose -f compose.prod.yml down
 
 # 3. After deployment completes, reload all watershed data
 tmux new -s data-load
-docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --force
+docker compose -f compose.prod.yml exec server python manage.py load_watershed_data --force --all
 ```
 
 > ⚠️ **Important:** The database currently has NO persistent volume configured. Running `docker compose down` removes the database container and **all data is lost**. This is acceptable while only loading watershed data, but a persistent volume must be added before storing user data.

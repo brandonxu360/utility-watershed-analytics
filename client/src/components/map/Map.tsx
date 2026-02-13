@@ -12,17 +12,39 @@ import { useChoropleth } from '../../hooks/useChoropleth';
 import { selectedStyle, defaultStyle } from './constants';
 import { useAppStore } from '../../store/store';
 import { toast } from 'react-toastify';
+import { tss } from '../../utils/tss';
+import { CircularProgress } from '@mui/material';
 import DataLayersControl from './controls/DataLayers/DataLayers';
-import ZoomInControl from './controls/ZoomIn/ZoomIn';
-import ZoomOutControl from './controls/ZoomOut/ZoomOut';
-import LayersControl from './controls/Layers/Layers';
-import LegendControl from './controls/Legend/Legend';
-import SearchControl from './controls/Search/Search';
-import SettingsControl from './controls/Settings/Settings';
-import LandUseLegend from './controls/LandUseLegend/LandUseLegend';
+import ZoomInControl from './controls/ZoomIn';
+import ZoomOutControl from './controls/ZoomOut';
+import LayersControl from './controls/Layers';
+import LegendControl from './controls/Legend';
+import SearchControl from './controls/Search';
+import SettingsControl from './controls/Settings';
+import LandUseLegend from './controls/LandUseLegend';
 import SubcatchmentLayer from './SubcatchmentLayer';
 import 'leaflet/dist/leaflet.css';
-import './Map.css';
+
+const useStyles = tss.create(({ theme }) => ({
+  mapContainer: {
+    height: '100%',
+    width: '100%',
+  },
+  mapLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: theme.palette.surface.overlay,
+    zIndex: 1000,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+  },
+}));
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
@@ -45,6 +67,7 @@ const BOUNDS: [[number, number], [number, number]] = [
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
 export default function Map(): JSX.Element {
+  const { classes } = useStyles();
   const navigate = useNavigate()
 
   const {
@@ -92,10 +115,13 @@ export default function Map(): JSX.Element {
   useEffect(() => {
     if (!watershedID || subLoading || !subcatchments) return;
 
-    if (subcatchments.features?.length === 0) {
+    const noData = subcatchments.features?.length === 0;
+    const featuresEnabled = subcatchment || landuse;
+
+    if (noData && featuresEnabled) {
       if (subcatchment) setSubcatchment(false);
       if (landuse) setLanduse(false);
-      if (subcatchment || landuse) toast.error('No subcatchment data available');
+      toast.error('No subcatchment data available');
     }
   }, [watershedID, subcatchments, subLoading, subcatchments?.features?.length, subcatchment, landuse, setSubcatchment, setLanduse]);
 
@@ -214,7 +240,7 @@ export default function Map(): JSX.Element {
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
 
   return (
-    <div className="map-container">
+    <div className={classes.mapContainer}>
       <MapContainer
         center={CENTER}
         zoom={7}
@@ -231,8 +257,8 @@ export default function Map(): JSX.Element {
       >
 
         {(watershedsLoading || subLoading || channelLoading || choroplethLoading) && (
-          <div className="map-loading-overlay">
-            <div className="loading-spinner" />
+          <div className={classes.mapLoadingOverlay} data-testid="map-loading-overlay">
+            <CircularProgress size={50} />
           </div>
         )}
 

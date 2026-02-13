@@ -66,9 +66,7 @@ DEBUG=true
     }
 }
 ```
-7. **Data**: Watershed data (watersheds, subcatchments, channels) is loaded into the database via a Django management command. In development, the entrypoint script automatically loads a sample subset of watersheds on the first container startup. For production or custom data loading, see the Data Management section below.
-
-The [data-manifest.yaml](server/data-manifest.yaml) defines all available watershed data sources and their download locations.
+7. **Data**: Watershed data (watersheds, subcatchments, channels) is loaded into the database via a Django management command. The loader automatically discovers available watershed data from the API. In development, the entrypoint script automatically loads a sample subset of watersheds on the first container startup. For production or custom data loading, see the Data Management section below.
 
 ### Usage
 1. **Start Docker Services**: Use the provided `compose.yml` to start all the services. **Note**: If you are using VSCode with Dev Containers, you can skip this step—containers will start automatically when you open the project in a devcontainer.
@@ -109,42 +107,37 @@ docker compose logs -f client server
 ### Data Management (Development)
 
 The application uses a two-stage data pipeline:
-1. **Data Download** - Downloads GeoJSON/Parquet files from remote sources to a shared Docker volume
+1. **Data Download** - Downloads GeoJSON/Parquet files from remote sources to local storage
 2. **Data Loading** - Loads data into the PostgreSQL/PostGIS database
 
-The loader uses a **local-first approach**: it checks for cached files in the shared volume first, then falls back to fetching from remote URLs if local files aren't available.
+The loader uses a **local-first approach**: it checks for cached files first, then falls back to fetching from remote URLs if local files aren't available. Downloaded files are cached in the named Docker volume `watershed_data` and are mounted inside the server container at `/data` (controlled by `LOADER_DATA_DIR=/data`). The server Dockerfile creates `/data` and ensures it has the correct ownership so the loader can write files.
 
-#### Pre-Caching Data (Optional)
+#### Downloading Data (Optional)
 
-If you need to reload data into the database (e.g., after clearing the DB or first-time setup on a new volume), you can pre-cache the data files to avoid repeated network fetches:
-
-```bash
-# Download and cache development data subset
-docker compose --profile data-management run --rm data-downloader
-```
-
-The `--dev` flag (default) downloads the same subset loaded by the development entrypoint. This cached data persists in the `watershed_data` volume until the volume is removed.
-
-#### Data Downloader Options
-
-The downloader's default is `--dev`, but you can override it by passing different arguments:
+Pre-download data files to avoid repeated network fetches when reloading the database. The `watershed_data` named volume stores cached files.
 
 ```bash
 # Download development subset (default, recommended)
-docker compose --profile data-management run --rm data-downloader
-# or explicitly: docker compose --profile data-management run --rm data-downloader --dev
+docker compose exec server python manage.py download_data --dev
 
 # Download specific watersheds by runid
-docker compose --profile data-management run --rm data-downloader --runids <runid1> <runid2>
+docker compose exec server python manage.py download_data --runids <runid1> <runid2>
 
 # Download ALL data (warning: very large, production only)
-docker compose --profile data-management run --rm data-downloader --all
+docker compose exec server python manage.py download_data --all
 ```
 
 #### Loading Watershed Data
+
 ```bash
-# Load development subset (uses cache if available, else fetches remote)
+# Load development subset (default - same 4 watersheds used on first startup)
+docker compose exec server python manage.py load_watershed_data
+
+# Load specific watersheds by runid
 docker compose exec server python manage.py load_watershed_data --runids <runid1> <runid2>
+
+# Load ALL watersheds (discovers all available from API)
+docker compose exec server python manage.py load_watershed_data --all
 
 # Preview what would be loaded (safe to test)
 docker compose exec server python manage.py load_watershed_data --dry-run
@@ -156,19 +149,21 @@ docker compose exec server python manage.py load_watershed_data --force
 docker compose exec server python manage.py load_watershed_data --verbosity=2
 ```
 
+**Note:** Downloaded files are stored in the named Docker volume `watershed_data` (mounted at `/data` in the server container) and persist across container restarts. To clear cached files remove the named volume.
+
 #### Resetting Data
 ```bash
-# Remove all services and data (database + downloaded files)
+# Remove all services and database
+docker compose down
+
+# Remove all services and database (removes named volumes)
 docker compose down -v
 
-# Remove only the data file volume (clears cache)
-docker volume rm utility-watershed-analytics_watershed_data
+# Or remove only the watershed data volume (project-specific name shown by `docker volume ls`)
+docker volume rm watershed_data
 
-# Force reload data into database
+# Force reload data into database (clears DB first, then reloads)
 docker compose exec server python manage.py load_watershed_data --force
-
-# Force reload specific watersheds only
-docker compose exec server python manage.py load_watershed_data --force --runids <runid1> <runid2>
 ```
 
 ### Full Container Management
@@ -202,6 +197,8 @@ docker compose logs -f
 
 As the featureset expands, we're working on integrating a test-driven development approach.
 
+### Backend
+
 To run backend tests (Django/DRF), use either of the following commands:
 
 ```bash
@@ -212,4 +209,23 @@ Or, if you are inside the backend container:
 
 ```bash
 python manage.py test
+```
+
+### Frontend
+
+To run frontend tests developers must first navigate to the client devcontainer from which they can run the following commands:
+
+```bash
+# To run all tests
+npm run test
+```
+
+```bash
+# To run a single test file
+npm run test <path_to_file>
+```
+
+```bash
+# To run tests with coverage
+npm run coverage
 ```

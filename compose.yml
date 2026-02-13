@@ -35,10 +35,13 @@ services:
       - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=${DEBUG}
+      # Data directory for watershed GeoJSON/Parquet caching (created in Dockerfile with proper permissions)
+      - LOADER_DATA_DIR=/data
     # Volume mount
     volumes:
       - .:/app
-      - watershed_data:/app/server/server/watershed/data
+      # Watershed data cache directory - must match LOADER_DATA_DIR environment variable
+      - watershed_data:/data
     entrypoint: ["/entrypoint.sh"]
     command: python manage.py runserver 0.0.0.0:8000
     # Keep container active and interactive

@@ -12,18 +12,6 @@ services:
     profiles:
       - build
 
-  # Data downloader service - downloads watershed data files
-  data-downloader:
-    build:
-      context: ./server
-      dockerfile: Dockerfile.data-downloader
-    volumes:
-      - watershed_data:/data
-    environment:
-      - DATA_OUTPUT_DIR=/data
-    profiles:
-      - data-management
-
   # Backend Django server
   server:
     build:
@@ -32,7 +20,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - watershed_data:/app/server/server/watershed/data
+      # Watershed data cache directory - must match LOADER_DATA_DIR environment variable
+      - watershed_data:/data
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PW=${POSTGRES_PW}
@@ -42,6 +31,8 @@ services:
       - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DEBUG=False
+      # Data directory for watershed GeoJSON/Parquet caching (created in Dockerfile with proper permissions)
+      - LOADER_DATA_DIR=/data
     entrypoint: ["/entrypoint.sh"]
     command: gunicorn server.wsgi:application --bind 0.0.0.0:8000
     depends_on:
