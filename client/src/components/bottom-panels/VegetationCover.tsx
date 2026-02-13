@@ -87,8 +87,7 @@ export const VegetationCover: React.FC = () => {
     const { config } = useChoropleth();
 
     const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
-    const watershedID = match?.params.webcloudRunId ?? null;
-    const runId = watershedID;
+    const runId = match ? match.params.webcloudRunId : null;
 
     // Map UI option to band type
     const vegetationOptionToBand: Record<VegetationOption, VegetationBandType> = {
@@ -152,7 +151,7 @@ export const VegetationCover: React.FC = () => {
             try {
                 const rows = selectedHillslopeId
                     ? await fetchRap({ mode: 'hillslope', topazId: selectedHillslopeId, runId: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
-                    : watershedID
+                    : runId
                         ? await fetchRap({ mode: 'watershed', weppId: 108, runId: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
                         : null;
 
@@ -171,7 +170,7 @@ export const VegetationCover: React.FC = () => {
         return () => {
             mounted = false;
         };
-    }, [selectedHillslopeId, selectedYear, watershedID, runId]);
+    }, [selectedHillslopeId, selectedYear, runId]);
 
     const singleHillslopeChartData = useMemo(() => {
         if (!rapTimeSeries || rapTimeSeries.length === 0) return null;
