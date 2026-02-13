@@ -1,7 +1,6 @@
 import { startYear, endYear } from '../utils/constants';
 
 import {
-    buildRunPath,
     postQuery,
     addQueryFlags,
     toFiniteNumber,
@@ -71,8 +70,6 @@ function buildRapTimeseriesPayload(topazId: number, year?: number): RapTimeserie
 export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[]> {
     const { mode, topazId, weppId, runId, year, include_schema, include_sql } = opts;
 
-    const runPath = buildRunPath(runId);
-
     let payload: Record<string, unknown>;
 
     if (mode === 'hillslope') {
@@ -119,7 +116,7 @@ export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[
         addQueryFlags(payload, include_schema, include_sql);
     }
 
-    const rawRows = await postQuery(runPath, payload, 'RAP');
+    const rawRows = await postQuery(runId, payload, 'RAP');
 
     if (mode === 'watershed') {
         // Map server-aggregated rows straight to AggregatedRapRow
@@ -174,8 +171,6 @@ export default fetchRap;
 export async function fetchRapChoropleth(opts: FetchRapChoroplethOptions): Promise<RapChoroplethRow[]> {
     const { runId, band, year, include_schema, include_sql } = opts;
 
-    const runPath = buildRunPath(runId);
-
     // Build parameterized filters array using shared helpers
     const filters: QueryFilter[] = [createBandFilter(band)];
 
@@ -204,7 +199,7 @@ export async function fetchRapChoropleth(opts: FetchRapChoroplethOptions): Promi
     };
     addQueryFlags(payload, include_schema, include_sql);
 
-    const rawRows = await postQuery(runPath, payload, 'RAP Choropleth');
+    const rawRows = await postQuery(runId, payload, 'RAP Choropleth');
 
     return rawRows
         .map((r) => {

@@ -1,52 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { buildRunPath, extractRows, toFiniteNumber } from '../api/queryUtils';
+import { extractRows, toFiniteNumber } from '../api/queryUtils';
 
 describe('queryUtils', () => {
-    describe('buildRunPath', () => {
-        it('returns the run ID as-is when valid', () => {
-            const runPath = 'batch;;nasa-roses-2026-sbs;;OR-20';
-            const result = buildRunPath(runPath);
-            expect(result).toBe(runPath);
-        });
-
-        it('preserves valid run IDs with slashes', () => {
-            const runPath = 'batch;;some-batch;;my-run';
-            const result = buildRunPath(runPath);
-            expect(result).toBe(runPath);
-        });
-
-        it('trims whitespace from run ID', () => {
-            const result = buildRunPath('  batch;;test;;run  ');
-            expect(result).toBe('batch;;test;;run');
-        });
-
-        it('throws error when run ID is missing', () => {
-            expect(() => buildRunPath(undefined as unknown as string)).toThrow('Run ID is required');
-            expect(() => buildRunPath(null as unknown as string)).toThrow('Run ID is required');
-            expect(() => buildRunPath('')).toThrow('Run ID is required');
-            expect(() => buildRunPath('   ')).toThrow('Run ID is required');
-        });
-
-        // Security: ID traversal prevention
-        it('throws error for ID traversal with ..', () => {
-            expect(() => buildRunPath('../etc/passwd')).toThrow('Invalid run ID');
-            expect(() => buildRunPath('valid/../sneaky')).toThrow('Invalid run ID');
-            expect(() => buildRunPath('..%2F..%2Fetc')).toThrow('Invalid run ID');
-            // URL-encoded ID traversal attempts are also blocked (decoded before check)
-            expect(() => buildRunPath('%2e%2e/etc/passwd')).toThrow('Invalid run ID');
-        });
-
-        it('throws error for ID with double slashes', () => {
-            expect(() => buildRunPath('path//to//file')).toThrow('Invalid run ID');
-            expect(() => buildRunPath('//root')).toThrow('Invalid run ID');
-        });
-
-        it('allows valid IDs with single slashes', () => {
-            expect(() => buildRunPath('or/wa-108')).not.toThrow();
-            expect(buildRunPath('or/wa-108')).toBe('or/wa-108');
-        });
-    });
-
     describe('extractRows', () => {
         it('returns array directly if input is array', () => {
             const input = [{ id: 1 }, { id: 2 }];

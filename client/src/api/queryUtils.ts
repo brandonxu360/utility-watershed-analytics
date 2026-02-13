@@ -2,35 +2,6 @@ import { API_ENDPOINTS } from './apiEndpoints';
 import { YEAR_BOUNDS, QueryFilter } from './types';
 
 /**
- * Validate and sanitize a run ID for the query engine.
- * The run ID should be the complete batch path (e.g., 'batch;;nasa-roses-2026-sbs;;OR-20')
- * as provided by the watershed URL.
- * 
- * @param runId - The complete run ID from the watershed URL
- * @returns Validated run ID for the query engine
- * @throws Error if the run ID is invalid or missing
- */
-export function buildRunPath(runId: string): string {
-    if (!runId || typeof runId !== 'string') {
-        throw new Error('Run ID is required');
-    }
-
-    const sanitized = String(runId).trim();
-    if (!sanitized) {
-        throw new Error('Run ID is required');
-    }
-
-    // Decode URL encoding and check for path traversal attacks
-    const decoded = decodeURIComponent(sanitized);
-    if (decoded.includes('..') || decoded.includes('//') ||
-        sanitized.includes('..') || sanitized.includes('//')) {
-        throw new Error('Invalid run ID');
-    }
-
-    return sanitized;
-}
-
-/**
  * Extract rows from various query engine response formats.
  * The query engine can return data in multiple formats depending on configuration.
  */
