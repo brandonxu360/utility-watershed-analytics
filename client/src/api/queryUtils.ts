@@ -1,33 +1,6 @@
 import { API_ENDPOINTS } from './apiEndpoints';
 import { YEAR_BOUNDS, QueryFilter } from './types';
 
-export const DEFAULT_RUN_ID = 'or,wa-108';
-export const BATCH_PREFIX = 'batch;;nasa-roses-2025;;';
-
-/**
- * Build the run path for the query engine.
- * Handles both raw run IDs and pre-formatted batch paths.
- * 
- * @param runIdOrPath - Optional run ID or full batch path
- * @param defaultRunId - Fallback run ID if none provided
- * @returns Formatted batch path for the query engine
- */
-export function buildRunPath(runIdOrPath?: string, defaultRunId: string = DEFAULT_RUN_ID): string {
-    if (runIdOrPath) {
-        const sanitized = String(runIdOrPath);
-        // Decode URL encoding and check for path traversal attacks
-        const decoded = decodeURIComponent(sanitized);
-        if (decoded.includes('..') || decoded.includes('//') ||
-            sanitized.includes('..') || sanitized.includes('//')) {
-            throw new Error('Invalid run path');
-        }
-        return sanitized.startsWith('batch;;')
-            ? sanitized
-            : `${BATCH_PREFIX}${sanitized}`;
-    }
-    return `${BATCH_PREFIX}${defaultRunId}`;
-}
-
 /**
  * Extract rows from various query engine response formats.
  * The query engine can return data in multiple formats depending on configuration.

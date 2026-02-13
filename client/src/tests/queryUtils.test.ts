@@ -1,54 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { buildRunPath, extractRows, toFiniteNumber, DEFAULT_RUN_ID, BATCH_PREFIX } from '../api/queryUtils';
+import { extractRows, toFiniteNumber } from '../api/queryUtils';
 
 describe('queryUtils', () => {
-    describe('buildRunPath', () => {
-        it('returns default path when no argument provided', () => {
-            const result = buildRunPath();
-            expect(result).toBe(`${BATCH_PREFIX}${DEFAULT_RUN_ID}`);
-        });
-
-        it('prepends batch prefix to simple run ID', () => {
-            const result = buildRunPath('my-run-123');
-            expect(result).toBe(`${BATCH_PREFIX}my-run-123`);
-        });
-
-        it('preserves already prefixed batch paths', () => {
-            const fullPath = 'batch;;some-batch;;my-run';
-            const result = buildRunPath(fullPath);
-            expect(result).toBe(fullPath);
-        });
-
-        it('uses custom default run ID when provided', () => {
-            const result = buildRunPath(undefined, 'custom-default');
-            expect(result).toBe(`${BATCH_PREFIX}custom-default`);
-        });
-
-        // Security: Path traversal prevention
-        it('throws error for path traversal with ..', () => {
-            expect(() => buildRunPath('../etc/passwd')).toThrow('Invalid run path');
-            expect(() => buildRunPath('valid/../sneaky')).toThrow('Invalid run path');
-            expect(() => buildRunPath('..%2F..%2Fetc')).toThrow('Invalid run path'); // Still contains .. at start
-            // URL-encoded path traversal attempts are also blocked (decoded before check)
-            expect(() => buildRunPath('%2e%2e/etc/passwd')).toThrow('Invalid run path');
-        });
-
-        it('throws error for path with double slashes', () => {
-            expect(() => buildRunPath('path//to//file')).toThrow('Invalid run path');
-            expect(() => buildRunPath('//root')).toThrow('Invalid run path');
-        });
-
-        it('allows valid paths with single slashes', () => {
-            expect(() => buildRunPath('or/wa-108')).not.toThrow();
-            expect(buildRunPath('or/wa-108')).toBe(`${BATCH_PREFIX}or/wa-108`);
-        });
-
-        it('handles empty string', () => {
-            const result = buildRunPath('');
-            expect(result).toBe(`${BATCH_PREFIX}${DEFAULT_RUN_ID}`);
-        });
-    });
-
     describe('extractRows', () => {
         it('returns array directly if input is array', () => {
             const input = [{ id: 1 }, { id: 2 }];

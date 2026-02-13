@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import { PathOptions } from 'leaflet';
+import { useMatch } from '@tanstack/react-router';
 import { useAppStore } from '../store/store';
 import { ChoroplethType } from '../store/slices/choroplethSlice';
 import { fetchRapChoropleth } from '../api/rapApi';
 import { createColormap, normalizeValue, computeRobustRange, ColorArray } from '../utils/colormap';
-import { DEFAULT_RUN_ID } from '../api/queryUtils';
 import { VEGETATION_BANDS } from '../utils/constants';
+import { watershedOverviewRoute } from '../routes/router';
 
 export const CHOROPLETH_CONFIG: Record<Exclude<ChoroplethType, 'none'>, {
     title: string;
@@ -45,6 +46,9 @@ interface UseChoroplethResult {
 }
 
 export function useChoropleth(): UseChoroplethResult {
+    const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
+    const runId = match?.params.webcloudRunId ?? null;
+
     const {
         choropleth: {
             type: choroplethType,
@@ -71,7 +75,7 @@ export function useChoropleth(): UseChoroplethResult {
     }, [config, choroplethType, choroplethBands]);
 
     useEffect(() => {
-        if (choroplethType === 'none' || !config || effectiveBands.length === 0) {
+        if (choroplethType === 'none' || !config || effectiveBands.length === 0 || !runId) {
             setChoroplethData(null, null);
             return;
         }
@@ -84,7 +88,7 @@ export function useChoropleth(): UseChoroplethResult {
 
             try {
                 const data = await fetchRapChoropleth({
-                    runIdOrPath: DEFAULT_RUN_ID,
+                    runId: runId,
                     band: effectiveBands,
                     year: choroplethYear,
                 });
@@ -123,7 +127,7 @@ export function useChoropleth(): UseChoroplethResult {
 
         loadData();
         return () => { mounted = false; };
-    }, [choroplethType, choroplethYear, effectiveBands, config, setChoroplethData, setChoroplethLoading, setChoroplethError]);
+    }, [choroplethType, choroplethYear, effectiveBands, config, runId, setChoroplethData, setChoroplethLoading, setChoroplethError]);
 
     const colormap = useMemo(() => {
         if (!config) return null;

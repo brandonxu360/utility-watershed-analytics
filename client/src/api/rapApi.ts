@@ -1,7 +1,6 @@
 import { startYear, endYear } from '../utils/constants';
 
 import {
-    buildRunPath,
     postQuery,
     addQueryFlags,
     toFiniteNumber,
@@ -18,14 +17,6 @@ import {
     RapTimeseriesPayload,
     QueryFilter
 } from './types';
-
-/** Build run path with optional topaz ID for hillslope mode */
-function buildRapRunPath(runIdOrPath?: string, mode?: 'hillslope' | 'watershed' | 'choropleth', topazId?: number): string {
-    if (mode === 'hillslope' && typeof topazId !== 'undefined' && !runIdOrPath) {
-        return buildRunPath(`wa-${topazId}`);
-    }
-    return buildRunPath(runIdOrPath);
-}
 
 /**
  * Build a RAP timeseries query payload for a single Topaz ID.
@@ -77,9 +68,7 @@ function buildRapTimeseriesPayload(topazId: number, year?: number): RapTimeserie
  * (per-year rows with shrub/tree/coverage fields) which is the shape the UI needs.
  */
 export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[]> {
-    const { mode, topazId, weppId, runIdOrPath, year, include_schema, include_sql } = opts;
-
-    const runPath = buildRapRunPath(runIdOrPath, mode, topazId);
+    const { mode, topazId, weppId, runId, year, include_schema, include_sql } = opts;
 
     let payload: Record<string, unknown>;
 
@@ -127,7 +116,7 @@ export async function fetchRap(opts: FetchRapOptions): Promise<AggregatedRapRow[
         addQueryFlags(payload, include_schema, include_sql);
     }
 
-    const rawRows = await postQuery(runPath, payload, 'RAP');
+    const rawRows = await postQuery(runId, payload, 'RAP');
 
     if (mode === 'watershed') {
         // Map server-aggregated rows straight to AggregatedRapRow
@@ -180,9 +169,7 @@ export default fetchRap;
  * it averages across all years. Returns rows with { wepp_id, value }.
  */
 export async function fetchRapChoropleth(opts: FetchRapChoroplethOptions): Promise<RapChoroplethRow[]> {
-    const { runIdOrPath, band, year, include_schema, include_sql } = opts;
-
-    const runPath = buildRunPath(runIdOrPath);
+    const { runId, band, year, include_schema, include_sql } = opts;
 
     // Build parameterized filters array using shared helpers
     const filters: QueryFilter[] = [createBandFilter(band)];
@@ -212,7 +199,7 @@ export async function fetchRapChoropleth(opts: FetchRapChoroplethOptions): Promi
     };
     addQueryFlags(payload, include_schema, include_sql);
 
-    const rawRows = await postQuery(runPath, payload, 'RAP Choropleth');
+    const rawRows = await postQuery(runId, payload, 'RAP Choropleth');
 
     return rawRows
         .map((r) => {

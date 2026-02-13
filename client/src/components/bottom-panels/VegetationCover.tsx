@@ -87,9 +87,7 @@ export const VegetationCover: React.FC = () => {
     const { config } = useChoropleth();
 
     const match = useMatch({ from: watershedOverviewRoute.id, shouldThrow: false });
-    const watershedID = match?.params.webcloudRunId ?? null;
-    // Extract run ID from the watershed URL slug (last part after ;;)
-    const runId = watershedID ? watershedID.split(';;').pop() : null;
+    const runId = match ? match.params.webcloudRunId : null;
 
     // Map UI option to band type
     const vegetationOptionToBand: Record<VegetationOption, VegetationBandType> = {
@@ -152,17 +150,18 @@ export const VegetationCover: React.FC = () => {
 
             try {
                 const rows = selectedHillslopeId
-                    ? await fetchRap({ mode: 'hillslope', topazId: selectedHillslopeId, runIdOrPath: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
-                    : watershedID
-                        ? await fetchRap({ mode: 'watershed', weppId: 108, runIdOrPath: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
+                    ? await fetchRap({ mode: 'hillslope', topazId: selectedHillslopeId, runId: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
+                    : runId
+                        ? await fetchRap({ mode: 'watershed', weppId: 108, runId: runId, year: selectedYear === 'All' ? undefined : Number(selectedYear) })
                         : null;
 
                 if (!mounted) return;
                 setRapTimeSeries(Array.isArray(rows) ? rows : []);
                 setRapStatus({ state: 'ready' });
-            } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+            } catch (err: unknown) {
                 if (!mounted) return;
-                setRapStatus({ state: 'error', message: err?.message ?? String(err) });
+                const message = err instanceof Error ? err.message : String(err);
+                setRapStatus({ state: 'error', message });
                 setRapTimeSeries(null);
             }
         }
@@ -171,7 +170,7 @@ export const VegetationCover: React.FC = () => {
         return () => {
             mounted = false;
         };
-    }, [selectedHillslopeId, selectedYear, watershedID, runId]);
+    }, [selectedHillslopeId, selectedYear, runId]);
 
     const singleHillslopeChartData = useMemo(() => {
         if (!rapTimeSeries || rapTimeSeries.length === 0) return null;
