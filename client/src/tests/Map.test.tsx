@@ -75,9 +75,8 @@ vi.mock("react-leaflet", () => ({
         data: unknown;
         style: unknown;
         onEachFeature?: unknown;
-        pane?: string;
     }) => {
-        if (props.pane === "markerPane") {
+        if (!props.onEachFeature) {
             lastChannelGeoJsonProps = {
                 data: props.data,
                 style: props.style as () => unknown,
