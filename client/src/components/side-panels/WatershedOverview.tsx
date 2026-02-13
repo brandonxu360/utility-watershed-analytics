@@ -48,6 +48,7 @@ const useStyles = tss.create(({ theme }) => ({
         padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
         justifyContent: 'flex-start',
         fontSize: theme.typography.body2.fontSize,
+        textTransform: 'none',
         '&:hover': {
             borderColor: theme.palette.accent.main,
         },
@@ -175,11 +176,18 @@ export default function WatershedOverview() {
                 <div className={classes.accordionGroup} key={watershedID}>
                     <Button
                         className={classes.actionButton}
-                        aria-label='View Calibrated WEPP Results'
-                        title='View Calibrated WEPP Results'
+                        aria-label='View Uncalibrated WEPP Results'
+                        title='View Uncalibrated WEPP Results'
                         variant="text"
+                        onClick={() =>
+                            window.open(
+                                `https://wepp.cloud/weppcloud/runs/${watershedID}/disturbed9002_wbt/`,
+                                '_blank',
+                                'noopener,noreferrer'
+                            )
+                        }
                     >
-                        View Calibrated WEPP Results
+                        View Uncalibrated WEPP Results
                     </Button>
 
                     <Button
