@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import { ChangeEvent } from 'react';
-import { FaQuestionCircle } from 'react-icons/fa';
 import { VegetationCover } from '../../../bottom-panels/VegetationCover';
 import { useChoropleth } from '../../../../hooks/useChoropleth';
 import { useAppStore } from '../../../../store/store';
@@ -60,7 +59,6 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
         landuse,
         choropleth: { type: choroplethType },
         setSubcatchment,
-        setLanduseLegendVisible,
         setChoroplethType,
         openPanel,
     } = useAppStore();
@@ -96,13 +94,6 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
                 <>
                     <div className={classes.layer}>
                         <Button className={classes.layerTitle}>Land Use (2025)</Button>
-                        {landuse && <div
-                            className={classes.helpIcon}
-                            title="Land Use Legend"
-                            onClick={() => { setLanduseLegendVisible(true); }}
-                        >
-                            <FaQuestionCircle />
-                        </div>}
                         <Checkbox
                             checked={landuse}
                             onChange={handleChange}

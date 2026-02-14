@@ -96,6 +96,7 @@ export default function DataLayersControl() {
     setSubcatchment,
     setChannels,
     setLanduse,
+    setLanduseLegendVisible,
     clearSelectedHillslope,
     closePanel,
     resetOverlays,
@@ -136,6 +137,7 @@ export default function DataLayersControl() {
     if (id === 'landuse') {
       setSubcatchment(checked);
       setLanduse(checked);
+      setLanduseLegendVisible(checked);
       if (!checked) {
         resetOverlays();
       }

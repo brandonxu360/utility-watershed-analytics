@@ -66,7 +66,7 @@ describe("DataLayersControl", () => {
 
         const tabpanel = screen.getByRole("tabpanel");
         expect(tabpanel).toBeInTheDocument();
-        expect(tabpanel).toHaveTextContent("Hill Slopes");
+        expect(tabpanel).toHaveTextContent("WEPP Hillslopes");
     });
 
     it("switches active tab when clicking a nav tab", () => {
