@@ -1,4 +1,4 @@
-import { render, screen, } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, it, expect, beforeEach } from "vitest";
 import { useAppStore } from "../store/store";
 import LandUseLegend from "../components/map/controls/LandUseLegend";
