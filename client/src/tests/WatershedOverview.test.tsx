@@ -184,7 +184,7 @@ describe("WatershedOverview", () => {
                     screen.getByRole("button", { name: /View Calibrated RHESSys Results/i })
                 ).toBeInTheDocument();
                 expect(
-                    screen.getByRole("button", { name: /Run WEPP cloud watershed analysis model/i })
+                    screen.getByRole("button", { name: /View Detailed WEPP Model Results/i })
                 ).toBeInTheDocument();
             });
         });
