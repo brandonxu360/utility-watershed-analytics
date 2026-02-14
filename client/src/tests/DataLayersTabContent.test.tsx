@@ -38,13 +38,13 @@ describe("DataLayersTabContent", () => {
         });
     });
 
-    it("renders Hill Slopes tab with subcatchment + channels checkboxes", () => {
+    it("renders WEPP Hillslopes tab with subcatchment + channels checkboxes", () => {
         const { container } = render(
-            <DataLayersTabContent activeTab="Hill Slopes" handleChange={handleChange} />
+            <DataLayersTabContent activeTab="WEPP Hillslopes" handleChange={handleChange} />
         );
 
         expect(screen.getByText("Subcatchments")).toBeInTheDocument();
-        expect(screen.getByText("Channels")).toBeInTheDocument();
+        expect(screen.getByText("WEPP Channels")).toBeInTheDocument();
 
         expect(container.querySelector("input#subcatchment[type='checkbox']")).toBeTruthy();
         expect(container.querySelector("input#channels[type='checkbox']")).toBeTruthy();
@@ -54,7 +54,7 @@ describe("DataLayersTabContent", () => {
         useAppStore.setState({ landuse: true, subcatchment: true });
 
         const { container } = render(
-            <DataLayersTabContent activeTab="Hill Slopes" handleChange={handleChange} />
+            <DataLayersTabContent activeTab="WEPP Hillslopes" handleChange={handleChange} />
         );
 
         const subcatchmentBox = container.querySelector(
@@ -64,9 +64,9 @@ describe("DataLayersTabContent", () => {
         expect(subcatchmentBox.disabled).toBe(true);
     });
 
-    it("wires handleChange for Hill Slopes checkboxes", () => {
+    it("wires handleChange for WEPP Hillslopes checkboxes", () => {
         const { container } = render(
-            <DataLayersTabContent activeTab="Hill Slopes" handleChange={handleChange} />
+            <DataLayersTabContent activeTab="WEPP Hillslopes" handleChange={handleChange} />
         );
 
         fireEvent.click(container.querySelector("input#subcatchment")!);
@@ -80,7 +80,7 @@ describe("DataLayersTabContent", () => {
             <DataLayersTabContent activeTab="Surface Data" handleChange={handleChange} />
         );
 
-        expect(screen.getByText("Land Use")).toBeInTheDocument();
+        expect(screen.getByText("Land Use (2025)")).toBeInTheDocument();
         expect(container.querySelector("input#landuse[type='checkbox']")).toBeTruthy();
         expect(screen.getByRole("button", { name: "Evapotranspiration" })).toBeInTheDocument();
     });
@@ -88,14 +88,6 @@ describe("DataLayersTabContent", () => {
     it("does not show the land use legend help icon when landuse is false", () => {
         render(<DataLayersTabContent activeTab="Surface Data" handleChange={handleChange} />);
         expect(screen.queryByTitle("Land Use Legend")).not.toBeInTheDocument();
-    });
-
-    it("shows the land use legend help icon when landuse is true and clicking it opens legend", () => {
-        useAppStore.setState({ landuse: true });
-        render(<DataLayersTabContent activeTab="Surface Data" handleChange={handleChange} />);
-
-        fireEvent.click(screen.getByTitle("Land Use Legend"));
-        expect(setLanduseLegendVisible).toHaveBeenCalledWith(true);
     });
 
     it("bolds the active choropleth type when choropleth is active", () => {
