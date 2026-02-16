@@ -27,7 +27,15 @@
 	// "runServices": [],
 
 	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
-	"shutdownAction": "none"
+	"shutdownAction": "none",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode-remote.remote-containers",
+				"esbenp.prettier-vscode"
+			]
+		}
+	}
 
 	// Uncomment the next line to run commands after the container is created.
 	// "postCreateCommand": "cat /etc/os-release",
