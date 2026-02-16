@@ -13,4 +13,4 @@ This section provides helpful commands for working within the frontend developme
 ### Troubleshooting and Notes
 
 - **Development Server**: You do not need to run `npm run dev` manually if you are using the development container; it starts the dev server for you.
-- **HMR Issues**: If you are not seeing Hot Module Replacement (HMR) updates, ensure the repository is located within a WSL directory. HMR is not supported when the project is stored in a Windows directory. 
+- **HMR Issues**: If you are not seeing Hot Module Replacement (HMR) updates, ensure the repository is located within a WSL directory. HMR is not supported when the project is stored in a Windows directory.

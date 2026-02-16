@@ -7,11 +7,20 @@ import { zoomToFeature } from "../../utils/map/MapUtil";
 import { selectedStyle, highlightedStyle } from "./constants";
 
 // Renders subcatchment hillslope polygons and binds hover-only tooltips
-export default function SubcatchmentLayer({ data, style, choroplethActive, choroplethKey }: {
-  data: GeoJSON.FeatureCollection
-  choroplethActive: boolean
-  choroplethKey: string
-  style: (feature: GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties> | undefined) => PathOptions
+export default function SubcatchmentLayer({
+  data,
+  style,
+  choroplethActive,
+  choroplethKey,
+}: {
+  data: GeoJSON.FeatureCollection;
+  choroplethActive: boolean;
+  choroplethKey: string;
+  style: (
+    feature:
+      | GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>
+      | undefined,
+  ) => PathOptions;
 }) {
   const map = useMap();
 
@@ -29,18 +38,27 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
   // Track selected feature id and layer using refs so event handlers
   // can read/update the current selection at event time without forcing rerenders.
   const selectedIdRef = useRef<string | null>(null);
+
   const selectedLayerRef = useRef<{
-    layer: LeafletEvent['target'];
+    layer: LeafletEvent["target"];
     feature: GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties> | null;
   } | null>(null);
 
   // Track all layers for updating styles
-  const layersRef = useRef<Map<string, { layer: Layer; feature: GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties> }>>(new Map());
+  const layersRef = useRef<
+    Map<
+      string,
+      {
+        layer: Layer;
+        feature: GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>;
+      }
+    >
+  >(new Map());
 
   const setSelection = (
     id: string | null,
-    layer?: LeafletEvent['target'],
-    feature?: GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties> | null
+    layer?: LeafletEvent["target"],
+    feature?: GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties> | null,
   ) => {
     selectedIdRef.current = id;
     if (id && layer) {
@@ -55,7 +73,7 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
     layersRef.current.forEach(({ layer, feature }) => {
       const fid = feature?.id?.toString?.() ?? null;
       if (selectedIdRef.current !== fid) {
-        (layer as LeafletEvent['target']).setStyle(styleRef.current(feature));
+        (layer as LeafletEvent["target"]).setStyle(styleRef.current(feature));
       }
     });
   }, [choroplethKey]);
@@ -75,23 +93,23 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
 
         layer.bindTooltip(
           `<span class="tooltip-bold"><strong>Hillslope ID</strong>
-          <br/>TopazID: ${props.topazid ?? 'N/A'}, WeppID: ${props.weppid ?? 'N/A'}
+          <br/>TopazID: ${props.topazid ?? "N/A"}, WeppID: ${props.weppid ?? "N/A"}
           <br/><strong>Width:</strong>
-          ${props.width?.toFixed(2) ?? 'N/A'} m
+          ${props.width?.toFixed(2) ?? "N/A"} m
           <br/><strong>Length:</strong>
-          ${props.length?.toFixed(2) ?? 'N/A'} m
+          ${props.length?.toFixed(2) ?? "N/A"} m
           <br/><strong>Area:</strong>
-          ${props.hillslope_area ?? 'N/A'} m²
+          ${props.hillslope_area ?? "N/A"} m²
           <br/><strong>Slope:</strong>
-          ${props.slope_scalar?.toFixed(2) ?? 'N/A'}
+          ${props.slope_scalar?.toFixed(2) ?? "N/A"}
           <br/><strong>Aspect:</strong>
-          ${props.aspect?.toFixed(2) ?? 'N/A'}
+          ${props.aspect?.toFixed(2) ?? "N/A"}
           <br/><strong>Soil:</strong>
-          ${props.simple_texture ?? 'N/A'}</span>`,
+          ${props.simple_texture ?? "N/A"}</span>`,
           {
-            className: 'tooltip',
+            className: "tooltip",
             offset: [12, -50],
-          }
+          },
         );
         layer.on({
           click: (e) => {
@@ -104,18 +122,23 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
             } else {
               if (selectedLayerRef.current) {
                 selectedLayerRef.current.layer.setStyle(
-                  styleRef.current(selectedLayerRef.current.feature ?? undefined)
+                  styleRef.current(
+                    selectedLayerRef.current.feature ?? undefined,
+                  ),
                 );
               }
 
               // Set new selection
               e.target.setStyle(selectedStyle);
               setSelection(clickFid, e.target, feature);
-              setSelectedHillslope(feature.properties.topazid, feature.properties);
+              setSelectedHillslope(
+                feature.properties.topazid,
+                feature.properties,
+              );
             }
 
             zoomToFeature(map, layer);
-          }
+          },
         });
         layer.on({
           mouseover: (e) => {
@@ -128,7 +151,7 @@ export default function SubcatchmentLayer({ data, style, choroplethActive, choro
               e.target.setStyle({
                 ...currentStyle,
                 weight: 3,
-                color: '#ffffff',
+                color: "#ffffff",
               });
             } else {
               e.target.setStyle(highlightedStyle);
