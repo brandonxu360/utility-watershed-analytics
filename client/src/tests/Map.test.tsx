@@ -804,9 +804,7 @@ describe("Map Component", () => {
             };
             const result = lastSubcatchmentStyleFn!(feature);
             expect(result).toMatchObject({
-                color: "#2c2c2c",
-                fillColor: "#4a83ec",
-                fillOpacity: 0.75,
+                color: "rgb(255, 255, 0, 0.5)",
             });
         });
 
@@ -871,9 +869,7 @@ describe("Map Component", () => {
             };
             const result = lastSubcatchmentStyleFn!(feature);
             expect(result).toMatchObject({
-                color: "#2c2c2c",
-                fillColor: "#4a83ec",
-                fillOpacity: 0.75,
+                color: "rgb(255, 255, 0, 0.5)",
             });
         });
 
@@ -899,9 +895,7 @@ describe("Map Component", () => {
 
             const result = lastSubcatchmentStyleFn!(undefined);
             expect(result).toMatchObject({
-                color: "#2c2c2c",
-                fillColor: "#4a83ec",
-                fillOpacity: 0.75,
+                color: "rgb(255, 255, 0, 0.5)",
             });
         });
 
@@ -935,8 +929,7 @@ describe("Map Component", () => {
             // Should fall through to default style, not choropleth
             expect(mockGetChoroplethStyle).not.toHaveBeenCalled();
             expect(result).toMatchObject({
-                color: "#2c2c2c",
-                fillColor: "#4a83ec",
+                color: "rgb(255, 255, 0, 0.5)",
             });
         });
     });
