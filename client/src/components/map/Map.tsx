@@ -196,10 +196,9 @@ export default function Map(): JSX.Element {
 
       // Default style
       return {
-        color: '#2c2c2c',
-        weight: 0.75,
-        fillColor: '#4a83ec',
-        fillOpacity: 0.75,
+        color: 'rgb(255, 255, 0, 0.5)',
+        weight: 1,
+        fillOpacity: 0,
       };
     },
     [landuse, choroplethActive, getChoroplethStyle]
