@@ -60,10 +60,7 @@ export const ChoroplethScale: React.FC<ChoroplethScaleProps> = ({
   }, [colormap]);
 
   return (
-    <div
-      style={style}
-      data-testid="choropleth-legend"
-    >
+    <div style={style} data-testid="choropleth-legend">
       <div
         className={classes.gradient}
         style={gradientStyle}

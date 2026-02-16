@@ -311,13 +311,13 @@ export default function Map(): JSX.Element {
           subLoading ||
           channelLoading ||
           choroplethLoading) && (
-            <div
-              className={classes.mapLoadingOverlay}
-              data-testid="map-loading-overlay"
-            >
-              <CircularProgress size={50} />
-            </div>
-          )}
+          <div
+            className={classes.mapLoadingOverlay}
+            data-testid="map-loading-overlay"
+          >
+            <CircularProgress size={50} />
+          </div>
+        )}
 
         <TileLayer
           key={selectedLayerId}
