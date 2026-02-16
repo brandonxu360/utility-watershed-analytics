@@ -1,0 +1,6 @@
+# Ignore artifacts:
+build
+dist
+coverage
+package-lock.json
+src/routeTree.gen.ts
