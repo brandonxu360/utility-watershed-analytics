@@ -1,6 +1,5 @@
 import { FC } from "react";
 import { ChangeEvent } from "react";
-import { FaQuestionCircle } from "react-icons/fa";
 import { VegetationCover } from "../../../bottom-panels/VegetationCover";
 import { useChoropleth } from "../../../../hooks/useChoropleth";
 import { useAppStore } from "../../../../store/store";
@@ -60,7 +59,6 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
     landuse,
     choropleth: { type: choroplethType },
     setSubcatchment,
-    setLanduseLegendVisible,
     setChoroplethType,
     openPanel,
   } = useAppStore();
@@ -69,25 +67,25 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
 
   return (
     <div className={classes.layers}>
-      {activeTab === "Hill Slopes" && (
+      {activeTab === "WEPP Hillslopes" && (
         <>
           <div className={classes.layer}>
             <Button className={classes.layerTitle}>Subcatchments</Button>
             <Checkbox
-              inputProps={{ id: "subcatchment" }}
               checked={subcatchment}
               onChange={handleChange}
               disabled={landuse && subcatchment}
               className={classes.layerCheckbox}
+              slotProps={{ input: { id: "subcatchment" } }}
             />
           </div>
           <div className={classes.layer}>
-            <Button className={classes.layerTitle}>Channels</Button>
+            <Button className={classes.layerTitle}>WEPP Channels</Button>
             <Checkbox
-              inputProps={{ id: "channels" }}
               checked={channels}
               onChange={handleChange}
               className={classes.layerCheckbox}
+              slotProps={{ input: { id: "channels" } }}
             />
           </div>
         </>
@@ -95,23 +93,12 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
       {activeTab === "Surface Data" && (
         <>
           <div className={classes.layer}>
-            <Button className={classes.layerTitle}>Land Use</Button>
-            {landuse && (
-              <div
-                className={classes.helpIcon}
-                title="Land Use Legend"
-                onClick={() => {
-                  setLanduseLegendVisible(true);
-                }}
-              >
-                <FaQuestionCircle />
-              </div>
-            )}
+            <Button className={classes.layerTitle}>Land Use (2025)</Button>
             <Checkbox
-              inputProps={{ id: "landuse" }}
               checked={landuse}
               onChange={handleChange}
               className={classes.layerCheckbox}
+              slotProps={{ input: { id: "landuse" } }}
             />
           </div>
           <div className={classes.layer}>
@@ -151,17 +138,17 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button className={classes.layerTitle}>Fire Severity</Button>
             <Checkbox
-              inputProps={{ id: "fireSeverity" }}
               onChange={handleChange}
               className={classes.layerCheckbox}
+              slotProps={{ input: { id: "fireSeverity" } }}
             />
           </div>
           <div className={classes.layer}>
             <Button className={classes.layerTitle}>Soil Burn Severity</Button>
             <Checkbox
-              inputProps={{ id: "soilBurnSeverity" }}
               onChange={handleChange}
               className={classes.layerCheckbox}
+              slotProps={{ input: { id: "soilBurnSeverity" } }}
             />
           </div>
           <div className={classes.layer}>

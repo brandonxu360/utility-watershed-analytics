@@ -39,16 +39,16 @@ describe("DataLayersTabContent", () => {
     });
   });
 
-  it("renders Hill Slopes tab with subcatchment + channels checkboxes", () => {
+  it("renders WEPP Hillslopes tab with subcatchment + channels checkboxes", () => {
     const { container } = render(
       <DataLayersTabContent
-        activeTab="Hill Slopes"
+        activeTab="WEPP Hillslopes"
         handleChange={handleChange}
       />,
     );
 
     expect(screen.getByText("Subcatchments")).toBeInTheDocument();
-    expect(screen.getByText("Channels")).toBeInTheDocument();
+    expect(screen.getByText("WEPP Channels")).toBeInTheDocument();
 
     expect(
       container.querySelector("input#subcatchment[type='checkbox']"),
@@ -63,7 +63,7 @@ describe("DataLayersTabContent", () => {
 
     const { container } = render(
       <DataLayersTabContent
-        activeTab="Hill Slopes"
+        activeTab="WEPP Hillslopes"
         handleChange={handleChange}
       />,
     );
@@ -75,10 +75,10 @@ describe("DataLayersTabContent", () => {
     expect(subcatchmentBox.disabled).toBe(true);
   });
 
-  it("wires handleChange for Hill Slopes checkboxes", () => {
+  it("wires handleChange for WEPP Hillslopes checkboxes", () => {
     const { container } = render(
       <DataLayersTabContent
-        activeTab="Hill Slopes"
+        activeTab="WEPP Hillslopes"
         handleChange={handleChange}
       />,
     );
@@ -97,7 +97,7 @@ describe("DataLayersTabContent", () => {
       />,
     );
 
-    expect(screen.getByText("Land Use")).toBeInTheDocument();
+    expect(screen.getByText("Land Use (2025)")).toBeInTheDocument();
     expect(
       container.querySelector("input#landuse[type='checkbox']"),
     ).toBeTruthy();
@@ -114,19 +114,6 @@ describe("DataLayersTabContent", () => {
       />,
     );
     expect(screen.queryByTitle("Land Use Legend")).not.toBeInTheDocument();
-  });
-
-  it("shows the land use legend help icon when landuse is true and clicking it opens legend", () => {
-    useAppStore.setState({ landuse: true });
-    render(
-      <DataLayersTabContent
-        activeTab="Surface Data"
-        handleChange={handleChange}
-      />,
-    );
-
-    fireEvent.click(screen.getByTitle("Land Use Legend"));
-    expect(setLanduseLegendVisible).toHaveBeenCalledWith(true);
   });
 
   it("bolds the active choropleth type when choropleth is active", () => {

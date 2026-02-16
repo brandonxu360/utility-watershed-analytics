@@ -96,16 +96,17 @@ export default function DataLayersControl() {
     setSubcatchment,
     setChannels,
     setLanduse,
+    setLanduseLegendVisible,
     clearSelectedHillslope,
     closePanel,
     resetOverlays,
   } = useAppStore();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("Hill Slopes");
+  const [activeTab, setActiveTab] = useState("WEPP Hillslopes");
 
   const navTabs = [
-    { key: "Hill Slopes", icon: <FaWater title="Hill Slopes" /> },
+    { key: "WEPP Hillslopes", icon: <FaWater title="WEPP Hillslopes" /> },
     { key: "Surface Data", icon: <FaGlobe title="Coverage" /> },
     { key: "Coverage", icon: <FaTree title="Vegetation" /> },
     { key: "Soil Burn", icon: <FaFireAlt title="Soil Burn" /> },
@@ -136,6 +137,7 @@ export default function DataLayersControl() {
     if (id === "landuse") {
       setSubcatchment(checked);
       setLanduse(checked);
+      setLanduseLegendVisible(checked);
       if (!checked) {
         resetOverlays();
       }

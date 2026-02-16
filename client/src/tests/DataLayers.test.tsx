@@ -50,6 +50,7 @@ describe("DataLayersControl", () => {
   const setSubcatchment = vi.fn();
   const setChannels = vi.fn();
   const setLanduse = vi.fn();
+  const setLanduseLegendVisible = vi.fn();
   const clearSelectedHillslope = vi.fn();
   const closePanel = vi.fn();
   const resetOverlays = vi.fn();
@@ -63,6 +64,7 @@ describe("DataLayersControl", () => {
       setSubcatchment,
       setChannels,
       setLanduse,
+      setLanduseLegendVisible,
       clearSelectedHillslope,
       closePanel,
       resetOverlays,
@@ -81,7 +83,7 @@ describe("DataLayersControl", () => {
 
     const tabpanel = screen.getByRole("tabpanel");
     expect(tabpanel).toBeInTheDocument();
-    expect(tabpanel).toHaveTextContent("Hill Slopes");
+    expect(tabpanel).toHaveTextContent("WEPP Hillslopes");
   });
 
   it("switches active tab when clicking a nav tab", () => {
@@ -145,12 +147,14 @@ describe("DataLayersControl", () => {
     fireEvent.click(landuseBox);
     expect(setSubcatchment).toHaveBeenCalledWith(true);
     expect(setLanduse).toHaveBeenCalledWith(true);
+    expect(setLanduseLegendVisible).toHaveBeenCalledWith(true);
     expect(resetOverlays).not.toHaveBeenCalled();
 
     // Disable
     fireEvent.click(landuseBox);
     expect(setSubcatchment).toHaveBeenCalledWith(false);
     expect(setLanduse).toHaveBeenCalledWith(false);
+    expect(setLanduseLegendVisible).toHaveBeenCalledWith(false);
     expect(resetOverlays).toHaveBeenCalledTimes(1);
   });
 });

@@ -54,8 +54,8 @@ const useStyles = tss.create(({ theme }) => ({
 
 // Center coordinates [lat, lng]
 const CENTER: [number, number] = [
-  Number(((43.88 + 49.19) / 2).toFixed(2)),
-  Number(((-124.52 + -116.93) / 2).toFixed(2)),
+  Number(((43.75 + 49.19) / 2).toFixed(2)),
+  Number(((-124.52 + -113.93) / 2).toFixed(2)),
 ];
 
 // Bounds

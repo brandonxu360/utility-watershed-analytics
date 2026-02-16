@@ -1,6 +1,5 @@
 import { tss } from "../../../utils/tss";
-import { Paper, Typography, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Paper, Typography } from "@mui/material";
 import { useAppStore } from "../../../store/store";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -69,8 +68,7 @@ const useStyles = tss.create(({ theme }) => ({
 export default function LandUseLegend() {
   const { classes } = useStyles();
 
-  const { landuseLegendVisible, landuseLegendMap, setLanduseLegendVisible } =
-    useAppStore();
+  const { landuseLegendVisible, landuseLegendMap } = useAppStore();
 
   if (!landuseLegendVisible) return null;
 
@@ -82,15 +80,6 @@ export default function LandUseLegend() {
     >
       <Paper className={classes.landuseLegend}>
         <div className={classes.landuseLegendHeader}>
-          <IconButton
-            onClick={() => setLanduseLegendVisible(false)}
-            className={classes.landuseClose}
-            aria-label="Close land use legend panel"
-            title="Close land use legend panel"
-            size="small"
-          >
-            <CloseIcon />
-          </IconButton>
           <Typography variant="h6" className={classes.heading}>
             Land Use Legend
           </Typography>
