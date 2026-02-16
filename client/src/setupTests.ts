@@ -59,8 +59,8 @@ vi.mock("@testing-library/react", async (importOriginal) => {
  * Minimal ResizeObserver polyfill for the test environment.
  * Required for components that use ResizeObserver (e.g., Recharts).
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).ResizeObserver = class {
-  // eslint-disable-line @typescript-eslint/no-explicit-any
   observe() {
     // no-op
   }
