@@ -1,9 +1,9 @@
-import { useMap } from 'react-leaflet';
-import { useEffect } from 'react';
-import { zoomToFeature } from './MapUtil';
-import { WatershedProperties } from '../../types/WatershedProperties';
-import { useAppStore } from '../../store/store';
-import L from 'leaflet';
+import { useMap } from "react-leaflet";
+import { useEffect } from "react";
+import { zoomToFeature } from "./MapUtil";
+import { WatershedProperties } from "../../types/WatershedProperties";
+import { useAppStore } from "../../store/store";
+import L from "leaflet";
 
 interface MapEffectProps {
   watershedId: string | null;
@@ -13,7 +13,7 @@ interface MapEffectProps {
 /**
  * Helper function that zooms onto the specified watershed if the url matches
  * the /watershed/$watershedId format.
- * 
+ *
  * @param webcloudRunId - The parsed watershed id taken from the url
  * @param watersheds - Our fetched watershed data from @see {@link fetchWatersheds}
  * @returns {null} - Doesn't return anything
@@ -25,7 +25,8 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
   useEffect(() => {
     if (watershedId && watersheds && Array.isArray(watersheds.features)) {
       const matchingFeature = watersheds.features.find(
-        (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>) => feature.id && feature.id.toString() === watershedId
+        (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>) =>
+          feature.id && feature.id.toString() === watershedId,
       );
 
       if (matchingFeature) {

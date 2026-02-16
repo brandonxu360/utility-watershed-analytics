@@ -1,29 +1,29 @@
-import { useState } from 'react';
-import { useMap } from 'react-leaflet';
-import { toast } from 'react-toastify';
-import { tss } from '../../../utils/tss';
-import { Button, Paper, TextField, InputAdornment } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
+import { useState } from "react";
+import { useMap } from "react-leaflet";
+import { toast } from "react-toastify";
+import { tss } from "../../../utils/tss";
+import { Button, Paper, TextField, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
 
 const useStyles = tss.create(({ theme }) => ({
   searchButton: {
     height: 36,
     minWidth: 36,
     backgroundColor: theme.palette.primary.dark,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 0,
-    cursor: 'pointer',
-    appearance: 'none',
-    borderStyle: 'outset',
+    cursor: "pointer",
+    appearance: "none",
+    borderStyle: "outset",
     borderWidth: 2,
     borderRadius: 0,
     borderColor: theme.palette.surface.border,
-    boxSizing: 'border-box',
-    '&:active': {
-      borderStyle: 'inset',
+    boxSizing: "border-box",
+    "&:active": {
+      borderStyle: "inset",
     },
   },
   searchIcon: {
@@ -31,31 +31,31 @@ const useStyles = tss.create(({ theme }) => ({
     color: theme.palette.primary.contrastText,
   },
   searchModal: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     right: 60,
     background: theme.palette.surface.overlay,
     color: theme.palette.primary.contrastText,
     padding: theme.spacing(1),
     borderRadius: theme.spacing(1),
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
     zIndex: 1000,
   },
   searchContent: {
-    display: 'flex',
-    alignItems: 'center',
+    display: "flex",
+    alignItems: "center",
     gap: theme.spacing(1.5),
   },
   searchInput: {
     minWidth: 260,
-    '& .MuiInputBase-root': {
+    "& .MuiInputBase-root": {
       height: 40,
       backgroundColor: theme.palette.primary.contrastText,
       color: theme.palette.primary.dark,
       borderRadius: theme.spacing(0.5),
       paddingLeft: theme.spacing(1),
     },
-    '& .MuiOutlinedInput-notchedOutline': {
+    "& .MuiOutlinedInput-notchedOutline": {
       border: `1px solid ${theme.palette.primary.contrastText}`,
     },
   },
@@ -65,13 +65,13 @@ const useStyles = tss.create(({ theme }) => ({
   },
   goButton: {
     fontSize: theme.typography.body2.fontSize,
-    transitionDuration: '0.4s',
+    transitionDuration: "0.4s",
     backgroundColor: theme.palette.primary.contrastText,
     color: theme.palette.primary.dark,
-    minWidth: 'auto',
+    minWidth: "auto",
     padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
     height: 40,
-    '&:hover': {
+    "&:hover": {
       backgroundColor: theme.palette.primary.light,
     },
   },
@@ -79,7 +79,7 @@ const useStyles = tss.create(({ theme }) => ({
 
 /**
  * SearchControl - A custom map control component that provides location search functionality
- * 
+ *
  * @component
  */
 export default function SearchControl() {
@@ -87,16 +87,20 @@ export default function SearchControl() {
   const { classes } = useStyles();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
 
   const handleSearch = () => {
-    const [lat, lng] = input.split(',').map(coord => parseFloat(coord.trim()));
+    const [lat, lng] = input
+      .split(",")
+      .map((coord) => parseFloat(coord.trim()));
     if (!isNaN(lat) && !isNaN(lng)) {
       map.setView([lat, lng], 13);
-      setInput('');
+      setInput("");
       setIsSearchOpen(false);
     } else {
-      toast.error('Invalid coordinates. Please enter in "latitude, longitude" format.');
+      toast.error(
+        'Invalid coordinates. Please enter in "latitude, longitude" format.',
+      );
     }
   };
 
@@ -134,7 +138,7 @@ export default function SearchControl() {
                     ),
                   },
                   htmlInput: {
-                    'aria-label': 'Search bar',
+                    "aria-label": "Search bar",
                   },
                 }}
               />

@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import { useAppStore } from "../store/store";
@@ -19,7 +25,7 @@ const { mockFetchRap } = vi.hoisted(() => ({
       { year: 1986, shrub: 10, tree: 20, coverage: 30 },
       { year: 1987, shrub: 15, tree: 25, coverage: 40 },
       { year: 2020, shrub: 30, tree: 40, coverage: 70 },
-    ])
+    ]),
   ),
 }));
 
@@ -37,7 +43,15 @@ vi.mock("../hooks/useChoropleth", () => ({
 }));
 
 vi.mock("../components/ChoroplethScale", () => ({
-  ChoroplethScale: ({ colormap, range, unit }: { colormap: string; range: { min: number; max: number }; unit: string }) => (
+  ChoroplethScale: ({
+    colormap,
+    range,
+    unit,
+  }: {
+    colormap: string;
+    range: { min: number; max: number };
+    unit: string;
+  }) => (
     <div data-testid="choropleth-scale">
       {colormap} {range.min}-{range.max} {unit}
     </div>
@@ -45,7 +59,15 @@ vi.mock("../components/ChoroplethScale", () => ({
 }));
 
 vi.mock("../components/CoverageLineChart", () => ({
-  CoverageLineChart: ({ data, title, lineKeys }: { data: unknown[]; title: string; lineKeys: unknown[] }) => (
+  CoverageLineChart: ({
+    data,
+    title,
+    lineKeys,
+  }: {
+    data: unknown[];
+    title: string;
+    lineKeys: unknown[];
+  }) => (
     <div data-testid="coverage-chart">
       {title}
       <span data-testid="chart-data-length">{data.length}</span>
@@ -55,8 +77,16 @@ vi.mock("../components/CoverageLineChart", () => ({
 }));
 
 vi.mock("react-icons/fa6", () => ({
-  FaXmark: ({ className, onClick }: { className?: string; onClick?: () => void }) => (
-    <span data-testid="close-icon" className={className} onClick={onClick}>X</span>
+  FaXmark: ({
+    className,
+    onClick,
+  }: {
+    className?: string;
+    onClick?: () => void;
+  }) => (
+    <span data-testid="close-icon" className={className} onClick={onClick}>
+      X
+    </span>
   ),
   FaChevronDown: () => <span data-testid="chevron-down">▼</span>,
 }));
@@ -75,7 +105,7 @@ beforeEach(() => {
       { year: 1986, shrub: 10, tree: 20, coverage: 30 },
       { year: 1987, shrub: 15, tree: 25, coverage: 40 },
       { year: 2020, shrub: 30, tree: 40, coverage: 70 },
-    ])
+    ]),
   );
   mockUseMatch.mockReturnValue({ params: { webcloudRunId: "or,wa-108" } });
   mockUseChoropleth.mockReturnValue({ config: null });
@@ -212,7 +242,7 @@ describe("VegetationCover", () => {
         () =>
           new Promise((resolve) => {
             resolvePromise = resolve;
-          })
+          }),
       );
 
       await act(async () => {
@@ -226,7 +256,9 @@ describe("VegetationCover", () => {
       });
 
       await waitFor(() => {
-        expect(screen.queryByText("Loading vegetation data…")).not.toBeInTheDocument();
+        expect(
+          screen.queryByText("Loading vegetation data…"),
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -256,7 +288,9 @@ describe("VegetationCover", () => {
       });
 
       expect(screen.getByTestId("choropleth-scale")).toBeInTheDocument();
-      expect(screen.getByTestId("choropleth-scale")).toHaveTextContent("viridis 0-100 % cover");
+      expect(screen.getByTestId("choropleth-scale")).toHaveTextContent(
+        "viridis 0-100 % cover",
+      );
     });
 
     it("does not render ChoroplethScale when loading", async () => {
@@ -398,7 +432,9 @@ describe("VegetationCover", () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId("coverage-chart")).toHaveTextContent("Tree Coverage");
+        expect(screen.getByTestId("coverage-chart")).toHaveTextContent(
+          "Tree Coverage",
+        );
       });
 
       expect(mockSetChoroplethBands).toHaveBeenCalledWith("tree");
@@ -436,7 +472,9 @@ describe("VegetationCover", () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId("coverage-chart")).toHaveTextContent("All Coverage");
+        expect(screen.getByTestId("coverage-chart")).toHaveTextContent(
+          "All Coverage",
+        );
       });
 
       expect(mockSetChoroplethBands).toHaveBeenCalledWith("all");
@@ -464,7 +502,9 @@ describe("VegetationCover", () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId("coverage-chart")).toHaveTextContent("(2020)");
+        expect(screen.getByTestId("coverage-chart")).toHaveTextContent(
+          "(2020)",
+        );
       });
 
       expect(mockSetChoroplethYear).toHaveBeenCalledWith(2020);
@@ -543,7 +583,7 @@ describe("VegetationCover", () => {
           expect.objectContaining({
             mode: "hillslope",
             topazId: 123,
-          })
+          }),
         );
       });
     });
@@ -558,7 +598,7 @@ describe("VegetationCover", () => {
           expect.objectContaining({
             mode: "watershed",
             weppId: 108,
-          })
+          }),
         );
       });
     });
@@ -588,7 +628,7 @@ describe("VegetationCover", () => {
             mode: "hillslope",
             topazId: 99,
             year: 2010,
-          })
+          }),
         );
       });
     });
@@ -615,7 +655,7 @@ describe("VegetationCover", () => {
           expect.objectContaining({
             mode: "watershed",
             year: 2005,
-          })
+          }),
         );
       });
     });
@@ -638,7 +678,9 @@ describe("VegetationCover", () => {
     });
 
     it("handles fetch error gracefully", async () => {
-      mockFetchRap.mockImplementation(() => Promise.reject(new Error("Network error")));
+      mockFetchRap.mockImplementation(() =>
+        Promise.reject(new Error("Network error")),
+      );
 
       await act(async () => {
         render(<VegetationCover />);
@@ -686,7 +728,7 @@ describe("VegetationCover", () => {
         expect(mockFetchRap).toHaveBeenCalledWith(
           expect.objectContaining({
             year: 2015,
-          })
+          }),
         );
       });
     });
@@ -700,13 +742,15 @@ describe("VegetationCover", () => {
         expect(mockFetchRap).toHaveBeenCalledWith(
           expect.objectContaining({
             year: undefined,
-          })
+          }),
         );
       });
     });
 
     it("returns null data when no watershedID and no hillslope", async () => {
-      mockUseMatch.mockReturnValue(null as unknown as ReturnType<typeof mockUseMatch>);
+      mockUseMatch.mockReturnValue(
+        null as unknown as ReturnType<typeof mockUseMatch>,
+      );
 
       await act(async () => {
         render(<VegetationCover />);
@@ -723,7 +767,7 @@ describe("VegetationCover", () => {
         () =>
           new Promise((resolve) => {
             resolvePromise = resolve;
-          })
+          }),
       );
 
       const { unmount } = render(<VegetationCover />);
@@ -741,7 +785,7 @@ describe("VegetationCover", () => {
         () =>
           new Promise((_resolve, reject) => {
             rejectPromise = reject;
-          })
+          }),
       );
 
       const { unmount } = render(<VegetationCover />);
@@ -769,7 +813,7 @@ describe("VegetationCover", () => {
       });
 
       mockFetchRap.mockImplementation(() =>
-        Promise.resolve([{ year: 2020, shrub: 30, tree: 40, coverage: 70 }])
+        Promise.resolve([{ year: 2020, shrub: 30, tree: 40, coverage: 70 }]),
       );
 
       await act(async () => {
@@ -788,7 +832,7 @@ describe("VegetationCover", () => {
         Promise.resolve([
           { year: 1986, shrub: 10, tree: 20, coverage: 30 },
           { year: 2023, shrub: 50, tree: 60, coverage: 110 },
-        ])
+        ]),
       );
 
       await act(async () => {
@@ -806,7 +850,7 @@ describe("VegetationCover", () => {
       mockFetchRap.mockImplementation(() =>
         Promise.resolve([
           { year: 1986, shrub: null, tree: null, coverage: null },
-        ])
+        ]),
       );
 
       await act(async () => {
@@ -834,7 +878,7 @@ describe("VegetationCover", () => {
       });
 
       mockFetchRap.mockImplementation(() =>
-        Promise.resolve([{ year: 1986, shrub: 10, tree: 20, coverage: 30 }])
+        Promise.resolve([{ year: 1986, shrub: 10, tree: 20, coverage: 30 }]),
       );
 
       await act(async () => {

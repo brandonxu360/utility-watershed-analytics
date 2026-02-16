@@ -22,42 +22,42 @@ type LoginProps = {
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 'calc(100vh - 64px)',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "calc(100vh - 64px)",
   },
   formContainer: {
-    width: '100%',
+    width: "100%",
     maxWidth: 500,
   },
   authCard: {
-    width: '100%',
+    width: "100%",
     padding: `${theme.spacing(4)} ${theme.spacing(2)}`,
-    display: 'flex',
-    flexDirection: 'column',
+    display: "flex",
+    flexDirection: "column",
     gap: theme.spacing(2),
-    boxSizing: 'border-box',
+    boxSizing: "border-box",
   },
   authFooter: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: theme.spacing(1),
     marginTop: theme.spacing(2),
   },
   forgotRow: {
     color: theme.palette.accent.main,
-    display: 'flex',
-    justifyContent: 'flex-end',
+    display: "flex",
+    justifyContent: "flex-end",
     fontSize: theme.typography.caption.fontSize,
-    textDecoration: 'none',
+    textDecoration: "none",
   },
   linkButton: {
     color: theme.palette.accent.main,
-    textDecoration: 'none',
+    textDecoration: "none",
     marginLeft: theme.spacing(0.5),
   },
 }));
@@ -85,20 +85,35 @@ const Login: FC<LoginProps> = ({ onSubmit }) => {
     setIsHidden((prev) => !prev);
   };
 
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     event.preventDefault();
   };
 
-  const handleMouseUpPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMouseUpPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     event.preventDefault();
   };
 
   return (
     <div className={classes.root}>
       <div className={classes.formContainer}>
-        <Paper elevation={3} className={classes.authCard} component="form" onSubmit={handleSubmit} noValidate>
+        <Paper
+          elevation={3}
+          className={classes.authCard}
+          component="form"
+          onSubmit={handleSubmit}
+          noValidate
+        >
           <div>
-            <Typography variant="h4" component="h1" align="center" fontWeight={700}>
+            <Typography
+              variant="h4"
+              component="h1"
+              align="center"
+              fontWeight={700}
+            >
               Welcome Back!
             </Typography>
             <Typography variant="subtitle1" align="center">
@@ -143,14 +158,24 @@ const Login: FC<LoginProps> = ({ onSubmit }) => {
             />
           </FormControl>
           <div className={classes.forgotRow}>
-            <Link to="" className={classes.forgotRow}>Forgot password?</Link>
+            <Link to="" className={classes.forgotRow}>
+              Forgot password?
+            </Link>
           </div>
-          <Button type="submit" variant="contained" color="primary" fullWidth size="large">
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            size="large"
+          >
             Log In
           </Button>
           <div className={classes.authFooter}>
             <Typography variant="body2">Don't have an account?</Typography>
-            <Link to="/register" className={classes.linkButton}>Register</Link>
+            <Link to="/register" className={classes.linkButton}>
+              Register
+            </Link>
           </div>
         </Paper>
       </div>

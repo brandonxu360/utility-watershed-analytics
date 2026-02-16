@@ -1,7 +1,7 @@
 import { toast } from "react-toastify";
-import { tss } from '../../../utils/tss';
-import { Button } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
+import { tss } from "../../../utils/tss";
+import { Button } from "@mui/material";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 const useStyles = tss.create(({ theme }) => ({
   settingsButton: {
@@ -9,22 +9,22 @@ const useStyles = tss.create(({ theme }) => ({
     minWidth: 36,
     backgroundColor: theme.palette.primary.dark,
 
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
 
     padding: 0,
-    cursor: 'pointer',
+    cursor: "pointer",
 
-    appearance: 'none',
-    borderStyle: 'outset',
+    appearance: "none",
+    borderStyle: "outset",
     borderWidth: 2,
     borderRadius: 0,
     borderColor: theme.palette.surface.border,
-    boxSizing: 'border-box',
+    boxSizing: "border-box",
 
-    '&:active': {
-      borderStyle: 'inset',
+    "&:active": {
+      borderStyle: "inset",
     },
   },
   settingsIcon: {
@@ -35,7 +35,7 @@ const useStyles = tss.create(({ theme }) => ({
 
 /**
  * Settings - A custom map control component that provides settings functionality
- * 
+ *
  * @component
  */
 export default function Settings() {
@@ -44,7 +44,7 @@ export default function Settings() {
   return (
     <div className="leaflet-bar leaflet-control">
       <Button
-        onClick={() => toast.error('Feature not implemented yet')}
+        onClick={() => toast.error("Feature not implemented yet")}
         className={classes.settingsButton}
         aria-label="Open settings"
         title="Open settings"

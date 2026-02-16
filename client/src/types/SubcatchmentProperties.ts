@@ -8,7 +8,7 @@ export interface SubcatchmentProperties {
   topazid: number;
   weppid: number;
   watershed: string;
-  
+
   // Hillslope geometry and characteristics
   slope_scalar: number | null;
   length: number | null;
@@ -21,7 +21,7 @@ export interface SubcatchmentProperties {
   centroid_py: number | null;
   centroid_lon: number | null;
   centroid_lat: number | null;
-  
+
   // Soil data fields
   mukey: string | null;
   soil_fname: string | null;
@@ -37,7 +37,7 @@ export interface SubcatchmentProperties {
   ll: number | null;
   bd: number | null;
   simple_texture: string | null;
-  
+
   // Land use data fields
   landuse_key: number | null;
   landuse_map: string | null;
