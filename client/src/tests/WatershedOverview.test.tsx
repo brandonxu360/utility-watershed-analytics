@@ -86,7 +86,7 @@ describe("WatershedOverview", () => {
       mockUseMatch.mockReturnValue({
         params: { webcloudRunId: "test-watershed-123" },
       });
-      mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
 
       renderWithProviders(<WatershedOverview />);
 
@@ -99,7 +99,7 @@ describe("WatershedOverview", () => {
       mockUseMatch.mockReturnValue({
         params: { webcloudRunId: "test-watershed-123" },
       });
-      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedOverview />);
 
@@ -192,13 +192,17 @@ describe("WatershedOverview", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole("button", { name: /View Calibrated WEPP Results/i })
+          screen.getByRole("button", { name: /View Calibrated WEPP Results/i }),
         ).toBeInTheDocument();
         expect(
-          screen.getByRole("button", { name: /View Calibrated RHESSys Results/i })
+          screen.getByRole("button", {
+            name: /View Calibrated RHESSys Results/i,
+          }),
         ).toBeInTheDocument();
         expect(
-          screen.getByRole("button", { name: /View Detailed WEPP Model Results/i })
+          screen.getByRole("button", {
+            name: /View Detailed WEPP Model Results/i,
+          }),
         ).toBeInTheDocument();
       });
     });

@@ -269,14 +269,14 @@ export default function WatershedOverview() {
 
           <Button
             className={classes.actionButton}
-            aria-label='View Detailed WEPP Model Results'
-            title='View Detailed WEPP Model Results'
+            aria-label="View Detailed WEPP Model Results"
+            title="View Detailed WEPP Model Results"
             variant="text"
             onClick={() =>
               window.open(
                 `https://wepp.cloud/weppcloud/runs/${watershedID}/disturbed9002_wbt/gl-dashboard`,
-                '_blank',
-                'noopener,noreferrer'
+                "_blank",
+                "noopener,noreferrer",
               )
             }
           >
@@ -285,5 +285,5 @@ export default function WatershedOverview() {
         </div>
       </div>
     </div>
-  )
+  );
 }
