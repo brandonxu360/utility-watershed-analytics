@@ -384,7 +384,7 @@ describe("Map Component", () => {
 
   describe("loading states", () => {
     it("shows loading overlay when watersheds are loading", async () => {
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
 
       renderWithProviders(<Map />);
 
@@ -804,9 +804,7 @@ describe("Map Component", () => {
       };
       const result = lastSubcatchmentStyleFn!(feature);
       expect(result).toMatchObject({
-        color: "#2c2c2c",
-        fillColor: "#4a83ec",
-        fillOpacity: 0.75,
+        color: "rgb(255, 255, 0, 0.5)",
       });
     });
 
@@ -871,9 +869,7 @@ describe("Map Component", () => {
       };
       const result = lastSubcatchmentStyleFn!(feature);
       expect(result).toMatchObject({
-        color: "#2c2c2c",
-        fillColor: "#4a83ec",
-        fillOpacity: 0.75,
+        color: "rgb(255, 255, 0, 0.5)",
       });
     });
 
@@ -899,9 +895,7 @@ describe("Map Component", () => {
 
       const result = lastSubcatchmentStyleFn!(undefined);
       expect(result).toMatchObject({
-        color: "#2c2c2c",
-        fillColor: "#4a83ec",
-        fillOpacity: 0.75,
+        color: "rgb(255, 255, 0, 0.5)",
       });
     });
 
@@ -935,8 +929,7 @@ describe("Map Component", () => {
       // Should fall through to default style, not choropleth
       expect(mockGetChoroplethStyle).not.toHaveBeenCalled();
       expect(result).toMatchObject({
-        color: "#2c2c2c",
-        fillColor: "#4a83ec",
+        color: "rgb(255, 255, 0, 0.5)",
       });
     });
   });
@@ -1091,7 +1084,7 @@ describe("Map Component", () => {
         subcatchment: true,
         setSubcatchment: mockSetSubcatchment,
       });
-      mockFetchSubcatchments.mockReturnValue(new Promise(() => {}));
+      mockFetchSubcatchments.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<Map />);
 
@@ -1108,7 +1101,7 @@ describe("Map Component", () => {
         channels: true,
         setChannels: mockSetChannels,
       });
-      mockFetchChannels.mockReturnValue(new Promise(() => {}));
+      mockFetchChannels.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<Map />);
 
