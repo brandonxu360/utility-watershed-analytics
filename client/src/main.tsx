@@ -11,6 +11,7 @@ import "./index.css";
 // Create a Tanstack query client
 const queryClient = new QueryClient();
 
+/* eslint-disable react-refresh/only-export-components */
 const Root = () => {
   const [mode, setMode] = useState<"light" | "dark">("dark");
 

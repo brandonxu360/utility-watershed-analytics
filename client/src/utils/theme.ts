@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme, TypographyVariantsOptions, Components, Theme } from "@mui/material/styles";
 import { PaletteMode } from "@mui/material";
 
 declare module "@mui/material/styles" {
@@ -31,7 +31,7 @@ declare module "@mui/material/styles" {
 }
 
 // Common typography
-const typography: any = {
+const typography: TypographyVariantsOptions = {
   fontWeightRegular: 500,
   h1: { fontSize: "3rem" },
   h2: { fontSize: "2rem" },
@@ -48,9 +48,9 @@ const typography: any = {
 };
 
 // Common components styles
-const components: any = {
+const components: Components<Omit<Theme, "components">> = {
   MuiCssBaseline: {
-    styleOverrides: (themeParam: any) => ({
+    styleOverrides: (themeParam: Theme) => ({
       body: {
         scrollbarColor: `${themeParam.palette.muted.main} ${themeParam.palette.background.default}`,
         "&::-webkit-scrollbar, & *::-webkit-scrollbar": {

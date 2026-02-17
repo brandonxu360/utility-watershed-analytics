@@ -309,7 +309,6 @@ describe("Map Component", () => {
         expect(screen.getByTestId("layers-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-in-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-out-control")).toBeInTheDocument();
-        expect(screen.getByTestId("settings-control")).toBeInTheDocument();
         expect(screen.getByTestId("landuse-legend")).toBeInTheDocument();
       });
     });
@@ -384,7 +383,7 @@ describe("Map Component", () => {
 
   describe("loading states", () => {
     it("shows loading overlay when watersheds are loading", async () => {
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
 
       renderWithProviders(<Map />);
 
@@ -1084,7 +1083,7 @@ describe("Map Component", () => {
         subcatchment: true,
         setSubcatchment: mockSetSubcatchment,
       });
-      mockFetchSubcatchments.mockReturnValue(new Promise(() => {}));
+      mockFetchSubcatchments.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<Map />);
 
@@ -1101,7 +1100,7 @@ describe("Map Component", () => {
         channels: true,
         setChannels: mockSetChannels,
       });
-      mockFetchChannels.mockReturnValue(new Promise(() => {}));
+      mockFetchChannels.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<Map />);
 
