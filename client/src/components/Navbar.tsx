@@ -16,10 +16,14 @@ const useStyles = tss.create(({ theme }) => ({
   },
   link: {
     color: theme.palette.text.primary,
-    marginLeft: theme.spacing(2),
     textDecoration: "none",
+    display: "inline-block",
+    padding: theme.spacing(0.5, 1),
+    borderRadius: theme.shape.borderRadius,
+    transition: "background-color 150ms ease",
     ":hover": {
-      color: theme.palette.accent.dark,
+      color: theme.palette.text.primary,
+      backgroundColor: theme.palette.accent.light,
     },
   },
 }));
