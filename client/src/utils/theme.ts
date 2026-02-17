@@ -55,7 +55,7 @@ const theme = createTheme({
     // Custom palette colors
     accent: {
       main: "#646cff",
-      light: "#818cf8",
+      light: "#f5f5f525",
       dark: "#535bf2",
       contrastText: "#F5F5F5",
     },
