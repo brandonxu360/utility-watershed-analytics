@@ -72,9 +72,6 @@ const useStyles = tss.create(({ theme }) => ({
     display: "flex",
     color: theme.palette.accent.main,
     cursor: "pointer",
-    "&.active": {
-      background: theme.palette.text.secondary,
-    },
     "&:hover": {
       background: theme.palette.text.secondary,
     },

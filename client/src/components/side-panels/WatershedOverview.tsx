@@ -14,7 +14,7 @@ import Skeleton from "@mui/material/Skeleton";
 const useStyles = tss.create(({ theme }) => ({
   closeButton: {
     backgroundColor: theme.palette.error.main,
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.primary.light,
     fontSize: theme.typography.body2.fontSize,
     marginTop: theme.spacing(1.5),
     marginBottom: theme.spacing(1),

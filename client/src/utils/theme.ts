@@ -63,17 +63,17 @@ const components: any = {
           border: `3px solid ${themeParam.palette.background.default}`,
         },
         "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus":
-          {
-            backgroundColor: themeParam.palette.accent.main,
-          },
+        {
+          backgroundColor: themeParam.palette.accent.main,
+        },
         "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active":
-          {
-            backgroundColor: themeParam.palette.accent.main,
-          },
+        {
+          backgroundColor: themeParam.palette.accent.main,
+        },
         "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover":
-          {
-            backgroundColor: themeParam.palette.accent.light,
-          },
+        {
+          backgroundColor: themeParam.palette.accent.light,
+        },
         "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
           backgroundColor: themeParam.palette.background.default,
         },
@@ -125,9 +125,9 @@ const darkPalette = {
 const lightPalette = {
   mode: "light" as PaletteMode,
   primary: {
-    main: "#F1F1F1",
+    main: "#e0e0e0",
     light: "#E6F2FF",
-    dark: "#FFFFFF",
+    dark: "#F5F5F5",
     contrastText: "#213547",
   },
   secondary: {
