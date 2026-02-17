@@ -27,7 +27,7 @@ const useStyles = tss.create(({ theme }) => ({
     transition: "background-color 150ms ease",
     ":hover": {
       color: theme.palette.text.primary,
-      backgroundColor: theme.palette.accent.light,
+      backgroundColor: theme.palette.surface.main,
     },
   },
   colorToggle: {
