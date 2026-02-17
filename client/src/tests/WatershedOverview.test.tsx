@@ -201,7 +201,7 @@ describe("WatershedOverview", () => {
         ).toBeInTheDocument();
         expect(
           screen.getByRole("button", {
-            name: /Run WEPP cloud watershed analysis model/i,
+            name: /View Detailed WEPP Model Results/i,
           }),
         ).toBeInTheDocument();
       });
