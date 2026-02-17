@@ -28,99 +28,79 @@ const rootRoute = createRootRoute({
 
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
-  component: () => (
-    <Home />
-  ),
+  path: "/",
+  component: () => <Home />,
 });
 
 export const watershedOverviewRoute = createRoute({
   getParentRoute: () => homeRoute,
-  path: '/watershed/$webcloudRunId',
+  path: "/watershed/$webcloudRunId",
   component: WatershedOverview,
 });
 
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/login',
+  path: "/login",
   component: LoginRoute,
 });
 
 const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: 'register',
+  path: "register",
   component: RegisterRoute,
 });
 
 const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/about',
-  component: () => (
-    <About />
-  ),
+  path: "/about",
+  component: () => <About />,
 });
 
 const teamRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/team',
-  component: () => (
-    <Team />
-  ),
+  path: "/team",
+  component: () => <Team />,
 });
 
 const aboutWeppRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/about-wepp',
-  component: () => (
-    <AboutWepp />
-  ),
+  path: "/about-wepp",
+  component: () => <AboutWepp />,
 });
 
 const aboutWeppCloudRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/about-wepp-cloud',
-  component: () => (
-    <AboutWeppCloud />
-  ),
+  path: "/about-wepp-cloud",
+  component: () => <AboutWeppCloud />,
 });
 
 const aboutRhessysRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/about-rhessys',
-  component: () => (
-    <AboutRHESSys />
-  ),
+  path: "/about-rhessys",
+  component: () => <AboutRHESSys />,
 });
 
 const aboutWatarRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/about-watar',
-  component: () => (
-    <AboutWATAR />
-  ),
+  path: "/about-watar",
+  component: () => <AboutWATAR />,
 });
 
 const aboutSBSRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/about-sbs',
-  component: () => (
-    <AboutSBS />
-  ),
+  path: "/about-sbs",
+  component: () => <AboutSBS />,
 });
 
 const scenariosRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/scenarios',
-  component: () => (
-    <Scenarios />
-  ),
+  path: "/scenarios",
+  component: () => <Scenarios />,
 });
 
 // Create the route tree
 const routeTree = rootRoute.addChildren([
-  homeRoute.addChildren([
-    watershedOverviewRoute,
-  ]),
+  homeRoute.addChildren([watershedOverviewRoute]),
   loginRoute,
   registerRoute,
   aboutRoute,
@@ -130,7 +110,7 @@ const routeTree = rootRoute.addChildren([
   aboutRhessysRoute,
   aboutWatarRoute,
   aboutSBSRoute,
-  scenariosRoute
+  scenariosRoute,
 ]);
 
 // Pass the route tree to the Router constructor

@@ -1,27 +1,27 @@
-import { useMap } from 'react-leaflet';
-import { tss } from '../../../utils/tss';
-import { Button } from '@mui/material';
-import RemoveIcon from '@mui/icons-material/Remove';
+import { useMap } from "react-leaflet";
+import { tss } from "../../../utils/tss";
+import { Button } from "@mui/material";
+import RemoveIcon from "@mui/icons-material/Remove";
 
 const useStyles = tss.create(({ theme }) => ({
   zoomOutButton: {
     height: 36,
     minWidth: 36,
     backgroundColor: theme.palette.primary.dark,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 0,
-    cursor: 'pointer',
-    appearance: 'none',
-    borderStyle: 'outset',
+    cursor: "pointer",
+    appearance: "none",
+    borderStyle: "outset",
     borderWidth: 2,
     borderRadius: 0,
     borderColor: theme.palette.surface.border,
-    boxSizing: 'border-box',
+    boxSizing: "border-box",
 
-    '&:active': {
-      borderStyle: 'inset',
+    "&:active": {
+      borderStyle: "inset",
     },
   },
   zoomIcon: {
