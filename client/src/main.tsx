@@ -9,7 +9,7 @@ import App from './App.tsx'
 import './index.css'
 
 // Create a Tanstack query client
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 const Root = () => {
   const [mode, setMode] = useState<'light' | 'dark'>('dark');

@@ -1,16 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 :root {
   /*Website Colors*/
-  --clr-primary-100: #F5F5F5;
-  --clr-primary-200: #DCEDFF;
-  --clr-primary-300: #00A896;
+  --clr-primary-100: #f5f5f5;
+  --clr-primary-200: #dcedff;
+  --clr-primary-300: #00a896;
   --clr-primary-400: #444444;
   --clr-primary-500: #121212;
-  --clr-primary-error: #FF4B3E;
+  --clr-primary-error: #ff4b3e;
 
   /*Fonts*/
-  --ff-primary: 'Inter', serif;
+  --ff-primary: "Inter", serif;
   --ff-body: var(--ff-primary);
   --ff-heading: var(--ff-primary);
   line-height: 1.5;
@@ -35,9 +35,9 @@
   --fw-regular: 500;
 
   /*Space Variables*/
-  --size-100: .25rem;
-  --size-200: .5rem;
-  --size-300: .75rem;
+  --size-100: 0.25rem;
+  --size-200: 0.5rem;
+  --size-300: 0.75rem;
   --size-400: 1rem;
   --size-500: 1.5rem;
   --size-600: 2rem;
@@ -105,8 +105,8 @@
 }
 
 /* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
-ul[role='list'],
-ol[role='list'] {
+ul[role="list"],
+ol[role="list"] {
   list-style: none;
 }
 

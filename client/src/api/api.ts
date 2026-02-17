@@ -1,9 +1,9 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
 
 /**
- * Fetches all the available watersheds with the original or 
+ * Fetches all the available watersheds with the original or
  * simplified geometries (depending on simplified_geom query parameter).
- * 
+ *
  * @async
  * @function fetchWatersheds
  * @returns {Promise<unknown>} Resolves with the parsed JSON response from the
@@ -12,14 +12,14 @@ import { API_ENDPOINTS } from "./apiEndpoints";
  */
 export async function fetchWatersheds() {
   const res = await fetch(API_ENDPOINTS.WATERSHEDS);
-  if (!res.ok) throw new Error('Failed to fetch watersheds');
+  if (!res.ok) throw new Error("Failed to fetch watersheds");
   return res.json();
 }
 
 /**
- * Fetches a singular specified watershed with the original or 
+ * Fetches a singular specified watershed with the original or
  * simplified geometries (depending on simplified_geom query parameter)
- * 
+ *
  * @async
  * @function fetchWatershed
  * @param {string} id

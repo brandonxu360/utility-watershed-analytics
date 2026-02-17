@@ -24,35 +24,35 @@ export interface RegisterProps {
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 'calc(100vh - 64px)',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "calc(100vh - 64px)",
   },
   formContainer: {
-    width: '100%',
+    width: "100%",
     maxWidth: 500,
   },
   authCard: {
-    width: '100%',
+    width: "100%",
     padding: `${theme.spacing(4)} ${theme.spacing(2)}`,
-    display: 'flex',
-    flexDirection: 'column',
+    display: "flex",
+    flexDirection: "column",
     gap: theme.spacing(2),
-    boxSizing: 'border-box',
+    boxSizing: "border-box",
   },
   authFooter: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: theme.spacing(1),
     marginTop: theme.spacing(2),
   },
   linkButton: {
     color: theme.palette.accent.main,
-    textDecoration: 'none',
+    textDecoration: "none",
     marginLeft: theme.spacing(0.5),
   },
 }));
@@ -77,24 +77,39 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
     if (onSubmit) onSubmit(payload);
   };
 
-  const toggleHidden = (field: 'password' | 'confirm') => {
+  const toggleHidden = (field: "password" | "confirm") => {
     setHidden((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     event.preventDefault();
   };
 
-  const handleMouseUpPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMouseUpPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     event.preventDefault();
   };
 
   return (
     <div className={classes.root}>
       <div className={classes.formContainer}>
-        <Paper elevation={3} className={classes.authCard} component="form" onSubmit={handleSubmit} noValidate>
+        <Paper
+          elevation={3}
+          className={classes.authCard}
+          component="form"
+          onSubmit={handleSubmit}
+          noValidate
+        >
           <div>
-            <Typography variant="h4" component="h1" align="center" fontWeight={700}>
+            <Typography
+              variant="h4"
+              component="h1"
+              align="center"
+              fontWeight={700}
+            >
               Create an account!
             </Typography>
             <Typography variant="subtitle1" align="center">
@@ -125,7 +140,9 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
-                    aria-label={hidden.password ? "Show password" : "Hide password"}
+                    aria-label={
+                      hidden.password ? "Show password" : "Hide password"
+                    }
                     onClick={() => toggleHidden("password")}
                     onMouseDown={handleMouseDownPassword}
                     onMouseUp={handleMouseUpPassword}
@@ -151,8 +168,16 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
-                    aria-label={hidden.confirm ? "Show confirm password" : "Hide confirm password"}
-                    title={hidden.confirm ? "Show confirm password" : "Hide confirm password"}
+                    aria-label={
+                      hidden.confirm
+                        ? "Show confirm password"
+                        : "Hide confirm password"
+                    }
+                    title={
+                      hidden.confirm
+                        ? "Show confirm password"
+                        : "Hide confirm password"
+                    }
                     aria-pressed={!hidden.confirm}
                     onClick={() => toggleHidden("confirm")}
                     onMouseDown={handleMouseDownPassword}
@@ -166,12 +191,20 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
               }
             />
           </FormControl>
-          <Button type="submit" variant="contained" color="primary" fullWidth size="large">
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            size="large"
+          >
             Sign Up
           </Button>
           <div className={classes.authFooter}>
             <Typography variant="body2">Already have an account?</Typography>
-            <Link to="/login" className={classes.linkButton}>Login</Link>
+            <Link to="/login" className={classes.linkButton}>
+              Login
+            </Link>
           </div>
         </Paper>
       </div>
