@@ -17,11 +17,11 @@ import KevinBladon from "../assets/images/kevin_bladon.png";
 import RyanCole from "../assets/images/ryan_cole.png";
 import PeteRobichaud from "../assets/images/pete_robichaud.png";
 
-const useStyles = tss.create({
-  ...commonStyles,
-  ...navStyles,
+const useStyles = tss.create(({ theme }) => ({
+  ...commonStyles(theme),
+  ...navStyles(theme),
   univHeading: {
-    borderBottom: "1px solid #ccc",
+    borderBottom: `1px solid ${theme.palette.divider}`,
     paddingBottom: 20,
     marginBottom: 10,
     textTransform: "uppercase",
@@ -41,7 +41,7 @@ const useStyles = tss.create({
     },
     "& a": {
       fontWeight: 800,
-      color: "#a3a8fa",
+      color: theme.palette.accent.main,
     },
     "& img": {
       height: 190,
@@ -55,7 +55,7 @@ const useStyles = tss.create({
     padding: "40px 40px 0 40px",
     textAlign: "left",
   },
-});
+}));
 
 const scrollToUniversity = (e: React.MouseEvent, name: string) => {
   e.preventDefault();

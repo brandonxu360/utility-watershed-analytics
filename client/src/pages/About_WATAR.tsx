@@ -6,7 +6,7 @@ import SmallScreenNotice from "../components/SmallScreenNotice";
 import { useNavigate } from "@tanstack/react-router";
 import watar_diagram from "../assets/images/watar_diagram.png";
 
-const useStyles = tss.create({ ...commonStyles, ...subPageStyles });
+const useStyles = tss.create(({ theme }) => ({ ...commonStyles(theme), ...subPageStyles(theme) }));
 
 /* ABOUT WATAR: SIDE PANEL CONTENT */
 export function AboutWatarSidePanelContent() {

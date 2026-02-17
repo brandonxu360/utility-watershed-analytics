@@ -1,6 +1,8 @@
+import { Theme } from "@mui/material";
 import type { CSSObject } from "tss-react";
 
-export const commonStyles = {
+export const commonStyles = (theme: Theme) =>
+({
   aboutContainer: {
     display: "flex",
     flex: 1,
@@ -10,7 +12,7 @@ export const commonStyles = {
       fontSize: "1.2rem",
     },
     "& a": {
-      color: "#a3a8fa",
+      color: theme.palette.accent.main,
       fontWeight: 800,
     },
   } as CSSObject,
@@ -26,11 +28,11 @@ export const commonStyles = {
     flexDirection: "column",
     height: "100%",
     minHeight: 0,
-    background: "rgba(18, 18, 18, 0.9)",
-    color: "var(--clr-primary-100)",
+    background: theme.palette.surface.overlay,
+    color: theme.palette.text.primary,
     "& button:hover": {
-      background: "#000 !important",
-      color: "#a3a8fa !important",
+      background: `${theme.palette.action.hover} !important`,
+      color: `${theme.palette.accent.main} !important`,
     },
     "& h2": {
       fontSize: "2rem",
@@ -51,6 +53,7 @@ export const commonStyles = {
     "& hr": {
       marginTop: 20,
       marginBottom: 30,
+      borderColor: theme.palette.divider,
     },
   } as CSSObject,
   sidePanelContent: {
@@ -63,8 +66,11 @@ export const commonStyles = {
   aboutContainerMain: {
     width: "100%",
     textAlign: "left",
-    color: "white",
-    background: "#121212",
+    color: theme.palette.text.primary,
+    background:
+      theme.palette.mode === "light"
+        ? theme.palette.surface.main
+        : theme.palette.background.default,
     padding: "0 40px 50px 40px",
     "& p": {
       fontSize: "1.2rem",
@@ -124,19 +130,20 @@ export const commonStyles = {
     fontSize: "3em",
     fontWeight: 100,
   } as CSSObject,
-};
+});
 
-export const subPageStyles = {
+export const subPageStyles = (theme: Theme) =>
+({
   closeButton: {
-    background: "#FF4B3E",
+    background: theme.palette.error.main,
     border: "none",
     borderRadius: 3,
-    color: "white",
+    color: theme.palette.common.white,
     "&:hover": {
-      background: "#FF4B3E !important",
+      background: `${theme.palette.error.dark} !important`,
       border: "none",
       borderRadius: "3px !important",
-      color: "white !important",
+      color: `${theme.palette.common.white} !important`,
       cursor: "pointer",
     },
   } as CSSObject,
@@ -150,15 +157,16 @@ export const subPageStyles = {
     },
     "& span": {
       fontWeight: 800,
-      color: "#000",
-      background: "#eee",
+      color: theme.palette.text.primary,
+      background: theme.palette.action.selected,
       padding: "3px 6px",
       borderRadius: 4,
     },
   } as CSSObject,
-};
+});
 
-export const navStyles = {
+export const navStyles = (theme: Theme) =>
+({
   navButtons: {
     display: "flex",
     flexDirection: "column",
@@ -166,19 +174,20 @@ export const navStyles = {
     "& button": {
       background: "transparent",
       border: "none",
-      borderBottom: "var(--clr-primary-100) 1px solid",
+      borderBottom: `1px solid ${theme.palette.text.primary}`,
       borderRadius: 0,
       padding: "8px 16px",
-      color: "var(--clr-primary-100)",
+      color: theme.palette.text.primary,
       cursor: "pointer",
       textAlign: "left",
       fontSize: 18,
     },
     "& button:hover": {
-      borderBottom: "1px solid #a3a8fa",
+      borderBottom: `1px solid ${theme.palette.accent.main}`,
+      color: theme.palette.accent.main,
     },
   } as CSSObject,
   actionButton: {
     fontSize: "1.2rem",
   } as CSSObject,
-};
+});

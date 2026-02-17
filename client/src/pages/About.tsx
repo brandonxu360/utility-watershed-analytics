@@ -11,20 +11,20 @@ import usfs from "../assets/images/usfs_rockyMtn_logo.png";
 import firewise_diagram from "../assets/images/firewise_diagram.png";
 import fire_image from "../assets/images/wildfire-threat-water-supply.jpg";
 
-const useStyles = tss.create({
-  ...commonStyles,
-  ...navStyles,
+const useStyles = tss.create(({ theme }) => ({
+  ...commonStyles(theme),
+  ...navStyles(theme),
   btnLink: {
-    background: "#000",
+    background: theme.palette.common.black,
     padding: "8px 16px",
-    border: "1px solid #a3a8fa",
+    border: `1px solid ${theme.palette.accent.main}`,
     borderRadius: 4,
-    color: "#a3a8fa",
+    color: theme.palette.accent.main,
     "&:hover": {
-      background: "#a3a8fa",
+      background: theme.palette.accent.main,
       padding: "8px 16px",
       borderRadius: 4,
-      color: "#333",
+      color: theme.palette.common.white,
     },
   },
   institutions: {
@@ -34,7 +34,7 @@ const useStyles = tss.create({
     },
   },
   box_txt: {
-    border: "1px solid #ddd",
+    border: `1px solid ${theme.palette.divider}`,
     padding: "20px",
   },
   row: {
@@ -57,7 +57,7 @@ const useStyles = tss.create({
       verticalAlign: "top",
     },
   },
-});
+}));
 
 /* ABOUT: SIDE PANEL CONTENT */
 export function AboutSidePanelContent() {
