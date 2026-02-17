@@ -1,8 +1,7 @@
 import { Theme } from "@mui/material/styles";
 import type { CSSObject } from "tss-react";
 
-export const commonStyles = (theme: Theme) =>
-({
+export const commonStyles = (theme: Theme) => ({
   aboutContainer: {
     display: "flex",
     flex: 1,
@@ -132,8 +131,7 @@ export const commonStyles = (theme: Theme) =>
   } as CSSObject,
 });
 
-export const subPageStyles = (theme: Theme) =>
-({
+export const subPageStyles = (theme: Theme) => ({
   closeButton: {
     background: theme.palette.error.main,
     border: "none",
@@ -165,8 +163,7 @@ export const subPageStyles = (theme: Theme) =>
   } as CSSObject,
 });
 
-export const navStyles = (theme: Theme) =>
-({
+export const navStyles = (theme: Theme) => ({
   navButtons: {
     display: "flex",
     flexDirection: "column",

@@ -6,7 +6,10 @@ import SmallScreenNotice from "../components/SmallScreenNotice";
 import { useNavigate } from "@tanstack/react-router";
 import sbs_diagram from "../assets/images/sbs_diagram.png";
 
-const useStyles = tss.create(({ theme }) => ({ ...commonStyles(theme), ...subPageStyles(theme) }));
+const useStyles = tss.create(({ theme }) => ({
+  ...commonStyles(theme),
+  ...subPageStyles(theme),
+}));
 
 /* ABOUT SBS: SIDE PANEL CONTENT */
 export function AboutSBSSidePanelContent() {

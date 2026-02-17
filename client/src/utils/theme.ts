@@ -1,4 +1,9 @@
-import { createTheme, TypographyVariantsOptions, Components, Theme } from "@mui/material/styles";
+import {
+  createTheme,
+  TypographyVariantsOptions,
+  Components,
+  Theme,
+} from "@mui/material/styles";
 import { PaletteMode } from "@mui/material";
 
 declare module "@mui/material/styles" {
@@ -63,17 +68,17 @@ const components: Components<Omit<Theme, "components">> = {
           border: `3px solid ${themeParam.palette.background.default}`,
         },
         "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus":
-        {
-          backgroundColor: themeParam.palette.accent.main,
-        },
+          {
+            backgroundColor: themeParam.palette.accent.main,
+          },
         "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active":
-        {
-          backgroundColor: themeParam.palette.accent.main,
-        },
+          {
+            backgroundColor: themeParam.palette.accent.main,
+          },
         "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover":
-        {
-          backgroundColor: themeParam.palette.accent.light,
-        },
+          {
+            backgroundColor: themeParam.palette.accent.light,
+          },
         "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
           backgroundColor: themeParam.palette.background.default,
         },

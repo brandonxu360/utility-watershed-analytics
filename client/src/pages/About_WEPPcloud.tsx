@@ -5,7 +5,10 @@ import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import weppcloud_diagram from "../assets/images/weppcloud_diagram.png";
 
-const useStyles = tss.create(({ theme }) => ({ ...commonStyles(theme), ...subPageStyles(theme) }));
+const useStyles = tss.create(({ theme }) => ({
+  ...commonStyles(theme),
+  ...subPageStyles(theme),
+}));
 
 /* ABOUT WEPPCLOUD: SIDE PANEL CONTENT */
 export function AboutWeppCloudSidePanelContent() {

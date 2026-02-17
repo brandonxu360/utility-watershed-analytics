@@ -6,7 +6,10 @@ import SmallScreenNotice from "../components/SmallScreenNotice";
 import { useNavigate } from "@tanstack/react-router";
 import scenarios_diagram from "../assets/images/scenarios_diagram.png";
 
-const useStyles = tss.create(({ theme }) => ({ ...commonStyles(theme), ...subPageStyles(theme) }));
+const useStyles = tss.create(({ theme }) => ({
+  ...commonStyles(theme),
+  ...subPageStyles(theme),
+}));
 
 /* SCENARIOS: SIDE PANEL CONTENT */
 export function ScenariosSidePanelContent() {
