@@ -62,15 +62,18 @@ const components: any = {
           minHeight: 24,
           border: `3px solid ${themeParam.palette.background.default}`,
         },
-        "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus": {
-          backgroundColor: themeParam.palette.accent.main,
-        },
-        "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active": {
-          backgroundColor: themeParam.palette.accent.main,
-        },
-        "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover": {
-          backgroundColor: themeParam.palette.accent.light,
-        },
+        "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus":
+          {
+            backgroundColor: themeParam.palette.accent.main,
+          },
+        "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active":
+          {
+            backgroundColor: themeParam.palette.accent.main,
+          },
+        "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover":
+          {
+            backgroundColor: themeParam.palette.accent.light,
+          },
         "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
           backgroundColor: themeParam.palette.background.default,
         },

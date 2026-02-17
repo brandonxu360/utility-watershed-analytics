@@ -29,7 +29,7 @@ const useStyles = tss.create(({ theme }) => ({
   colorToggle: {
     color: theme.palette.text.primary,
     marginLeft: theme.spacing(3),
-  }
+  },
 }));
 
 const Navbar: FC = () => {
@@ -43,12 +43,20 @@ const Navbar: FC = () => {
           <Typography variant="h6" component="div" className={classes.title}>
             FireWISE Watersheds
           </Typography>
-          <Link to='/' className={classes.link}>Home</Link>
-          <Link to='/team' className={classes.link}>Team</Link>
-          <Link to='/about' className={classes.link}>About</Link>
-          <Link to='/login' className={classes.link}>Login</Link>
+          <Link to="/" className={classes.link}>
+            Home
+          </Link>
+          <Link to="/team" className={classes.link}>
+            Team
+          </Link>
+          <Link to="/about" className={classes.link}>
+            About
+          </Link>
+          <Link to="/login" className={classes.link}>
+            Login
+          </Link>
           <IconButton className={classes.colorToggle} onClick={toggleColorMode}>
-            {mode === 'dark' ? <Brightness7Icon /> : <DarkMode />}
+            {mode === "dark" ? <Brightness7Icon /> : <DarkMode />}
           </IconButton>
         </Toolbar>
       </AppBar>
