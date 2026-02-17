@@ -1,12 +1,15 @@
-import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/SmallScreenNotice';
+import { tss } from '../utils/tss';
+import { commonStyles, subPageStyles } from '../utils/sharedStyles';
+import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
+import SmallScreenNotice from '../components/SmallScreenNotice';
 import { useNavigate } from '@tanstack/react-router';
-import rhessys_diagram from '../../assets/images/rhessys_diagram.png'
-import '../about/About.css';
+import rhessys_diagram from '../assets/images/rhessys_diagram.png'
  
+const useStyles = tss.create({ ...commonStyles, ...subPageStyles });
 
 /* ABOUT RHYSSys: SIDE PANEL CONTENT */
 export function AboutRHESSysSidePanelContent() {
+  const { classes } = useStyles();
   const navigate = useNavigate();
   return (
     <div className="about-panel">
@@ -14,7 +17,7 @@ export function AboutRHESSysSidePanelContent() {
         onClick={() => {
           navigate({ to: "/about" });
         }}
-        className='closeButton'
+        className={classes.closeButton}
         aria-label='Close RHESSys panel'
         title='Close RHESSys panel'
         style={{ padding: '0.313rem 0.5rem', marginBottom: '1rem' }}
@@ -24,7 +27,7 @@ export function AboutRHESSysSidePanelContent() {
 
       <h2>About RHESSys</h2>
       <hr />
-      <div id="nutshell">
+      <div className={classes.nutshell}>
         <h3>IN A NUTSHELL</h3>
         <p>
           <span>What it is:</span>&nbsp;
@@ -48,8 +51,9 @@ export function AboutRHESSysSidePanelContent() {
 
 /* ABOUT RHYSSys: MAIN CONTENT */
 export function AboutRHESSysMainContent() {
+  const { classes } = useStyles();
   return (
-      <div id="about-container-main">  
+      <div className={classes.aboutContainerMain}>  
         <img src={rhessys_diagram} alt="diagram of inputs, processes and outputs of RHESSys" />
         
         <h2>
@@ -68,7 +72,7 @@ export function AboutRHESSysMainContent() {
           <li><span>Nutrient Cycling:</span> Tracking nitrogen pollution (nitrification/denitrification) and how it moves from hillslopes into streams</li>
         </ul>
 
-      <div className="text-center dash">&mdash;</div>
+      <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
       <h2>
         How RHESSys Works
@@ -105,7 +109,7 @@ export function AboutRHESSysMainContent() {
         <li><span>TOPMODEL (or DHSVM-style routing):</span> Simulates the movement of water, including surface runoff, subsurface flow, and saturation.</li>
       </ul>
 
-      <div className="text-center dash">&mdash;</div>
+      <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
       <h2>
         Model Inputs and Outputs
@@ -169,9 +173,10 @@ export function AboutRHESSysMainContent() {
 }
 
 function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
+  const { classes } = useStyles();
   return (
-    <div className='side-panel'>
-      <div className='side-panel-content'>{children}</div>
+    <div className={classes.sidePanel}>
+      <div className={classes.sidePanelContent}>{children}</div>
     </div>
   );
 }
@@ -180,6 +185,7 @@ function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
  * Layout for the ABOUT RHESSys page.
  */
 export default function AboutRHESSys() {
+  const { classes } = useStyles();
   const isSmallScreen = useIsSmallScreen();
 
   if (isSmallScreen) {
@@ -187,11 +193,11 @@ export default function AboutRHESSys() {
   }
 
   return (
-    <div className='about-container'>
+    <div className={classes.aboutContainer}>
       <SidePanel>
         <AboutRHESSysSidePanelContent />
       </SidePanel>
-      <div className='about-wrapper' style={{ position: 'relative' }}>
+      <div className={classes.aboutWrapper} style={{ position: 'relative' }}>
         <AboutRHESSysMainContent />
       </div>
     </div>

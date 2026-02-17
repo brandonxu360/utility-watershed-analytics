@@ -1,12 +1,15 @@
+import { tss } from '../utils/tss';
+import { commonStyles, subPageStyles } from '../utils/sharedStyles';
 import { useNavigate } from '@tanstack/react-router';
-import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/SmallScreenNotice';
-import weppcloud_diagram from '../../assets/images/weppcloud_diagram.png'
-import '../about/About.css';
+import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
+import SmallScreenNotice from '../components/SmallScreenNotice';
+import weppcloud_diagram from '../assets/images/weppcloud_diagram.png'
 
+const useStyles = tss.create({ ...commonStyles, ...subPageStyles });
 
 /* ABOUT WEPPCLOUD: SIDE PANEL CONTENT */
 export function AboutWeppCloudSidePanelContent() {
+    const { classes } = useStyles();
     const navigate = useNavigate();
     return (
         <div className="about-panel">
@@ -14,7 +17,7 @@ export function AboutWeppCloudSidePanelContent() {
                 onClick={() => {
                     navigate({ to: "/about" });
                 }}
-                className='closeButton'
+                className={classes.closeButton}
                 aria-label='Close WEPPcloud panel'
                 title='Close WEPPcloud panel'
                 style={{ padding: '0.313rem 0.5rem', marginBottom: '1rem' }}
@@ -24,7 +27,7 @@ export function AboutWeppCloudSidePanelContent() {
 
             <h2>About WEPPcloud</h2>
             <hr />
-            <div id="nutshell">
+            <div className={classes.nutshell}>
                 <h3>IN A NUTSHELL</h3>
                 <p>
                     <span>What it is:</span>&nbsp;
@@ -50,8 +53,9 @@ export function AboutWeppCloudSidePanelContent() {
 
 /* ABOUT WEPPCLOUD: MAIN CONTENT */
 export function AboutWeppCloudMainContent() {
+    const { classes } = useStyles();
     return (
-        <div id="about-container-main">
+        <div className={classes.aboutContainerMain}>
             <img src={weppcloud_diagram} alt="diagram of inputs, processes and outputs of WEPP Cloud" /> 
           
             <h2>How WEPPcloud is Used</h2>
@@ -92,7 +96,7 @@ export function AboutWeppCloudMainContent() {
                 <li>Users can visualize and compare outputs such as soil loss and sediment yield maps</li>
             </ul>
 
-            <div className="text-center dash">&mdash;</div>
+            <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
             <h2>Who Uses WEPPcloud</h2>
             <p>
@@ -115,9 +119,10 @@ export function AboutWeppCloudMainContent() {
 }
 
 function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
+    const { classes } = useStyles();
     return (
-      <div className='side-panel'>
-        <div className='side-panel-content'>{children}</div>
+      <div className={classes.sidePanel}>
+        <div className={classes.sidePanelContent}>{children}</div>
       </div>
     );
 }
@@ -126,6 +131,7 @@ function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
  * Layout for the ABOUT WEPPCLOUD page.
  */
 export default function AboutWeppCloud() {
+    const { classes } = useStyles();
     const isSmallScreen = useIsSmallScreen();
 
     if (isSmallScreen) {
@@ -133,11 +139,11 @@ export default function AboutWeppCloud() {
     }
 
     return (
-        <div className='about-container'>
+        <div className={classes.aboutContainer}>
             <SidePanel>
                 <AboutWeppCloudSidePanelContent />
             </SidePanel>
-            <div className='about-wrapper' style={{ position: 'relative' }}>
+            <div className={classes.aboutWrapper} style={{ position: 'relative' }}>
                 <AboutWeppCloudMainContent />
             </div>
         </div>

@@ -1,11 +1,15 @@
+import { tss } from '../utils/tss';
+import { commonStyles, subPageStyles } from '../utils/sharedStyles';
 import { useNavigate } from '@tanstack/react-router';
-import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/SmallScreenNotice';
-import wepp_diagram from '../../assets/images/wepp_diagram.png'
-import '../about/About.css';
+import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
+import SmallScreenNotice from '../components/SmallScreenNotice';
+import wepp_diagram from '../assets/images/wepp_diagram_v2.png'
+
+const useStyles = tss.create({ ...commonStyles, ...subPageStyles });
 
 /* ABOUT WEPP: SIDE PANEL CONTENT */
-export function AboutWeppSidePanelContent() { 
+export function AboutWeppSidePanelContent() {
+  const { classes } = useStyles();
   const navigate = useNavigate();
   return (
     <div className="about-panel">
@@ -13,7 +17,7 @@ export function AboutWeppSidePanelContent() {
         onClick={() => {
           navigate({ to: "/about" });
         }}
-        className='closeButton'
+        className={classes.closeButton}
         aria-label='Close WEPP panel'
         title='Close WEPP panel'
         style={{ padding: '0.313rem 0.5rem', marginBottom: '1rem' }}
@@ -23,7 +27,7 @@ export function AboutWeppSidePanelContent() {
 
       <h2>About WEPP</h2>
       <hr />
-      <div id="nutshell">
+      <div className={classes.nutshell}>
         <h3>IN A NUTSHELL</h3>
         <p>
           <span>What it is:</span>&nbsp;
@@ -49,8 +53,9 @@ export function AboutWeppSidePanelContent() {
 
 /* ABOUT WEPP: MAIN CONTENT */
 export function AboutWeppMainContent() {
+  const { classes } = useStyles();
   return (
-    <div id="about-container-main">
+    <div className={classes.aboutContainerMain}>
       <img src={wepp_diagram} alt="diagram of inputs, processes and outputs of WEPP" /> 
       
       <h2>What is WEPP?</h2>
@@ -79,7 +84,7 @@ export function AboutWeppMainContent() {
         can represent landscapes that range from simple to highly complex and nonuniform.
       </p>
 
-      <div className="text-center dash">&mdash;</div>
+      <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
       <h2>Purpose and Applications</h2>
 
@@ -91,12 +96,12 @@ export function AboutWeppMainContent() {
       <ul>
         <li>USDA–Natural Resources Conservation Service</li>
         <li>USDA–Forest Service</li>
-        <li>USDI–Bureau of Land Management</li>
+        <li>USDI–Bureau of Land Management (BLM)</li>
         <li>Other organizations involved in land and water resource management</li>
         <li>WEPP is widely used to evaluate erosion risks, sediment delivery, and the effects of land management practices across a variety of landscapes.</li>
       </ul>
 
-      <div className="text-center dash">&mdash;</div>
+      <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
       <h2>How WEPP Works</h2>
       <p>
@@ -235,7 +240,7 @@ export function AboutWeppMainContent() {
         <li>Includes channel hydrology, channel erosion, and impoundment analysis</li>
       </ul>
 
-      <div className="text-center dash">&mdash;</div>
+      <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
       <h2>Model Inputs and Outputs</h2>
 
@@ -276,9 +281,10 @@ export function AboutWeppMainContent() {
 }
 
 function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
+  const { classes } = useStyles();
   return (
-    <div className='side-panel'>
-      <div className='side-panel-content'>{children}</div>
+    <div className={classes.sidePanel}>
+      <div className={classes.sidePanelContent}>{children}</div>
     </div>
   );
 }
@@ -287,6 +293,7 @@ function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
  * Layout for the ABOUT WEPP page.
  */
 export default function AboutWepp() {
+  const { classes } = useStyles();
   const isSmallScreen = useIsSmallScreen();
 
   if (isSmallScreen) {
@@ -294,11 +301,11 @@ export default function AboutWepp() {
   }
 
   return (
-    <div className='about-container'>
+    <div className={classes.aboutContainer}>
       <SidePanel>
         <AboutWeppSidePanelContent />
       </SidePanel>
-      <div className='about-wrapper' style={{ position: 'relative' }}>
+      <div className={classes.aboutWrapper} style={{ position: 'relative' }}>
         <AboutWeppMainContent />
       </div>
     </div>

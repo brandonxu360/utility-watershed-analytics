@@ -1,21 +1,61 @@
 import React from 'react';
-import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/SmallScreenNotice';
-import RogerLew from '../../assets/images/roger_lew.png'
-import MarianaDobre from '../../assets/images/mariana_dobre.png'
-import ErinBrooks from '../../assets/images/erin_brooks.png'
-import SubhankarDas from '../../assets/images/subhankar_das.jpeg'
-import ErinHanan from '../../assets/images/erin_hanan.jpg'
-import WilliamBurke from '../../assets/images/william_burke.png'
-import LawrenceAlawode from '../../assets/images/lawrence_alawode.png'
-import MingliangLiu from '../../assets/images/mingliang_liu.png'
-import JuliePadowski from '../../assets/images/julie_padowski.png'
-import JennyAdam from '../../assets/images/jenny_adam.png'
-import KevinBladon from '../../assets/images/kevin_bladon.png'
-import RyanCole from '../../assets/images/ryan_cole.png'
-import PeteRobichaud from '../../assets/images/pete_robichaud.png'
-import '../about/About.css';
+import { tss } from '../utils/tss';
+import { commonStyles, navStyles } from '../utils/sharedStyles';
+import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
+import SmallScreenNotice from '../components/SmallScreenNotice';
+import RogerLew from '../assets/images/roger_lew.png'
+import MarianaDobre from '../assets/images/mariana_dobre.png'
+import ErinBrooks from '../assets/images/erin_brooks.png'
+import SubhankarDas from '../assets/images/subhankar_das.jpeg'
+import ErinHanan from '../assets/images/erin_hanan.jpg'
+import WilliamBurke from '../assets/images/william_burke.png'
+import LawrenceAlawode from '../assets/images/lawrence_alawode.png'
+import MingliangLiu from '../assets/images/mingliang_liu.png'
+import JuliePadowski from '../assets/images/julie_padowski.png'
+import JennyAdam from '../assets/images/jenny_adam.png'
+import KevinBladon from '../assets/images/kevin_bladon.png'
+import RyanCole from '../assets/images/ryan_cole.png'
+import PeteRobichaud from '../assets/images/pete_robichaud.png'
 
+const useStyles = tss.create({
+  ...commonStyles,
+  ...navStyles,
+  univHeading: {
+    borderBottom: '1px solid #ccc',
+    paddingBottom: 20,
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    fontWeight: 'bold',
+    fontSize: '1.5rem',
+    textAlign: 'center',
+  },
+  memberCard: {
+    display: 'inline-block',
+    padding: 10,
+    margin: 10,
+    width: 200,
+    verticalAlign: 'top',
+    '& h4': {
+      paddingTop: 10,
+      marginBottom: '10px !important',
+    },
+    '& a': {
+      fontWeight: 800,
+      color: '#a3a8fa',
+    },
+    '& img': {
+      height: 190,
+      width: '100%',
+      objectFit: 'cover',
+      objectPosition: 'center',
+    },
+  },
+  partnerSection: {
+    display: 'block',
+    padding: '40px 40px 0 40px',
+    textAlign: 'left',
+  }
+});
 
 const scrollToUniversity = (e: React.MouseEvent, name: string) => {
   e.preventDefault();
@@ -50,6 +90,7 @@ const scrollToUniversity = (e: React.MouseEvent, name: string) => {
 
 /* TEAM: SIDE PANEL CONTENT */
 export function TeamSidePanelContent() {
+  const { classes } = useStyles();
   return (
     <div className="about-panel">
       <h2>Project Team & Partners</h2>
@@ -57,9 +98,9 @@ export function TeamSidePanelContent() {
         Select from the following to see our team of experts and partner institutions:
       </p>
 
-      <div className="nav-buttons">
+      <div className={classes.navButtons}>
         <button
-          className='actionButton'
+          className={classes.actionButton}
           aria-label='Washington State University'
           title='Washington State University'
           id='wsu'
@@ -69,7 +110,7 @@ export function TeamSidePanelContent() {
         </button>
 
         <button
-          className='actionButton'
+          className={classes.actionButton}
           aria-label='University of Idaho'
           title='University of Idaho'
           id='ui'
@@ -79,7 +120,7 @@ export function TeamSidePanelContent() {
         </button>
 
         <button
-          className='actionButton'
+          className={classes.actionButton}
           aria-label='University of Nevada, Reno'
           title='University of Nevada, Reno'
           id='unr'
@@ -89,7 +130,7 @@ export function TeamSidePanelContent() {
         </button>
 
         <button
-          className='actionButton'
+          className={classes.actionButton}
           aria-label='Oregon State University'
           title='Oregon State University'
           id='osu'
@@ -99,7 +140,7 @@ export function TeamSidePanelContent() {
         </button>
 
         <button
-          className='actionButton'
+          className={classes.actionButton}
           aria-label='US Forest Service'
           title='US Forest Service'
           id='usfs'
@@ -109,7 +150,7 @@ export function TeamSidePanelContent() {
         </button>
 
         <button
-          className='actionButton'
+          className={classes.actionButton}
           aria-label='Partners'
           title='Partners'
           id='partners'
@@ -132,6 +173,7 @@ interface TeamMember {
 }
 
 export function TeamMainContent() {
+  const { classes } = useStyles();
   const teamMembers: TeamMember[] = [
     {
       name: "Mingliang Liu",
@@ -236,13 +278,13 @@ export function TeamMainContent() {
   }, {} as Record<string, TeamMember[]>);
 
   return (
-    <div id="about-container-main" className="scroll-container">  
-      <div className="text-center">
+    <div className={`${classes.aboutContainerMain} scroll-container`}>  
+      <div className={classes.textCenter}>
         {Object.entries(groupedMembers).map(([university, members]) => (
           <section key={university} id={university.replace(/\s+/g, '_')}>
-            <h3 className="univ-heading">{university}</h3>
+            <h3 className={classes.univHeading}>{university}</h3>
             {members.map((person, index) => (
-              <div key={index} className="member-card">
+              <div key={index} className={classes.memberCard}>
                 <img 
                   src={person.img} 
                   alt={person.name} 
@@ -257,26 +299,23 @@ export function TeamMainContent() {
         ))}
       </div>
 
-      <div id="partner_section">
-        <h2 className="univ-heading">Partner Institutions</h2>
-        <div className="partner-col">
-          <p>Pacific Northwest water utilities:</p>
-          <ul>
-            <li><a href="https://www.seattle.gov/utilities" target="_blank">Seattle Public Utilities</a></li>
-            <li><a href="https://www.portland.gov/water" target="_blank">Portland Water Bureau</a></li>
-            <li><a href="https://www.eweb.org/" target="_blank">Eugene Water &amp; Electric Board</a></li>
-            <li><a href="https://www.cityofsalem.net/community/household/water-utilities" target="_blank">City of Salem</a></li>
-            <li><a href="https://www.bremertonwa.gov/524/Utility-Billing" target="_blank">City of Bremerton</a></li>
-            <li><a href="https://www.medfordwater.org/" target="_blank">Medford Water Commission</a></li>
-            <li><a href="https://www.clackamasproviders.org/" target="_blank">Clackamas River Water Providers</a></li>
-            <li><a href="https://www.victoria.ca/home-property/utilities/water-system" target="_blank">City of Victoria, Canada</a></li>
-          </ul>
-        </div>
-        <div className="partner-col">
-          <p><a href="https://doh.wa.gov/community-and-environment/drinking-water/office-drinking-water" target="_blank">Washington Department of Health – Office of Drinking Water</a></p>
-          <br />
-          <p><a href="https://www.waterrf.org/" target="_blank">The Water Research Foundation</a></p>
-        </div>
+      <div id="partner_section" className={classes.partnerSection}>
+        <h2 className={classes.univHeading}>Partner Institutions</h2>
+        <p>Pacific Northwest water utilities:</p>
+        <ul>
+          <li><a href="https://www.seattle.gov/utilities" target="_blank">Seattle Public Utilities</a></li>
+          <li><a href="https://www.portland.gov/water" target="_blank">Portland Water Bureau</a></li>
+          <li><a href="https://www.eweb.org/" target="_blank">Eugene Water &amp; Electric Board</a></li>
+          <li><a href="https://www.cityofsalem.net/community/household/water-utilities" target="_blank">City of Salem</a></li>
+          <li><a href="https://www.bremertonwa.gov/524/Utility-Billing" target="_blank">City of Bremerton</a></li>
+          <li><a href="https://www.medfordwater.org/" target="_blank">Medford Water Commission</a></li>
+          <li><a href="https://www.clackamasproviders.org/" target="_blank">Clackamas River Water Providers</a></li>
+          <li><a href="https://www.victoria.ca/home-property/utilities/water-system" target="_blank">City of Victoria, Canada</a></li>
+          <li><a href="https://doh.wa.gov/community-and-environment/drinking-water/office-drinking-water" target="_blank">Washington Department of Health – Office of Drinking Water</a></li>
+          <li><a href="https://www.waterrf.org/" target="_blank">The Water Research Foundation</a></li>
+        </ul>
+    
+        
       </div>
       <br /><br /><br />
     </div>
@@ -284,9 +323,10 @@ export function TeamMainContent() {
 }
 
 function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
+  const { classes } = useStyles();
   return (
-    <div className='side-panel'>
-      <div className='side-panel-content'>{children}</div>
+    <div className={classes.sidePanel}>
+      <div className={classes.sidePanelContent}>{children}</div>
     </div>
   );
 }
@@ -294,6 +334,7 @@ function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
  * Layout for the TEAM page.
  */
 export default function Team() {
+  const { classes } = useStyles();
   const isSmallScreen = useIsSmallScreen();
 
   if (isSmallScreen) {
@@ -301,11 +342,11 @@ export default function Team() {
   }
 
   return (
-    <div className='about-container'>
+    <div className={classes.aboutContainer}>
       <SidePanel>
         <TeamSidePanelContent />
       </SidePanel>
-      <div className='about-wrapper' style={{ position: 'relative' }}>
+      <div className={classes.aboutWrapper} style={{ position: 'relative' }}>
         <TeamMainContent />
       </div>
     </div>

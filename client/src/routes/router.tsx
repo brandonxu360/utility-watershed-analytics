@@ -4,14 +4,14 @@ import Home from '../pages/Home';
 import WatershedOverview from '../components/side-panels/WatershedOverview';
 import LoginRoute from './LoginRoute';
 import RegisterRoute from './RegisterRoute';
-import About from '../pages/about/About';
-import Team from '../pages/team/Team';
-import AboutWepp from '../pages/about_wepp/About_WEPP';
-import AboutWeppCloud from '../pages/about_weppcloud/About_WEPPcloud';
-import AboutRHESSys from '../pages/about_rhessys/About_RHESSys';
-import AboutWATAR from '../pages/about_watar/About_WATAR';
-import AboutSBS from '../pages/about_sbs/About_SBS';
-import Scenarios from '../pages/scenarios/Scenarios'
+import About from '../pages/About';
+import Team from '../pages/Team';
+import AboutWepp from '../pages/About_WEPP';
+import AboutWeppCloud from '../pages/About_WEPPcloud';
+import AboutRHESSys from '../pages/About_RHESSys';
+import AboutWATAR from '../pages/About_WATAR';
+import AboutSBS from '../pages/About_SBS';
+import Scenarios from '../pages/Scenarios'
 
 
 const rootRoute = createRootRoute({

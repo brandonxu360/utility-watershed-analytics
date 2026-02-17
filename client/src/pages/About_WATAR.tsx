@@ -1,21 +1,25 @@
 import React from 'react';
-import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/SmallScreenNotice';
+import { tss } from '../utils/tss';
+import { commonStyles, subPageStyles } from '../utils/sharedStyles';
+import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
+import SmallScreenNotice from '../components/SmallScreenNotice';
 import { useNavigate } from '@tanstack/react-router';
-import watar_diagram from '../../assets/images/watar_diagram.png'
-import '../about/About.css';
+import watar_diagram from '../assets/images/watar_diagram.png'
  
+const useStyles = tss.create({ ...commonStyles, ...subPageStyles });
+
 
 /* ABOUT WATAR: SIDE PANEL CONTENT */
 export function AboutWatarSidePanelContent() {
-  const navigate = useNavigate();  
+  const { classes } = useStyles();
+  const navigate = useNavigate();
   return (
     <div className="about-panel">
       <button
         onClick={() => {
             navigate({ to: "/about" });
         }}
-        className='closeButton'
+        className={classes.closeButton}
         aria-label='Close WATAR panel'
         title='Close WATAR panel'
         style={{ padding: '0.313rem 0.5rem' }}
@@ -25,7 +29,7 @@ export function AboutWatarSidePanelContent() {
 
       <h2>About WATAR</h2>
       <hr />
-      <div id="nutshell">
+      <div className={classes.nutshell}>
         <h3>IN A NUTSHELL</h3>
         <p>
           <span>What it is:</span>&nbsp;
@@ -50,8 +54,9 @@ export function AboutWatarSidePanelContent() {
 
 /* ABOUT WATAR: MAIN CONTENT */
 export  function AboutWatarMainContent() {
+  const { classes } = useStyles();
   return (
-      <div id="about-container-main">  
+      <div className={classes.aboutContainerMain}>  
         <img src={watar_diagram} alt="diagram of inputs, processes and outputs of WATAR" />
         
         <h2>
@@ -64,7 +69,7 @@ export  function AboutWatarMainContent() {
           WATAR is built on extensive field measurements, laboratory experiments, and Earth observation (satellite) data collected after wildfires in the western United States. It operates as an extension of WEPPcloud, using WEPP’s hydrologic simulations as a foundation while explicitly accounting for the unique behavior of wildfire ash.
         </p>
 
-        <div className="text-center dash">&mdash;</div>
+        <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
         <h2>
           What the Model Does
@@ -83,7 +88,7 @@ export  function AboutWatarMainContent() {
           Unlike traditional erosion models that treat post-fire material as mineral soil, WATAR treats ash as a distinct material with different physical and chemical properties.
         </p>
 
-        <div className="text-center dash">&mdash;</div>
+        <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
         <h2>
           Key Concepts Behind WATAR
@@ -103,7 +108,7 @@ export  function AboutWatarMainContent() {
           </li>
         </ul>
 
-        <div className="text-center dash">&mdash;</div>
+        <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
         <h2>
           Model Outputs
@@ -131,9 +136,10 @@ export  function AboutWatarMainContent() {
  * SidePanel component
  */
 function SidePanel({ children }: { children: React.ReactNode }) {
+  const { classes } = useStyles();
   return (
-    <div className='side-panel'>
-      <div className='side-panel-content'>{children}</div>
+    <div className={classes.sidePanel}>
+      <div className={classes.sidePanelContent}>{children}</div>
     </div>
   );
 }
@@ -142,6 +148,7 @@ function SidePanel({ children }: { children: React.ReactNode }) {
  * Layout for the ABOUT WATAR page.
  */
 export default function AboutWATAR() {
+  const { classes } = useStyles();
   const isSmallScreen = useIsSmallScreen();
 
   if (isSmallScreen) {
@@ -149,11 +156,11 @@ export default function AboutWATAR() {
   }
 
   return (
-    <div className='about-container'>
+    <div className={classes.aboutContainer}>
       <SidePanel>
         <AboutWatarSidePanelContent />
       </SidePanel>
-      <div className='about-wrapper' style={{ position: 'relative' }}>
+      <div className={classes.aboutWrapper} style={{ position: 'relative' }}>
         <AboutWatarMainContent />
       </div>
     </div>

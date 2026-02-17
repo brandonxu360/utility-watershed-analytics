@@ -1,21 +1,24 @@
 import React from 'react';
-import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/SmallScreenNotice';
+import { tss } from '../utils/tss';
+import { commonStyles, subPageStyles } from '../utils/sharedStyles';
+import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
+import SmallScreenNotice from '../components/SmallScreenNotice';
 import { useNavigate } from '@tanstack/react-router';
-import scenarios_diagram from '../../assets/images/scenarios_diagram.png'
-import '../about/About.css';
+import scenarios_diagram from '../assets/images/scenarios_diagram.png'
  
+const useStyles = tss.create({ ...commonStyles, ...subPageStyles });
 
 /* SCENARIOS: SIDE PANEL CONTENT */
 export function ScenariosSidePanelContent() {
-  const navigate = useNavigate();  
+  const { classes } = useStyles();
+  const navigate = useNavigate();
   return (
     <div className="about-panel">
       <button
         onClick={() => {
             navigate({ to: "/about" });
         }}
-        className='closeButton'
+        className={classes.closeButton}
         aria-label='Close Scenarios panel'
         title='Close Scenarios panel'
         style={{ padding: '0.313rem 0.5rem' }}
@@ -39,8 +42,9 @@ export function ScenariosSidePanelContent() {
 
 /* SCENARIOS: MAIN CONTENT */
 export  function ScenariosMainContent() {
+  const { classes } = useStyles();
   return (
-      <div id="about-container-main">  
+      <div className={classes.aboutContainerMain}>  
         <img src={scenarios_diagram} alt="diagram of scenarios modeling" /> 
         <h2>
           What are Scenarios?
@@ -58,7 +62,7 @@ export  function ScenariosMainContent() {
           outcomes. They are widely used as decision-support tools by land and water resource managers.
         </p>
 
-        <div className="text-center dash">&mdash;</div>
+        <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
         <h2>
           Disturbance and Management Scenarios
@@ -100,7 +104,7 @@ export  function ScenariosMainContent() {
           </li>
         </ul>
 
-        <div className="text-center dash">&mdash;</div>
+        <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
         <h2>
           How Scenarios are Used
@@ -125,7 +129,7 @@ export  function ScenariosMainContent() {
           <li>Support planning, mitigation, and emergency response decisions</li>
         </ul>
 
-        <div className="text-center dash">&mdash;</div>
+        <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
         <h2>
           Who Uses Scenario-Based Modeling?
@@ -152,9 +156,10 @@ export  function ScenariosMainContent() {
  * SidePanel component
  */
 function SidePanel({ children }: { children: React.ReactNode }) {
+  const { classes } = useStyles();
   return (
-    <div className='side-panel'>
-      <div className='side-panel-content'>{children}</div>
+    <div className={classes.sidePanel}>
+      <div className={classes.sidePanelContent}>{children}</div>
     </div>
   );
 }
@@ -163,6 +168,7 @@ function SidePanel({ children }: { children: React.ReactNode }) {
  * Layout for the Scenarios page.
  */
 export default function Scenarios() {
+  const { classes } = useStyles();
   const isSmallScreen = useIsSmallScreen();
 
   if (isSmallScreen) {
@@ -170,11 +176,11 @@ export default function Scenarios() {
   }
 
   return (
-    <div className='about-container'>
+    <div className={classes.aboutContainer}>
       <SidePanel>
         <ScenariosSidePanelContent />
       </SidePanel>
-      <div className='about-wrapper' style={{ position: 'relative' }}>
+      <div className={classes.aboutWrapper} style={{ position: 'relative' }}>
         <ScenariosMainContent />
       </div>
     </div>

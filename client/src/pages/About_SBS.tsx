@@ -1,21 +1,24 @@
 import React from 'react';
-import { useIsSmallScreen } from '../../hooks/useIsSmallScreen';
-import SmallScreenNotice from '../../components/SmallScreenNotice';
+import { tss } from '../utils/tss';
+import { commonStyles, subPageStyles } from '../utils/sharedStyles';
+import { useIsSmallScreen } from '../hooks/useIsSmallScreen';
+import SmallScreenNotice from '../components/SmallScreenNotice';
 import { useNavigate } from '@tanstack/react-router';
-import sbs_diagram from '../../assets/images/sbs_diagram.png'
-import '../about/About.css';
+import sbs_diagram from '../assets/images/sbs_diagram.png'
 
+const useStyles = tss.create({ ...commonStyles, ...subPageStyles });
 
 /* ABOUT SBS: SIDE PANEL CONTENT */
 export function AboutSBSSidePanelContent() {
-  const navigate = useNavigate();  
+  const { classes } = useStyles();
+  const navigate = useNavigate();
   return (
     <div className="about-panel">
       <button
         onClick={() => {
             navigate({ to: "/about" });
         }}
-        className='closeButton'
+        className={classes.closeButton}
         aria-label='Close SBS panel'
         title='Close SBS panel'
         style={{ padding: '0.313rem 0.5rem' }}
@@ -25,7 +28,7 @@ export function AboutSBSSidePanelContent() {
 
       <h2>About Predicted-SBS</h2>
       <hr />
-      <div id="nutshell">
+      <div className={classes.nutshell}>
         <h3>IN A NUTSHELL</h3>
         <p>
           <span>What it is:</span>&nbsp;
@@ -53,8 +56,9 @@ export function AboutSBSSidePanelContent() {
 
 /* ABOUT SBS: MAIN CONTENT */
 export  function AboutSBSMainContent() {
+  const { classes } = useStyles();
   return (
-      <div id="about-container-main">  
+      <div className={classes.aboutContainerMain}>  
         <img src={sbs_diagram} alt="diagram of inputs, processes and outputs of p-SBS" />
         
         <h2>What is Soil Burn Severity?</h2>
@@ -67,7 +71,7 @@ export  function AboutSBSMainContent() {
           post-fire imagery to classify severity across a burned area.
         </p>
         
-        <div className="text-center dash">&mdash;</div>
+        <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
         <h2>
           Predicted SBS Tool<br />Purpose and Applications
@@ -88,7 +92,7 @@ export  function AboutSBSMainContent() {
           <li>Using anticipatory severity mapping to guide resource allocation.</li>
         </ul>
 
-        <div className="text-center dash">&mdash;</div>
+        <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
         <h2>
           What the Model Does
@@ -102,7 +106,7 @@ export  function AboutSBSMainContent() {
           (ESI, ETa), and vegetation moisture and biomass (NDMI, NDVI).
         </p>
 
-        <div className="text-center dash">&mdash;</div>
+        <div className={`${classes.textCenter} ${classes.dash}`}>&mdash;</div>
 
         <h2>
           Model Inputs and Outputs
@@ -148,9 +152,10 @@ export  function AboutSBSMainContent() {
  * SidePanel component
  */
 function SidePanel({ children }: { children: React.ReactNode }) {
+  const { classes } = useStyles();
   return (
-    <div className='side-panel'>
-      <div className='side-panel-content'>{children}</div>
+    <div className={classes.sidePanel}>
+      <div className={classes.sidePanelContent}>{children}</div>
     </div>
   );
 }
@@ -159,6 +164,7 @@ function SidePanel({ children }: { children: React.ReactNode }) {
  * Layout for the ABOUT SBS page.
  */
 export default function AboutSBS() {
+  const { classes } = useStyles();
   const isSmallScreen = useIsSmallScreen();
 
   if (isSmallScreen) {
@@ -166,11 +172,11 @@ export default function AboutSBS() {
   }
 
   return (
-    <div className='about-container'>
+    <div className={classes.aboutContainer}>
       <SidePanel>
         <AboutSBSSidePanelContent />
       </SidePanel>
-      <div className='about-wrapper' style={{ position: 'relative' }}>
+      <div className={classes.aboutWrapper} style={{ position: 'relative' }}>
         <AboutSBSMainContent />
       </div>
     </div>
