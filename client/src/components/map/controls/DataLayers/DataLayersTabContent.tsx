@@ -59,6 +59,8 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
     landuse,
     choropleth: { type: choroplethType },
     setSubcatchment,
+    setLanduse,
+    setLanduseLegendVisible,
     setChoroplethType,
     openPanel,
   } = useAppStore();
@@ -104,7 +106,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button
               className={classes.layerTitle}
-              onClick={() => {}}
+              onClick={() => { }}
               style={{
                 fontWeight:
                   isActive && choroplethType === "evapotranspiration"
@@ -124,6 +126,8 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               className={classes.layerTitle}
               onClick={() => {
                 setSubcatchment(true);
+                setLanduse(false);
+                setLanduseLegendVisible(false);
                 setChoroplethType("vegetationCover");
                 openPanel(<VegetationCover />);
               }}
