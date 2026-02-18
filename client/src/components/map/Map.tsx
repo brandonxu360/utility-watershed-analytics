@@ -42,6 +42,7 @@ const useStyles = tss.create(({ theme }) => ({
     right: 0,
     bottom: 0,
     backgroundColor: theme.palette.surface.overlay,
+    color: theme.palette.text.primary,
     zIndex: 1000,
     display: "flex",
     flexDirection: "column",
@@ -313,7 +314,7 @@ export default function Map(): JSX.Element {
             className={classes.mapLoadingOverlay}
             data-testid="map-loading-overlay"
           >
-            <CircularProgress size={50} />
+            <CircularProgress size={50} color="inherit" />
           </div>
         )}
 
