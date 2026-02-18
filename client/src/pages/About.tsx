@@ -30,8 +30,21 @@ const useStyles = tss.create(({ theme }) => ({
   institutions: {
     "& img": {
       width: 220,
-      margin: "2rem auto",
+      margin: "0 auto",
+      display: "block",
     },
+  },
+  logoContainer: {
+    backgroundColor:
+      theme.palette.mode === "light"
+        ? "rgba(133, 133, 133, 0.75)"
+        : "transparent",
+    padding: "1rem",
+    borderRadius: "8px",
+    marginBottom: "1rem",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   box_txt: {
     border: `1px solid ${theme.palette.divider}`,
@@ -152,19 +165,19 @@ export function AboutSidePanelContent() {
 
       <div className={classes.institutions}>
         <h2>Participating Institutions</h2>
-        <p className={classes.textCenter}>
+        <p className={classes.logoContainer}>
           <img src={wsu} alt="Washington State University logo" />
         </p>
-        <p>
+        <p className={classes.logoContainer}>
           <img src={ui} alt="University of Idaho logo" />
         </p>
-        <p>
+        <p className={classes.logoContainer}>
           <img src={unr} alt="University of Nevada, Reno logo" />
         </p>
-        <p>
+        <p className={classes.logoContainer}>
           <img src={osu} alt="Oregon State University logo" />
         </p>
-        <p>
+        <p className={classes.logoContainer}>
           <img
             src={usfs}
             alt="US Forest Service, Rocky Mountain Research logo"
