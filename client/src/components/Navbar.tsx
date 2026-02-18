@@ -32,7 +32,7 @@ const useStyles = tss.create(({ theme }) => ({
   },
   colorToggle: {
     color: theme.palette.text.primary,
-    marginLeft: theme.spacing(2),
+    marginLeft: theme.spacing(1.75),
   },
 }));
 
