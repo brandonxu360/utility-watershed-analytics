@@ -309,7 +309,6 @@ describe("Map Component", () => {
         expect(screen.getByTestId("layers-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-in-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-out-control")).toBeInTheDocument();
-        expect(screen.getByTestId("settings-control")).toBeInTheDocument();
         expect(screen.getByTestId("landuse-legend")).toBeInTheDocument();
       });
     });

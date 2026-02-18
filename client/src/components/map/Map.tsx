@@ -26,7 +26,6 @@ import ZoomOutControl from "./controls/ZoomOut";
 import LayersControl from "./controls/Layers";
 import LegendControl from "./controls/Legend";
 import SearchControl from "./controls/Search";
-import SettingsControl from "./controls/Settings";
 import LandUseLegend from "./controls/LandUseLegend";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import "leaflet/dist/leaflet.css";
@@ -344,7 +343,6 @@ export default function Map(): JSX.Element {
           />
           <ZoomInControl />
           <ZoomOutControl />
-          <SettingsControl />
         </div>
 
         {/* Handles URL navigation to a specified watershed */}

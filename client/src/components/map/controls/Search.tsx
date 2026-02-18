@@ -50,8 +50,8 @@ const useStyles = tss.create(({ theme }) => ({
     minWidth: 260,
     "& .MuiInputBase-root": {
       height: 40,
-      backgroundColor: theme.palette.primary.contrastText,
-      color: theme.palette.primary.dark,
+      backgroundColor: theme.palette.accent.contrastText,
+      color: theme.palette.secondary.main,
       borderRadius: theme.spacing(0.5),
       paddingLeft: theme.spacing(1),
     },
@@ -60,7 +60,7 @@ const useStyles = tss.create(({ theme }) => ({
     },
   },
   inputIcon: {
-    color: theme.palette.primary.dark,
+    color: theme.palette.secondary.main,
     fontSize: 20,
   },
   goButton: {

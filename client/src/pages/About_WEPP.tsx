@@ -5,7 +5,10 @@ import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import wepp_diagram from "../assets/images/wepp_diagram_v2.png";
 
-const useStyles = tss.create({ ...commonStyles, ...subPageStyles });
+const useStyles = tss.create(({ theme }) => ({
+  ...commonStyles(theme),
+  ...subPageStyles(theme),
+}));
 
 /* ABOUT WEPP: SIDE PANEL CONTENT */
 export function AboutWeppSidePanelContent() {
