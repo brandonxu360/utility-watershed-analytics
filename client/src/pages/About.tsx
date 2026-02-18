@@ -34,8 +34,8 @@ const useStyles = tss.create({
     },
   },
   box_txt: {
-    border: '1px solid #ddd',
-    padding: '20px'
+    border: '1px solid #fff',
+    padding: '25px 30px'
   },
   row: {
     display: 'block',

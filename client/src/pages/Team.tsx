@@ -53,7 +53,6 @@ const useStyles = tss.create({
   partnerSection: {
     display: 'block',
     padding: '40px 40px 0 40px',
-    textAlign: 'left',
   }
 });
 
@@ -282,7 +281,7 @@ export function TeamMainContent() {
       <div className={classes.textCenter}>
         {Object.entries(groupedMembers).map(([university, members]) => (
           <section key={university} id={university.replace(/\s+/g, '_')}>
-            <h3 className={classes.univHeading}>{university}</h3>
+            <h2 className={classes.univHeading}>{university}</h2>
             {members.map((person, index) => (
               <div key={index} className={classes.memberCard}>
                 <img 
