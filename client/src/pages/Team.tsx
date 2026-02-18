@@ -54,7 +54,7 @@ const useStyles = tss.create(({ theme }) => ({
     display: 'block',
     padding: '40px 40px 0 40px',
   }
-});
+}));
 
 const scrollToUniversity = (e: React.MouseEvent, name: string) => {
   e.preventDefault();

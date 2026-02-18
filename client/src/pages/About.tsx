@@ -1,4 +1,5 @@
 import { tss } from "../utils/tss";
+import { useTheme } from "@mui/material/styles";
 import { commonStyles, navStyles } from "../utils/sharedStyles";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -7,19 +8,28 @@ import wsu from "../assets/images/wsu_logo_horiz.png";
 import ui from "../assets/images/ui_logo_light_horiz.png";
 import unr from "../assets/images/unr_logo.png";
 import osu from "../assets/images/osu_logo.png";
+import wsu_dark from "../assets/images/wsu_logo_horiz_dark.png";
+import ui_dark from "../assets/images/ui_logo_horiz_dark.png";
+import unr_dark from "../assets/images/unr_logo_horiz_dark.png";
+import osu_dark from "../assets/images/osu_logo_horiz_dark.png";
 import usfs from "../assets/images/usfs_rockyMtn_logo.png";
 import firewise_diagram from "../assets/images/firewise_diagram.png";
 import fire_image from "../assets/images/wildfire-threat-water-supply.jpg";
 
+
 const useStyles = tss.create(({ theme }) => ({
   ...commonStyles(theme),
   ...navStyles(theme),
+  
+  
   btnLink: {
-    background: theme.palette.common.black,
+    background: 
+      theme.palette.mode === "dark" 
+      ? "theme.palette.common.black theme.palette.accent.main"
+      : "theme.palette.accent.main theme.palette.common.white",
     padding: "8px 16px",
     border: `1px solid ${theme.palette.accent.main}`,
     borderRadius: 4,
-    color: theme.palette.accent.main,
     "&:hover": {
       background: theme.palette.accent.main,
       padding: "8px 16px",
@@ -35,10 +45,10 @@ const useStyles = tss.create(({ theme }) => ({
     },
   },
   logoContainer: {
-    backgroundColor:
+    /*backgroundColor:
       theme.palette.mode === "light"
         ? "rgba(133, 133, 133, 0.75)"
-        : "transparent",
+        : "transparent",*/
     padding: "1rem",
     borderRadius: "8px",
     marginBottom: "1rem",
@@ -47,7 +57,10 @@ const useStyles = tss.create(({ theme }) => ({
     alignItems: "center",
   },
   box_txt: {
-    border: '1px solid #fff',
+    border: 
+      theme.palette.mode === "light"
+        ? "1px solid #333"
+        : "1px solid #fff",
     padding: '25px 30px'
   },
   row: {
@@ -75,6 +88,8 @@ const useStyles = tss.create(({ theme }) => ({
 /* ABOUT: SIDE PANEL CONTENT */
 export function AboutSidePanelContent() {
   const { classes } = useStyles();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const navigate = useNavigate();
   return (
     <div className="about-panel">
@@ -166,16 +181,16 @@ export function AboutSidePanelContent() {
       <div className={classes.institutions}>
         <h2>Participating Institutions</h2>
         <p className={classes.logoContainer}>
-          <img src={wsu} alt="Washington State University logo" />
+          <img src={isDark ? wsu : wsu_dark} alt="Washington State University logo" />
         </p>
         <p className={classes.logoContainer}>
-          <img src={ui} alt="University of Idaho logo" />
+          <img src={isDark ? ui : ui_dark} alt="University of Idaho logo" />
         </p>
         <p className={classes.logoContainer}>
-          <img src={unr} alt="University of Nevada, Reno logo" />
+          <img src={isDark ? unr : unr_dark} alt="University of Nevada, Reno logo" />
         </p>
         <p className={classes.logoContainer}>
-          <img src={osu} alt="Oregon State University logo" />
+          <img src={isDark ? osu : osu_dark} alt="Oregon State University logo" />
         </p>
         <p className={classes.logoContainer}>
           <img
