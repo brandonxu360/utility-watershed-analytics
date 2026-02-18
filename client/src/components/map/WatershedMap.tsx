@@ -20,6 +20,7 @@ import { useAppStore } from "../../store/store";
 import { toast } from "react-toastify";
 import { tss } from "../../utils/tss";
 import { CircularProgress } from "@mui/material";
+import { fetchLanduse } from "../../api/landuseApi";
 import DataLayersControl from "./controls/DataLayers/DataLayers";
 import ZoomInControl from "./controls/ZoomIn";
 import ZoomOutControl from "./controls/ZoomOut";
@@ -72,7 +73,7 @@ const BOUNDS: [[number, number], [number, number]] = [
  * @param webcloudRunId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
-export default function Map(): JSX.Element {
+export default function WatershedMap(): JSX.Element {
   const { classes } = useStyles();
   const navigate = useNavigate();
 
@@ -85,6 +86,7 @@ export default function Map(): JSX.Element {
     setChannels,
     setLanduse,
     setLanduseLegendMap,
+    setLanduseLegendVisible,
   } = useAppStore();
 
   // Use the choropleth hook for data fetching and styling
@@ -110,6 +112,7 @@ export default function Map(): JSX.Element {
     from: watershedOverviewRoute.id,
     shouldThrow: false,
   });
+
   const watershedID = match?.params.webcloudRunId ?? null;
 
   const {
@@ -133,27 +136,55 @@ export default function Map(): JSX.Element {
     enabled: Boolean(channels && watershedID),
   });
 
-  // Auto-disable features that depend on subcatchment data
+  const {
+    data: landuseData,
+    isLoading: landuseLoading,
+    error: landuseError,
+  } = useQuery({
+    queryKey: ["landuse-undisturbed", watershedID],
+    queryFn: () => fetchLanduse({ runId: watershedID! }),
+    enabled: Boolean(landuse && watershedID),
+  });
+
+  // Auto-disable features that depend on subcatchment data or missing landuse
   useEffect(() => {
-    if (!watershedID || subLoading || !subcatchments) return;
+    if (!watershedID) return;
 
-    const noData = subcatchments.features?.length === 0;
-    const featuresEnabled = subcatchment || landuse;
+    // Handle subcatchment data unavailability
+    if (!subLoading && subcatchments) {
+      const noSubData = subcatchments.features?.length === 0;
+      if (noSubData && (subcatchment || landuse)) {
+        if (subcatchment) setSubcatchment(false);
+        if (landuse) setLanduse(false);
+        toast.error("No subcatchment data available");
+        return;
+      }
+    }
 
-    if (noData && featuresEnabled) {
-      if (subcatchment) setSubcatchment(false);
-      if (landuse) setLanduse(false);
-      toast.error("No subcatchment data available");
+    // Handle landuse data unavailability
+    if (landuse && !landuseLoading) {
+      const noLanduseData =
+        landuseError || (landuseData && Object.keys(landuseData).length === 0);
+      if (noLanduseData) {
+        toast.error("Land use data is not available for this watershed");
+        setLanduse(false);
+        setLanduseLegendMap({});
+        setLanduseLegendVisible(false);
+      }
     }
   }, [
-    watershedID,
-    subcatchments,
-    subLoading,
-    subcatchments?.features?.length,
-    subcatchment,
     landuse,
-    setSubcatchment,
+    landuseData,
+    subLoading,
+    landuseError,
+    landuseLoading,
+    subcatchment,
+    subcatchments,
+    watershedID,
     setLanduse,
+    setSubcatchment,
+    setLanduseLegendMap,
+    setLanduseLegendVisible,
   ]);
 
   // Auto-disable channels if data unavailable
@@ -200,21 +231,27 @@ export default function Map(): JSX.Element {
     [watershedID],
   );
 
+  // Build landuse legend directly from landuse data
   useEffect(() => {
-    if (landuse && memoSubcatchments) {
+    if (landuse && landuseData && Object.keys(landuseData).length > 0) {
       const legend: Record<string, string> = {};
-      for (const feature of memoSubcatchments.features) {
-        const color = feature.properties?.landuse_color;
-        const desc = feature.properties?.landuse_desc;
+      for (const { color, desc } of Object.values(landuseData)) {
         if (color && desc && !(color in legend)) {
           legend[color] = desc;
         }
       }
       setLanduseLegendMap(legend);
-    } else if (!landuse) {
+    } else if (!landuse || !watershedID) {
       setLanduseLegendMap({});
+      setLanduseLegendVisible(false);
     }
-  }, [landuse, memoSubcatchments, setLanduseLegendMap]);
+  }, [
+    landuse,
+    landuseData,
+    watershedID,
+    setLanduseLegendMap,
+    setLanduseLegendVisible,
+  ]);
 
   const subcatchmentStyle = useCallback(
     (
@@ -230,14 +267,17 @@ export default function Map(): JSX.Element {
         }
       }
 
-      // Land use coloring
-      if (landuse && feature?.properties?.landuse_color) {
-        return {
-          color: "#2c2c2c",
-          weight: 0.75,
-          fillColor: feature.properties.landuse_color,
-          fillOpacity: 1,
-        };
+      // Land use coloring - lookup by topazid
+      if (landuse && feature?.properties?.topazid) {
+        const landuseInfo = landuseData?.[feature.properties.topazid];
+        if (landuseInfo?.color) {
+          return {
+            color: "#2c2c2c",
+            weight: 0.75,
+            fillColor: landuseInfo.color,
+            fillOpacity: 1,
+          };
+        }
       }
 
       // Default style
@@ -247,7 +287,7 @@ export default function Map(): JSX.Element {
         fillOpacity: 0,
       };
     },
-    [landuse, choroplethActive, getChoroplethStyle],
+    [landuse, landuseData, choroplethActive, getChoroplethStyle],
   );
 
   const channelStyle = useCallback(
@@ -309,7 +349,8 @@ export default function Map(): JSX.Element {
         {(watershedsLoading ||
           subLoading ||
           channelLoading ||
-          choroplethLoading) && (
+          choroplethLoading ||
+          landuseLoading) && (
           <div
             className={classes.mapLoadingOverlay}
             data-testid="map-loading-overlay"

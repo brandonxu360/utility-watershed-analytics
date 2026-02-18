@@ -7,7 +7,7 @@ import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import BottomPanel from "../components/bottom-panels/BottomPanel";
-import Map from "../components/map/Map";
+import WatershedMap from "../components/map/WatershedMap";
 import Paper from "@mui/material/Paper";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -70,7 +70,7 @@ export default function Home(): JSX.Element {
       </Paper>
       <div className={classes.mapWrapper}>
         <div className={classes.map}>
-          <Map />
+          <WatershedMap />
         </div>
         {isPanelOpen && (
           <BottomPanel isOpen={isPanelOpen}>{panelContent}</BottomPanel>

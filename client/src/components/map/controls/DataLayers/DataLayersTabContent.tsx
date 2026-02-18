@@ -106,7 +106,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button
               className={classes.layerTitle}
-              onClick={() => { }}
+              onClick={() => {}}
               style={{
                 fontWeight:
                   isActive && choroplethType === "evapotranspiration"
