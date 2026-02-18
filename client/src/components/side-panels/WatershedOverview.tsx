@@ -14,7 +14,7 @@ import Skeleton from "@mui/material/Skeleton";
 const useStyles = tss.create(({ theme }) => ({
   closeButton: {
     backgroundColor: theme.palette.error.main,
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.primary.light,
     fontSize: theme.typography.body2.fontSize,
     marginTop: theme.spacing(1.5),
     marginBottom: theme.spacing(1),
@@ -269,11 +269,18 @@ export default function WatershedOverview() {
 
           <Button
             className={classes.actionButton}
-            aria-label="Run WEPP cloud watershed analysis model"
-            title="Run WEPPcloud watershed analysis model"
+            aria-label="View Detailed WEPP Model Results"
+            title="View Detailed WEPP Model Results"
             variant="text"
+            onClick={() =>
+              window.open(
+                `https://wepp.cloud/weppcloud/runs/${watershedID}/disturbed9002_wbt/gl-dashboard`,
+                "_blank",
+                "noopener,noreferrer",
+              )
+            }
           >
-            WEPPcloud Watershed Analysis
+            View Detailed WEPP Model Results
           </Button>
         </div>
       </div>

@@ -47,13 +47,13 @@ const useStyles = tss.create(({ theme }) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: theme.spacing(1),
+    gap: theme.spacing(0.5),
     marginTop: theme.spacing(2),
   },
   linkButton: {
     color: theme.palette.accent.main,
+    fontSize: theme.typography.body2.fontSize,
     textDecoration: "none",
-    marginLeft: theme.spacing(0.5),
   },
 }));
 
@@ -194,7 +194,7 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
           <Button
             type="submit"
             variant="contained"
-            color="primary"
+            color="secondary"
             fullWidth
             size="large"
           >

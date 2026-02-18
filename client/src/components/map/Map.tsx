@@ -26,7 +26,6 @@ import ZoomOutControl from "./controls/ZoomOut";
 import LayersControl from "./controls/Layers";
 import LegendControl from "./controls/Legend";
 import SearchControl from "./controls/Search";
-import SettingsControl from "./controls/Settings";
 import LandUseLegend from "./controls/LandUseLegend";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import "leaflet/dist/leaflet.css";
@@ -43,6 +42,7 @@ const useStyles = tss.create(({ theme }) => ({
     right: 0,
     bottom: 0,
     backgroundColor: theme.palette.surface.overlay,
+    color: theme.palette.text.primary,
     zIndex: 1000,
     display: "flex",
     flexDirection: "column",
@@ -242,7 +242,7 @@ export default function Map(): JSX.Element {
 
       // Default style
       return {
-        color: "rgb(255, 255, 0, 0.5)",
+        color: "#ffff00",
         weight: 1,
         fillOpacity: 0,
       };
@@ -252,9 +252,9 @@ export default function Map(): JSX.Element {
 
   const channelStyle = useCallback(
     () => ({
-      color: "#ff6700",
-      fillOpacity: 0.75,
-      weight: 0.75,
+      color: "#000080",
+      fillOpacity: 1,
+      weight: 2,
     }),
     [],
   );
@@ -314,7 +314,7 @@ export default function Map(): JSX.Element {
             className={classes.mapLoadingOverlay}
             data-testid="map-loading-overlay"
           >
-            <CircularProgress size={50} />
+            <CircularProgress size={50} color="inherit" />
           </div>
         )}
 
@@ -344,7 +344,6 @@ export default function Map(): JSX.Element {
           />
           <ZoomInControl />
           <ZoomOutControl />
-          <SettingsControl />
         </div>
 
         {/* Handles URL navigation to a specified watershed */}

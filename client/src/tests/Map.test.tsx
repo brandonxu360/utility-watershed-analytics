@@ -309,7 +309,6 @@ describe("Map Component", () => {
         expect(screen.getByTestId("layers-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-in-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-out-control")).toBeInTheDocument();
-        expect(screen.getByTestId("settings-control")).toBeInTheDocument();
         expect(screen.getByTestId("landuse-legend")).toBeInTheDocument();
       });
     });
@@ -587,9 +586,9 @@ describe("Map Component", () => {
 
       const style = lastChannelGeoJsonProps!.style();
       expect(style).toMatchObject({
-        color: "#ff6700",
-        fillOpacity: 0.75,
-        weight: 0.75,
+        color: "#000080",
+        fillOpacity: 1,
+        weight: 2,
       });
     });
   });
@@ -804,7 +803,7 @@ describe("Map Component", () => {
       };
       const result = lastSubcatchmentStyleFn!(feature);
       expect(result).toMatchObject({
-        color: "rgb(255, 255, 0, 0.5)",
+        color: "#ffff00",
       });
     });
 
@@ -869,7 +868,7 @@ describe("Map Component", () => {
       };
       const result = lastSubcatchmentStyleFn!(feature);
       expect(result).toMatchObject({
-        color: "rgb(255, 255, 0, 0.5)",
+        color: "#ffff00",
       });
     });
 
@@ -895,7 +894,7 @@ describe("Map Component", () => {
 
       const result = lastSubcatchmentStyleFn!(undefined);
       expect(result).toMatchObject({
-        color: "rgb(255, 255, 0, 0.5)",
+        color: "#ffff00",
       });
     });
 
@@ -929,7 +928,7 @@ describe("Map Component", () => {
       // Should fall through to default style, not choropleth
       expect(mockGetChoroplethStyle).not.toHaveBeenCalled();
       expect(result).toMatchObject({
-        color: "rgb(255, 255, 0, 0.5)",
+        color: "#ffff00",
       });
     });
   });
