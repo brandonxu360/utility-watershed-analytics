@@ -32,6 +32,10 @@ const useStyles = tss.create(({ theme }) => ({
   layerCheckbox: {
     marginLeft: theme.spacing(1),
     color: theme.palette.primary.dark,
+    '&.Mui-disabled': {
+      color: theme.palette.muted.main,
+      opacity: 0.85,
+    },
   },
   helpIcon: {
     color: theme.palette.accent.main,
@@ -106,7 +110,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button
               className={classes.layerTitle}
-              onClick={() => {}}
+              onClick={() => { }}
               style={{
                 fontWeight:
                   isActive && choroplethType === "evapotranspiration"
