@@ -35,7 +35,7 @@ class MockDataSourceReader:
     def __init__(self):
         self.geojson_responses: dict[str, Mock] = {}
         self.parquet_responses: dict[str, pd.DataFrame] = {}
-        self.geojson_calls: list[tuple[str, Optional[Path]]] = []
+        self.geojson_calls: list[tuple[str, Optional[Path], Optional[dict]]] = []
         self.parquet_calls: list[tuple[str, Optional[Path]]] = []
     
     def add_geojson_response(self, url: str, layer_data: list[dict]):
@@ -74,7 +74,7 @@ class MockDataSourceReader:
         headers: Optional[dict] = None,
     ):
         """Return pre-configured mock response."""
-        self.geojson_calls.append((url, local_path))
+        self.geojson_calls.append((url, local_path, headers))
         if url in self.geojson_responses:
             return self.geojson_responses[url]
         raise ValueError(f"No mock response configured for URL: {url}")
@@ -402,6 +402,57 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
         subcatchment_calls = [c for c in self.reader.geojson_calls if "subcatchments" in c[0]]
         self.assertEqual(len(subcatchment_calls), 1)
         self.assertIn("ws-1", subcatchment_calls[0][0])
+    
+    def test_jwt_token_sends_bearer_header_for_watersheds(self):
+        """Test that a JWT token is forwarded as a Bearer header for the watershed fetch."""
+        token = "test-jwt-secret"
+        config = LoaderConfig(
+            retry=RetryConfig(max_attempts=1, base_delay_seconds=0.01),
+            api=ApiConfig(
+                weppcloud_base_url="https://mock.test",
+                weppcloud_batch_url="https://mock.test/batch/test",
+                weppcloud_jwt_token=token,
+            ),
+            geometry=GeometryConfig(),
+        )
+        loader = WatershedLoader(
+            reader=self.reader,
+            writer=self.writer,
+            discovery=self.discovery,
+            config=config,
+        )
+        
+        loader.load(runids=["ws-1", "ws-2"], verbose=False)
+        
+        watershed_calls = [c for c in self.reader.geojson_calls if "watersheds" in c[0]]
+        self.assertEqual(len(watershed_calls), 1)
+        _, _, headers = watershed_calls[0]
+        self.assertEqual(headers, {"Authorization": f"Bearer {token}"})
+    
+    def test_no_jwt_token_sends_no_auth_header(self):
+        """Test that without a JWT token, no Authorization header is sent."""
+        config = LoaderConfig(
+            retry=RetryConfig(max_attempts=1, base_delay_seconds=0.01),
+            api=ApiConfig(
+                weppcloud_base_url="https://mock.test",
+                weppcloud_batch_url="https://mock.test/batch/test",
+                weppcloud_jwt_token=None,
+            ),
+            geometry=GeometryConfig(),
+        )
+        loader = WatershedLoader(
+            reader=self.reader,
+            writer=self.writer,
+            discovery=self.discovery,
+            config=config,
+        )
+        
+        loader.load(runids=["ws-1", "ws-2"], verbose=False)
+        
+        watershed_calls = [c for c in self.reader.geojson_calls if "watersheds" in c[0]]
+        self.assertEqual(len(watershed_calls), 1)
+        _, _, headers = watershed_calls[0]
+        self.assertIsNone(headers)
 
 
 class TestDiscoveryUrlGeneration(unittest.TestCase):
