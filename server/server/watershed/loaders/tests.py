@@ -67,7 +67,12 @@ class MockDataSourceReader:
             mock_features.append(mock_feature)
         return mock_features
     
-    def read_geojson(self, url: str, local_path: Optional[Path] = None):
+    def read_geojson(
+        self,
+        url: str,
+        local_path: Optional[Path] = None,
+        headers: Optional[dict] = None,
+    ):
         """Return pre-configured mock response."""
         self.geojson_calls.append((url, local_path))
         if url in self.geojson_responses:

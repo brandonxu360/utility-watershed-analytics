@@ -37,6 +37,7 @@ services:
       - DEBUG=${DEBUG}
       # Data directory for watershed GeoJSON/Parquet caching (created in Dockerfile with proper permissions)
       - LOADER_DATA_DIR=/data
+      - WEPPCLOUD_JWT_TOKEN=${WEPPCLOUD_JWT_TOKEN}
     # Volume mount
     volumes:
       - .:/app

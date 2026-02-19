@@ -114,7 +114,11 @@ class WatershedLoader:
             url = self.discovery.get_watersheds_url()
             local_path = self.discovery.get_watersheds_local_path()
             
-            ds = self.reader.read_geojson(url, local_path)
+            # The master watersheds GeoJSON requires JWT auth; other endpoints do not.
+            jwt_token = self.config.api.weppcloud_jwt_token
+            headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else None
+            
+            ds = self.reader.read_geojson(url, local_path, headers=headers)
             
             if runids is not None:
                 count = self.writer.save_watersheds_filtered(ds[0], runids)
