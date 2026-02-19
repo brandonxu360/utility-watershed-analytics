@@ -19,7 +19,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   });
 });
 
-vi.mock("../components/map/Map", () => ({
+vi.mock("../components/map/WatershedMap", () => ({
   default: () => <div role="region" aria-label="Map" />,
 }));
 

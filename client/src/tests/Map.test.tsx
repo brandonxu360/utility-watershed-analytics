@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAppStore } from "../store/store";
 import { initialChoroplethState } from "../store/slices/choroplethSlice";
 import { toast } from "react-toastify";
-import Map from "../components/map/Map";
+import WatershedMap from "../components/map/WatershedMap";
 
 const mockNavigate = vi.fn();
 const mockClosePanel = vi.fn();
@@ -24,11 +24,16 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 const mockFetchWatersheds = vi.fn();
 const mockFetchSubcatchments = vi.fn();
 const mockFetchChannels = vi.fn();
+const mockFetchLanduse = vi.fn();
 
 vi.mock("../api/api", () => ({
   fetchWatersheds: () => mockFetchWatersheds(),
   fetchSubcatchments: (id: string) => mockFetchSubcatchments(id),
   fetchChannels: (id: string) => mockFetchChannels(id),
+}));
+
+vi.mock("../api/landuseApi", () => ({
+  fetchLanduse: (opts: { runId: string }) => mockFetchLanduse(opts),
 }));
 
 vi.mock("react-toastify", () => ({
@@ -201,6 +206,7 @@ const mockSubcatchmentData = {
       type: "Feature",
       geometry: { type: "Polygon", coordinates: [] },
       properties: {
+        topazid: 1,
         weppid: 101,
         landuse_color: "#ff0000",
         landuse_desc: "Forest",
@@ -211,6 +217,7 @@ const mockSubcatchmentData = {
       type: "Feature",
       geometry: { type: "Polygon", coordinates: [] },
       properties: {
+        topazid: 2,
         weppid: 102,
         landuse_color: "#00ff00",
         landuse_desc: "Grassland",
@@ -281,6 +288,10 @@ describe("Map Component", () => {
     mockFetchWatersheds.mockResolvedValue(mockWatershedData);
     mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
     mockFetchChannels.mockResolvedValue(mockChannelData);
+    mockFetchLanduse.mockResolvedValue({
+      1: { desc: "Forest", color: "#ff0000" },
+      2: { desc: "Grassland", color: "#00ff00" },
+    });
     mockUseChoropleth.mockReturnValue({
       isActive: false,
       getChoroplethStyle: mockGetChoroplethStyle,
@@ -295,14 +306,14 @@ describe("Map Component", () => {
 
   describe("rendering", () => {
     it("renders the map container", async () => {
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         expect(screen.getByTestId("map-container")).toBeInTheDocument();
       });
     });
 
     it("renders all control components", async () => {
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         expect(screen.getByTestId("legend-control")).toBeInTheDocument();
         expect(screen.getByTestId("search-control")).toBeInTheDocument();
@@ -314,14 +325,14 @@ describe("Map Component", () => {
     });
 
     it("renders scale control", async () => {
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         expect(screen.getByTestId("scale-control")).toBeInTheDocument();
       });
     });
 
     it("renders tile layer with satellite by default", async () => {
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         const tileLayer = screen.getByTestId("tile-layer");
         expect(tileLayer).toBeInTheDocument();
@@ -330,7 +341,7 @@ describe("Map Component", () => {
     });
 
     it("renders watersheds GeoJSON when no subcatchment enabled", async () => {
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         expect(screen.getByTestId("watersheds-geojson")).toBeInTheDocument();
       });
@@ -338,7 +349,7 @@ describe("Map Component", () => {
 
     it("does not render DataLayersControl when no watershedID", async () => {
       mockUseMatch.mockReturnValue(null);
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         expect(
           screen.queryByTestId("data-layers-control"),
@@ -350,7 +361,7 @@ describe("Map Component", () => {
       mockUseMatch.mockReturnValue({
         params: { webcloudRunId: "watershed-1" },
       });
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         expect(screen.getByTestId("data-layers-control")).toBeInTheDocument();
       });
@@ -360,7 +371,7 @@ describe("Map Component", () => {
       mockUseMatch.mockReturnValue({
         params: { webcloudRunId: "watershed-1" },
       });
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         const mapEffect = screen.getByTestId("map-effect");
         expect(mapEffect.getAttribute("data-watershed-id")).toBe("watershed-1");
@@ -373,7 +384,7 @@ describe("Map Component", () => {
       const error = new Error("Network error");
       mockFetchWatersheds.mockRejectedValue(error);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(screen.getByText(/Error: Network error/)).toBeInTheDocument();
@@ -383,9 +394,9 @@ describe("Map Component", () => {
 
   describe("loading states", () => {
     it("shows loading overlay when watersheds are loading", async () => {
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(screen.getByTestId("map-loading-overlay")).toBeInTheDocument();
@@ -400,7 +411,7 @@ describe("Map Component", () => {
         getChoroplethStyle: mockGetChoroplethStyle,
       });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(screen.getByTestId("map-loading-overlay")).toBeInTheDocument();
@@ -413,7 +424,7 @@ describe("Map Component", () => {
       mockUseMatch.mockReturnValue({
         params: { webcloudRunId: "watershed-1" },
       });
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastWatershedGeoJsonProps).toBeTruthy();
@@ -428,7 +439,7 @@ describe("Map Component", () => {
       mockUseMatch.mockReturnValue({
         params: { webcloudRunId: "watershed-1" },
       });
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastWatershedGeoJsonProps).toBeTruthy();
@@ -440,7 +451,7 @@ describe("Map Component", () => {
     });
 
     it("navigates to watershed on click", async () => {
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastWatershedGeoJsonProps).toBeTruthy();
@@ -480,7 +491,7 @@ describe("Map Component", () => {
       useAppStore.setState({ subcatchment: true });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(screen.getByTestId("subcatchment-layer")).toBeInTheDocument();
@@ -493,7 +504,7 @@ describe("Map Component", () => {
       });
       useAppStore.setState({ subcatchment: false });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(
@@ -509,7 +520,7 @@ describe("Map Component", () => {
       useAppStore.setState({ subcatchment: true });
       mockFetchSubcatchments.mockResolvedValue({ features: [] });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(screen.getByTestId("watersheds-geojson")).toBeInTheDocument();
@@ -532,7 +543,7 @@ describe("Map Component", () => {
       });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         const layer = screen.getByTestId("subcatchment-layer");
@@ -549,7 +560,7 @@ describe("Map Component", () => {
       useAppStore.setState({ channels: true });
       mockFetchChannels.mockResolvedValue(mockChannelData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(screen.getByTestId("channels-geojson")).toBeInTheDocument();
@@ -562,7 +573,7 @@ describe("Map Component", () => {
       });
       useAppStore.setState({ channels: false });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(
@@ -578,7 +589,7 @@ describe("Map Component", () => {
       useAppStore.setState({ channels: true });
       mockFetchChannels.mockResolvedValue(mockChannelData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastChannelGeoJsonProps).toBeTruthy();
@@ -609,7 +620,7 @@ describe("Map Component", () => {
       });
       mockFetchSubcatchments.mockResolvedValue({ features: [] });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(mockSetSubcatchment).toHaveBeenCalledWith(false);
@@ -632,7 +643,7 @@ describe("Map Component", () => {
       });
       mockFetchChannels.mockResolvedValue({ features: [] });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(mockSetChannels).toHaveBeenCalledWith(false);
@@ -657,7 +668,7 @@ describe("Map Component", () => {
       });
       mockFetchSubcatchments.mockResolvedValue({ features: [] });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(mockSetSubcatchment).toHaveBeenCalledWith(false);
@@ -683,12 +694,51 @@ describe("Map Component", () => {
       });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({
           "#ff0000": "Forest",
           "#00ff00": "Grassland",
+        });
+      });
+    });
+
+    it("prefers undisturbed landuse parquet values when available", async () => {
+      const mockSetLanduseLegendMap = vi.fn();
+
+      mockUseMatch.mockReturnValue({
+        params: { webcloudRunId: "watershed-1" },
+      });
+      useAppStore.setState({
+        subcatchment: true,
+        landuse: true,
+        setLanduseLegendMap: mockSetLanduseLegendMap,
+      });
+
+      mockFetchSubcatchments.mockResolvedValue({
+        features: [
+          {
+            id: "sub-1",
+            type: "Feature",
+            geometry: { type: "Polygon", coordinates: [] },
+            properties: { topazid: 1, weppid: 101 },
+          },
+        ],
+      });
+
+      mockFetchLanduse.mockResolvedValue({
+        1: { desc: "Pasture/Hay", color: "#dbd83d" },
+      });
+
+      renderWithProviders(<WatershedMap />);
+
+      await waitFor(() => {
+        expect(mockFetchLanduse).toHaveBeenCalledWith({
+          runId: "watershed-1",
+        });
+        expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({
+          "#dbd83d": "Pasture/Hay",
         });
       });
     });
@@ -706,14 +756,14 @@ describe("Map Component", () => {
       });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
       });
     });
 
-    it("handles features without landuse color/desc", async () => {
+    it("handles landuse entries without color/desc", async () => {
       const mockSetLanduseLegendMap = vi.fn();
 
       mockUseMatch.mockReturnValue({
@@ -724,19 +774,67 @@ describe("Map Component", () => {
         landuse: true,
         setLanduseLegendMap: mockSetLanduseLegendMap,
       });
-      mockFetchSubcatchments.mockResolvedValue({
-        features: [
-          {
-            id: "sub-1",
-            properties: { weppid: 1 },
-          },
-        ],
+      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
+      // Landuse entries without color/desc should be filtered out of legend
+      mockFetchLanduse.mockResolvedValue({
+        1: { desc: "", color: "" },
+        2: { desc: "", color: "" },
       });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
+      });
+    });
+
+    it("shows toast and disables landuse when undisturbed scenario returns no rows", async () => {
+      const mockSetLanduse = vi.fn();
+      const mockSetLanduseLegendMap = vi.fn();
+      const mockSetLanduseLegendVisible = vi.fn();
+
+      mockUseMatch.mockReturnValue({
+        params: { webcloudRunId: "watershed-1" },
+      });
+      useAppStore.setState({
+        subcatchment: true,
+        landuse: true,
+        setLanduse: mockSetLanduse,
+        setLanduseLegendMap: mockSetLanduseLegendMap,
+        setLanduseLegendVisible: mockSetLanduseLegendVisible,
+      });
+
+      mockFetchLanduse.mockResolvedValue({});
+      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
+
+      renderWithProviders(<WatershedMap />);
+
+      await waitFor(() => {
+        expect(toastErrorMock).toHaveBeenCalled();
+        expect(mockSetLanduse).toHaveBeenCalledWith(false);
+        expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
+        expect(mockSetLanduseLegendVisible).toHaveBeenCalledWith(false);
+      });
+    });
+
+    it("clears landuse legend when returning to home without watershed", async () => {
+      const mockSetLanduseLegendMap = vi.fn();
+      const mockSetLanduseLegendVisible = vi.fn();
+
+      mockUseMatch.mockReturnValue(undefined);
+      useAppStore.setState({
+        subcatchment: false,
+        landuse: true, // Still true from previous session
+        setLanduseLegendMap: mockSetLanduseLegendMap,
+        setLanduseLegendVisible: mockSetLanduseLegendVisible,
+      });
+
+      renderWithProviders(<WatershedMap />);
+
+      await waitFor(() => {
+        // Legend should be cleared since no watershed is selected
+        expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
+        expect(mockSetLanduseLegendVisible).toHaveBeenCalledWith(false);
       });
     });
   });
@@ -758,7 +856,7 @@ describe("Map Component", () => {
       useAppStore.setState({ subcatchment: true });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastSubcatchmentStyleFn).toBeTruthy();
@@ -790,7 +888,7 @@ describe("Map Component", () => {
       useAppStore.setState({ subcatchment: true, landuse: false });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastSubcatchmentStyleFn).toBeTruthy();
@@ -821,7 +919,7 @@ describe("Map Component", () => {
       useAppStore.setState({ subcatchment: true, landuse: true });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastSubcatchmentStyleFn).toBeTruthy();
@@ -829,14 +927,14 @@ describe("Map Component", () => {
 
       const feature = {
         type: "Feature" as const,
-        properties: { landuse_color: "#ff5500" },
+        properties: { topazid: 1, weppid: 101 },
         geometry: { type: "Point" as const, coordinates: [0, 0] },
       };
       const result = lastSubcatchmentStyleFn!(feature);
       expect(result).toMatchObject({
         color: "#2c2c2c",
         weight: 0.75,
-        fillColor: "#ff5500",
+        fillColor: "#ff0000",
         fillOpacity: 1,
       });
     });
@@ -855,7 +953,7 @@ describe("Map Component", () => {
       useAppStore.setState({ subcatchment: true, landuse: true });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastSubcatchmentStyleFn).toBeTruthy();
@@ -886,7 +984,7 @@ describe("Map Component", () => {
       useAppStore.setState({ subcatchment: true, landuse: false });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastSubcatchmentStyleFn).toBeTruthy();
@@ -913,7 +1011,7 @@ describe("Map Component", () => {
       useAppStore.setState({ subcatchment: true, landuse: false });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastSubcatchmentStyleFn).toBeTruthy();
@@ -935,7 +1033,7 @@ describe("Map Component", () => {
 
   describe("layer switching", () => {
     it("renders with Satellite layer by default", async () => {
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(screen.getByTestId("selected-layer").textContent).toBe(
@@ -945,7 +1043,7 @@ describe("Map Component", () => {
     });
 
     it("can switch to Topographic layer", async () => {
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(screen.getByTestId("toggle-layer")).toBeInTheDocument();
@@ -985,7 +1083,7 @@ describe("Map Component", () => {
       });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         const layer = screen.getByTestId("subcatchment-layer");
@@ -1018,7 +1116,7 @@ describe("Map Component", () => {
       });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         const layer = screen.getByTestId("subcatchment-layer");
@@ -1029,7 +1127,7 @@ describe("Map Component", () => {
 
   describe("edge cases", () => {
     it("handles undefined feature in watershed style", async () => {
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(lastWatershedGeoJsonProps).toBeTruthy();
@@ -1041,7 +1139,7 @@ describe("Map Component", () => {
 
     it("handles missing webcloudRunId in match params", async () => {
       mockUseMatch.mockReturnValue({ params: {} });
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(screen.getByTestId("watersheds-geojson")).toBeInTheDocument();
@@ -1055,7 +1153,7 @@ describe("Map Component", () => {
       mockUseMatch.mockReturnValue(null);
       useAppStore.setState({ subcatchment: true });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(mockFetchSubcatchments).not.toHaveBeenCalled();
@@ -1066,7 +1164,7 @@ describe("Map Component", () => {
       mockUseMatch.mockReturnValue(null);
       useAppStore.setState({ channels: true });
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
         expect(mockFetchChannels).not.toHaveBeenCalled();
@@ -1085,7 +1183,7 @@ describe("Map Component", () => {
       });
       mockFetchSubcatchments.mockReturnValue(new Promise(() => {}));
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       expect(mockSetSubcatchment).not.toHaveBeenCalled();
     });
@@ -1102,7 +1200,7 @@ describe("Map Component", () => {
       });
       mockFetchChannels.mockReturnValue(new Promise(() => {}));
 
-      renderWithProviders(<Map />);
+      renderWithProviders(<WatershedMap />);
 
       expect(mockSetChannels).not.toHaveBeenCalled();
     });
