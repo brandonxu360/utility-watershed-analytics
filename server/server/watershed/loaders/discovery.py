@@ -166,8 +166,13 @@ class WatershedDataDiscovery:
         
         logger.info(f"Discovering runids from {self.watersheds_url}")
         
+        headers = {}
+        jwt_token = self.config.api.weppcloud_jwt_token
+        if jwt_token:
+            headers["Authorization"] = f"Bearer {jwt_token}"
+        
         try:
-            response = requests.get(self.watersheds_url, timeout=30)
+            response = requests.get(self.watersheds_url, headers=headers, timeout=30)
             response.raise_for_status()
             data = response.json()
         except requests.RequestException as e:

@@ -22,13 +22,19 @@ class DataSourceReader(Protocol):
     - File format parsing (GeoJSON, Parquet)
     """
     
-    def read_geojson(self, url: str, local_path: Optional[Path] = None) -> Any:
+    def read_geojson(
+        self,
+        url: str,
+        local_path: Optional[Path] = None,
+        headers: Optional[dict] = None,
+    ) -> Any:
         """
         Read GeoJSON data from URL or local cache.
         
         Args:
             url: Remote URL to fetch from if local not available
             local_path: Optional local cache path to check first
+            headers: Optional HTTP headers to include in the request (e.g. Authorization)
         
         Returns:
             GDAL DataSource or compatible object with layer access
