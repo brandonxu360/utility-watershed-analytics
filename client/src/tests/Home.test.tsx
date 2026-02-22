@@ -1,11 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAppStore } from "../store/store";
-import { routeTree } from "../routeTree.gen";
 import Home from "../pages/Home";
-
-const router = createRouter({ routeTree });
 
 const mockNavigate = vi.fn();
 
@@ -111,13 +107,12 @@ describe("Home Component Tests", () => {
       expect(screen.getByText("Test Panel Content")).toBeInTheDocument();
     });
 
-    it("shows the small-screen notice when width < 768px", () => {
+    it("shows the small-screen notice when width < 768px", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).innerWidth = 500;
-      render(<RouterProvider router={router} />);
-      expect(
-        screen.getByText(/Best viewed on larger screens/i),
-      ).toBeInTheDocument();
+      render(<Home />);
+      const notice = await screen.findByText(/Best viewed on larger screens/i);
+      expect(notice).toBeInTheDocument();
     });
   });
 });
