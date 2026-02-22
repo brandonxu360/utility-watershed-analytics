@@ -13,7 +13,6 @@ import {
 } from "../utils/colormap";
 
 import { VEGETATION_BANDS } from "../utils/constants";
-import { watershedOverviewRoute } from "../routes/router";
 
 export const CHOROPLETH_CONFIG: Record<
   Exclude<ChoroplethType, "none">,
@@ -57,7 +56,7 @@ interface UseChoroplethResult {
 
 export function useChoropleth(): UseChoroplethResult {
   const match = useMatch({
-    from: watershedOverviewRoute.id,
+    from: '/watershed/$webcloudRunId',
     shouldThrow: false,
   });
   const runId = match?.params.webcloudRunId ?? null;
@@ -107,7 +106,7 @@ export function useChoropleth(): UseChoroplethResult {
 
       try {
         const data = await fetchRapChoropleth({
-          runId: runId,
+          runId: runId!,
           band: effectiveBands,
           year: choroplethYear,
         });

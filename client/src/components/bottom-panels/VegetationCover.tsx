@@ -3,7 +3,6 @@ import { tss } from "../../utils/tss";
 import { useAppStore } from "../../store/store";
 import { VegetationBandType } from "../../store/slices/choroplethSlice";
 import { useMatch } from "@tanstack/react-router";
-import { watershedOverviewRoute } from "../../routes/router";
 import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
 import { useChoropleth } from "../../hooks/useChoropleth";
@@ -87,7 +86,7 @@ export const VegetationCover: React.FC = () => {
   const { config } = useChoropleth();
 
   const match = useMatch({
-    from: watershedOverviewRoute.id,
+    from: '/watershed/$webcloudRunId',
     shouldThrow: false,
   });
   const runId = match ? match.params.webcloudRunId : null;
@@ -171,18 +170,18 @@ export const VegetationCover: React.FC = () => {
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-              mode: "hillslope",
-              topazId: selectedHillslopeId,
+            mode: "hillslope",
+            topazId: selectedHillslopeId,
+            runId: runId!,
+            year: selectedYear === "All" ? undefined : Number(selectedYear),
+          })
+          : runId
+            ? await fetchRap({
+              mode: "watershed",
+              weppId: 108,
               runId: runId,
               year: selectedYear === "All" ? undefined : Number(selectedYear),
             })
-          : runId
-            ? await fetchRap({
-                mode: "watershed",
-                weppId: 108,
-                runId: runId,
-                year: selectedYear === "All" ? undefined : Number(selectedYear),
-              })
             : null;
 
         if (!mounted) return;

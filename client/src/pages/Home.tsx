@@ -1,4 +1,3 @@
-import { watershedOverviewRoute } from "../routes/router";
 import { useMatch } from "@tanstack/react-router";
 import { useAppStore } from "../store/store";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
@@ -50,7 +49,7 @@ export default function Home(): JSX.Element {
   const { isPanelOpen, panelContent } = useAppStore();
 
   const match = useMatch({
-    from: watershedOverviewRoute.id,
+    from: '/watershed/$webcloudRunId',
     shouldThrow: false,
   });
 

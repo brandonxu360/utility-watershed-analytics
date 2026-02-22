@@ -13,7 +13,6 @@ import {
 import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { LeafletMouseEvent } from "leaflet";
-import { watershedOverviewRoute } from "../../routes/router";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { selectedStyle, defaultStyle } from "./constants";
 import { useAppStore } from "../../store/store";
@@ -109,7 +108,7 @@ export default function WatershedMap(): JSX.Element {
   );
 
   const match = useMatch({
-    from: watershedOverviewRoute.id,
+    from: '/watershed/$webcloudRunId',
     shouldThrow: false,
   });
 
@@ -351,13 +350,13 @@ export default function WatershedMap(): JSX.Element {
           channelLoading ||
           choroplethLoading ||
           landuseLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}

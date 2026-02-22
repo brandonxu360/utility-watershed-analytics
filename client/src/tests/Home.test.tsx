@@ -1,9 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import { RouterProvider } from "@tanstack/react-router";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAppStore } from "../store/store";
-import { router } from "../routes/router";
+import { routeTree } from "../routeTree.gen";
 import Home from "../pages/Home";
+
+const router = createRouter({ routeTree });
 
 const mockNavigate = vi.fn();
 

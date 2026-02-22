@@ -3,7 +3,6 @@ import { useMatch, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWatersheds } from "../../api/api";
 import { WatershedProperties } from "../../types/WatershedProperties";
-import { watershedOverviewRoute } from "../../routes/router";
 import { useAppStore } from "../../store/store";
 import { tss } from "../../utils/tss";
 import { toast } from "react-toastify";
@@ -166,7 +165,7 @@ export default function WatershedOverview() {
   const { resetOverlays } = useAppStore();
 
   const match = useMatch({
-    from: watershedOverviewRoute.id,
+    from: '/watershed/$webcloudRunId',
     shouldThrow: false,
   });
   const watershedID = match?.params.webcloudRunId ?? null;
