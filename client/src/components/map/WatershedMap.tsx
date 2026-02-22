@@ -108,7 +108,7 @@ export default function WatershedMap(): JSX.Element {
   );
 
   const match = useMatch({
-    from: '/watershed/$webcloudRunId',
+    from: "/watershed/$webcloudRunId",
     shouldThrow: false,
   });
 
@@ -350,13 +350,13 @@ export default function WatershedMap(): JSX.Element {
           channelLoading ||
           choroplethLoading ||
           landuseLoading) && (
-            <div
-              className={classes.mapLoadingOverlay}
-              data-testid="map-loading-overlay"
-            >
-              <CircularProgress size={50} color="inherit" />
-            </div>
-          )}
+          <div
+            className={classes.mapLoadingOverlay}
+            data-testid="map-loading-overlay"
+          >
+            <CircularProgress size={50} color="inherit" />
+          </div>
+        )}
 
         <TileLayer
           key={selectedLayerId}

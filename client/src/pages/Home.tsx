@@ -49,7 +49,7 @@ export default function Home(): JSX.Element {
   const { isPanelOpen, panelContent } = useAppStore();
 
   const match = useMatch({
-    from: '/watershed/$webcloudRunId',
+    from: "/watershed/$webcloudRunId",
     shouldThrow: false,
   });
 

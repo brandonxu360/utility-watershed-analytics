@@ -86,7 +86,7 @@ export const VegetationCover: React.FC = () => {
   const { config } = useChoropleth();
 
   const match = useMatch({
-    from: '/watershed/$webcloudRunId',
+    from: "/watershed/$webcloudRunId",
     shouldThrow: false,
   });
   const runId = match ? match.params.webcloudRunId : null;
@@ -170,18 +170,18 @@ export const VegetationCover: React.FC = () => {
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-            mode: "hillslope",
-            topazId: selectedHillslopeId,
-            runId: runId!,
-            year: selectedYear === "All" ? undefined : Number(selectedYear),
-          })
-          : runId
-            ? await fetchRap({
-              mode: "watershed",
-              weppId: 108,
-              runId: runId,
+              mode: "hillslope",
+              topazId: selectedHillslopeId,
+              runId: runId!,
               year: selectedYear === "All" ? undefined : Number(selectedYear),
             })
+          : runId
+            ? await fetchRap({
+                mode: "watershed",
+                weppId: 108,
+                runId: runId,
+                year: selectedYear === "All" ? undefined : Number(selectedYear),
+              })
             : null;
 
         if (!mounted) return;

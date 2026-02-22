@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
-import Home from '../pages/Home'
+import { createFileRoute } from "@tanstack/react-router";
+import Home from "../pages/Home";
 
-export const Route = createFileRoute('/watershed/$webcloudRunId')({
+export const Route = createFileRoute("/watershed/$webcloudRunId")({
   component: Home,
-})
+});

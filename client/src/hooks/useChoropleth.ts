@@ -56,7 +56,7 @@ interface UseChoroplethResult {
 
 export function useChoropleth(): UseChoroplethResult {
   const match = useMatch({
-    from: '/watershed/$webcloudRunId',
+    from: "/watershed/$webcloudRunId",
     shouldThrow: false,
   });
   const runId = match?.params.webcloudRunId ?? null;
