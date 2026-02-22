@@ -47,6 +47,7 @@ const useStyles = tss.create(({ theme }) => ({
     borderBottom: `1px solid ${theme.palette.primary.contrastText}`,
     padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
     justifyContent: "flex-start",
+    textTransform: "none",
     fontSize: theme.typography.body2.fontSize,
     "&:hover": {
       borderColor: theme.palette.accent.main,

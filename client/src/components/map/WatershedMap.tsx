@@ -351,13 +351,13 @@ export default function WatershedMap(): JSX.Element {
           channelLoading ||
           choroplethLoading ||
           landuseLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}
@@ -374,17 +374,17 @@ export default function WatershedMap(): JSX.Element {
         {/* TOP LEFT CONTROLS */}
         <div className="leaflet-top leaflet-left">
           <LegendControl />
-        </div>
-
-        {/* TOP RIGHT CONTROLS */}
-        <div className="leaflet-top leaflet-right">
-          <SearchControl />
           <LayersControl
             selectedLayerId={selectedLayerId}
             setSelectedLayerId={setSelectedLayerId}
           />
           <ZoomInControl />
           <ZoomOutControl />
+        </div>
+
+        {/* TOP RIGHT CONTROLS */}
+        <div className="leaflet-top leaflet-right">
+          <SearchControl />
         </div>
 
         {/* Handles URL navigation to a specified watershed */}
