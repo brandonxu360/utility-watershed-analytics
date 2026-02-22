@@ -13,12 +13,27 @@ const queryClient = new QueryClient();
 
 /* eslint-disable react-refresh/only-export-components */
 const Root = () => {
-  const [mode, setMode] = useState<"light" | "dark">("dark");
+  const [mode, setMode] = useState<"light" | "dark">(() => {
+    try {
+      const stored = localStorage.getItem("color-mode");
+      return stored === "light" ? "light" : "dark";
+    } catch {
+      return "dark";
+    }
+  });
 
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
-        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+        setMode((prevMode) => {
+          const newMode = prevMode === "light" ? "dark" : "light";
+          try {
+            localStorage.setItem("color-mode", newMode);
+          } catch {
+            // ignore localStorage errors
+          }
+          return newMode;
+        });
       },
       mode,
     }),
