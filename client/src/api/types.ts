@@ -59,6 +59,33 @@ export type LanduseEntry = {
 
 export type LanduseMap = Record<number, LanduseEntry>;
 
+// ── SBS Colormap ─────────────────────────────────────────────────────────────
+
+/**
+ * Color modes for SBS (Soil Burn Severity) raster tiles and legend.
+ * The backend is the source of truth; the frontend passes this value as
+ * a query param to both the tile endpoint and GET /api/watershed/sbs/colormap.
+ */
+export type SbsColorMode = "legacy" | "shift";
+
+/** One row returned by GET /api/watershed/sbs/colormap */
+export type SbsColormapEntry = {
+  /** SBS canonical class value (130 = Unburned … 133 = High) */
+  class_value: number;
+  /** Human-readable severity label */
+  label: string;
+  /** [R, G, B, A] (0-255 each) */
+  rgba: [number, number, number, number];
+  /** CSS hex string e.g. "#009E73" */
+  hex: string;
+};
+
+/** Full response from GET /api/watershed/sbs/colormap */
+export type SbsColormapResponse = {
+  mode: SbsColorMode;
+  entries: SbsColormapEntry[];
+};
+
 export type FetchLanduseOptions = {
   runId: string;
   include_schema?: boolean;
