@@ -54,25 +54,28 @@ _COLORMAPS: dict[ColorMode, dict[int, tuple[int, int, int, int]]] = {
 # what tile.py passes to rio-tiler's img.render(colormap=...).
 # The 130-based dicts above remain the API-facing representation (legend, etc.).
 
-_RENDER_LEGACY: dict[int, tuple[int, int, int, int]] = {
-    0: (0,   115, 74,  255),  # Unburned
-    1: (77,  230, 0,   255),  # Low
-    2: (255, 255, 0,   255),  # Moderate
-    3: (255, 0,   0,   255),  # High
-}
+# Canonical class order shared between canonical (130–133) and render (0–3) maps.
+# 0 → 130 (Unburned), 1 → 131 (Low), 2 → 132 (Moderate), 3 → 133 (High)
+_CLASS_ORDER: list[int] = [130, 131, 132, 133]
 
-_RENDER_SHIFT: dict[int, tuple[int, int, int, int]] = {
-    0: (0,   158, 115, 255),  # Unburned (Okabe-Ito)
-    1: (86,  180, 233, 255),  # Low
-    2: (240, 228, 66,  255),  # Moderate
-    3: (204, 121, 167, 255),  # High
-}
+def _build_render_colormap(canonical_colormap: dict[int, tuple[int, int, int, int]]) -> dict[int, tuple[int, int, int, int]]:
+    """
+    Derive a 0–3 render colormap from a canonical 130–133 colormap.
+    This avoids duplicating RGBA tuples and ensures that legend and render
+    outputs stay in sync if colors are updated.
+    """
+    return {
+        idx: canonical_colormap[class_value]
+        for idx, class_value in enumerate(_CLASS_ORDER)
+    }
+
+_RENDER_LEGACY: dict[int, tuple[int, int, int, int]] = _build_render_colormap(_LEGACY)
+_RENDER_SHIFT: dict[int, tuple[int, int, int, int]] = _build_render_colormap(_SHIFT)
 
 _RENDER_COLORMAPS: dict[ColorMode, dict[int, tuple[int, int, int, int]]] = {
     ColorMode.LEGACY: _RENDER_LEGACY,
     ColorMode.SHIFT:  _RENDER_SHIFT,
 }
-
 
 def get_colormap(
     mode: ColorMode = ColorMode.LEGACY,
