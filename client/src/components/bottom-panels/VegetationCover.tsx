@@ -166,23 +166,28 @@ export const VegetationCover: React.FC = () => {
   useEffect(() => {
     let mounted = true;
     async function loadRap() {
+      if (!runId) {
+        setRapTimeSeries([]);
+        setRapStatus({ state: "ready" });
+        return;
+      }
+
       setRapStatus({ state: "loading" });
 
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-              mode: "hillslope",
-              topazId: selectedHillslopeId,
-              runId: runId!,
-              year: selectedYear === "All" ? undefined : Number(selectedYear),
-            })
+            mode: "hillslope",
+            topazId: selectedHillslopeId,
+            runId: runId,
+            year: selectedYear === "All" ? undefined : Number(selectedYear),
+          })
           : runId
             ? await fetchRap({
-                mode: "watershed",
-                weppId: 108,
-                runId: runId,
-                year: selectedYear === "All" ? undefined : Number(selectedYear),
-              })
+              mode: "watershed",
+              runId: runId,
+              year: selectedYear === "All" ? undefined : Number(selectedYear),
+            })
             : null;
 
         if (!mounted) return;

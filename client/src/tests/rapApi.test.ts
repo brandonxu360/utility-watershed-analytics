@@ -89,49 +89,9 @@ describe("rapApi validation", () => {
   });
 
   describe("fetchRap - watershed mode validation", () => {
-    it("throws error when weppId is missing in watershed mode", async () => {
-      await expect(
-        fetchRap({ mode: "watershed", runId: TEST_RUN_PATH }),
-      ).rejects.toThrow("weppId required for watershed mode");
-    });
-
-    it("throws error for negative weppId", async () => {
-      await expect(
-        fetchRap({ mode: "watershed", weppId: -1, runId: TEST_RUN_PATH }),
-      ).rejects.toThrow("Invalid weppId provided");
-    });
-
-    it("throws error for weppId exceeding max value", async () => {
-      await expect(
-        fetchRap({ mode: "watershed", weppId: 1000001, runId: TEST_RUN_PATH }),
-      ).rejects.toThrow("Invalid weppId provided");
-    });
-
-    it("throws error for non-integer weppId", async () => {
-      await expect(
-        fetchRap({ mode: "watershed", weppId: 1.5, runId: TEST_RUN_PATH }),
-      ).rejects.toThrow("Invalid weppId provided");
-    });
-
-    it("accepts valid weppId", async () => {
-      await expect(
-        fetchRap({ mode: "watershed", weppId: 108, runId: TEST_RUN_PATH }),
-      ).resolves.not.toThrow();
-    });
-
-    it("accepts boundary weppId values", async () => {
-      await expect(
-        fetchRap({ mode: "watershed", weppId: 0, runId: TEST_RUN_PATH }),
-      ).resolves.not.toThrow();
-      await expect(
-        fetchRap({ mode: "watershed", weppId: 1000000, runId: TEST_RUN_PATH }),
-      ).resolves.not.toThrow();
-    });
-
     it("validates year in parameterized filters", async () => {
       await fetchRap({
         mode: "watershed",
-        weppId: 108,
         year: 2020,
         runId: TEST_RUN_PATH,
       });
@@ -150,7 +110,6 @@ describe("rapApi validation", () => {
     it("excludes invalid year from parameterized filters", async () => {
       await fetchRap({
         mode: "watershed",
-        weppId: 108,
         year: 3000,
         runId: TEST_RUN_PATH,
       });
@@ -303,7 +262,6 @@ describe("rapApi validation", () => {
       // Parameters are now in the filters array, not embedded in SQL strings
       await fetchRap({
         mode: "watershed",
-        weppId: 108,
         year: 2020,
         runId: TEST_RUN_PATH,
       });
@@ -316,11 +274,6 @@ describe("rapApi validation", () => {
       const aggregations = payload.aggregations as Array<{
         expression: string;
       }>;
-
-      // Verify weppId is in filters, not in SQL expression
-      const weppFilter = filters.find((f) => f.column === "hillslopes.wepp_id");
-      expect(weppFilter).toBeDefined();
-      expect(weppFilter?.value).toBe(108);
 
       // Verify year is in filters, not in SQL expression
       const yearFilter = filters.find((f) => f.column === "rap.year");

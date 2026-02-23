@@ -599,7 +599,6 @@ describe("VegetationCover", () => {
         expect(mockFetchRap).toHaveBeenCalledWith(
           expect.objectContaining({
             mode: "watershed",
-            weppId: 108,
           }),
         );
       });
