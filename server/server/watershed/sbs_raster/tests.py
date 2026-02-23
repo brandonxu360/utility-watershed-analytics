@@ -2,7 +2,7 @@
 Tests for the SBS (Soil Burn Severity) raster functionality.
 
 Covers:
-  - color_map module:  get_colormap() and get_colormap_metadata()
+  - color_map module:  get_colormap(), get_render_colormap() and get_colormap_metadata()
   - SbsColormapView:   GET /api/watersheds/sbs/colormap
   - SbsRasterTileView: GET /api/watersheds/<runid>/sbs/tiles/<z>/<x>/<y>.png
 """
@@ -10,6 +10,7 @@ Covers:
 import unittest
 from unittest.mock import patch, MagicMock
 
+import rasterio.errors
 from django.contrib.gis.geos import GEOSGeometry
 from django.urls import reverse
 from rest_framework import status
@@ -22,6 +23,7 @@ from server.watershed.sbs_raster.color_map import (
     SBS_CLASS_LABELS,
     get_colormap,
     get_colormap_metadata,
+    get_render_colormap,
 )
 
 
@@ -30,6 +32,7 @@ from server.watershed.sbs_raster.color_map import (
 # ---------------------------------------------------------------------------
 
 _SBS_CLASSES = {130, 131, 132, 133}
+_SBS_RENDER_CLASSES = {0, 1, 2, 3}
 
 _MINIMAL_PNG = (
     b'\x89PNG\r\n\x1a\n'          # PNG signature
@@ -132,6 +135,51 @@ class GetColormapTests(unittest.TestCase):
     def test_shift_unburned_is_okabe_ito(self):
         cm = get_colormap(ColorMode.SHIFT)
         self.assertEqual(cm[130], (0, 158, 115, 255))  # #009E73
+
+
+# ---------------------------------------------------------------------------
+# color_map: get_render_colormap()  — 0-based pixel keys for tile rendering
+# ---------------------------------------------------------------------------
+
+class GetRenderColormapTests(unittest.TestCase):
+    def test_legacy_contains_pixel_values_0_to_3(self):
+        self.assertEqual(set(get_render_colormap(ColorMode.LEGACY).keys()), _SBS_RENDER_CLASSES)
+
+    def test_shift_contains_pixel_values_0_to_3(self):
+        self.assertEqual(set(get_render_colormap(ColorMode.SHIFT).keys()), _SBS_RENDER_CLASSES)
+
+    def test_default_mode_is_legacy(self):
+        self.assertEqual(get_render_colormap(), get_render_colormap(ColorMode.LEGACY))
+
+    def test_rgba_tuples_have_four_channels(self):
+        for mode in ColorMode:
+            for px, rgba in get_render_colormap(mode).items():
+                self.assertEqual(len(rgba), 4, f"[{mode}] pixel {px}: expected 4 channels")
+
+    def test_rgba_channel_values_are_in_valid_range(self):
+        for mode in ColorMode:
+            for px, rgba in get_render_colormap(mode).items():
+                for i, ch in enumerate(rgba):
+                    self.assertGreaterEqual(ch, 0,   f"[{mode}] px {px} ch {i} < 0")
+                    self.assertLessEqual(ch,   255, f"[{mode}] px {px} ch {i} > 255")
+
+    def test_colours_match_canonical_colormap(self):
+        """Render colormap colours must be identical to the canonical 130-based map."""
+        canonical_order = [130, 131, 132, 133]  # Unburned, Low, Moderate, High
+        for mode in ColorMode:
+            canonical = get_colormap(mode)
+            render = get_render_colormap(mode)
+            for render_px, canonical_cls in enumerate(canonical_order):
+                self.assertEqual(
+                    render[render_px], canonical[canonical_cls],
+                    f"[{mode}] render pixel {render_px} != canonical class {canonical_cls}",
+                )
+
+    def test_legacy_and_shift_palettes_differ(self):
+        self.assertNotEqual(
+            get_render_colormap(ColorMode.LEGACY),
+            get_render_colormap(ColorMode.SHIFT),
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -391,7 +439,7 @@ class SbsRasterTileViewTests(APITestCase):
         tif_url_arg = mock_tile.call_args[0][0]
         expected = (
             f'https://wepp.cloud/weppcloud/runs/{self.watershed.runid}'
-            '/disturbed_wbt/download/sbs/sbs_map.tif'
+            '/disturbed_wbt/download/disturbed/prediction_wgs84_merged.wgs.tif'
         )
         self.assertEqual(tif_url_arg, expected)
 
@@ -425,6 +473,20 @@ class SbsRasterTileViewTests(APITestCase):
         When the requested tile lies outside the raster extent the view should
         return 404.  The view catches TileOutsideBoundsError (aliased from
         rio_tiler.errors.TileOutsideBounds) and raises DRF NotFound.
+        """
+        url = self._url(self.watershed.runid)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    # -- Rasterio HTTP 404 (TIF not found on remote) ------------------------
+
+    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_TILE_PATCH_TARGET, side_effect=rasterio.errors.RasterioIOError("HTTP response code: 404"))
+    def test_rasterio_io_error_returns_404(self, mock_tile, mock_cfg):
+        """
+        When rasterio cannot open the remote TIF (e.g. the run has no SBS
+        data, or the tile request hits a path that does not exist on WEPPcloud)
+        the view should return 404 rather than leaking a 500.
         """
         url = self._url(self.watershed.runid)
         response = self.client.get(url)

@@ -1,3 +1,5 @@
+import rasterio.errors
+
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -89,11 +91,13 @@ class SbsRasterTileView(APIView):
 
         config = get_config()
         base = config.api.weppcloud_base_url.rstrip('/')
-        tif_url = f"{base}/runs/{runid}/disturbed_wbt/download/sbs/sbs_map.tif"
+        tif_url = f"{base}/runs/{runid}/disturbed_wbt/download/disturbed/prediction_wgs84_merged.wgs.tif"
 
         try:
             png_bytes = get_tile_png(tif_url, z, x, y, mode)
         except TileOutsideBounds:
             raise NotFound("Tile is outside the bounds of this raster.")
+        except rasterio.errors.RasterioIOError:
+            raise NotFound("SBS raster data not available for this watershed.")
 
         return HttpResponse(png_bytes, content_type='image/png')

@@ -3,7 +3,7 @@ Generate PNG map tiles from SBS GeoTIFF using rio-tiler.
 """
 
 from rio_tiler.io import Reader
-from .color_map import ColorMode, get_colormap
+from .color_map import ColorMode, get_render_colormap
 
 
 def get_tile_png(
@@ -16,10 +16,11 @@ def get_tile_png(
     """
     Return PNG bytes for the given Web Mercator tile (z, x, y).
 
-    Fetches the colormap for the requested color mode from color_map so that
-    the rendered tile always matches what the frontend legend displays.
+    Uses get_render_colormap() (0-based pixel keys) so the colormap indices
+    match the raw pixel values stored in the SBS GeoTIFF (0–3).  The legend
+    API continues to use the canonical 130-133 class codes.
     """
-    colormap = get_colormap(mode)
+    colormap = get_render_colormap(mode)
     with Reader(tif_url) as src:
         img = src.tile(tile_x, tile_y, tile_z, tilesize=256)
     return img.render(colormap=colormap)

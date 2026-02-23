@@ -49,14 +49,52 @@ _COLORMAPS: dict[ColorMode, dict[int, tuple[int, int, int, int]]] = {
 }
 
 
+# Render colormaps keyed by the raw pixel values stored in the raster (0–3).
+# The raster encodes 0=Unburned, 1=Low, 2=Moderate, 3=High — these dicts are
+# what tile.py passes to rio-tiler's img.render(colormap=...).
+# The 130-based dicts above remain the API-facing representation (legend, etc.).
+
+_RENDER_LEGACY: dict[int, tuple[int, int, int, int]] = {
+    0: (0,   115, 74,  255),  # Unburned
+    1: (77,  230, 0,   255),  # Low
+    2: (255, 255, 0,   255),  # Moderate
+    3: (255, 0,   0,   255),  # High
+}
+
+_RENDER_SHIFT: dict[int, tuple[int, int, int, int]] = {
+    0: (0,   158, 115, 255),  # Unburned (Okabe-Ito)
+    1: (86,  180, 233, 255),  # Low
+    2: (240, 228, 66,  255),  # Moderate
+    3: (204, 121, 167, 255),  # High
+}
+
+_RENDER_COLORMAPS: dict[ColorMode, dict[int, tuple[int, int, int, int]]] = {
+    ColorMode.LEGACY: _RENDER_LEGACY,
+    ColorMode.SHIFT:  _RENDER_SHIFT,
+}
+
+
 def get_colormap(
     mode: ColorMode = ColorMode.LEGACY,
 ) -> dict[int, tuple[int, int, int, int]]:
-    """Return RGBA colormap dict for the given color mode.
+    """Return RGBA colormap dict keyed by canonical class codes (130–133).
 
-    Intended for use by tile.py when rendering PNG tiles via rio-tiler.
+    Used for API responses / legend metadata. For tile rendering, use
+    get_render_colormap() instead.
     """
     return _COLORMAPS[mode]
+
+
+def get_render_colormap(
+    mode: ColorMode = ColorMode.LEGACY,
+) -> dict[int, tuple[int, int, int, int]]:
+    """Return RGBA colormap dict keyed by raw raster pixel values (0–3).
+
+    The SBS GeoTIFF stores 0=Unburned, 1=Low, 2=Moderate, 3=High.
+    Pass this dict to rio-tiler's img.render(colormap=...) so tiles are
+    coloured correctly.
+    """
+    return _RENDER_COLORMAPS[mode]
 
 
 def get_colormap_metadata(mode: ColorMode = ColorMode.LEGACY) -> list[dict]:

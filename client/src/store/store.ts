@@ -19,12 +19,15 @@ import {
   type SharedActionsSlice,
 } from "./slices/sharedActionsSlice";
 
+import { createSbsSlice, type SbsSlice } from "./slices/sbsSlice";
+
 export type AppState = OverlaySlice &
   LanduseSlice &
   PanelSlice &
   HillslopeSlice &
   ChoroplethSlice &
-  SharedActionsSlice;
+  SharedActionsSlice &
+  SbsSlice;
 
 export const useAppStore = create<AppState>()(
   devtools(
@@ -35,6 +38,7 @@ export const useAppStore = create<AppState>()(
       ...createHillslopeSlice(...a),
       ...createChoroplethSlice(...a),
       ...createSharedActionsSlice(...a),
+      ...createSbsSlice(...a),
     }),
     { name: "app-store" },
   ),
