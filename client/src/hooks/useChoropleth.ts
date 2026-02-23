@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
-import { useMatch } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { useAppStore } from "../store/store";
 import { ChoroplethType } from "../store/slices/choroplethSlice";
 import { fetchRapChoropleth } from "../api/rapApi";
@@ -55,11 +55,12 @@ interface UseChoroplethResult {
 }
 
 export function useChoropleth(): UseChoroplethResult {
-  const match = useMatch({
-    from: "/watershed/$webcloudRunId",
-    shouldThrow: false,
-  });
-  const runId = match?.params.webcloudRunId ?? null;
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
 
   const {
     choropleth: {

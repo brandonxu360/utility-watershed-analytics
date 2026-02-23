@@ -6,14 +6,14 @@ import WatershedOverview from "../components/side-panels/WatershedOverview";
 
 const mockNavigate = vi.fn();
 
-const { mockUseMatch } = vi.hoisted(() => ({
-  mockUseMatch: vi.fn(),
+const { mockUseParams } = vi.hoisted(() => ({
+  mockUseParams: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
   return Object.assign({}, actual, {
-    useMatch: () => mockUseMatch(),
+    useParams: () => mockUseParams(),
     useNavigate: () => mockNavigate,
   });
 });
@@ -83,9 +83,7 @@ describe("WatershedOverview", () => {
 
   describe("loading state", () => {
     it("renders skeleton panel while loading", () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "test-watershed-123" },
-      });
+      mockUseParams.mockReturnValue("test-watershed-123");
       mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
 
       renderWithProviders(<WatershedOverview />);
@@ -96,9 +94,7 @@ describe("WatershedOverview", () => {
     });
 
     it("renders skeleton buttons while loading", () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "test-watershed-123" },
-      });
+      mockUseParams.mockReturnValue("test-watershed-123");
       mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedOverview />);
@@ -110,9 +106,7 @@ describe("WatershedOverview", () => {
 
   describe("error state", () => {
     it("renders error message when fetch fails", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "test-watershed-123" },
-      });
+      mockUseParams.mockReturnValue("test-watershed-123");
       mockFetchWatersheds.mockRejectedValue(new Error("Network error"));
 
       renderWithProviders(<WatershedOverview />);
@@ -125,9 +119,7 @@ describe("WatershedOverview", () => {
 
   describe("no data states", () => {
     it("renders message when no watershed data is found", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "test-watershed-123" },
-      });
+      mockUseParams.mockReturnValue("test-watershed-123");
       mockFetchWatersheds.mockResolvedValue({ features: null });
 
       renderWithProviders(<WatershedOverview />);
@@ -142,9 +134,7 @@ describe("WatershedOverview", () => {
 
   describe("successful rendering", () => {
     beforeEach(() => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "test-watershed-123" },
-      });
+      mockUseParams.mockReturnValue("test-watershed-123");
       mockFetchWatersheds.mockResolvedValue(mockWatershedData);
     });
 
@@ -218,9 +208,7 @@ describe("WatershedOverview", () => {
 
   describe("navigation", () => {
     beforeEach(() => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "test-watershed-123" },
-      });
+      mockUseParams.mockReturnValue("test-watershed-123");
       mockFetchWatersheds.mockResolvedValue(mockWatershedData);
     });
 
@@ -263,9 +251,7 @@ describe("WatershedOverview", () => {
 
   describe("N/A fallbacks", () => {
     it("renders N/A when county is not available", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "test-watershed-na" },
-      });
+      mockUseParams.mockReturnValue("test-watershed-na");
       mockFetchWatersheds.mockResolvedValue({
         features: [
           {
@@ -292,9 +278,7 @@ describe("WatershedOverview", () => {
 
   describe("different watershed selection", () => {
     it("renders correct watershed when ID changes", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "test-watershed-456" },
-      });
+      mockUseParams.mockReturnValue("test-watershed-456");
       mockFetchWatersheds.mockResolvedValue(mockWatershedData);
 
       renderWithProviders(<WatershedOverview />);
@@ -309,9 +293,7 @@ describe("WatershedOverview", () => {
 
   describe("accessibility", () => {
     beforeEach(() => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "test-watershed-123" },
-      });
+      mockUseParams.mockReturnValue("test-watershed-123");
       mockFetchWatersheds.mockResolvedValue(mockWatershedData);
     });
 

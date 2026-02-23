@@ -10,12 +10,14 @@ import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import { useAppStore } from "../store/store";
 
-const mockUseMatch = vi.fn(() => ({ params: { webcloudRunId: "or,wa-108" } }));
+const { mockUseParams } = vi.hoisted(() => ({
+  mockUseParams: vi.fn(),
+}));
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
   return Object.assign({}, actual, {
-    useMatch: () => mockUseMatch(),
+    useParams: () => mockUseParams(),
   });
 });
 
@@ -107,7 +109,7 @@ beforeEach(() => {
       { year: 2020, shrub: 30, tree: 40, coverage: 70 },
     ]),
   );
-  mockUseMatch.mockReturnValue({ params: { webcloudRunId: "or,wa-108" } });
+  mockUseParams.mockReturnValue("batch;;test-batch;;test-run");
   mockUseChoropleth.mockReturnValue({ config: null });
 
   useAppStore.setState({
@@ -748,9 +750,7 @@ describe("VegetationCover", () => {
     });
 
     it("returns null data when no watershedID and no hillslope", async () => {
-      mockUseMatch.mockReturnValue(
-        null as unknown as ReturnType<typeof mockUseMatch>,
-      );
+      mockUseParams.mockReturnValue(undefined);
 
       await act(async () => {
         render(<VegetationCover />);

@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
 import { useAppStore } from "../../store/store";
 import { VegetationBandType } from "../../store/slices/choroplethSlice";
-import { useMatch } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
 import { useChoropleth } from "../../hooks/useChoropleth";
@@ -85,11 +85,12 @@ export const VegetationCover: React.FC = () => {
 
   const { config } = useChoropleth();
 
-  const match = useMatch({
-    from: "/watershed/$webcloudRunId",
-    shouldThrow: false,
-  });
-  const runId = match ? match.params.webcloudRunId : null;
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
 
   // Map UI option to band type
   const vegetationOptionToBand: Record<VegetationOption, VegetationBandType> = {
