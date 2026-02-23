@@ -43,7 +43,9 @@ ENV DJANGO_SETTINGS_MODULE=server.settings
 
 # Install Python dependencies (notably Django and psycopg)
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN apk add --no-cache --virtual .build-deps build-base python3-dev \
+    && pip install -r requirements.txt && pip install rio-tiler \
+    && apk del .build-deps
 
 # Make sure scripts in venv are executable
 RUN chmod +x /venv/bin/*
