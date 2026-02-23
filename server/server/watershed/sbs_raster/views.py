@@ -7,7 +7,6 @@ from rest_framework.exceptions import NotFound
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rio_tiler.errors import TileOutsideBounds
 
-from server.watershed.models import Watershed
 from server.watershed.sbs_raster.color_map import ColorMode, get_colormap_metadata
 from server.watershed.sbs_raster.tile import get_tile_png
 from server.watershed.loaders.config import get_config
@@ -79,10 +78,6 @@ class SbsRasterTileView(APIView):
         responses={200: bytes},
     )
     def get(self, request, runid: str, z: int, x: int, y: int):
-        # Verify the watershed exists before attempting an expensive tile fetch.
-        if not Watershed.objects.filter(runid=runid).exists():
-            raise NotFound(f"Watershed '{runid}' not found.")
-
         raw_mode = request.query_params.get('mode', ColorMode.LEGACY.value)
         try:
             mode = ColorMode(raw_mode)
@@ -98,6 +93,6 @@ class SbsRasterTileView(APIView):
         except TileOutsideBounds:
             raise NotFound("Tile is outside the bounds of this raster.")
         except rasterio.errors.RasterioIOError:
-            raise NotFound("SBS raster data not available for this watershed.")
+            raise NotFound("SBS raster data not found or not available for this watershed.")
 
         return HttpResponse(png_bytes, content_type='image/png')
