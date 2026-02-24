@@ -51,9 +51,9 @@ const useStyles = tss.create(({ theme }) => ({
     },
   },
   partnerSection: {
-    display: 'block',
-    padding: '40px 40px 0 40px',
-  }
+    display: "block",
+    padding: "40px 40px 0 40px",
+  },
 }));
 
 const scrollToUniversity = (e: React.MouseEvent, name: string) => {
@@ -293,7 +293,7 @@ export function TeamMainContent() {
     <div className={`${classes.aboutContainerMain} scroll-container`}>
       <div className={classes.textCenter}>
         {Object.entries(groupedMembers).map(([university, members]) => (
-          <section key={university} id={university.replace(/\s+/g, '_')}>
+          <section key={university} id={university.replace(/\s+/g, "_")}>
             <h2 className={classes.univHeading}>{university}</h2>
             {members.map((person, index) => (
               <div key={index} className={classes.memberCard}>

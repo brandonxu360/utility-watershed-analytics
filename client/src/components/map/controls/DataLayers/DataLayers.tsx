@@ -97,6 +97,7 @@ export default function DataLayersControl() {
     clearSelectedHillslope,
     closePanel,
     resetOverlays,
+    setSbsEnabled,
   } = useAppStore();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -138,6 +139,10 @@ export default function DataLayersControl() {
       if (!checked) {
         resetOverlays();
       }
+    }
+
+    if (id === "soilBurnSeverity") {
+      setSbsEnabled(checked);
     }
   };
 

@@ -32,7 +32,7 @@ const useStyles = tss.create(({ theme }) => ({
   layerCheckbox: {
     marginLeft: theme.spacing(1),
     color: theme.palette.primary.dark,
-    '&.Mui-disabled': {
+    "&.Mui-disabled": {
       color: theme.palette.muted.main,
       opacity: 0.85,
     },
@@ -61,6 +61,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
     subcatchment,
     channels,
     landuse,
+    sbsEnabled,
     choropleth: { type: choroplethType },
     setSubcatchment,
     setLanduse,
@@ -110,7 +111,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button
               className={classes.layerTitle}
-              onClick={() => { }}
+              onClick={() => {}}
               style={{
                 fontWeight:
                   isActive && choroplethType === "evapotranspiration"
@@ -154,6 +155,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button className={classes.layerTitle}>Soil Burn Severity</Button>
             <Checkbox
+              checked={sbsEnabled}
               onChange={handleChange}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "soilBurnSeverity" } }}

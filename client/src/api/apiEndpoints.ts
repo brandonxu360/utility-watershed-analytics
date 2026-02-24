@@ -16,4 +16,12 @@ export const API_ENDPOINTS = {
   CHANNELS: (id: string) => `${API_BASE_URL}/watershed/${id}/channels`,
   // Query engine endpoint for running queries against a run path.
   QUERY_RUN: (batchPath: string) => `${QUERY_RUN_PATH}/${batchPath}/query`,
+  // SBS colormap metadata — used for legend rendering and color-shift toggle.
+  // The backend is the single source of truth; both tile rendering and the
+  // frontend legend consume this endpoint so colours always agree.
+  SBS_COLORMAP: `${API_BASE_URL}/watershed/sbs/colormap`,
+  // SBS raster tile URL template for use as a Leaflet TileLayer.
+  // Replace {runId} with the watershed run ID before passing to TileLayer.
+  SBS_TILE: (runId: string) =>
+    `${API_BASE_URL}/watershed/${runId}/sbs/tiles/{z}/{x}/{y}.png`,
 };
