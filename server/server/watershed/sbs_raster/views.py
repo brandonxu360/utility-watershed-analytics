@@ -55,7 +55,7 @@ class SbsRasterTileView(APIView):
     coords (z, x, y).
 
     Intended for use as a slippy-map TileLayer URL template, e.g.:
-        /api/watersheds/{runid}/sbs/tiles/{z}/{x}/{y}.png?mode=shift
+        /api/watershed/{runid}/sbs/tiles/{z}/{x}/{y}.png?mode=shift
 
     URL params:
         runid: Watershed run identifier.

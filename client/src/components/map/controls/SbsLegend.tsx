@@ -95,16 +95,16 @@ export default function SbsLegend() {
             Soil Burn Severity
           </Typography>
           <div className={classes.toggle}>
-            <Typography className={classes.toggleLabel}>
-              Colorblind
-            </Typography>
+            <Typography className={classes.toggleLabel}>Colorblind</Typography>
             <Switch
               size="small"
               checked={sbsColorMode === "shift"}
               onChange={(_, checked) =>
                 setSbsColorMode(checked ? "shift" : "legacy")
               }
-              inputProps={{ "aria-label": "Colorblind-friendly palette toggle" }}
+              inputProps={{
+                "aria-label": "Colorblind-friendly palette toggle",
+              }}
             />
           </div>
         </div>
@@ -129,9 +129,7 @@ export default function SbsLegend() {
                 style={{ background: entry.hex }}
                 aria-hidden="true"
               />
-              <Typography className={classes.label}>
-                {entry.label}
-              </Typography>
+              <Typography className={classes.label}>{entry.label}</Typography>
             </div>
           ))}
         </div>

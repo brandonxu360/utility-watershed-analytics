@@ -437,7 +437,11 @@ export default function WatershedMap(): JSX.Element {
         )}
 
         {sbsEnabled && watershedID && (
-          <SbsLayer runId={watershedID} mode={sbsColorMode} bounds={sbsBounds} />
+          <SbsLayer
+            runId={watershedID}
+            mode={sbsColorMode}
+            bounds={sbsBounds}
+          />
         )}
       </MapContainer>
 

@@ -1,11 +1,5 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
-import {
-  SbsColorMode,
-  SbsColormapEntry,
-  SbsColormapResponse,
-} from "./types";
-
-export type { SbsColorMode, SbsColormapEntry, SbsColormapResponse };
+import { SbsColorMode, SbsColormapResponse } from "./types";
 
 /**
  * Fetch SBS colormap metadata from the backend.
