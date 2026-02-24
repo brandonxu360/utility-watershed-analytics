@@ -5,8 +5,8 @@ Class definitions sourced from:
   https://github.com/rogerlew/wepppy/blob/master/wepppy/nodb/mods/baer/README.sbs_map.md
 
 The **backend is the source of truth** for all SBS colormaps.
-tile.py uses get_colormap() to render PNG tiles server-side; the frontend
-queries GET /api/sbs/colormap?mode=<legacy|shift> to build legends and
+tile.py uses get_render_colormap() to render PNG tiles server-side; the frontend
+queries GET /api/watershed/sbs/colormap?mode=<legacy|shift> to build legends and
 support the colorblind-friendly color-shift toggle — both sides always
 agree because they share this single definition.
 """
