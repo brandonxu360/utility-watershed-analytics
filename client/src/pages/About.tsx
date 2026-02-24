@@ -43,10 +43,6 @@ const useStyles = tss.create(({ theme }) => ({
     },
   },
   logoContainer: {
-    /*backgroundColor:
-      theme.palette.mode === "light"
-        ? "rgba(133, 133, 133, 0.75)"
-        : "transparent",*/
     padding: "1rem",
     borderRadius: "8px",
     marginBottom: "1rem",
@@ -107,7 +103,7 @@ export function AboutSidePanelContent() {
       <div className={classes.navButtons} style={{ marginBottom: "1rem" }}>
         <button
           onClick={() => {
-            navigate({ to: "/about-wepp" });
+            navigate({ to: "/about/about-wepp" });
           }}
           className={classes.actionButton}
           aria-label="Learn about WEPP"
@@ -118,7 +114,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about-wepp-cloud" });
+            navigate({ to: "/about/about-wepp-cloud" });
           }}
           className={classes.actionButton}
           aria-label="Learn about WEPPcloud"
@@ -129,7 +125,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about-rhessys" });
+            navigate({ to: "/about/about-rhessys" });
           }}
           className={classes.actionButton}
           aria-label="Learn about RHESSys"
@@ -140,7 +136,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about-sbs" });
+            navigate({ to: "/about/about-sbs" });
           }}
           className={classes.actionButton}
           aria-label="Learn about Predicted SBS"
@@ -151,7 +147,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about-watar" });
+            navigate({ to: "/about/about-watar" });
           }}
           className={classes.actionButton}
           aria-label="Learn about WATAR"
@@ -162,7 +158,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/scenarios" });
+            navigate({ to: "/about/scenarios" });
           }}
           className={classes.actionButton}
           aria-label="Learn about Scenarios"

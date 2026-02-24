@@ -10,26 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeamRouteImport } from './routes/team'
-import { Route as ScenariosRouteImport } from './routes/scenarios'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AboutWeppCloudRouteImport } from './routes/about-wepp-cloud'
-import { Route as AboutWeppRouteImport } from './routes/about-wepp'
-import { Route as AboutWatarRouteImport } from './routes/about-watar'
-import { Route as AboutSbsRouteImport } from './routes/about-sbs'
-import { Route as AboutRhessysRouteImport } from './routes/about-rhessys'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutIndexRouteImport } from './routes/about/index'
 import { Route as WatershedWebcloudRunIdRouteImport } from './routes/watershed.$webcloudRunId'
+import { Route as AboutScenariosRouteImport } from './routes/about/scenarios'
+import { Route as AboutAboutWeppCloudRouteImport } from './routes/about/about-wepp-cloud'
+import { Route as AboutAboutWeppRouteImport } from './routes/about/about-wepp'
+import { Route as AboutAboutWatarRouteImport } from './routes/about/about-watar'
+import { Route as AboutAboutSbsRouteImport } from './routes/about/about-sbs'
+import { Route as AboutAboutRhessysRouteImport } from './routes/about/about-rhessys'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ScenariosRoute = ScenariosRouteImport.update({
-  id: '/scenarios',
-  path: '/scenarios',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -42,31 +38,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutWeppCloudRoute = AboutWeppCloudRouteImport.update({
-  id: '/about-wepp-cloud',
-  path: '/about-wepp-cloud',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutWeppRoute = AboutWeppRouteImport.update({
-  id: '/about-wepp',
-  path: '/about-wepp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutWatarRoute = AboutWatarRouteImport.update({
-  id: '/about-watar',
-  path: '/about-watar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutSbsRoute = AboutSbsRouteImport.update({
-  id: '/about-sbs',
-  path: '/about-sbs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRhessysRoute = AboutRhessysRouteImport.update({
-  id: '/about-rhessys',
-  path: '/about-rhessys',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -77,111 +48,144 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutIndexRoute = AboutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AboutRoute,
+} as any)
 const WatershedWebcloudRunIdRoute = WatershedWebcloudRunIdRouteImport.update({
   id: '/watershed/$webcloudRunId',
   path: '/watershed/$webcloudRunId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutScenariosRoute = AboutScenariosRouteImport.update({
+  id: '/scenarios',
+  path: '/scenarios',
+  getParentRoute: () => AboutRoute,
+} as any)
+const AboutAboutWeppCloudRoute = AboutAboutWeppCloudRouteImport.update({
+  id: '/about-wepp-cloud',
+  path: '/about-wepp-cloud',
+  getParentRoute: () => AboutRoute,
+} as any)
+const AboutAboutWeppRoute = AboutAboutWeppRouteImport.update({
+  id: '/about-wepp',
+  path: '/about-wepp',
+  getParentRoute: () => AboutRoute,
+} as any)
+const AboutAboutWatarRoute = AboutAboutWatarRouteImport.update({
+  id: '/about-watar',
+  path: '/about-watar',
+  getParentRoute: () => AboutRoute,
+} as any)
+const AboutAboutSbsRoute = AboutAboutSbsRouteImport.update({
+  id: '/about-sbs',
+  path: '/about-sbs',
+  getParentRoute: () => AboutRoute,
+} as any)
+const AboutAboutRhessysRoute = AboutAboutRhessysRouteImport.update({
+  id: '/about-rhessys',
+  path: '/about-rhessys',
+  getParentRoute: () => AboutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/about-rhessys': typeof AboutRhessysRoute
-  '/about-sbs': typeof AboutSbsRoute
-  '/about-watar': typeof AboutWatarRoute
-  '/about-wepp': typeof AboutWeppRoute
-  '/about-wepp-cloud': typeof AboutWeppCloudRoute
+  '/about': typeof AboutRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/scenarios': typeof ScenariosRoute
   '/team': typeof TeamRoute
+  '/about/about-rhessys': typeof AboutAboutRhessysRoute
+  '/about/about-sbs': typeof AboutAboutSbsRoute
+  '/about/about-watar': typeof AboutAboutWatarRoute
+  '/about/about-wepp': typeof AboutAboutWeppRoute
+  '/about/about-wepp-cloud': typeof AboutAboutWeppCloudRoute
+  '/about/scenarios': typeof AboutScenariosRoute
   '/watershed/$webcloudRunId': typeof WatershedWebcloudRunIdRoute
+  '/about/': typeof AboutIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/about-rhessys': typeof AboutRhessysRoute
-  '/about-sbs': typeof AboutSbsRoute
-  '/about-watar': typeof AboutWatarRoute
-  '/about-wepp': typeof AboutWeppRoute
-  '/about-wepp-cloud': typeof AboutWeppCloudRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/scenarios': typeof ScenariosRoute
   '/team': typeof TeamRoute
+  '/about/about-rhessys': typeof AboutAboutRhessysRoute
+  '/about/about-sbs': typeof AboutAboutSbsRoute
+  '/about/about-watar': typeof AboutAboutWatarRoute
+  '/about/about-wepp': typeof AboutAboutWeppRoute
+  '/about/about-wepp-cloud': typeof AboutAboutWeppCloudRoute
+  '/about/scenarios': typeof AboutScenariosRoute
   '/watershed/$webcloudRunId': typeof WatershedWebcloudRunIdRoute
+  '/about': typeof AboutIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/about-rhessys': typeof AboutRhessysRoute
-  '/about-sbs': typeof AboutSbsRoute
-  '/about-watar': typeof AboutWatarRoute
-  '/about-wepp': typeof AboutWeppRoute
-  '/about-wepp-cloud': typeof AboutWeppCloudRoute
+  '/about': typeof AboutRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/scenarios': typeof ScenariosRoute
   '/team': typeof TeamRoute
+  '/about/about-rhessys': typeof AboutAboutRhessysRoute
+  '/about/about-sbs': typeof AboutAboutSbsRoute
+  '/about/about-watar': typeof AboutAboutWatarRoute
+  '/about/about-wepp': typeof AboutAboutWeppRoute
+  '/about/about-wepp-cloud': typeof AboutAboutWeppCloudRoute
+  '/about/scenarios': typeof AboutScenariosRoute
   '/watershed/$webcloudRunId': typeof WatershedWebcloudRunIdRoute
+  '/about/': typeof AboutIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
-    | '/about-rhessys'
-    | '/about-sbs'
-    | '/about-watar'
-    | '/about-wepp'
-    | '/about-wepp-cloud'
     | '/login'
     | '/register'
-    | '/scenarios'
     | '/team'
+    | '/about/about-rhessys'
+    | '/about/about-sbs'
+    | '/about/about-watar'
+    | '/about/about-wepp'
+    | '/about/about-wepp-cloud'
+    | '/about/scenarios'
     | '/watershed/$webcloudRunId'
+    | '/about/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
-    | '/about-rhessys'
-    | '/about-sbs'
-    | '/about-watar'
-    | '/about-wepp'
-    | '/about-wepp-cloud'
     | '/login'
     | '/register'
-    | '/scenarios'
     | '/team'
+    | '/about/about-rhessys'
+    | '/about/about-sbs'
+    | '/about/about-watar'
+    | '/about/about-wepp'
+    | '/about/about-wepp-cloud'
+    | '/about/scenarios'
     | '/watershed/$webcloudRunId'
+    | '/about'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/about-rhessys'
-    | '/about-sbs'
-    | '/about-watar'
-    | '/about-wepp'
-    | '/about-wepp-cloud'
     | '/login'
     | '/register'
-    | '/scenarios'
     | '/team'
+    | '/about/about-rhessys'
+    | '/about/about-sbs'
+    | '/about/about-watar'
+    | '/about/about-wepp'
+    | '/about/about-wepp-cloud'
+    | '/about/scenarios'
     | '/watershed/$webcloudRunId'
+    | '/about/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
-  AboutRhessysRoute: typeof AboutRhessysRoute
-  AboutSbsRoute: typeof AboutSbsRoute
-  AboutWatarRoute: typeof AboutWatarRoute
-  AboutWeppRoute: typeof AboutWeppRoute
-  AboutWeppCloudRoute: typeof AboutWeppCloudRoute
+  AboutRoute: typeof AboutRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
-  ScenariosRoute: typeof ScenariosRoute
   TeamRoute: typeof TeamRoute
   WatershedWebcloudRunIdRoute: typeof WatershedWebcloudRunIdRoute
 }
@@ -193,13 +197,6 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof TeamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/scenarios': {
-      id: '/scenarios'
-      path: '/scenarios'
-      fullPath: '/scenarios'
-      preLoaderRoute: typeof ScenariosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -216,41 +213,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/about-wepp-cloud': {
-      id: '/about-wepp-cloud'
-      path: '/about-wepp-cloud'
-      fullPath: '/about-wepp-cloud'
-      preLoaderRoute: typeof AboutWeppCloudRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about-wepp': {
-      id: '/about-wepp'
-      path: '/about-wepp'
-      fullPath: '/about-wepp'
-      preLoaderRoute: typeof AboutWeppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about-watar': {
-      id: '/about-watar'
-      path: '/about-watar'
-      fullPath: '/about-watar'
-      preLoaderRoute: typeof AboutWatarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about-sbs': {
-      id: '/about-sbs'
-      path: '/about-sbs'
-      fullPath: '/about-sbs'
-      preLoaderRoute: typeof AboutSbsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about-rhessys': {
-      id: '/about-rhessys'
-      path: '/about-rhessys'
-      fullPath: '/about-rhessys'
-      preLoaderRoute: typeof AboutRhessysRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -265,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about/': {
+      id: '/about/'
+      path: '/'
+      fullPath: '/about/'
+      preLoaderRoute: typeof AboutIndexRouteImport
+      parentRoute: typeof AboutRoute
+    }
     '/watershed/$webcloudRunId': {
       id: '/watershed/$webcloudRunId'
       path: '/watershed/$webcloudRunId'
@@ -272,20 +241,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatershedWebcloudRunIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about/scenarios': {
+      id: '/about/scenarios'
+      path: '/scenarios'
+      fullPath: '/about/scenarios'
+      preLoaderRoute: typeof AboutScenariosRouteImport
+      parentRoute: typeof AboutRoute
+    }
+    '/about/about-wepp-cloud': {
+      id: '/about/about-wepp-cloud'
+      path: '/about-wepp-cloud'
+      fullPath: '/about/about-wepp-cloud'
+      preLoaderRoute: typeof AboutAboutWeppCloudRouteImport
+      parentRoute: typeof AboutRoute
+    }
+    '/about/about-wepp': {
+      id: '/about/about-wepp'
+      path: '/about-wepp'
+      fullPath: '/about/about-wepp'
+      preLoaderRoute: typeof AboutAboutWeppRouteImport
+      parentRoute: typeof AboutRoute
+    }
+    '/about/about-watar': {
+      id: '/about/about-watar'
+      path: '/about-watar'
+      fullPath: '/about/about-watar'
+      preLoaderRoute: typeof AboutAboutWatarRouteImport
+      parentRoute: typeof AboutRoute
+    }
+    '/about/about-sbs': {
+      id: '/about/about-sbs'
+      path: '/about-sbs'
+      fullPath: '/about/about-sbs'
+      preLoaderRoute: typeof AboutAboutSbsRouteImport
+      parentRoute: typeof AboutRoute
+    }
+    '/about/about-rhessys': {
+      id: '/about/about-rhessys'
+      path: '/about-rhessys'
+      fullPath: '/about/about-rhessys'
+      preLoaderRoute: typeof AboutAboutRhessysRouteImport
+      parentRoute: typeof AboutRoute
+    }
   }
 }
 
+interface AboutRouteChildren {
+  AboutAboutRhessysRoute: typeof AboutAboutRhessysRoute
+  AboutAboutSbsRoute: typeof AboutAboutSbsRoute
+  AboutAboutWatarRoute: typeof AboutAboutWatarRoute
+  AboutAboutWeppRoute: typeof AboutAboutWeppRoute
+  AboutAboutWeppCloudRoute: typeof AboutAboutWeppCloudRoute
+  AboutScenariosRoute: typeof AboutScenariosRoute
+  AboutIndexRoute: typeof AboutIndexRoute
+}
+
+const AboutRouteChildren: AboutRouteChildren = {
+  AboutAboutRhessysRoute: AboutAboutRhessysRoute,
+  AboutAboutSbsRoute: AboutAboutSbsRoute,
+  AboutAboutWatarRoute: AboutAboutWatarRoute,
+  AboutAboutWeppRoute: AboutAboutWeppRoute,
+  AboutAboutWeppCloudRoute: AboutAboutWeppCloudRoute,
+  AboutScenariosRoute: AboutScenariosRoute,
+  AboutIndexRoute: AboutIndexRoute,
+}
+
+const AboutRouteWithChildren = AboutRoute._addFileChildren(AboutRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
-  AboutRhessysRoute: AboutRhessysRoute,
-  AboutSbsRoute: AboutSbsRoute,
-  AboutWatarRoute: AboutWatarRoute,
-  AboutWeppRoute: AboutWeppRoute,
-  AboutWeppCloudRoute: AboutWeppCloudRoute,
+  AboutRoute: AboutRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
-  ScenariosRoute: ScenariosRoute,
   TeamRoute: TeamRoute,
   WatershedWebcloudRunIdRoute: WatershedWebcloudRunIdRoute,
 }
