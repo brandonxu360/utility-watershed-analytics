@@ -24,4 +24,8 @@ export const API_ENDPOINTS = {
   // Replace {runId} with the watershed run ID before passing to TileLayer.
   SBS_TILE: (runId: string) =>
     `${API_BASE_URL}/watershed/${runId}/sbs/tiles/{z}/{x}/{y}.png`,
+  // Scenarios parquet file — read directly by the frontend (no backend needed).
+  // runId is the full batch path, e.g. "batch;;nasa-roses-2026-sbs;;OR-19"
+  SCENARIOS_PARQUET: (runId: string) =>
+    `/weppcloud/runs/${runId}/disturbed9002_wbt/download/omni/scenarios.out.parquet`,
 };

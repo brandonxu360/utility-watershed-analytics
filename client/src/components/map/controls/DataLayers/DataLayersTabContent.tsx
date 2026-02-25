@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { ChangeEvent } from "react";
 import { VegetationCover } from "../../../bottom-panels/VegetationCover";
+import { ScenariosTable } from "../../../bottom-panels/ScenariosTable";
 import { useChoropleth } from "../../../../hooks/useChoropleth";
 import { useAppStore } from "../../../../store/store";
 import { tss } from "../../../../utils/tss";
@@ -122,6 +123,16 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               Evapotranspiration
             </Button>
           </div>
+          <div className={classes.layer}>
+            <Button
+              className={classes.layerTitle}
+              onClick={() => {
+                openPanel(<ScenariosTable />);
+              }}
+            >
+              Watershed Scenarios
+            </Button>
+          </div>
         </>
       )}
       {activeTab === "Coverage" && (
@@ -166,6 +177,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           </div>
         </>
       )}
+
     </div>
   );
 };
