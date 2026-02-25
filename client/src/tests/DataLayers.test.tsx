@@ -59,6 +59,9 @@ describe("DataLayersControl", () => {
   const setSubcatchment = vi.fn();
   const setChannels = vi.fn();
   const setActiveDataLayer = vi.fn();
+  const closeVegetationCover = vi.fn();
+  const closeLanduse = vi.fn();
+  const closeSoilBurnSeverity = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -69,6 +72,9 @@ describe("DataLayersControl", () => {
       setSubcatchment,
       setChannels,
       setActiveDataLayer,
+      closeVegetationCover,
+      closeLanduse,
+      closeSoilBurnSeverity,
     });
   });
 
@@ -145,7 +151,7 @@ describe("DataLayersControl", () => {
 
     // Disable
     fireEvent.click(landuseBox);
-    expect(setActiveDataLayer).toHaveBeenCalledWith("none");
+    expect(closeLanduse).toHaveBeenCalled();
   });
 
   it("handles vegetation toggle", () => {
@@ -160,6 +166,6 @@ describe("DataLayersControl", () => {
 
     // Disable
     fireEvent.click(vegBox);
-    expect(setActiveDataLayer).toHaveBeenCalledWith("none");
+    expect(closeVegetationCover).toHaveBeenCalled();
   });
 });

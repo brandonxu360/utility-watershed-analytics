@@ -72,11 +72,9 @@ export const VegetationCover: React.FC = () => {
     choroplethBands,
     choroplethRange,
     choroplethLoading,
-    setActiveDataLayer,
     setChoroplethYear,
     setChoroplethBands,
-    clearSelectedHillslope,
-    resetChoropleth,
+    closeVegetationCover,
   } = useAppStore();
 
   const { config } = useChoropleth();
@@ -173,17 +171,17 @@ export const VegetationCover: React.FC = () => {
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-              mode: "hillslope",
-              topazId: selectedHillslopeId,
+            mode: "hillslope",
+            topazId: selectedHillslopeId,
+            runId: runId,
+            year: selectedYear === "All" ? undefined : Number(selectedYear),
+          })
+          : runId
+            ? await fetchRap({
+              mode: "watershed",
               runId: runId,
               year: selectedYear === "All" ? undefined : Number(selectedYear),
             })
-          : runId
-            ? await fetchRap({
-                mode: "watershed",
-                runId: runId,
-                year: selectedYear === "All" ? undefined : Number(selectedYear),
-              })
             : null;
 
         if (!mounted) return;
@@ -277,11 +275,7 @@ export const VegetationCover: React.FC = () => {
           <IconButton
             className={classes.closeButton}
             data-testid="veg-close-button"
-            onClick={() => {
-              setActiveDataLayer("none");
-              clearSelectedHillslope();
-              resetChoropleth();
-            }}
+            onClick={() => closeVegetationCover()}
           >
             <CloseIcon />
           </IconButton>

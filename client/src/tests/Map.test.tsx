@@ -378,7 +378,7 @@ describe("Map Component", () => {
 
   describe("loading states", () => {
     it("shows loading overlay when watersheds are loading", async () => {
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<WatershedMap />);
 
@@ -572,14 +572,14 @@ describe("Map Component", () => {
   describe("auto-disable effects", () => {
     it("disables subcatchment and landuse when no subcatchment data", async () => {
       const mockSetSubcatchment = vi.fn();
-      const mockSetActiveDataLayer = vi.fn();
+      const mockCloseLanduse = vi.fn();
 
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         activeDataLayer: "landuse",
         setSubcatchment: mockSetSubcatchment,
-        setActiveDataLayer: mockSetActiveDataLayer,
+        closeLanduse: mockCloseLanduse,
       });
       mockFetchSubcatchments.mockResolvedValue({ features: [] });
 
@@ -587,7 +587,7 @@ describe("Map Component", () => {
 
       await waitFor(() => {
         expect(mockSetSubcatchment).toHaveBeenCalledWith(false);
-        expect(mockSetActiveDataLayer).toHaveBeenCalledWith("none");
+        expect(mockCloseLanduse).toHaveBeenCalled();
         expect(toastErrorMock).toHaveBeenCalledWith(
           "No subcatchment data available",
         );
@@ -616,14 +616,14 @@ describe("Map Component", () => {
 
     it("shows toast when landuse is enabled but no subcatchment data", async () => {
       const mockSetSubcatchment = vi.fn();
-      const mockSetActiveDataLayer = vi.fn();
+      const mockCloseLanduse = vi.fn();
 
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         activeDataLayer: "landuse",
         setSubcatchment: mockSetSubcatchment,
-        setActiveDataLayer: mockSetActiveDataLayer,
+        closeLanduse: mockCloseLanduse,
       });
       mockFetchSubcatchments.mockResolvedValue({ features: [] });
 
@@ -631,7 +631,7 @@ describe("Map Component", () => {
 
       await waitFor(() => {
         expect(mockSetSubcatchment).toHaveBeenCalledWith(false);
-        expect(mockSetActiveDataLayer).toHaveBeenCalledWith("none");
+        expect(mockCloseLanduse).toHaveBeenCalled();
         expect(toastErrorMock).toHaveBeenCalledWith(
           "No subcatchment data available",
         );
@@ -740,14 +740,14 @@ describe("Map Component", () => {
     });
 
     it("shows toast and disables landuse when undisturbed scenario returns no rows", async () => {
-      const mockSetActiveDataLayer = vi.fn();
+      const mockCloseLanduse = vi.fn();
       const mockSetLanduseLegendMap = vi.fn();
 
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         activeDataLayer: "landuse",
-        setActiveDataLayer: mockSetActiveDataLayer,
+        closeLanduse: mockCloseLanduse,
         setLanduseLegendMap: mockSetLanduseLegendMap,
       });
 
@@ -758,7 +758,7 @@ describe("Map Component", () => {
 
       await waitFor(() => {
         expect(toastErrorMock).toHaveBeenCalled();
-        expect(mockSetActiveDataLayer).toHaveBeenCalledWith("none");
+        expect(mockCloseLanduse).toHaveBeenCalled();
         expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
       });
     });
@@ -1100,7 +1100,7 @@ describe("Map Component", () => {
         subcatchment: true,
         setSubcatchment: mockSetSubcatchment,
       });
-      mockFetchSubcatchments.mockReturnValue(new Promise(() => {}));
+      mockFetchSubcatchments.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<WatershedMap />);
 
@@ -1115,7 +1115,7 @@ describe("Map Component", () => {
         channels: true,
         setChannels: mockSetChannels,
       });
-      mockFetchChannels.mockReturnValue(new Promise(() => {}));
+      mockFetchChannels.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<WatershedMap />);
 

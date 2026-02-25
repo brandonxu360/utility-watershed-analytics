@@ -64,7 +64,6 @@ export interface LayersSlice extends LayersState {
   ) => void;
   setChoroplethLoading: (loading: boolean) => void;
   setChoroplethError: (error: string | null) => void;
-  resetChoropleth: () => void;
 
   setSbsColorMode: (mode: SbsColorMode) => void;
   setLanduseLegendMap: (legend: Record<string, string>) => void;
@@ -73,6 +72,10 @@ export interface LayersSlice extends LayersState {
     props?: Record<string, unknown> | null,
   ) => void;
   clearSelectedHillslope: () => void;
+
+  closeVegetationCover: () => void;
+  closeLanduse: () => void;
+  closeSoilBurnSeverity: () => void;
 
   resetLayers: () => void;
 }
@@ -87,14 +90,7 @@ export const createLayersSlice: StateCreator<
 
   setActiveDataLayer: (layer) => {
     if (layer === "none") {
-      set({
-        activeDataLayer: "none",
-        subcatchment: false,
-        choroplethData: null,
-        choroplethRange: null,
-        selectedHillslopeId: null,
-        selectedHillslopeProps: null,
-      });
+      set({ activeDataLayer: "none" });
     } else {
       set({
         activeDataLayer: layer,
@@ -112,15 +108,6 @@ export const createLayersSlice: StateCreator<
     set({ choroplethData: data, choroplethRange: range }),
   setChoroplethLoading: (loading) => set({ choroplethLoading: loading }),
   setChoroplethError: (error) => set({ choroplethError: error }),
-  resetChoropleth: () =>
-    set({
-      choroplethYear: null,
-      choroplethBands: "all",
-      choroplethData: null,
-      choroplethRange: null,
-      choroplethLoading: false,
-      choroplethError: null,
-    }),
 
   setSbsColorMode: (mode) => set({ sbsColorMode: mode }),
   setLanduseLegendMap: (legend) => set({ landuseLegendMap: legend }),
@@ -132,6 +119,38 @@ export const createLayersSlice: StateCreator<
     }),
   clearSelectedHillslope: () =>
     set({ selectedHillslopeId: null, selectedHillslopeProps: null }),
+
+  closeVegetationCover: () =>
+    set({
+      activeDataLayer: "none",
+      subcatchment: false,
+      choroplethYear: null,
+      choroplethBands: "all",
+      choroplethData: null,
+      choroplethRange: null,
+      choroplethLoading: false,
+      choroplethError: null,
+      selectedHillslopeId: null,
+      selectedHillslopeProps: null,
+    }),
+
+  closeLanduse: () =>
+    set({
+      activeDataLayer: "none",
+      subcatchment: false,
+      landuseLegendMap: {},
+      selectedHillslopeId: null,
+      selectedHillslopeProps: null,
+    }),
+
+  closeSoilBurnSeverity: () =>
+    set({
+      activeDataLayer: "none",
+      subcatchment: false,
+      sbsColorMode: "legacy",
+      selectedHillslopeId: null,
+      selectedHillslopeProps: null,
+    }),
 
   resetLayers: () => set({ ...initialLayersState }),
 });

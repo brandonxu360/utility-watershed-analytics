@@ -80,7 +80,14 @@ export default function DataLayersControl() {
 
   const queryClient = useQueryClient();
 
-  const { setActiveDataLayer, setSubcatchment, setChannels } = useAppStore();
+  const {
+    setActiveDataLayer,
+    setSubcatchment,
+    setChannels,
+    closeVegetationCover,
+    closeLanduse,
+    closeSoilBurnSeverity,
+  } = useAppStore();
 
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("WEPP");
@@ -92,25 +99,34 @@ export default function DataLayersControl() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = e.target;
 
-    if (!checked) {
-      if (id === "subcatchment") {
-        queryClient.cancelQueries({ queryKey: ["subcatchments"] });
-      } else if (id === "channels") {
-        queryClient.cancelQueries({ queryKey: ["channels"] });
-      }
-    }
+    const handlers: Record<string, (c: boolean) => void> = {
+      subcatchment: (c) => {
+        if (!c) queryClient.cancelQueries({ queryKey: ["subcatchments"] });
+        setSubcatchment(c);
+      },
+      channels: (c) => {
+        if (!c) queryClient.cancelQueries({ queryKey: ["channels"] });
+        setChannels(c);
+      },
+    };
 
-    // Handle independent overlays
-    if (id === "subcatchment") {
-      return setSubcatchment(checked);
-    }
-    if (id === "channels") {
-      return setChannels(checked);
+    if (handlers[id]) {
+      handlers[id](checked);
+      return;
     }
 
     // Handle mutually exclusive data layers
     if (id in DATA_LAYER_IDS) {
-      return setActiveDataLayer(checked ? DATA_LAYER_IDS[id] : "none");
+      if (checked) {
+        setActiveDataLayer(DATA_LAYER_IDS[id]);
+      } else {
+        const closeActions: Record<string, () => void> = {
+          landuse: closeLanduse,
+          vegetationCover: closeVegetationCover,
+          soilBurnSeverity: closeSoilBurnSeverity,
+        };
+        closeActions[id]?.();
+      }
     }
   };
 

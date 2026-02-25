@@ -89,7 +89,7 @@ export default function WatershedMap(): JSX.Element {
     setSubcatchment,
     setChannels,
     setLanduseLegendMap,
-    setActiveDataLayer,
+    closeLanduse,
   } = useAppStore();
 
   const landuse = activeDataLayer === "landuse";
@@ -157,7 +157,7 @@ export default function WatershedMap(): JSX.Element {
       const noSubData = subcatchments.features?.length === 0;
       if (noSubData && (subcatchment || landuse)) {
         if (subcatchment) setSubcatchment(false);
-        if (landuse) setActiveDataLayer("none");
+        if (landuse) closeLanduse();
         toast.error("No subcatchment data available");
         return;
       }
@@ -169,7 +169,7 @@ export default function WatershedMap(): JSX.Element {
         landuseError || (landuseData && Object.keys(landuseData).length === 0);
       if (noLanduseData) {
         toast.error("Land use data is not available for this watershed");
-        setActiveDataLayer("none");
+        closeLanduse();
       }
     }
   }, [
@@ -181,7 +181,7 @@ export default function WatershedMap(): JSX.Element {
     subcatchment,
     subcatchments,
     runId,
-    setActiveDataLayer,
+    closeLanduse,
     setSubcatchment,
   ]);
 

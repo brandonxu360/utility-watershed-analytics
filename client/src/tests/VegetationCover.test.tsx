@@ -77,11 +77,9 @@ vi.mock("../components/CoverageLineChart", () => ({
   ),
 }));
 
-const mockClearSelectedHillslope = vi.fn();
-const mockResetChoropleth = vi.fn();
+const mockCloseVegetationCover = vi.fn();
 const mockSetChoroplethYear = vi.fn();
 const mockSetChoroplethBands = vi.fn();
-const mockSetActiveDataLayer = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -96,9 +94,7 @@ beforeEach(() => {
   mockUseChoropleth.mockReturnValue({ config: null });
 
   useAppStore.setState({
-    clearSelectedHillslope: mockClearSelectedHillslope,
-    setActiveDataLayer: mockSetActiveDataLayer,
-    resetChoropleth: mockResetChoropleth,
+    closeVegetationCover: mockCloseVegetationCover,
     setChoroplethYear: mockSetChoroplethYear,
     setChoroplethBands: mockSetChoroplethBands,
     selectedHillslopeId: null,
@@ -345,10 +341,8 @@ describe("VegetationCover", () => {
         fireEvent.click(closeButton);
       });
 
-      // Close button calls setActiveDataLayer("none"), clearSelectedHillslope, resetChoropleth
-      expect(mockSetActiveDataLayer).toHaveBeenCalledWith("none");
-      expect(mockClearSelectedHillslope).toHaveBeenCalled();
-      expect(mockResetChoropleth).toHaveBeenCalled();
+      // Close button calls closeVegetationCover
+      expect(mockCloseVegetationCover).toHaveBeenCalled();
     });
   });
 
