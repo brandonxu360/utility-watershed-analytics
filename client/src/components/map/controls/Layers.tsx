@@ -45,7 +45,7 @@ const useStyles = tss.create(({ theme }) => ({
   layersModal: {
     position: "absolute",
     top: 0,
-    left: 60,
+    right: 60,
     background: theme.palette.surface.overlay,
     color: theme.palette.primary.contrastText,
     padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
