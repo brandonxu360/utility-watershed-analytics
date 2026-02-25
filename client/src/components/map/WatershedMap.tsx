@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
+import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { MapEffect } from "../../utils/map/MapEffectUtil";
@@ -27,6 +28,8 @@ import LayersControl from "./controls/Layers";
 import LegendControl from "./controls/Legend";
 import SearchControl from "./controls/Search";
 import LandUseLegend from "./controls/LandUseLegend";
+import SbsLegend from "./controls/SbsLegend";
+import SbsLayer from "./SbsLayer";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import "leaflet/dist/leaflet.css";
 
@@ -80,6 +83,8 @@ export default function WatershedMap(): JSX.Element {
     subcatchment,
     channels,
     landuse,
+    sbsEnabled,
+    sbsColorMode,
     closePanel,
     setSubcatchment,
     setChannels,
@@ -326,6 +331,21 @@ export default function WatershedMap(): JSX.Element {
     },
   };
 
+  // Compute the bounding box of the currently selected watershed so the SBS
+  // TileLayer only requests tiles that intersect it.
+  const sbsBounds = useMemo((): L.LatLngBoundsExpression | undefined => {
+    if (!watershedID || !memoWatersheds) return undefined;
+    const feature = memoWatersheds.features?.find(
+      (f: GeoJSON.Feature) => f.id?.toString() === watershedID,
+    );
+    if (!feature) return undefined;
+    try {
+      return L.geoJSON(feature).getBounds();
+    } catch {
+      return undefined;
+    }
+  }, [watershedID, memoWatersheds]);
+
   // Only crash on critical data failure (watersheds are required for the map to function)
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
 
@@ -414,9 +434,19 @@ export default function WatershedMap(): JSX.Element {
         {channels && memoChannels && (
           <GeoJSON data={memoChannels} style={channelStyle} />
         )}
+
+        {sbsEnabled && runId && (
+          <SbsLayer
+            runId={runId}
+            mode={sbsColorMode}
+            bounds={sbsBounds}
+          />
+        )}
       </MapContainer>
 
       <LandUseLegend />
+
+      {sbsEnabled && <SbsLegend />}
 
       {runId && (
         <div style={{ position: "absolute", right: "10px", bottom: "30px" }}>

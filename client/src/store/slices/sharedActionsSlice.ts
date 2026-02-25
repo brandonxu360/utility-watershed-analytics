@@ -22,5 +22,6 @@ export const createSharedActionsSlice: StateCreator<
       landuseLegendMap: {},
       choropleth: initialChoroplethState,
       isPanelOpen: false,
+      sbsEnabled: false,
     }),
 });
