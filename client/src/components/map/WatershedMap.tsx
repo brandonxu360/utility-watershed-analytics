@@ -202,6 +202,13 @@ export default function WatershedMap(): JSX.Element {
     setChannels,
   ]);
 
+  const resetLayers = useAppStore((s) => s.resetLayers);
+  useEffect(() => {
+    if (!runId && activeDataLayer !== "none") {
+      resetLayers();
+    }
+  }, [runId, activeDataLayer, resetLayers]);
+
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
     const layer = e.sourceTarget;
