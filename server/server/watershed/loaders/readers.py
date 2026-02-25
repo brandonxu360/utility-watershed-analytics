@@ -33,13 +33,19 @@ class RemoteDataSourceReader:
     def __init__(self, config: Optional[LoaderConfig] = None):
         self.config = config or get_config()
     
-    def read_geojson(self, url: str, local_path: Optional[Path] = None) -> GDALDataSource:
+    def read_geojson(
+        self,
+        url: str,
+        local_path: Optional[Path] = None,
+        headers: Optional[dict] = None,
+    ) -> GDALDataSource:
         """
         Read GeoJSON data, checking local cache first.
         
         Args:
             url: Remote URL to fetch from if local not available
             local_path: Optional local cache path to check first
+            headers: Optional HTTP headers to include in the request (e.g. Authorization)
         
         Returns:
             GDAL DataSource object
@@ -51,16 +57,25 @@ class RemoteDataSourceReader:
         
         # Fall back to remote with retry
         logger.debug(f"Fetching GeoJSON from remote: {url}")
-        return self._fetch_geojson_with_retry(url)
+        return self._fetch_geojson_with_retry(url, headers=headers)
     
-    def _fetch_geojson_with_retry(self, url: str) -> GDALDataSource:
-        """Fetch GeoJSON from URL with retry logic."""
+    def _fetch_geojson_with_retry(
+        self, url: str, headers: Optional[dict] = None
+    ) -> GDALDataSource:
+        """Fetch GeoJSON from URL with retry logic.
+        
+        Downloads via requests and opens the response content directly with
+        GDALDataSource. Optional headers (e.g. Authorization) are forwarded
+        as-is — the caller decides what auth is needed.
+        """
         @with_retry(
             max_attempts=self.config.retry.max_attempts,
             base_delay=self.config.retry.base_delay_seconds,
         )
         def fetch() -> GDALDataSource:
-            return GDALDataSource(url)
+            response = requests.get(url, headers=headers, timeout=60)
+            response.raise_for_status()
+            return GDALDataSource(response.text)
         
         try:
             return fetch()

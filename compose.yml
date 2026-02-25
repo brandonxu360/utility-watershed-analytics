@@ -37,6 +37,7 @@ services:
       - DEBUG=${DEBUG}
       # Data directory for watershed GeoJSON/Parquet caching (created in Dockerfile with proper permissions)
       - LOADER_DATA_DIR=/data
+      - WEPPCLOUD_JWT_TOKEN=${WEPPCLOUD_JWT_TOKEN}
     # Volume mount
     volumes:
       - .:/app
@@ -50,18 +51,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
-  # Data downloader service - downloads watershed data files
-  data-downloader:
-    build:
-      context: ./server
-      dockerfile: Dockerfile.data-downloader
-    volumes:
-      - watershed_data:/data
-    environment:
-      - DATA_OUTPUT_DIR=/data
-    profiles:
-      - data-management
 
   # PostgreSQL database with PostGIS
   db:

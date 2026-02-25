@@ -71,7 +71,7 @@ function buildRapTimeseriesPayload(
 export async function fetchRap(
   opts: FetchRapOptions,
 ): Promise<AggregatedRapRow[]> {
-  const { mode, topazId, weppId, runId, year, include_schema, include_sql } =
+  const { mode, topazId, runId, year, include_schema, include_sql } =
     opts;
 
   let payload: Record<string, unknown>;
@@ -82,48 +82,22 @@ export async function fetchRap(
     payload = buildRapTimeseriesPayload(topazId, year);
     addQueryFlags(payload, include_schema, include_sql);
   } else {
-    if (typeof weppId === "undefined")
-      throw new Error("weppId required for watershed mode");
-
-    // Validate weppId is a reasonable positive integer
-    const validWeppId = Number(weppId);
-    if (
-      !Number.isInteger(validWeppId) ||
-      validWeppId < 0 ||
-      validWeppId > 1000000
-    ) {
-      throw new Error("Invalid weppId provided");
-    }
 
     // Build parameterized filters array
     const filters: QueryFilter[] = [
-      { column: "hillslopes.wepp_id", operator: "=", value: validWeppId },
       { column: "rap.band", operator: "IN", value: [1, 4, 5, 6] },
     ];
 
-    // Add year filter if valid
     const yearFilter = createYearFilter(year);
-    if (yearFilter) {
-      filters.push(yearFilter);
-    }
+    if (yearFilter) filters.push(yearFilter);
 
     payload = {
-      datasets: [
-        { path: "rap/rap_ts.parquet", alias: "rap" },
-        { path: "watershed/hillslopes.parquet", alias: "hillslopes" },
-      ],
-      joins: [{ left: "rap", right: "hillslopes", on: ["topaz_id"] }],
+      datasets: [{ path: "rap/rap_ts.parquet", alias: "rap" }],
       columns: ["rap.year AS year"],
       filters,
       aggregations: [
-        {
-          alias: "shrub",
-          expression: "SUM(CASE WHEN rap.band = 5 THEN rap.value ELSE 0 END)",
-        },
-        {
-          alias: "tree",
-          expression: "SUM(CASE WHEN rap.band = 6 THEN rap.value ELSE 0 END)",
-        },
+        { alias: "shrub", expression: "SUM(CASE WHEN rap.band = 5 THEN rap.value ELSE 0 END)" },
+        { alias: "tree", expression: "SUM(CASE WHEN rap.band = 6 THEN rap.value ELSE 0 END)" },
         { alias: "coverage", expression: "SUM(rap.value)" },
       ],
       group_by: ["rap.year"],

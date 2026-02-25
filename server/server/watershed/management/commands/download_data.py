@@ -85,7 +85,13 @@ class Command(BaseCommand):
         except Exception as e:
             raise CommandError(f"Download failed: {e}")
 
-    def _download_file(self, url: str, target: Path, session: requests.Session) -> int:
+    def _download_file(
+        self,
+        url: str,
+        target: Path,
+        session: requests.Session,
+        headers: dict | None = None,
+    ) -> int:
         """
         Download a file from URL to target path.
         
@@ -93,6 +99,7 @@ class Command(BaseCommand):
             url: URL to download from
             target: Local path to save to
             session: Requests session for connection pooling
+            headers: Optional HTTP headers to include in the request (e.g. Authorization)
         
         Returns:
             Size of downloaded file in bytes
@@ -100,7 +107,7 @@ class Command(BaseCommand):
         Raises:
             requests.RequestException: If download fails
         """
-        response = session.get(url, timeout=60, stream=True)
+        response = session.get(url, headers=headers, timeout=60, stream=True)
         response.raise_for_status()
         
         # Write file in chunks to handle large files
@@ -117,6 +124,7 @@ class Command(BaseCommand):
         output_dir: Path,
         session: requests.Session,
         stats: dict,
+        headers: dict | None = None,
     ) -> None:
         """
         Process a single data source - download if not cached.
@@ -126,6 +134,7 @@ class Command(BaseCommand):
             output_dir: Base output directory
             session: Requests session
             stats: Dictionary to update with download statistics
+            headers: Optional HTTP headers to include in the request (e.g. Authorization)
         """
         # Generate target path based on data type and runid
         if source.data_type == "watersheds":
@@ -155,7 +164,7 @@ class Command(BaseCommand):
         # Download the file
         try:
             self.stdout.write(f"    Downloading from: {source.url}")
-            file_size = self._download_file(source.url, target, session)
+            file_size = self._download_file(source.url, target, session, headers=headers)
             self.stdout.write(self.style.SUCCESS(f"    ✓ Downloaded to: {target}"))
             self.stdout.write(self.style.SUCCESS(
                 f"    ✓ File size: {file_size:,} bytes ({file_size / (1024*1024):.2f} MB)"
@@ -223,10 +232,14 @@ class Command(BaseCommand):
         
         # Create session for connection pooling
         with requests.Session() as session:
+            # The master watersheds GeoJSON requires JWT auth; other endpoints do not.
+            jwt_token = config.api.weppcloud_jwt_token
+            auth_headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else None
+
             # Download master watersheds file
             self.stdout.write("\n==> Section: Watersheds")
             watershed_source = discovery.get_watersheds_source()
-            self._process_source(watershed_source, output_dir, session, stats)
+            self._process_source(watershed_source, output_dir, session, stats, headers=auth_headers)
             
             # Download subcatchments
             self.stdout.write("\n==> Section: Subcatchments")

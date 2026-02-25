@@ -16,17 +16,15 @@ import usfs from "../assets/images/usfs_rockyMtn_logo.png";
 import firewise_diagram from "../assets/images/firewise_diagram.png";
 import fire_image from "../assets/images/wildfire-threat-water-supply.jpg";
 
-
 const useStyles = tss.create(({ theme }) => ({
   ...commonStyles(theme),
   ...navStyles(theme),
-  
-  
+
   btnLink: {
-    background: 
-      theme.palette.mode === "dark" 
-      ? "theme.palette.common.black theme.palette.accent.main"
-      : "theme.palette.accent.main theme.palette.common.white",
+    background:
+      theme.palette.mode === "dark"
+        ? "theme.palette.common.black theme.palette.accent.main"
+        : "theme.palette.accent.main theme.palette.common.white",
     padding: "8px 16px",
     border: `1px solid ${theme.palette.accent.main}`,
     borderRadius: 4,
@@ -45,10 +43,6 @@ const useStyles = tss.create(({ theme }) => ({
     },
   },
   logoContainer: {
-    /*backgroundColor:
-      theme.palette.mode === "light"
-        ? "rgba(133, 133, 133, 0.75)"
-        : "transparent",*/
     padding: "1rem",
     borderRadius: "8px",
     marginBottom: "1rem",
@@ -57,11 +51,9 @@ const useStyles = tss.create(({ theme }) => ({
     alignItems: "center",
   },
   box_txt: {
-    border: 
-      theme.palette.mode === "light"
-        ? "1px solid #333"
-        : "1px solid #fff",
-    padding: '25px 30px'
+    border:
+      theme.palette.mode === "light" ? "1px solid #333" : "1px solid #fff",
+    padding: "25px 30px",
   },
   row: {
     display: "block",
@@ -111,7 +103,7 @@ export function AboutSidePanelContent() {
       <div className={classes.navButtons} style={{ marginBottom: "1rem" }}>
         <button
           onClick={() => {
-            navigate({ to: "/about-wepp" });
+            navigate({ to: "/about/wepp" });
           }}
           className={classes.actionButton}
           aria-label="Learn about WEPP"
@@ -122,7 +114,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about-wepp-cloud" });
+            navigate({ to: "/about/wepp-cloud" });
           }}
           className={classes.actionButton}
           aria-label="Learn about WEPPcloud"
@@ -133,7 +125,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about-rhessys" });
+            navigate({ to: "/about/rhessys" });
           }}
           className={classes.actionButton}
           aria-label="Learn about RHESSys"
@@ -144,7 +136,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about-sbs" });
+            navigate({ to: "/about/sbs" });
           }}
           className={classes.actionButton}
           aria-label="Learn about Predicted SBS"
@@ -155,7 +147,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about-watar" });
+            navigate({ to: "/about/watar" });
           }}
           className={classes.actionButton}
           aria-label="Learn about WATAR"
@@ -166,7 +158,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/scenarios" });
+            navigate({ to: "/about/scenarios" });
           }}
           className={classes.actionButton}
           aria-label="Learn about Scenarios"
@@ -181,16 +173,25 @@ export function AboutSidePanelContent() {
       <div className={classes.institutions}>
         <h2>Participating Institutions</h2>
         <p className={classes.logoContainer}>
-          <img src={isDark ? wsu : wsu_dark} alt="Washington State University logo" />
+          <img
+            src={isDark ? wsu : wsu_dark}
+            alt="Washington State University logo"
+          />
         </p>
         <p className={classes.logoContainer}>
           <img src={isDark ? ui : ui_dark} alt="University of Idaho logo" />
         </p>
         <p className={classes.logoContainer}>
-          <img src={isDark ? unr : unr_dark} alt="University of Nevada, Reno logo" />
+          <img
+            src={isDark ? unr : unr_dark}
+            alt="University of Nevada, Reno logo"
+          />
         </p>
         <p className={classes.logoContainer}>
-          <img src={isDark ? osu : osu_dark} alt="Oregon State University logo" />
+          <img
+            src={isDark ? osu : osu_dark}
+            alt="Oregon State University logo"
+          />
         </p>
         <p className={classes.logoContainer}>
           <img

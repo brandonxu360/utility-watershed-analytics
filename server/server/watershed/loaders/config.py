@@ -63,6 +63,10 @@ class ApiConfig:
     weppcloud_base_url: str = "https://wepp.cloud/weppcloud"
     # Batch URL for discovering available watersheds
     weppcloud_batch_url: str = "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs"
+    # JWT token for authenticated endpoints (e.g. the master watersheds GeoJSON).
+    # Set via WEPPCLOUD_JWT_TOKEN environment variable. The rest of the ingestion
+    # does not require authentication.
+    weppcloud_jwt_token: Optional[str] = None
     
     @classmethod
     def from_environment(cls) -> "ApiConfig":
@@ -76,6 +80,7 @@ class ApiConfig:
                 "WEPPCLOUD_BATCH_URL",
                 cls.weppcloud_batch_url
             ),
+            weppcloud_jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN"),
         )
 
 

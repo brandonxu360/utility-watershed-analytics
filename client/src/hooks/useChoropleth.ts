@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
-import { useMatch } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { useAppStore } from "../store/store";
 import { ChoroplethType } from "../store/slices/choroplethSlice";
 import { fetchRapChoropleth } from "../api/rapApi";
@@ -13,7 +13,6 @@ import {
 } from "../utils/colormap";
 
 import { VEGETATION_BANDS } from "../utils/constants";
-import { watershedOverviewRoute } from "../routes/router";
 
 export const CHOROPLETH_CONFIG: Record<
   Exclude<ChoroplethType, "none">,
@@ -56,11 +55,12 @@ interface UseChoroplethResult {
 }
 
 export function useChoropleth(): UseChoroplethResult {
-  const match = useMatch({
-    from: watershedOverviewRoute.id,
-    shouldThrow: false,
-  });
-  const runId = match?.params.webcloudRunId ?? null;
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
 
   const {
     choropleth: {
@@ -107,7 +107,7 @@ export function useChoropleth(): UseChoroplethResult {
 
       try {
         const data = await fetchRapChoropleth({
-          runId: runId,
+          runId: runId!,
           band: effectiveBands,
           year: choroplethYear,
         });
