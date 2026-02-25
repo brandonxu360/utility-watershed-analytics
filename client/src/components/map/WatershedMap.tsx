@@ -378,17 +378,17 @@ export default function WatershedMap(): JSX.Element {
         {/* TOP LEFT CONTROLS */}
         <div className="leaflet-top leaflet-left">
           <LegendControl />
+        </div>
+
+        {/* TOP RIGHT CONTROLS */}
+        <div className="leaflet-top leaflet-right">
+          <SearchControl />
           <LayersControl
             selectedLayerId={selectedLayerId}
             setSelectedLayerId={setSelectedLayerId}
           />
           <ZoomInControl />
           <ZoomOutControl />
-        </div>
-
-        {/* TOP RIGHT CONTROLS */}
-        <div className="leaflet-top leaflet-right">
-          <SearchControl />
         </div>
 
         {/* Handles URL navigation to a specified watershed */}
