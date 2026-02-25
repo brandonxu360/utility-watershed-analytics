@@ -103,7 +103,7 @@ export function AboutSidePanelContent() {
       <div className={classes.navButtons} style={{ marginBottom: "1rem" }}>
         <button
           onClick={() => {
-            navigate({ to: "/about/about-wepp" });
+            navigate({ to: "/about/wepp" });
           }}
           className={classes.actionButton}
           aria-label="Learn about WEPP"
@@ -114,7 +114,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about/about-wepp-cloud" });
+            navigate({ to: "/about/wepp-cloud" });
           }}
           className={classes.actionButton}
           aria-label="Learn about WEPPcloud"
@@ -125,7 +125,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about/about-rhessys" });
+            navigate({ to: "/about/rhessys" });
           }}
           className={classes.actionButton}
           aria-label="Learn about RHESSys"
@@ -136,7 +136,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about/about-sbs" });
+            navigate({ to: "/about/sbs" });
           }}
           className={classes.actionButton}
           aria-label="Learn about Predicted SBS"
@@ -147,7 +147,7 @@ export function AboutSidePanelContent() {
 
         <button
           onClick={() => {
-            navigate({ to: "/about/about-watar" });
+            navigate({ to: "/about/watar" });
           }}
           className={classes.actionButton}
           aria-label="Learn about WATAR"
