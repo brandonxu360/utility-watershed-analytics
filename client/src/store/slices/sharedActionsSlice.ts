@@ -18,6 +18,7 @@ export const createSharedActionsSlice: StateCreator<
       channels: false,
       patches: false,
       landuse: false,
+      vegetation: false,
       landuseLegendVisible: false,
       landuseLegendMap: {},
       choropleth: initialChoroplethState,

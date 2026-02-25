@@ -1,17 +1,21 @@
 import { FC } from "react";
 import { ChangeEvent } from "react";
-import { VegetationCover } from "../../../bottom-panels/VegetationCover";
-import { useChoropleth } from "../../../../hooks/useChoropleth";
 import { useAppStore } from "../../../../store/store";
 import { tss } from "../../../../utils/tss";
-import Button from "@mui/material/Button";
+import { Typography } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 
 const useStyles = tss.create(({ theme }) => ({
   layers: {
-    maxHeight: "120px",
+    maxHeight: "475px",
     overflowY: "auto",
     padding: `${theme.spacing(0.5)} 0 ${theme.spacing(1)} 0`,
+  },
+  heading: {
+    fontSize: theme.typography.subtitle2.fontSize,
+    fontWeight: 600,
+    color: theme.palette.primary.dark,
+    padding: `${theme.spacing(1)} ${theme.spacing(2)} 0 ${theme.spacing(2)}`,
   },
   layer: {
     display: "flex",
@@ -21,13 +25,8 @@ const useStyles = tss.create(({ theme }) => ({
   layerTitle: {
     fontSize: theme.typography.subtitle2.fontSize,
     color: theme.palette.primary.dark,
-    fontWeight: 500,
-    cursor: "pointer",
     flex: 1,
-    textAlign: "left",
-    textTransform: "none",
-    justifyContent: "flex-start",
-    background: "none",
+    paddingLeft: theme.spacing(1.5),
   },
   layerCheckbox: {
     marginLeft: theme.spacing(1),
@@ -57,37 +56,27 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
 }) => {
   const { classes } = useStyles();
 
-  const {
-    subcatchment,
-    channels,
-    landuse,
-    sbsEnabled,
-    choropleth: { type: choroplethType },
-    setSubcatchment,
-    setLanduse,
-    setLanduseLegendVisible,
-    setChoroplethType,
-    openPanel,
-  } = useAppStore();
-
-  const { isActive } = useChoropleth();
+  const { subcatchment, channels, landuse, vegetation, sbsEnabled } =
+    useAppStore();
 
   return (
     <div className={classes.layers}>
-      {activeTab === "WEPP Hillslopes" && (
+      {activeTab === "WEPP" && (
         <>
           <div className={classes.layer}>
-            <Button className={classes.layerTitle}>Subcatchments</Button>
+            <Typography className={classes.layerTitle}>
+              Subcatchments
+            </Typography>
             <Checkbox
               checked={subcatchment}
               onChange={handleChange}
-              disabled={landuse && subcatchment}
+              disabled={landuse || vegetation}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "subcatchment" } }}
             />
           </div>
           <div className={classes.layer}>
-            <Button className={classes.layerTitle}>WEPP Channels</Button>
+            <Typography className={classes.layerTitle}>Channels</Typography>
             <Checkbox
               checked={channels}
               onChange={handleChange}
@@ -97,72 +86,41 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           </div>
         </>
       )}
-      {activeTab === "Surface Data" && (
+      {activeTab === "Watershed Data" && (
         <>
           <div className={classes.layer}>
-            <Button className={classes.layerTitle}>Land Use (2025)</Button>
+            <Typography className={classes.layerTitle}>
+              Land Use (2025)
+            </Typography>
             <Checkbox
               checked={landuse}
               onChange={handleChange}
+              disabled={vegetation}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "landuse" } }}
             />
           </div>
           <div className={classes.layer}>
-            <Button
-              className={classes.layerTitle}
-              onClick={() => {}}
-              style={{
-                fontWeight:
-                  isActive && choroplethType === "evapotranspiration"
-                    ? "bold"
-                    : "normal",
-              }}
-            >
-              Evapotranspiration
-            </Button>
-          </div>
-        </>
-      )}
-      {activeTab === "Coverage" && (
-        <>
-          <div className={classes.layer}>
-            <Button
-              className={classes.layerTitle}
-              onClick={() => {
-                setSubcatchment(true);
-                setLanduse(false);
-                setLanduseLegendVisible(false);
-                setChoroplethType("vegetationCover");
-                openPanel(<VegetationCover />);
-              }}
-            >
+            <Typography className={classes.layerTitle}>
               Vegetation Cover
-            </Button>
-          </div>
-        </>
-      )}
-      {activeTab === "Soil Burn" && (
-        <>
-          <div className={classes.layer}>
-            <Button className={classes.layerTitle}>Fire Severity</Button>
+            </Typography>
             <Checkbox
+              checked={vegetation}
               onChange={handleChange}
               className={classes.layerCheckbox}
-              slotProps={{ input: { id: "fireSeverity" } }}
+              slotProps={{ input: { id: "vegetationCover" } }}
             />
           </div>
           <div className={classes.layer}>
-            <Button className={classes.layerTitle}>Soil Burn Severity</Button>
+            <Typography className={classes.layerTitle}>
+              Soil Burn Severity
+            </Typography>
             <Checkbox
               checked={sbsEnabled}
               onChange={handleChange}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "soilBurnSeverity" } }}
             />
-          </div>
-          <div className={classes.layer}>
-            <Button className={classes.layerTitle}>Predict</Button>
           </div>
         </>
       )}

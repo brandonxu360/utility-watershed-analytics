@@ -40,6 +40,15 @@ vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
           onChange={handleChange}
         />
       </label>
+      <label>
+        Vegetation Cover
+        <input
+          aria-label="vegetationCover"
+          type="checkbox"
+          id="vegetationCover"
+          onChange={handleChange}
+        />
+      </label>
     </div>
   ),
 }));
@@ -54,6 +63,9 @@ describe("DataLayersControl", () => {
   const clearSelectedHillslope = vi.fn();
   const closePanel = vi.fn();
   const resetOverlays = vi.fn();
+  const setVegetation = vi.fn();
+  const setChoroplethType = vi.fn();
+  const openPanel = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,6 +73,7 @@ describe("DataLayersControl", () => {
       subcatchment: false,
       channels: false,
       landuse: false,
+      vegetation: false,
       setSubcatchment,
       setChannels,
       setLanduse,
@@ -68,6 +81,9 @@ describe("DataLayersControl", () => {
       clearSelectedHillslope,
       closePanel,
       resetOverlays,
+      setVegetation,
+      setChoroplethType,
+      openPanel,
     });
   });
 
@@ -90,17 +106,17 @@ describe("DataLayersControl", () => {
     const { container } = render(<DataLayersControl />);
     fireEvent.click(screen.getByText(/Data Layers/i));
 
-    const surfaceTab = container.querySelector(
-      '[data-layer-tab="Surface Data"]',
+    const watershedTab = container.querySelector(
+      '[data-layer-tab="Watershed Data"]',
     );
-    expect(surfaceTab).toBeTruthy();
+    expect(watershedTab).toBeTruthy();
 
-    if (surfaceTab) {
-      fireEvent.click(surfaceTab);
+    if (watershedTab) {
+      fireEvent.click(watershedTab);
     }
 
     const tabpanel = screen.getByRole("tabpanel");
-    expect(tabpanel).toHaveTextContent("Surface Data");
+    expect(tabpanel).toHaveTextContent("Watershed Data");
   });
 
   it("handles subcatchment toggle and performs cleanup on uncheck", () => {
@@ -156,5 +172,27 @@ describe("DataLayersControl", () => {
     expect(setLanduse).toHaveBeenCalledWith(false);
     expect(setLanduseLegendVisible).toHaveBeenCalledWith(false);
     expect(resetOverlays).toHaveBeenCalledTimes(1);
+  });
+
+  it("handles vegetation toggle and updates store + panel state", () => {
+    render(<DataLayersControl />);
+    fireEvent.click(screen.getByText(/Data Layers/i));
+
+    const vegBox = screen.getByLabelText("vegetationCover") as HTMLInputElement;
+
+    // Enable
+    fireEvent.click(vegBox);
+    expect(setVegetation).toHaveBeenCalledWith(true);
+    expect(setSubcatchment).toHaveBeenCalledWith(true);
+    expect(setLanduse).toHaveBeenCalledWith(false);
+    expect(setLanduseLegendVisible).toHaveBeenCalledWith(false);
+    expect(setChoroplethType).toHaveBeenCalledWith("vegetationCover");
+    expect(openPanel).toHaveBeenCalled();
+
+    // Disable
+    fireEvent.click(vegBox);
+    expect(setVegetation).toHaveBeenCalledWith(false);
+    expect(setChoroplethType).toHaveBeenCalledWith("none");
+    expect(closePanel).toHaveBeenCalled();
   });
 });

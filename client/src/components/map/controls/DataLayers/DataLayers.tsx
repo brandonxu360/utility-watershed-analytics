@@ -1,15 +1,9 @@
 import { ChangeEvent, useState } from "react";
 import { useAppStore } from "../../../../store/store";
+import { VegetationCover } from "../../../bottom-panels/VegetationCover";
 import DataLayersTabContent from "./DataLayersTabContent";
 
-import {
-  FaChevronUp,
-  FaChevronDown,
-  FaWater,
-  FaGlobe,
-  FaTree,
-  FaFireAlt,
-} from "react-icons/fa";
+import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 
 import { tss } from "../../../../utils/tss";
 import Paper from "@mui/material/Paper";
@@ -31,7 +25,7 @@ const useStyles = tss.create(({ theme }) => ({
     display: "flex",
     alignContent: "center",
     justifyContent: "space-between",
-    padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
+    padding: `${theme.spacing(1.25)} ${theme.spacing(2)}`,
     fontSize: theme.typography.subtitle2.fontSize,
     fontWeight: 700,
     color: theme.palette.primary.contrastText,
@@ -48,12 +42,6 @@ const useStyles = tss.create(({ theme }) => ({
     padding: 0,
     borderRadius: 0,
   },
-  heading: {
-    fontSize: theme.typography.subtitle2.fontSize,
-    fontWeight: 600,
-    color: theme.palette.primary.dark,
-    padding: `${theme.spacing(1)} ${theme.spacing(2)} 0 ${theme.spacing(2)}`,
-  },
   bottomNav: {
     background: theme.palette.primary.contrastText,
     display: "flex",
@@ -64,26 +52,23 @@ const useStyles = tss.create(({ theme }) => ({
   },
   navContainer: {
     display: "flex",
-    gap: theme.spacing(3),
+    gap: theme.spacing(6),
   },
   navButton: {
-    width: "40px",
     height: "40px",
     display: "flex",
     color: theme.palette.accent.main,
     cursor: "pointer",
+    border: "none",
+    borderRadius: 0,
     "&:hover": {
       background: theme.palette.text.secondary,
     },
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: 600,
   },
 }));
 
-/**
- * DataLayersControl - toggles visibility of map data layers:
- * - Subcatchments
- * - Channels
- * - Land Use
- */
 export default function DataLayersControl() {
   const { classes } = useStyles();
 
@@ -98,51 +83,71 @@ export default function DataLayersControl() {
     closePanel,
     resetOverlays,
     setSbsEnabled,
+    setChoroplethType,
+    setVegetation,
+    openPanel,
   } = useAppStore();
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("WEPP Hillslopes");
+  const [isOpen, setIsOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState("WEPP");
 
-  const navTabs = [
-    { key: "WEPP Hillslopes", icon: <FaWater title="WEPP Hillslopes" /> },
-    { key: "Surface Data", icon: <FaGlobe title="Coverage" /> },
-    { key: "Coverage", icon: <FaTree title="Vegetation" /> },
-    { key: "Soil Burn", icon: <FaFireAlt title="Soil Burn" /> },
-  ];
+  const navTabs = ["WEPP", "Watershed Data"];
 
   const toggleOpen = () => setIsOpen((prev) => !prev);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = e.target;
 
-    if (id === "subcatchment") {
-      setSubcatchment(checked);
-      if (!checked) {
-        queryClient.cancelQueries({ queryKey: ["subcatchments"] });
-        closePanel();
-        setLanduse(false);
-        clearSelectedHillslope();
+    switch (id) {
+      case "subcatchment": {
+        setSubcatchment(checked);
+        if (!checked) {
+          queryClient.cancelQueries({ queryKey: ["subcatchments"] });
+          closePanel();
+          setLanduse(false);
+          clearSelectedHillslope();
+        }
+        return;
       }
-    }
-
-    if (id === "channels") {
-      setChannels(checked);
-      if (!checked) {
-        queryClient.cancelQueries({ queryKey: ["channels"] });
+      case "channels": {
+        setChannels(checked);
+        if (!checked) {
+          queryClient.cancelQueries({ queryKey: ["channels"] });
+        }
+        return;
       }
-    }
-
-    if (id === "landuse") {
-      setSubcatchment(checked);
-      setLanduse(checked);
-      setLanduseLegendVisible(checked);
-      if (!checked) {
-        resetOverlays();
+      case "landuse": {
+        setSubcatchment(checked);
+        setLanduse(checked);
+        setLanduseLegendVisible(checked);
+        if (!checked) {
+          resetOverlays();
+        }
+        return;
       }
-    }
+      case "vegetationCover": {
+        setVegetation(checked);
 
-    if (id === "soilBurnSeverity") {
-      setSbsEnabled(checked);
+        if (checked) {
+          setSubcatchment(true);
+          setLanduse(false);
+          setLanduseLegendVisible(false);
+          setChoroplethType("vegetationCover");
+          openPanel(<VegetationCover />);
+        } else {
+          setSubcatchment(false);
+          setChoroplethType("none");
+          closePanel();
+        }
+        return;
+      }
+      case "soilBurnSeverity": {
+        setSbsEnabled(checked);
+        return;
+      }
+      default: {
+        return;
+      }
     }
   };
 
@@ -150,14 +155,13 @@ export default function DataLayersControl() {
     <div className={classes.root}>
       <div>
         <div className={classes.header} onClick={toggleOpen}>
-          Data Layers{" "}
+          <div>{activeTab}</div>
           <span className={classes.chevron}>
-            {isOpen ? <FaChevronDown /> : <FaChevronUp />}
+            {isOpen ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
           </span>
         </div>
         {isOpen && (
           <Paper className={classes.tabContent}>
-            <div className={classes.heading}>{activeTab}</div>
             <DataLayersTabContent
               activeTab={activeTab}
               handleChange={handleChange}
@@ -167,23 +171,23 @@ export default function DataLayersControl() {
         <div className={classes.bottomNav}>
           <div className={classes.navContainer}>
             {navTabs.map((tab) => {
-              const isActive = activeTab === tab.key;
+              const isActive = activeTab === tab;
               return (
                 <IconButton
-                  key={tab.key}
+                  key={tab}
                   className={`${classes.navButton}${isActive ? " active" : ""}`}
                   onClick={() => {
                     if (isActive) {
                       toggleOpen();
                     } else {
-                      setActiveTab(tab.key);
+                      setActiveTab(tab);
                       setIsOpen(true);
                     }
                   }}
                   size="small"
-                  data-layer-tab={tab.key}
+                  data-layer-tab={tab}
                 >
-                  {tab.icon}
+                  {tab}
                 </IconButton>
               );
             })}

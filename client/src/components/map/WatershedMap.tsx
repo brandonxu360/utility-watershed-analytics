@@ -370,13 +370,13 @@ export default function WatershedMap(): JSX.Element {
           channelLoading ||
           choroplethLoading ||
           landuseLoading) && (
-            <div
-              className={classes.mapLoadingOverlay}
-              data-testid="map-loading-overlay"
-            >
-              <CircularProgress size={50} color="inherit" />
-            </div>
-          )}
+          <div
+            className={classes.mapLoadingOverlay}
+            data-testid="map-loading-overlay"
+          >
+            <CircularProgress size={50} color="inherit" />
+          </div>
+        )}
 
         <TileLayer
           key={selectedLayerId}
@@ -436,11 +436,7 @@ export default function WatershedMap(): JSX.Element {
         )}
 
         {sbsEnabled && runId && (
-          <SbsLayer
-            runId={runId}
-            mode={sbsColorMode}
-            bounds={sbsBounds}
-          />
+          <SbsLayer runId={runId} mode={sbsColorMode} bounds={sbsBounds} />
         )}
       </MapContainer>
 

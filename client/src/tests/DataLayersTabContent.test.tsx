@@ -39,16 +39,13 @@ describe("DataLayersTabContent", () => {
     });
   });
 
-  it("renders WEPP Hillslopes tab with subcatchment + channels checkboxes", () => {
+  it("renders WEPP tab with subcatchment + channels checkboxes", () => {
     const { container } = render(
-      <DataLayersTabContent
-        activeTab="WEPP Hillslopes"
-        handleChange={handleChange}
-      />,
+      <DataLayersTabContent activeTab="WEPP" handleChange={handleChange} />,
     );
 
     expect(screen.getByText("Subcatchments")).toBeInTheDocument();
-    expect(screen.getByText("WEPP Channels")).toBeInTheDocument();
+    expect(screen.getByText("Channels")).toBeInTheDocument();
 
     expect(
       container.querySelector("input#subcatchment[type='checkbox']"),
@@ -89,10 +86,10 @@ describe("DataLayersTabContent", () => {
     expect(handleChange).toHaveBeenCalledTimes(2);
   });
 
-  it("renders Surface Data tab with landuse checkbox and choropleth buttons", () => {
+  it("renders Watershed Data tab with landuse and vegetation checkboxes", () => {
     const { container } = render(
       <DataLayersTabContent
-        activeTab="Surface Data"
+        activeTab="Watershed Data"
         handleChange={handleChange}
       />,
     );
@@ -102,8 +99,8 @@ describe("DataLayersTabContent", () => {
       container.querySelector("input#landuse[type='checkbox']"),
     ).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: "Evapotranspiration" }),
-    ).toBeInTheDocument();
+      container.querySelector("input#vegetationCover[type='checkbox']"),
+    ).toBeTruthy();
   });
 
   it("does not show the land use legend help icon when landuse is false", () => {

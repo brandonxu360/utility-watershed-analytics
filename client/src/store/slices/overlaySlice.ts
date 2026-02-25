@@ -6,10 +6,12 @@ export interface OverlaySlice {
   channels: boolean;
   patches: boolean;
   landuse: boolean;
+  vegetation: boolean;
   setSubcatchment: (value: boolean) => void;
   setChannels: (value: boolean) => void;
   setPatches: (value: boolean) => void;
   setLanduse: (value: boolean) => void;
+  setVegetation: (value: boolean) => void;
 }
 
 export const createOverlaySlice: StateCreator<
@@ -22,8 +24,10 @@ export const createOverlaySlice: StateCreator<
   channels: false,
   patches: false,
   landuse: false,
+  vegetation: false,
   setSubcatchment: (value) => set({ subcatchment: value }),
   setChannels: (value) => set({ channels: value }),
   setPatches: (value) => set({ patches: value }),
   setLanduse: (value) => set({ landuse: value }),
+  setVegetation: (value) => set({ vegetation: value }),
 });

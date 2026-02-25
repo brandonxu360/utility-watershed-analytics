@@ -78,21 +78,6 @@ vi.mock("../components/CoverageLineChart", () => ({
   ),
 }));
 
-vi.mock("react-icons/fa6", () => ({
-  FaXmark: ({
-    className,
-    onClick,
-  }: {
-    className?: string;
-    onClick?: () => void;
-  }) => (
-    <span data-testid="close-icon" className={className} onClick={onClick}>
-      X
-    </span>
-  ),
-  FaChevronDown: () => <span data-testid="chevron-down">▼</span>,
-}));
-
 const mockClose = vi.fn();
 const mockClearSelectedHillslope = vi.fn();
 const mockSetSubcatchment = vi.fn();
