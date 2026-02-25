@@ -334,9 +334,9 @@ export default function WatershedMap(): JSX.Element {
   // Compute the bounding box of the currently selected watershed so the SBS
   // TileLayer only requests tiles that intersect it.
   const sbsBounds = useMemo((): L.LatLngBoundsExpression | undefined => {
-    if (!watershedID || !memoWatersheds) return undefined;
+    if (!runId || !memoWatersheds) return undefined;
     const feature = memoWatersheds.features?.find(
-      (f: GeoJSON.Feature) => f.id?.toString() === watershedID,
+      (f: GeoJSON.Feature) => f.id?.toString() === runId,
     );
     if (!feature) return undefined;
     try {
@@ -344,7 +344,7 @@ export default function WatershedMap(): JSX.Element {
     } catch {
       return undefined;
     }
-  }, [watershedID, memoWatersheds]);
+  }, [runId, memoWatersheds]);
 
   // Only crash on critical data failure (watersheds are required for the map to function)
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
