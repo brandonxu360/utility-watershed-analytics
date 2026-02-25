@@ -33,7 +33,6 @@ export type FetchRapOptions = {
   mode: "hillslope" | "watershed";
   runId: string;
   topazId?: number;
-  weppId?: number;
   year?: number;
   include_schema?: boolean;
   include_sql?: boolean;

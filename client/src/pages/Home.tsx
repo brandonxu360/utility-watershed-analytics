@@ -1,5 +1,4 @@
-import { watershedOverviewRoute } from "../routes/router";
-import { useMatch } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { useAppStore } from "../store/store";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import { tss } from "../utils/tss";
@@ -49,12 +48,13 @@ export default function Home(): JSX.Element {
   const { classes } = useStyles();
   const { isPanelOpen, panelContent } = useAppStore();
 
-  const match = useMatch({
-    from: watershedOverviewRoute.id,
-    shouldThrow: false,
-  });
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
 
-  const watershedID = match?.params.webcloudRunId ?? null;
   const isSmallScreen = useIsSmallScreen();
 
   if (isSmallScreen) {
@@ -65,7 +65,7 @@ export default function Home(): JSX.Element {
     <div className={classes.root}>
       <Paper elevation={3} className={classes.sidePanel} square>
         <div className={classes.sidePanelContent}>
-          {watershedID ? <WatershedOverview /> : <HomeSidePanelContent />}
+          {runId ? <WatershedOverview /> : <HomeSidePanelContent />}
         </div>
       </Paper>
       <div className={classes.mapWrapper}>

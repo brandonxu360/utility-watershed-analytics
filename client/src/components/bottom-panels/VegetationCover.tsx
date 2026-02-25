@@ -2,8 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
 import { useAppStore } from "../../store/store";
 import { VegetationBandType } from "../../store/slices/choroplethSlice";
-import { useMatch } from "@tanstack/react-router";
-import { watershedOverviewRoute } from "../../routes/router";
+import { useParams } from "@tanstack/react-router";
 import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
 import { useChoropleth } from "../../hooks/useChoropleth";
@@ -86,11 +85,12 @@ export const VegetationCover: React.FC = () => {
 
   const { config } = useChoropleth();
 
-  const match = useMatch({
-    from: watershedOverviewRoute.id,
-    shouldThrow: false,
-  });
-  const runId = match ? match.params.webcloudRunId : null;
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
 
   // Map UI option to band type
   const vegetationOptionToBand: Record<VegetationOption, VegetationBandType> = {
@@ -166,23 +166,28 @@ export const VegetationCover: React.FC = () => {
   useEffect(() => {
     let mounted = true;
     async function loadRap() {
+      if (!runId) {
+        setRapTimeSeries([]);
+        setRapStatus({ state: "ready" });
+        return;
+      }
+
       setRapStatus({ state: "loading" });
 
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-              mode: "hillslope",
-              topazId: selectedHillslopeId,
+            mode: "hillslope",
+            topazId: selectedHillslopeId,
+            runId: runId,
+            year: selectedYear === "All" ? undefined : Number(selectedYear),
+          })
+          : runId
+            ? await fetchRap({
+              mode: "watershed",
               runId: runId,
               year: selectedYear === "All" ? undefined : Number(selectedYear),
             })
-          : runId
-            ? await fetchRap({
-                mode: "watershed",
-                weppId: 108,
-                runId: runId,
-                year: selectedYear === "All" ? undefined : Number(selectedYear),
-              })
             : null;
 
         if (!mounted) return;

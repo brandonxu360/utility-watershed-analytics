@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
-import { useMatch, useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { MapEffect } from "../../utils/map/MapEffectUtil";
 
 import {
@@ -14,7 +14,6 @@ import {
 import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { LeafletMouseEvent } from "leaflet";
-import { watershedOverviewRoute } from "../../routes/router";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { selectedStyle, defaultStyle } from "./constants";
 import { useAppStore } from "../../store/store";
@@ -73,7 +72,7 @@ const BOUNDS: [[number, number], [number, number]] = [
  * Handles the map of our application and contains all of its controls
  * and watershed specific workflows.
  *
- * @param webcloudRunId - Watershed ID taken from the useMatch hook in @see {@link Home} page.
+ * @param webcloudRunId - Watershed ID taken from the useParams hook in @see {@link Home} page.
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
 export default function WatershedMap(): JSX.Element {
@@ -113,12 +112,12 @@ export default function WatershedMap(): JSX.Element {
     [choropleth, choroplethYear, choroplethBands, choroplethActive],
   );
 
-  const match = useMatch({
-    from: watershedOverviewRoute.id,
-    shouldThrow: false,
-  });
-
-  const watershedID = match?.params.webcloudRunId ?? null;
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
 
   const {
     data: watersheds,
@@ -130,15 +129,15 @@ export default function WatershedMap(): JSX.Element {
   });
 
   const { data: subcatchments, isLoading: subLoading } = useQuery({
-    queryKey: ["subcatchments", watershedID],
-    queryFn: () => fetchSubcatchments(watershedID!),
-    enabled: Boolean(subcatchment && watershedID),
+    queryKey: ["subcatchments", runId],
+    queryFn: () => fetchSubcatchments(runId!),
+    enabled: Boolean(subcatchment && runId),
   });
 
   const { data: channelData, isLoading: channelLoading } = useQuery({
-    queryKey: ["channels", watershedID],
-    queryFn: () => fetchChannels(watershedID!),
-    enabled: Boolean(channels && watershedID),
+    queryKey: ["channels", runId],
+    queryFn: () => fetchChannels(runId!),
+    enabled: Boolean(channels && runId),
   });
 
   const {
@@ -146,14 +145,14 @@ export default function WatershedMap(): JSX.Element {
     isLoading: landuseLoading,
     error: landuseError,
   } = useQuery({
-    queryKey: ["landuse-undisturbed", watershedID],
-    queryFn: () => fetchLanduse({ runId: watershedID! }),
-    enabled: Boolean(landuse && watershedID),
+    queryKey: ["landuse-undisturbed", runId],
+    queryFn: () => fetchLanduse({ runId: runId! }),
+    enabled: Boolean(landuse && runId),
   });
 
   // Auto-disable features that depend on subcatchment data or missing landuse
   useEffect(() => {
-    if (!watershedID) return;
+    if (!runId) return;
 
     // Handle subcatchment data unavailability
     if (!subLoading && subcatchments) {
@@ -185,7 +184,7 @@ export default function WatershedMap(): JSX.Element {
     landuseLoading,
     subcatchment,
     subcatchments,
-    watershedID,
+    runId,
     setLanduse,
     setSubcatchment,
     setLanduseLegendMap,
@@ -194,14 +193,14 @@ export default function WatershedMap(): JSX.Element {
 
   // Auto-disable channels if data unavailable
   useEffect(() => {
-    if (!watershedID || channelLoading || !channelData) return;
+    if (!runId || channelLoading || !channelData) return;
 
     if (channelData.features?.length === 0 && channels) {
       setChannels(false);
       toast.error("No channel data available");
     }
   }, [
-    watershedID,
+    runId,
     channelData,
     channelLoading,
     channelData?.features?.length,
@@ -213,6 +212,7 @@ export default function WatershedMap(): JSX.Element {
   const onWatershedClick = (e: LeafletMouseEvent) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
+    console.log(feature);
 
     closePanel(); // TODO: The panel should only close if watershed id changes
     navigate({
@@ -231,9 +231,8 @@ export default function WatershedMap(): JSX.Element {
       feature:
         | GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>
         | undefined,
-    ) =>
-      feature?.id?.toString() === watershedID ? selectedStyle : defaultStyle,
-    [watershedID],
+    ) => (feature?.id?.toString() === runId ? selectedStyle : defaultStyle),
+    [runId],
   );
 
   // Build landuse legend directly from landuse data
@@ -246,14 +245,14 @@ export default function WatershedMap(): JSX.Element {
         }
       }
       setLanduseLegendMap(legend);
-    } else if (!landuse || !watershedID) {
+    } else if (!landuse || !runId) {
       setLanduseLegendMap({});
       setLanduseLegendVisible(false);
     }
   }, [
     landuse,
     landuseData,
-    watershedID,
+    runId,
     setLanduseLegendMap,
     setLanduseLegendVisible,
   ]);
@@ -335,9 +334,9 @@ export default function WatershedMap(): JSX.Element {
   // Compute the bounding box of the currently selected watershed so the SBS
   // TileLayer only requests tiles that intersect it.
   const sbsBounds = useMemo((): L.LatLngBoundsExpression | undefined => {
-    if (!watershedID || !memoWatersheds) return undefined;
+    if (!runId || !memoWatersheds) return undefined;
     const feature = memoWatersheds.features?.find(
-      (f: GeoJSON.Feature) => f.id?.toString() === watershedID,
+      (f: GeoJSON.Feature) => f.id?.toString() === runId,
     );
     if (!feature) return undefined;
     try {
@@ -345,7 +344,7 @@ export default function WatershedMap(): JSX.Element {
     } catch {
       return undefined;
     }
-  }, [watershedID, memoWatersheds]);
+  }, [runId, memoWatersheds]);
 
   // Only crash on critical data failure (watersheds are required for the map to function)
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
@@ -371,13 +370,13 @@ export default function WatershedMap(): JSX.Element {
           channelLoading ||
           choroplethLoading ||
           landuseLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}
@@ -408,7 +407,7 @@ export default function WatershedMap(): JSX.Element {
         </div>
 
         {/* Handles URL navigation to a specified watershed */}
-        <MapEffect watershedId={watershedID} watersheds={memoWatersheds} />
+        <MapEffect watershedId={runId} watersheds={memoWatersheds} />
 
         {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
         {(!subcatchment || !memoSubcatchments?.features?.length) &&
@@ -436,9 +435,9 @@ export default function WatershedMap(): JSX.Element {
           <GeoJSON data={memoChannels} style={channelStyle} />
         )}
 
-        {sbsEnabled && watershedID && (
+        {sbsEnabled && runId && (
           <SbsLayer
-            runId={watershedID}
+            runId={runId}
             mode={sbsColorMode}
             bounds={sbsBounds}
           />
@@ -449,7 +448,7 @@ export default function WatershedMap(): JSX.Element {
 
       {sbsEnabled && <SbsLegend />}
 
-      {watershedID && (
+      {runId && (
         <div style={{ position: "absolute", right: "10px", bottom: "30px" }}>
           <DataLayersControl />
         </div>

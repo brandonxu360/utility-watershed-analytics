@@ -9,14 +9,14 @@ import WatershedMap from "../components/map/WatershedMap";
 const mockNavigate = vi.fn();
 const mockClosePanel = vi.fn();
 
-const { mockUseMatch } = vi.hoisted(() => ({
-  mockUseMatch: vi.fn(),
+const { mockUseParams } = vi.hoisted(() => ({
+  mockUseParams: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
   return Object.assign({}, actual, {
-    useMatch: () => mockUseMatch(),
+    useParams: () => mockUseParams(),
     useNavigate: () => mockNavigate,
   });
 });
@@ -284,7 +284,7 @@ describe("Map Component", () => {
     lastSubcatchmentStyleFn = null;
 
     // Default mock returns
-    mockUseMatch.mockReturnValue(null);
+    mockUseParams.mockReturnValue(null);
     mockFetchWatersheds.mockResolvedValue(mockWatershedData);
     mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
     mockFetchChannels.mockResolvedValue(mockChannelData);
@@ -348,7 +348,7 @@ describe("Map Component", () => {
     });
 
     it("does not render DataLayersControl when no watershedID", async () => {
-      mockUseMatch.mockReturnValue(null);
+      mockUseParams.mockReturnValue(null);
       renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         expect(
@@ -358,9 +358,7 @@ describe("Map Component", () => {
     });
 
     it("renders DataLayersControl when watershedID is present", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         expect(screen.getByTestId("data-layers-control")).toBeInTheDocument();
@@ -368,9 +366,7 @@ describe("Map Component", () => {
     });
 
     it("renders MapEffect with correct watershed ID", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         const mapEffect = screen.getByTestId("map-effect");
@@ -421,9 +417,7 @@ describe("Map Component", () => {
 
   describe("watershed interactions", () => {
     it("applies selected style to matching watershed", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
@@ -436,9 +430,7 @@ describe("Map Component", () => {
     });
 
     it("applies default style to non-matching watershed", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
@@ -485,9 +477,7 @@ describe("Map Component", () => {
 
   describe("subcatchment layer", () => {
     it("shows subcatchment layer when enabled and data exists", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ subcatchment: true });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
@@ -499,9 +489,7 @@ describe("Map Component", () => {
     });
 
     it("does not show subcatchment layer when disabled", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ subcatchment: false });
 
       renderWithProviders(<WatershedMap />);
@@ -514,9 +502,7 @@ describe("Map Component", () => {
     });
 
     it("shows watershed layer when subcatchment has no features", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ subcatchment: true });
       mockFetchSubcatchments.mockResolvedValue({ features: [] });
 
@@ -528,9 +514,7 @@ describe("Map Component", () => {
     });
 
     it("passes correct choropleth props to SubcatchmentLayer", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         choropleth: { ...initialChoroplethState, type: "vegetationCover" },
@@ -554,9 +538,7 @@ describe("Map Component", () => {
 
   describe("channels layer", () => {
     it("shows channels when enabled and data exists", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ channels: true });
       mockFetchChannels.mockResolvedValue(mockChannelData);
 
@@ -568,9 +550,7 @@ describe("Map Component", () => {
     });
 
     it("does not show channels when disabled", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ channels: false });
 
       renderWithProviders(<WatershedMap />);
@@ -583,9 +563,7 @@ describe("Map Component", () => {
     });
 
     it("applies correct style to channels", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ channels: true });
       mockFetchChannels.mockResolvedValue(mockChannelData);
 
@@ -609,9 +587,7 @@ describe("Map Component", () => {
       const mockSetSubcatchment = vi.fn();
       const mockSetLanduse = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         landuse: true,
@@ -634,9 +610,7 @@ describe("Map Component", () => {
     it("disables channels when no channel data", async () => {
       const mockSetChannels = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         channels: true,
         setChannels: mockSetChannels,
@@ -657,9 +631,7 @@ describe("Map Component", () => {
       const mockSetSubcatchment = vi.fn();
       const mockSetLanduse = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         landuse: true,
@@ -684,9 +656,7 @@ describe("Map Component", () => {
     it("sets landuse legend map when landuse is enabled", async () => {
       const mockSetLanduseLegendMap = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         landuse: true,
@@ -707,9 +677,7 @@ describe("Map Component", () => {
     it("prefers undisturbed landuse parquet values when available", async () => {
       const mockSetLanduseLegendMap = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         landuse: true,
@@ -746,9 +714,7 @@ describe("Map Component", () => {
     it("clears landuse legend map when landuse is disabled", async () => {
       const mockSetLanduseLegendMap = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         landuse: false,
@@ -766,9 +732,7 @@ describe("Map Component", () => {
     it("handles landuse entries without color/desc", async () => {
       const mockSetLanduseLegendMap = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         landuse: true,
@@ -793,9 +757,7 @@ describe("Map Component", () => {
       const mockSetLanduseLegendMap = vi.fn();
       const mockSetLanduseLegendVisible = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         landuse: true,
@@ -821,7 +783,7 @@ describe("Map Component", () => {
       const mockSetLanduseLegendMap = vi.fn();
       const mockSetLanduseLegendVisible = vi.fn();
 
-      mockUseMatch.mockReturnValue(undefined);
+      mockUseParams.mockReturnValue(undefined);
       useAppStore.setState({
         subcatchment: false,
         landuse: true, // Still true from previous session
@@ -850,9 +812,7 @@ describe("Map Component", () => {
         choropleth: "vegetationCover",
       });
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ subcatchment: true });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
@@ -882,9 +842,7 @@ describe("Map Component", () => {
         getChoroplethStyle: mockGetChoroplethStyle,
       });
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ subcatchment: true, landuse: false });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
@@ -913,9 +871,7 @@ describe("Map Component", () => {
         choropleth: "none",
       });
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ subcatchment: true, landuse: true });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
@@ -947,9 +903,7 @@ describe("Map Component", () => {
         choropleth: "none",
       });
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ subcatchment: true, landuse: true });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
@@ -978,9 +932,7 @@ describe("Map Component", () => {
         choropleth: "none",
       });
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ subcatchment: true, landuse: false });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
@@ -1005,9 +957,7 @@ describe("Map Component", () => {
         choropleth: "vegetationCover",
       });
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({ subcatchment: true, landuse: false });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
@@ -1063,9 +1013,7 @@ describe("Map Component", () => {
 
   describe("choropleth key generation", () => {
     it("generates correct choropleth key", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         choropleth: {
@@ -1096,9 +1044,7 @@ describe("Map Component", () => {
     });
 
     it("uses 'all' for null year in choropleth key", async () => {
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         choropleth: {
@@ -1137,8 +1083,8 @@ describe("Map Component", () => {
       expect(style).toMatchObject({ fillOpacity: 0.25 }); // defaultStyle
     });
 
-    it("handles missing webcloudRunId in match params", async () => {
-      mockUseMatch.mockReturnValue({ params: {} });
+    it("handles missing watershedID in match params", async () => {
+      mockUseParams.mockReturnValue(undefined);
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
@@ -1150,7 +1096,7 @@ describe("Map Component", () => {
     });
 
     it("does not fetch subcatchments when watershedID is null", async () => {
-      mockUseMatch.mockReturnValue(null);
+      mockUseParams.mockReturnValue(null);
       useAppStore.setState({ subcatchment: true });
 
       renderWithProviders(<WatershedMap />);
@@ -1161,7 +1107,7 @@ describe("Map Component", () => {
     });
 
     it("does not fetch channels when watershedID is null", async () => {
-      mockUseMatch.mockReturnValue(null);
+      mockUseParams.mockReturnValue(null);
       useAppStore.setState({ channels: true });
 
       renderWithProviders(<WatershedMap />);
@@ -1174,9 +1120,7 @@ describe("Map Component", () => {
     it("does not run auto-disable effect when subLoading is true", async () => {
       const mockSetSubcatchment = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
         setSubcatchment: mockSetSubcatchment,
@@ -1191,9 +1135,7 @@ describe("Map Component", () => {
     it("does not run channel auto-disable effect when channelLoading is true", async () => {
       const mockSetChannels = vi.fn();
 
-      mockUseMatch.mockReturnValue({
-        params: { webcloudRunId: "watershed-1" },
-      });
+      mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         channels: true,
         setChannels: mockSetChannels,

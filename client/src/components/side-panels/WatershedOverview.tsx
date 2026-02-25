@@ -1,9 +1,8 @@
 import { useMemo } from "react";
-import { useMatch, useNavigate } from "@tanstack/react-router";
+import { useParams, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWatersheds } from "../../api/api";
 import { WatershedProperties } from "../../types/WatershedProperties";
-import { watershedOverviewRoute } from "../../routes/router";
 import { useAppStore } from "../../store/store";
 import { tss } from "../../utils/tss";
 import { toast } from "react-toastify";
@@ -165,11 +164,12 @@ export default function WatershedOverview() {
 
   const { resetOverlays } = useAppStore();
 
-  const match = useMatch({
-    from: watershedOverviewRoute.id,
-    shouldThrow: false,
-  });
-  const watershedID = match?.params.webcloudRunId ?? null;
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
 
   const {
     data: watersheds,
@@ -181,12 +181,12 @@ export default function WatershedOverview() {
   });
 
   const watershed = useMemo(() => {
-    if (!watersheds?.features || !watershedID) return null;
+    if (!watersheds?.features || !runId) return null;
     return watersheds.features.find(
       (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>) =>
-        feature.id && feature.id.toString() === watershedID,
+        feature.id && feature.id.toString() === runId,
     );
-  }, [watersheds?.features, watershedID]);
+  }, [watersheds?.features, runId]);
 
   if (isLoading) return <SkeletonWatershedPanel />;
   if (error) return <div>Error: {(error as Error).message}</div>;
@@ -248,7 +248,7 @@ export default function WatershedOverview() {
             <strong>Watershed Models</strong>
           </Typography>
         </div>
-        <div className={classes.accordionGroup} key={watershedID}>
+        <div className={classes.accordionGroup} key={runId}>
           <Button
             className={classes.actionButton}
             aria-label="View Calibrated WEPP Results"
@@ -274,7 +274,7 @@ export default function WatershedOverview() {
             variant="text"
             onClick={() =>
               window.open(
-                `https://wepp.cloud/weppcloud/runs/${watershedID}/disturbed9002_wbt/gl-dashboard`,
+                `https://wepp.cloud/weppcloud/runs/${runId}/disturbed9002_wbt/gl-dashboard`,
                 "_blank",
                 "noopener,noreferrer",
               )

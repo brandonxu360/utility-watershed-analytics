@@ -7,14 +7,12 @@ import {
 } from "../hooks/useChoropleth";
 import { useAppStore } from "../store/store";
 
-const mockUseMatch = vi.fn(() => ({
-  params: { webcloudRunId: "batch;;test-batch;;test-run" },
-}));
+const mockUseParams = vi.fn(() => "batch;;test-batch;;test-run");
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const actual = await importOriginal();
   return Object.assign({}, actual, {
-    useMatch: () => mockUseMatch(),
+    useParams: () => mockUseParams(),
   });
 });
 
@@ -29,9 +27,7 @@ const mockFetchRapChoropleth = vi.mocked(fetchRapChoropleth);
 describe("useChoropleth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseMatch.mockReturnValue({
-      params: { webcloudRunId: "batch;;test-batch;;test-run" },
-    });
+    mockUseParams.mockReturnValue("batch;;test-batch;;test-run");
     useAppStore.getState().setChoroplethType("none");
     useAppStore.getState().setChoroplethYear(null);
     useAppStore.getState().setChoroplethData(null, null);

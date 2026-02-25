@@ -158,7 +158,7 @@ const Login: FC<LoginProps> = ({ onSubmit }) => {
             />
           </FormControl>
           <div className={classes.forgotRow}>
-            <Link to="" className={classes.forgotRow}>
+            <Link to="/" className={classes.forgotRow}>
               Forgot password?
             </Link>
           </div>
