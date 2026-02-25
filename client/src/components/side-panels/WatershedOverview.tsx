@@ -27,7 +27,7 @@ const useStyles = tss.create(({ theme }) => ({
   },
   title: {
     marginBottom: theme.spacing(1.5),
-    fontSize: theme.typography.body1.fontSize,
+    fontSize: theme.typography.h3.fontSize,
   },
   paragraph: {
     marginBottom: theme.spacing(2),
@@ -217,10 +217,6 @@ export default function WatershedOverview() {
           <strong>{watershed?.properties?.pws_name}</strong>
         </Typography>
         <Typography variant="body1" className={classes.paragraph}>
-          This is where the description for the watershed will go. For now we
-          have placeholder text.
-        </Typography>
-        <Typography variant="body1" className={classes.paragraph}>
           <strong>County:</strong> {watershed?.properties?.county_nam ?? "N/A"}
         </Typography>
         <Typography variant="body1" className={classes.paragraph}>
@@ -228,10 +224,6 @@ export default function WatershedOverview() {
           {watershed?.properties?.shape_area
             ? `${watershed?.properties?.shape_area.toFixed(2)}`
             : "N/A"}
-        </Typography>
-        <Typography variant="body1" className={classes.paragraph}>
-          <strong>Number of Customers:</strong>{" "}
-          {watershed?.properties?.num_customers ?? "N/A"}
         </Typography>
         <Typography variant="body1" className={classes.paragraph}>
           <strong>Source Name:</strong>{" "}
