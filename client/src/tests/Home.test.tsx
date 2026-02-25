@@ -34,8 +34,7 @@ vi.mock("../components/bottom-panels/BottomPanel", () => ({
 describe("Home Component Tests", () => {
   beforeEach(() => {
     useAppStore.setState({
-      isPanelOpen: false,
-      panelContent: null,
+      activeDataLayer: "none",
     });
     mockUseParams.mockReset();
     mockNavigate.mockReset();
@@ -83,26 +82,24 @@ describe("Home Component Tests", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("does not render BottomPanel when isPanelOpen is false", () => {
+    it("does not render BottomPanel when activeDataLayer is not vegetationCover", () => {
       mockUseParams.mockReturnValue(null);
-      useAppStore.setState({ isPanelOpen: false, panelContent: "Hello" });
+      useAppStore.setState({ activeDataLayer: "none" });
       render(<Home />);
       expect(
         screen.queryByRole("complementary", { name: /bottom panel/i }),
       ).not.toBeInTheDocument();
     });
 
-    it("renders BottomPanel with panelContent when isPanelOpen is true", () => {
+    it("renders BottomPanel when activeDataLayer is vegetationCover", () => {
       mockUseParams.mockReturnValue(null);
       useAppStore.setState({
-        isPanelOpen: true,
-        panelContent: "Test Panel Content",
+        activeDataLayer: "vegetationCover",
       });
       render(<Home />);
       expect(
         screen.getByRole("complementary", { name: /bottom panel/i }),
       ).toBeInTheDocument();
-      expect(screen.getByText("Test Panel Content")).toBeInTheDocument();
     });
 
     it("shows the small-screen notice when width < 768px", async () => {

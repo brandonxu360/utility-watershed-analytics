@@ -2,12 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAppStore } from "../store/store";
-import { initialChoroplethState } from "../store/slices/choroplethSlice";
+import { initialLayersState } from "../store/slices/layersSlice";
 import { toast } from "react-toastify";
 import WatershedMap from "../components/map/WatershedMap";
 
 const mockNavigate = vi.fn();
-const mockClosePanel = vi.fn();
 
 const { mockUseParams } = vi.hoisted(() => ({
   mockUseParams: vi.fn(),
@@ -256,22 +255,11 @@ const renderWithProviders = (ui: React.ReactElement) => {
 
 const resetStore = () => {
   useAppStore.setState({
-    subcatchment: false,
-    channels: false,
-    patches: false,
-    landuse: false,
-    landuseLegendVisible: false,
-    landuseLegendMap: {},
-    isPanelOpen: false,
-    panelContent: null,
-    choropleth: initialChoroplethState,
-    closePanel: mockClosePanel,
+    ...initialLayersState,
     setSubcatchment: vi.fn(),
     setChannels: vi.fn(),
-    setPatches: vi.fn(),
-    setLanduse: vi.fn(),
     setLanduseLegendMap: vi.fn(),
-    setLanduseLegendVisible: vi.fn(),
+    setActiveDataLayer: vi.fn(),
   });
 };
 
@@ -468,7 +456,6 @@ describe("Map Component", () => {
       const clickHandler = mockLayer.on.mock.calls[0][0].click;
       clickHandler({ sourceTarget: { feature } });
 
-      expect(mockClosePanel).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith({
         to: "/watershed/test-watershed-click",
       });
@@ -517,7 +504,7 @@ describe("Map Component", () => {
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        choropleth: { ...initialChoroplethState, type: "vegetationCover" },
+        activeDataLayer: "vegetationCover",
       });
       mockUseChoropleth.mockReturnValue({
         isActive: true,
@@ -585,14 +572,14 @@ describe("Map Component", () => {
   describe("auto-disable effects", () => {
     it("disables subcatchment and landuse when no subcatchment data", async () => {
       const mockSetSubcatchment = vi.fn();
-      const mockSetLanduse = vi.fn();
+      const mockSetActiveDataLayer = vi.fn();
 
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        landuse: true,
+        activeDataLayer: "landuse",
         setSubcatchment: mockSetSubcatchment,
-        setLanduse: mockSetLanduse,
+        setActiveDataLayer: mockSetActiveDataLayer,
       });
       mockFetchSubcatchments.mockResolvedValue({ features: [] });
 
@@ -600,7 +587,7 @@ describe("Map Component", () => {
 
       await waitFor(() => {
         expect(mockSetSubcatchment).toHaveBeenCalledWith(false);
-        expect(mockSetLanduse).toHaveBeenCalledWith(false);
+        expect(mockSetActiveDataLayer).toHaveBeenCalledWith("none");
         expect(toastErrorMock).toHaveBeenCalledWith(
           "No subcatchment data available",
         );
@@ -629,14 +616,14 @@ describe("Map Component", () => {
 
     it("shows toast when landuse is enabled but no subcatchment data", async () => {
       const mockSetSubcatchment = vi.fn();
-      const mockSetLanduse = vi.fn();
+      const mockSetActiveDataLayer = vi.fn();
 
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        landuse: true,
+        activeDataLayer: "landuse",
         setSubcatchment: mockSetSubcatchment,
-        setLanduse: mockSetLanduse,
+        setActiveDataLayer: mockSetActiveDataLayer,
       });
       mockFetchSubcatchments.mockResolvedValue({ features: [] });
 
@@ -644,7 +631,7 @@ describe("Map Component", () => {
 
       await waitFor(() => {
         expect(mockSetSubcatchment).toHaveBeenCalledWith(false);
-        expect(mockSetLanduse).toHaveBeenCalledWith(false);
+        expect(mockSetActiveDataLayer).toHaveBeenCalledWith("none");
         expect(toastErrorMock).toHaveBeenCalledWith(
           "No subcatchment data available",
         );
@@ -659,7 +646,7 @@ describe("Map Component", () => {
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        landuse: true,
+        activeDataLayer: "landuse",
         setLanduseLegendMap: mockSetLanduseLegendMap,
       });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
@@ -680,7 +667,7 @@ describe("Map Component", () => {
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        landuse: true,
+        activeDataLayer: "landuse",
         setLanduseLegendMap: mockSetLanduseLegendMap,
       });
 
@@ -717,7 +704,7 @@ describe("Map Component", () => {
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        landuse: false,
+        activeDataLayer: "none",
         setLanduseLegendMap: mockSetLanduseLegendMap,
       });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
@@ -735,7 +722,7 @@ describe("Map Component", () => {
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        landuse: true,
+        activeDataLayer: "landuse",
         setLanduseLegendMap: mockSetLanduseLegendMap,
       });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
@@ -753,17 +740,15 @@ describe("Map Component", () => {
     });
 
     it("shows toast and disables landuse when undisturbed scenario returns no rows", async () => {
-      const mockSetLanduse = vi.fn();
+      const mockSetActiveDataLayer = vi.fn();
       const mockSetLanduseLegendMap = vi.fn();
-      const mockSetLanduseLegendVisible = vi.fn();
 
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        landuse: true,
-        setLanduse: mockSetLanduse,
+        activeDataLayer: "landuse",
+        setActiveDataLayer: mockSetActiveDataLayer,
         setLanduseLegendMap: mockSetLanduseLegendMap,
-        setLanduseLegendVisible: mockSetLanduseLegendVisible,
       });
 
       mockFetchLanduse.mockResolvedValue({});
@@ -773,30 +758,26 @@ describe("Map Component", () => {
 
       await waitFor(() => {
         expect(toastErrorMock).toHaveBeenCalled();
-        expect(mockSetLanduse).toHaveBeenCalledWith(false);
+        expect(mockSetActiveDataLayer).toHaveBeenCalledWith("none");
         expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
-        expect(mockSetLanduseLegendVisible).toHaveBeenCalledWith(false);
       });
     });
 
     it("clears landuse legend when returning to home without watershed", async () => {
       const mockSetLanduseLegendMap = vi.fn();
-      const mockSetLanduseLegendVisible = vi.fn();
 
       mockUseParams.mockReturnValue(undefined);
       useAppStore.setState({
         subcatchment: false,
-        landuse: true, // Still true from previous session
+        activeDataLayer: "landuse", // Still active from previous session
         setLanduseLegendMap: mockSetLanduseLegendMap,
-        setLanduseLegendVisible: mockSetLanduseLegendVisible,
       });
 
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
-        // Legend should be cleared since no watershed is selected
+        // Legend map should be cleared since no watershed is selected
         expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
-        expect(mockSetLanduseLegendVisible).toHaveBeenCalledWith(false);
       });
     });
   });
@@ -843,7 +824,7 @@ describe("Map Component", () => {
       });
 
       mockUseParams.mockReturnValue("watershed-1");
-      useAppStore.setState({ subcatchment: true, landuse: false });
+      useAppStore.setState({ subcatchment: true, activeDataLayer: "none" });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
@@ -872,7 +853,7 @@ describe("Map Component", () => {
       });
 
       mockUseParams.mockReturnValue("watershed-1");
-      useAppStore.setState({ subcatchment: true, landuse: true });
+      useAppStore.setState({ subcatchment: true, activeDataLayer: "landuse" });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
@@ -904,7 +885,7 @@ describe("Map Component", () => {
       });
 
       mockUseParams.mockReturnValue("watershed-1");
-      useAppStore.setState({ subcatchment: true, landuse: true });
+      useAppStore.setState({ subcatchment: true, activeDataLayer: "landuse" });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
@@ -933,7 +914,7 @@ describe("Map Component", () => {
       });
 
       mockUseParams.mockReturnValue("watershed-1");
-      useAppStore.setState({ subcatchment: true, landuse: false });
+      useAppStore.setState({ subcatchment: true, activeDataLayer: "none" });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
@@ -958,7 +939,7 @@ describe("Map Component", () => {
       });
 
       mockUseParams.mockReturnValue("watershed-1");
-      useAppStore.setState({ subcatchment: true, landuse: false });
+      useAppStore.setState({ subcatchment: true, activeDataLayer: "none" });
       mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
@@ -1016,12 +997,9 @@ describe("Map Component", () => {
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        choropleth: {
-          ...initialChoroplethState,
-          type: "vegetationCover",
-          year: 2020,
-          bands: "tree",
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: 2020,
+        choroplethBands: "tree",
       });
       mockUseChoropleth.mockReturnValue({
         isActive: true,
@@ -1047,12 +1025,9 @@ describe("Map Component", () => {
       mockUseParams.mockReturnValue("watershed-1");
       useAppStore.setState({
         subcatchment: true,
-        choropleth: {
-          ...initialChoroplethState,
-          type: "vegetationCover",
-          year: null,
-          bands: "all",
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: null,
+        choroplethBands: "all",
       });
       mockUseChoropleth.mockReturnValue({
         isActive: true,

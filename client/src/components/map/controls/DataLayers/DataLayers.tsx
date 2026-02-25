@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import { useAppStore } from "../../../../store/store";
-import { VegetationCover } from "../../../bottom-panels/VegetationCover";
+import type { ActiveDataLayer } from "../../../../store/slices/layersSlice";
 import DataLayersTabContent from "./DataLayersTabContent";
 
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
@@ -69,24 +69,18 @@ const useStyles = tss.create(({ theme }) => ({
   },
 }));
 
+const DATA_LAYER_IDS: Record<string, ActiveDataLayer> = {
+  landuse: "landuse",
+  vegetationCover: "vegetationCover",
+  soilBurnSeverity: "soilBurnSeverity",
+};
+
 export default function DataLayersControl() {
   const { classes } = useStyles();
 
   const queryClient = useQueryClient();
 
-  const {
-    setSubcatchment,
-    setChannels,
-    setLanduse,
-    setLanduseLegendVisible,
-    clearSelectedHillslope,
-    closePanel,
-    resetOverlays,
-    setSbsEnabled,
-    setChoroplethType,
-    setVegetation,
-    openPanel,
-  } = useAppStore();
+  const { setActiveDataLayer, setSubcatchment, setChannels } = useAppStore();
 
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("WEPP");
@@ -98,56 +92,25 @@ export default function DataLayersControl() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = e.target;
 
-    switch (id) {
-      case "subcatchment": {
-        setSubcatchment(checked);
-        if (!checked) {
-          queryClient.cancelQueries({ queryKey: ["subcatchments"] });
-          closePanel();
-          setLanduse(false);
-          clearSelectedHillslope();
-        }
-        return;
+    if (!checked) {
+      if (id === "subcatchment") {
+        queryClient.cancelQueries({ queryKey: ["subcatchments"] });
+      } else if (id === "channels") {
+        queryClient.cancelQueries({ queryKey: ["channels"] });
       }
-      case "channels": {
-        setChannels(checked);
-        if (!checked) {
-          queryClient.cancelQueries({ queryKey: ["channels"] });
-        }
-        return;
-      }
-      case "landuse": {
-        setSubcatchment(checked);
-        setLanduse(checked);
-        setLanduseLegendVisible(checked);
-        if (!checked) {
-          resetOverlays();
-        }
-        return;
-      }
-      case "vegetationCover": {
-        setVegetation(checked);
+    }
 
-        if (checked) {
-          setSubcatchment(true);
-          setLanduse(false);
-          setLanduseLegendVisible(false);
-          setChoroplethType("vegetationCover");
-          openPanel(<VegetationCover />);
-        } else {
-          setSubcatchment(false);
-          setChoroplethType("none");
-          closePanel();
-        }
-        return;
-      }
-      case "soilBurnSeverity": {
-        setSbsEnabled(checked);
-        return;
-      }
-      default: {
-        return;
-      }
+    // Handle independent overlays
+    if (id === "subcatchment") {
+      return setSubcatchment(checked);
+    }
+    if (id === "channels") {
+      return setChannels(checked);
+    }
+
+    // Handle mutually exclusive data layers
+    if (id in DATA_LAYER_IDS) {
+      return setActiveDataLayer(checked ? DATA_LAYER_IDS[id] : "none");
     }
   };
 

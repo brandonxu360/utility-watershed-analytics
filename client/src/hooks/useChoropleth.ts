@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
 import { useParams } from "@tanstack/react-router";
-import { useAppStore } from "../store/store";
-import { ChoroplethType } from "../store/slices/choroplethSlice";
+import { useAppStore, ActiveDataLayer } from "../store/store";
 import { fetchRapChoropleth } from "../api/rapApi";
 
 import {
@@ -14,6 +13,12 @@ import {
 
 import { VEGETATION_BANDS } from "../utils/constants";
 
+export type ChoroplethType = "none" | "vegetationCover";
+
+function getChoroplethType(layer: ActiveDataLayer): ChoroplethType {
+  return layer === "vegetationCover" ? "vegetationCover" : "none";
+}
+
 export const CHOROPLETH_CONFIG: Record<
   Exclude<ChoroplethType, "none">,
   {
@@ -23,12 +28,6 @@ export const CHOROPLETH_CONFIG: Record<
     bands: number[];
   }
 > = {
-  evapotranspiration: {
-    title: "Evapotranspiration",
-    unit: "% cover",
-    colormap: "et-blue",
-    bands: [1, 4, 5, 6],
-  },
   vegetationCover: {
     title: "Vegetation Cover",
     unit: "% cover",
@@ -63,19 +62,19 @@ export function useChoropleth(): UseChoroplethResult {
     }) ?? null;
 
   const {
-    choropleth: {
-      type: choroplethType,
-      year: choroplethYear,
-      bands: choroplethBands,
-      data: choroplethData,
-      range: choroplethRange,
-      loading: choroplethLoading,
-      error: choroplethError,
-    },
+    activeDataLayer,
+    choroplethYear,
+    choroplethBands,
+    choroplethData,
+    choroplethRange,
+    choroplethLoading,
+    choroplethError,
     setChoroplethData,
     setChoroplethLoading,
     setChoroplethError,
   } = useAppStore();
+
+  const choroplethType = getChoroplethType(activeDataLayer);
 
   const config =
     choroplethType !== "none" ? CHOROPLETH_CONFIG[choroplethType] : null;

@@ -6,12 +6,12 @@ import LandUseLegend from "../components/map/controls/LandUseLegend";
 describe("Land Use Legend Component Tests", () => {
   beforeEach(() => {
     useAppStore.setState({
-      landuseLegendVisible: false,
+      activeDataLayer: "none",
       landuseLegendMap: {},
     });
   });
 
-  it("renders nothing when landuseLegendVisible is false", () => {
+  it("renders nothing when activeDataLayer is not landuse", () => {
     render(<LandUseLegend />);
     expect(
       screen.queryByRole("region", { name: /land use legend/i }),
@@ -19,7 +19,7 @@ describe("Land Use Legend Component Tests", () => {
   });
 
   it("renders empty state when visible and legend map is empty", () => {
-    useAppStore.setState({ landuseLegendVisible: true, landuseLegendMap: {} });
+    useAppStore.setState({ activeDataLayer: "landuse", landuseLegendMap: {} });
     render(<LandUseLegend />);
 
     expect(
@@ -31,7 +31,7 @@ describe("Land Use Legend Component Tests", () => {
 
   it("renders legend items when legend map has entries", () => {
     useAppStore.setState({
-      landuseLegendVisible: true,
+      activeDataLayer: "landuse",
       landuseLegendMap: {
         "#ff0000": "Forest",
         "#00ff00": "Grass",

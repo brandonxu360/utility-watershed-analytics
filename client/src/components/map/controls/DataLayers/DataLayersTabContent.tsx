@@ -56,8 +56,12 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
 }) => {
   const { classes } = useStyles();
 
-  const { subcatchment, channels, landuse, vegetation, sbsEnabled } =
-    useAppStore();
+  const { activeDataLayer, subcatchment, channels } = useAppStore();
+
+  const landuse = activeDataLayer === "landuse";
+  const vegetation = activeDataLayer === "vegetationCover";
+  const sbsEnabled = activeDataLayer === "soilBurnSeverity";
+  const hasActiveDataLayer = activeDataLayer !== "none";
 
   return (
     <div className={classes.layers}>
@@ -70,7 +74,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Checkbox
               checked={subcatchment}
               onChange={handleChange}
-              disabled={landuse || vegetation}
+              disabled={hasActiveDataLayer}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "subcatchment" } }}
             />

@@ -28,7 +28,8 @@ describe("useChoropleth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseParams.mockReturnValue("batch;;test-batch;;test-run");
-    useAppStore.getState().setChoroplethType("none");
+    // Reset to initial state using the new activeDataLayer approach
+    useAppStore.setState({ activeDataLayer: "none" });
     useAppStore.getState().setChoroplethYear(null);
     useAppStore.getState().setChoroplethData(null, null);
     useAppStore.getState().setChoroplethLoading(false);
@@ -40,15 +41,6 @@ describe("useChoropleth", () => {
   });
 
   describe("CHOROPLETH_CONFIG", () => {
-    it("has configuration for evapotranspiration", () => {
-      expect(CHOROPLETH_CONFIG.evapotranspiration).toBeDefined();
-      expect(CHOROPLETH_CONFIG.evapotranspiration.title).toBe(
-        "Evapotranspiration",
-      );
-      expect(CHOROPLETH_CONFIG.evapotranspiration.colormap).toBe("et-blue");
-      expect(CHOROPLETH_CONFIG.evapotranspiration.bands).toEqual([1, 4, 5, 6]);
-    });
-
     it("has configuration for vegetationCover", () => {
       expect(CHOROPLETH_CONFIG.vegetationCover).toBeDefined();
       expect(CHOROPLETH_CONFIG.vegetationCover.title).toBe("Vegetation Cover");
@@ -83,7 +75,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {
@@ -103,7 +95,7 @@ describe("useChoropleth", () => {
       renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {
@@ -121,7 +113,7 @@ describe("useChoropleth", () => {
       renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
         useAppStore.getState().setChoroplethYear(2020);
       });
 
@@ -140,7 +132,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {
@@ -154,7 +146,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {
@@ -173,7 +165,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {
@@ -194,7 +186,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {
@@ -202,7 +194,7 @@ describe("useChoropleth", () => {
       });
 
       act(() => {
-        useAppStore.getState().setChoroplethType("none");
+        useAppStore.setState({ activeDataLayer: "none" });
       });
 
       await waitFor(() => {
@@ -223,7 +215,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {
@@ -239,7 +231,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {
@@ -258,7 +250,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {
@@ -286,7 +278,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        useAppStore.setState({ activeDataLayer: "vegetationCover" });
       });
 
       await waitFor(() => {

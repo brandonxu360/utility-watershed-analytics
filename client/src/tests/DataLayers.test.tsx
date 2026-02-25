@@ -58,53 +58,39 @@ import DataLayersControl from "../components/map/controls/DataLayers/DataLayers"
 describe("DataLayersControl", () => {
   const setSubcatchment = vi.fn();
   const setChannels = vi.fn();
-  const setLanduse = vi.fn();
-  const setLanduseLegendVisible = vi.fn();
-  const clearSelectedHillslope = vi.fn();
-  const closePanel = vi.fn();
-  const resetOverlays = vi.fn();
-  const setVegetation = vi.fn();
-  const setChoroplethType = vi.fn();
-  const openPanel = vi.fn();
+  const setActiveDataLayer = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     useAppStore.setState({
+      activeDataLayer: "none",
       subcatchment: false,
       channels: false,
-      landuse: false,
-      vegetation: false,
       setSubcatchment,
       setChannels,
-      setLanduse,
-      setLanduseLegendVisible,
-      clearSelectedHillslope,
-      closePanel,
-      resetOverlays,
-      setVegetation,
-      setChoroplethType,
-      openPanel,
+      setActiveDataLayer,
     });
   });
 
-  it("renders and is closed by default", () => {
+  it("renders with panel open by default", () => {
     render(<DataLayersControl />);
-    expect(screen.getByText(/Data Layers/i)).toBeInTheDocument();
-    expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
+    // Panel is open by default
+    expect(screen.getByRole("tabpanel")).toBeInTheDocument();
+    expect(screen.getByRole("tabpanel")).toHaveTextContent("WEPP");
   });
 
-  it("opens when clicking the header and shows default active tab", () => {
+  it("closes when clicking the header", () => {
     render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
+    // Panel starts open
+    expect(screen.getByRole("tabpanel")).toBeInTheDocument();
 
-    const tabpanel = screen.getByRole("tabpanel");
-    expect(tabpanel).toBeInTheDocument();
-    expect(tabpanel).toHaveTextContent("WEPP Hillslopes");
+    // Click header to close
+    fireEvent.click(screen.getAllByText(/WEPP/i)[0]);
+    expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
   });
 
   it("switches active tab when clicking a nav tab", () => {
     const { container } = render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
 
     const watershedTab = container.querySelector(
       '[data-layer-tab="Watershed Data"]',
@@ -119,30 +105,24 @@ describe("DataLayersControl", () => {
     expect(tabpanel).toHaveTextContent("Watershed Data");
   });
 
-  it("handles subcatchment toggle and performs cleanup on uncheck", () => {
+  it("handles subcatchment toggle", () => {
     render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
+    // Panel is open by default, no need to click header
 
     const sub = screen.getByLabelText("subcatchment") as HTMLInputElement;
 
     // Check
     fireEvent.click(sub);
     expect(setSubcatchment).toHaveBeenCalledWith(true);
-    expect(closePanel).not.toHaveBeenCalled();
-    expect(clearSelectedHillslope).not.toHaveBeenCalled();
-    expect(setLanduse).not.toHaveBeenCalled();
 
     // Uncheck
     fireEvent.click(sub);
     expect(setSubcatchment).toHaveBeenCalledWith(false);
-    expect(closePanel).toHaveBeenCalledTimes(1);
-    expect(setLanduse).toHaveBeenCalledWith(false);
-    expect(clearSelectedHillslope).toHaveBeenCalledTimes(1);
   });
 
   it("handles channels toggle", () => {
     render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
+    // Panel is open by default
 
     const channelsBox = screen.getByLabelText("channels") as HTMLInputElement;
 
@@ -153,46 +133,33 @@ describe("DataLayersControl", () => {
     expect(setChannels).toHaveBeenCalledWith(false);
   });
 
-  it("handles landuse toggle and calls resetOverlays when turned off", () => {
+  it("handles landuse toggle", () => {
     render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
+    // Panel is open by default
 
     const landuseBox = screen.getByLabelText("landuse") as HTMLInputElement;
 
     // Enable
     fireEvent.click(landuseBox);
-    expect(setSubcatchment).toHaveBeenCalledWith(true);
-    expect(setLanduse).toHaveBeenCalledWith(true);
-    expect(setLanduseLegendVisible).toHaveBeenCalledWith(true);
-    expect(resetOverlays).not.toHaveBeenCalled();
+    expect(setActiveDataLayer).toHaveBeenCalledWith("landuse");
 
     // Disable
     fireEvent.click(landuseBox);
-    expect(setSubcatchment).toHaveBeenCalledWith(false);
-    expect(setLanduse).toHaveBeenCalledWith(false);
-    expect(setLanduseLegendVisible).toHaveBeenCalledWith(false);
-    expect(resetOverlays).toHaveBeenCalledTimes(1);
+    expect(setActiveDataLayer).toHaveBeenCalledWith("none");
   });
 
-  it("handles vegetation toggle and updates store + panel state", () => {
+  it("handles vegetation toggle", () => {
     render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
+    // Panel is open by default
 
     const vegBox = screen.getByLabelText("vegetationCover") as HTMLInputElement;
 
     // Enable
     fireEvent.click(vegBox);
-    expect(setVegetation).toHaveBeenCalledWith(true);
-    expect(setSubcatchment).toHaveBeenCalledWith(true);
-    expect(setLanduse).toHaveBeenCalledWith(false);
-    expect(setLanduseLegendVisible).toHaveBeenCalledWith(false);
-    expect(setChoroplethType).toHaveBeenCalledWith("vegetationCover");
-    expect(openPanel).toHaveBeenCalled();
+    expect(setActiveDataLayer).toHaveBeenCalledWith("vegetationCover");
 
     // Disable
     fireEvent.click(vegBox);
-    expect(setVegetation).toHaveBeenCalledWith(false);
-    expect(setChoroplethType).toHaveBeenCalledWith("none");
-    expect(closePanel).toHaveBeenCalled();
+    expect(setActiveDataLayer).toHaveBeenCalledWith("none");
   });
 });

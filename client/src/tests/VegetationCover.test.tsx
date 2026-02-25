@@ -7,7 +7,6 @@ import {
   act,
 } from "@testing-library/react";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
-import { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import { useAppStore } from "../store/store";
 
 const { mockUseParams } = vi.hoisted(() => ({
@@ -78,12 +77,11 @@ vi.mock("../components/CoverageLineChart", () => ({
   ),
 }));
 
-const mockClose = vi.fn();
 const mockClearSelectedHillslope = vi.fn();
-const mockSetSubcatchment = vi.fn();
 const mockResetChoropleth = vi.fn();
 const mockSetChoroplethYear = vi.fn();
 const mockSetChoroplethBands = vi.fn();
+const mockSetActiveDataLayer = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -98,23 +96,20 @@ beforeEach(() => {
   mockUseChoropleth.mockReturnValue({ config: null });
 
   useAppStore.setState({
-    closePanel: mockClose,
     clearSelectedHillslope: mockClearSelectedHillslope,
-    setSubcatchment: mockSetSubcatchment,
+    setActiveDataLayer: mockSetActiveDataLayer,
     resetChoropleth: mockResetChoropleth,
     setChoroplethYear: mockSetChoroplethYear,
     setChoroplethBands: mockSetChoroplethBands,
     selectedHillslopeId: null,
     selectedHillslopeProps: null,
-    choropleth: {
-      type: "vegetationCover",
-      year: null,
-      bands: "all",
-      range: null,
-      loading: false,
-      data: null,
-      error: null,
-    },
+    activeDataLayer: "vegetationCover",
+    choroplethYear: null,
+    choroplethBands: "all",
+    choroplethRange: null,
+    choroplethLoading: false,
+    choroplethData: null,
+    choroplethError: null,
   });
 });
 
@@ -148,15 +143,13 @@ describe("VegetationCover", () => {
 
     it("renders with initial choropleth year from store", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: 2020,
-          bands: "all",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: 2020,
+        choroplethBands: "all",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -173,15 +166,13 @@ describe("VegetationCover", () => {
 
     it("renders with initial shrub band from store", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: null,
-          bands: "shrub",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: null,
+        choroplethBands: "shrub",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -199,15 +190,13 @@ describe("VegetationCover", () => {
 
     it("renders with initial tree band from store", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: null,
-          bands: "tree",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: null,
+        choroplethBands: "tree",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -255,15 +244,13 @@ describe("VegetationCover", () => {
       } as unknown as ReturnType<typeof mockUseChoropleth>);
 
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: null,
-          bands: "all",
-          range: { min: 0, max: 100 },
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: null,
+        choroplethBands: "all",
+        choroplethRange: { min: 0, max: 100 },
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -286,15 +273,13 @@ describe("VegetationCover", () => {
       } as unknown as ReturnType<typeof mockUseChoropleth>);
 
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: null,
-          bands: "all",
-          range: { min: 0, max: 100 },
-          loading: true,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: null,
+        choroplethBands: "all",
+        choroplethRange: { min: 0, max: 100 },
+        choroplethLoading: true,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -322,15 +307,13 @@ describe("VegetationCover", () => {
 
     it("does not render ChoroplethScale when config is null", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: null,
-          bands: "all",
-          range: { min: 0, max: 100 },
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: null,
+        choroplethBands: "all",
+        choroplethRange: { min: 0, max: 100 },
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -362,10 +345,10 @@ describe("VegetationCover", () => {
         fireEvent.click(closeButton);
       });
 
+      // Close button calls setActiveDataLayer("none"), clearSelectedHillslope, resetChoropleth
+      expect(mockSetActiveDataLayer).toHaveBeenCalledWith("none");
       expect(mockClearSelectedHillslope).toHaveBeenCalled();
-      expect(mockSetSubcatchment).toHaveBeenCalledWith(false);
       expect(mockResetChoropleth).toHaveBeenCalled();
-      expect(mockClose).toHaveBeenCalled();
     });
   });
 
@@ -429,15 +412,13 @@ describe("VegetationCover", () => {
 
     it("changes back to All option and updates store", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: null,
-          bands: "tree",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: null,
+        choroplethBands: "tree",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -499,15 +480,13 @@ describe("VegetationCover", () => {
 
     it("changes back to All years and updates store with null", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: 2020,
-          bands: "all",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: 2020,
+        choroplethBands: "all",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -540,7 +519,7 @@ describe("VegetationCover", () => {
     it("shows selected hillslope in chart title", async () => {
       useAppStore.setState({
         selectedHillslopeId: 42,
-        selectedHillslopeProps: {} as SubcatchmentProperties,
+        selectedHillslopeProps: {} as Record<string, unknown>,
       });
 
       await act(async () => {
@@ -558,7 +537,7 @@ describe("VegetationCover", () => {
     it("fetches hillslope-specific data when hillslope is selected", async () => {
       useAppStore.setState({
         selectedHillslopeId: 123,
-        selectedHillslopeProps: {} as SubcatchmentProperties,
+        selectedHillslopeProps: {} as Record<string, unknown>,
       });
 
       await act(async () => {
@@ -592,16 +571,14 @@ describe("VegetationCover", () => {
     it("fetches hillslope data with specific year", async () => {
       useAppStore.setState({
         selectedHillslopeId: 99,
-        selectedHillslopeProps: {} as SubcatchmentProperties,
-        choropleth: {
-          type: "vegetationCover",
-          year: 2010,
-          bands: "all",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        selectedHillslopeProps: {} as Record<string, unknown>,
+        activeDataLayer: "vegetationCover",
+        choroplethYear: 2010,
+        choroplethBands: "all",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -621,15 +598,13 @@ describe("VegetationCover", () => {
 
     it("fetches watershed data with specific year", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: 2005,
-          bands: "all",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: 2005,
+        choroplethBands: "all",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -695,15 +670,13 @@ describe("VegetationCover", () => {
 
     it("fetches data with specific year parameter", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: 2015,
-          bands: "all",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: 2015,
+        choroplethBands: "all",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -785,15 +758,13 @@ describe("VegetationCover", () => {
   describe("chart data processing", () => {
     it("processes single year data correctly", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: 2020,
-          bands: "all",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: 2020,
+        choroplethBands: "all",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       mockFetchRap.mockImplementation(() =>
@@ -850,15 +821,13 @@ describe("VegetationCover", () => {
 
     it("handles missing row for selected year", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: 1990,
-          bands: "all",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: 1990,
+        choroplethBands: "all",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       mockFetchRap.mockImplementation(() =>
@@ -892,15 +861,13 @@ describe("VegetationCover", () => {
 
     it("uses only shrub key for Shrub option", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: null,
-          bands: "shrub",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: null,
+        choroplethBands: "shrub",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {
@@ -916,15 +883,13 @@ describe("VegetationCover", () => {
 
     it("uses only tree key for Tree option", async () => {
       useAppStore.setState({
-        choropleth: {
-          type: "vegetationCover",
-          year: null,
-          bands: "tree",
-          range: null,
-          loading: false,
-          data: null,
-          error: null,
-        },
+        activeDataLayer: "vegetationCover",
+        choroplethYear: null,
+        choroplethBands: "tree",
+        choroplethRange: null,
+        choroplethLoading: false,
+        choroplethData: null,
+        choroplethError: null,
       });
 
       await act(async () => {

@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
-import { useAppStore } from "../../store/store";
-import { VegetationBandType } from "../../store/slices/choroplethSlice";
+import { useAppStore, VegetationBandType } from "../../store/store";
 import { useParams } from "@tanstack/react-router";
 import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
@@ -69,19 +68,15 @@ export const VegetationCover: React.FC = () => {
   const { classes } = useStyles();
   const {
     selectedHillslopeId,
-    choropleth: {
-      year: choroplethYear,
-      bands: choroplethBands,
-      range: choroplethRange,
-      loading: choroplethLoading,
-    },
-    setVegetation,
+    choroplethYear,
+    choroplethBands,
+    choroplethRange,
+    choroplethLoading,
+    setActiveDataLayer,
     setChoroplethYear,
     setChoroplethBands,
     clearSelectedHillslope,
-    setSubcatchment,
     resetChoropleth,
-    closePanel,
   } = useAppStore();
 
   const { config } = useChoropleth();
@@ -283,11 +278,9 @@ export const VegetationCover: React.FC = () => {
             className={classes.closeButton}
             data-testid="veg-close-button"
             onClick={() => {
-              setVegetation(false);
+              setActiveDataLayer("none");
               clearSelectedHillslope();
-              setSubcatchment(false);
               resetChoropleth();
-              closePanel();
             }}
           >
             <CloseIcon />

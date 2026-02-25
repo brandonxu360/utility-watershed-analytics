@@ -80,18 +80,20 @@ export default function WatershedMap(): JSX.Element {
   const navigate = useNavigate();
 
   const {
+    activeDataLayer,
     subcatchment,
     channels,
-    landuse,
-    sbsEnabled,
     sbsColorMode,
-    closePanel,
+    choroplethYear,
+    choroplethBands,
     setSubcatchment,
     setChannels,
-    setLanduse,
     setLanduseLegendMap,
-    setLanduseLegendVisible,
+    setActiveDataLayer,
   } = useAppStore();
+
+  const landuse = activeDataLayer === "landuse";
+  const sbsEnabled = activeDataLayer === "soilBurnSeverity";
 
   // Use the choropleth hook for data fetching and styling
   const {
@@ -100,10 +102,6 @@ export default function WatershedMap(): JSX.Element {
     isLoading: choroplethLoading,
     getChoroplethStyle,
   } = useChoropleth();
-
-  const {
-    choropleth: { year: choroplethYear, bands: choroplethBands },
-  } = useAppStore();
 
   // Create a key that changes when choropleth state changes to force style updates
   const choroplethKey = useMemo(
@@ -159,7 +157,7 @@ export default function WatershedMap(): JSX.Element {
       const noSubData = subcatchments.features?.length === 0;
       if (noSubData && (subcatchment || landuse)) {
         if (subcatchment) setSubcatchment(false);
-        if (landuse) setLanduse(false);
+        if (landuse) setActiveDataLayer("none");
         toast.error("No subcatchment data available");
         return;
       }
@@ -171,9 +169,7 @@ export default function WatershedMap(): JSX.Element {
         landuseError || (landuseData && Object.keys(landuseData).length === 0);
       if (noLanduseData) {
         toast.error("Land use data is not available for this watershed");
-        setLanduse(false);
-        setLanduseLegendMap({});
-        setLanduseLegendVisible(false);
+        setActiveDataLayer("none");
       }
     }
   }, [
@@ -185,10 +181,8 @@ export default function WatershedMap(): JSX.Element {
     subcatchment,
     subcatchments,
     runId,
-    setLanduse,
+    setActiveDataLayer,
     setSubcatchment,
-    setLanduseLegendMap,
-    setLanduseLegendVisible,
   ]);
 
   // Auto-disable channels if data unavailable
@@ -212,9 +206,7 @@ export default function WatershedMap(): JSX.Element {
   const onWatershedClick = (e: LeafletMouseEvent) => {
     const layer = e.sourceTarget;
     const feature = layer.feature;
-    console.log(feature);
 
-    closePanel(); // TODO: The panel should only close if watershed id changes
     navigate({
       to: `/watershed/${feature.id}`,
     });
@@ -247,15 +239,8 @@ export default function WatershedMap(): JSX.Element {
       setLanduseLegendMap(legend);
     } else if (!landuse || !runId) {
       setLanduseLegendMap({});
-      setLanduseLegendVisible(false);
     }
-  }, [
-    landuse,
-    landuseData,
-    runId,
-    setLanduseLegendMap,
-    setLanduseLegendVisible,
-  ]);
+  }, [landuse, landuseData, runId, setLanduseLegendMap]);
 
   const subcatchmentStyle = useCallback(
     (
@@ -370,13 +355,13 @@ export default function WatershedMap(): JSX.Element {
           channelLoading ||
           choroplethLoading ||
           landuseLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}

@@ -68,9 +68,11 @@ const useStyles = tss.create(({ theme }) => ({
 export default function LandUseLegend() {
   const { classes } = useStyles();
 
-  const { landuseLegendVisible, landuseLegendMap } = useAppStore();
+  const activeDataLayer = useAppStore((s) => s.activeDataLayer);
+  const landuseLegendMap = useAppStore((s) => s.landuseLegendMap);
+  const isVisible = activeDataLayer === "landuse";
 
-  if (!landuseLegendVisible) return null;
+  if (!isVisible) return null;
 
   return (
     <div

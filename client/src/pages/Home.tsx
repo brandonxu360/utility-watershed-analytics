@@ -2,6 +2,7 @@ import { useParams } from "@tanstack/react-router";
 import { useAppStore } from "../store/store";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import { tss } from "../utils/tss";
+import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
@@ -46,7 +47,8 @@ const useStyles = tss.create(({ theme }) => ({
 
 export default function Home(): JSX.Element {
   const { classes } = useStyles();
-  const { isPanelOpen, panelContent } = useAppStore();
+  const activeDataLayer = useAppStore((s) => s.activeDataLayer);
+  const isPanelOpen = activeDataLayer === "vegetationCover";
 
   const runId =
     useParams({
@@ -73,7 +75,9 @@ export default function Home(): JSX.Element {
           <WatershedMap />
         </div>
         {isPanelOpen && (
-          <BottomPanel isOpen={isPanelOpen}>{panelContent}</BottomPanel>
+          <BottomPanel isOpen={isPanelOpen}>
+            <VegetationCover />
+          </BottomPanel>
         )}
       </div>
     </div>
