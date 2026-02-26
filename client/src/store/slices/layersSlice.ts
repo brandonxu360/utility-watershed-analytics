@@ -10,6 +10,19 @@ export type ActiveDataLayer =
   | "vegetationCover"
   | "soilBurnSeverity";
 
+export const AVAILABLE_SCENARIOS = [
+  "undisturbed",
+  "prescribed_fire",
+  "thinning_40_75",
+  "thinning_65_93",
+] as const;
+
+export type ScenarioType = (typeof AVAILABLE_SCENARIOS)[number];
+
+export type ScenarioDataRow = {
+  wepp_id: number;
+  sediment_yield: number;
+};
 
 export type { SbsColorMode } from "../../api/types";
 
@@ -32,6 +45,8 @@ export interface LayersState {
 
   selectedHillslopeId: number | null;
   selectedHillslopeProps: Record<string, unknown> | null;
+
+  selectedScenario: ScenarioType | null;
 }
 
 export const initialLayersState: LayersState = {
@@ -48,6 +63,7 @@ export const initialLayersState: LayersState = {
   landuseLegendMap: {},
   selectedHillslopeId: null,
   selectedHillslopeProps: null,
+  selectedScenario: null,
 };
 
 export interface LayersSlice extends LayersState {
@@ -72,6 +88,8 @@ export interface LayersSlice extends LayersState {
     props?: Record<string, unknown> | null,
   ) => void;
   clearSelectedHillslope: () => void;
+
+  setSelectedScenario: (scenario: ScenarioType | null) => void;
 
   closeVegetationCover: () => void;
   closeLanduse: () => void;
@@ -119,6 +137,12 @@ export const createLayersSlice: StateCreator<
     }),
   clearSelectedHillslope: () =>
     set({ selectedHillslopeId: null, selectedHillslopeProps: null }),
+
+  setSelectedScenario: (scenario) =>
+    set({
+      selectedScenario: scenario,
+      ...(scenario ? { subcatchment: true } : {}),
+    }),
 
   closeVegetationCover: () =>
     set({

@@ -1,6 +1,17 @@
 import { FC } from "react";
 import { ChangeEvent } from "react";
-import { useAppStore } from "../../../../store/store";
+
+import {
+  useAppStore,
+  AVAILABLE_SCENARIOS,
+  type ScenarioType,
+} from "../../../../store/store";
+
+import {
+  useScenarioData,
+  formatScenarioLabel,
+} from "../../../../hooks/useScenarioData";
+
 import { tss } from "../../../../utils/tss";
 import { Typography } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
@@ -56,12 +67,28 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
 }) => {
   const { classes } = useStyles();
 
-  const { activeDataLayer, subcatchment, channels } = useAppStore();
+  const {
+    activeDataLayer,
+    subcatchment,
+    channels,
+    selectedScenario,
+    setSelectedScenario,
+  } = useAppStore();
+
+  const { isLoading: scenarioLoading } = useScenarioData();
 
   const landuse = activeDataLayer === "landuse";
   const vegetation = activeDataLayer === "vegetationCover";
   const sbsEnabled = activeDataLayer === "soilBurnSeverity";
   const hasActiveDataLayer = activeDataLayer !== "none";
+
+  const handleScenarioChange = (scenario: ScenarioType) => {
+    if (selectedScenario === scenario) {
+      setSelectedScenario(null);
+    } else {
+      setSelectedScenario(scenario);
+    }
+  };
 
   return (
     <div className={classes.layers}>
@@ -88,6 +115,20 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               slotProps={{ input: { id: "channels" } }}
             />
           </div>
+          {AVAILABLE_SCENARIOS.map((scenario) => (
+            <div key={scenario} className={classes.layer}>
+              <Typography className={classes.layerTitle}>
+                {formatScenarioLabel(scenario)}
+              </Typography>
+              <Checkbox
+                checked={selectedScenario === scenario}
+                onChange={() => handleScenarioChange(scenario)}
+                disabled={scenarioLoading}
+                className={classes.layerCheckbox}
+                slotProps={{ input: { id: scenario } }}
+              />
+            </div>
+          ))}
         </>
       )}
       {activeTab === "Watershed Data" && (

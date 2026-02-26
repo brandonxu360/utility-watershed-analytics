@@ -6,7 +6,11 @@ export type {
   ActiveDataLayer,
   SbsColorMode,
   VegetationBandType,
+  ScenarioType,
+  ScenarioDataRow,
 } from "./slices/layersSlice";
+
+export { AVAILABLE_SCENARIOS } from "./slices/layersSlice";
 
 export type AppState = LayersSlice;
 

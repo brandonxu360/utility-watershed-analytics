@@ -15,12 +15,20 @@ import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { LeafletMouseEvent } from "leaflet";
 import { useChoropleth } from "../../hooks/useChoropleth";
+import { useScenarioData } from "../../hooks/useScenarioData";
 import { selectedStyle, defaultStyle } from "./constants";
 import { useAppStore } from "../../store/store";
 import { toast } from "react-toastify";
 import { tss } from "../../utils/tss";
 import { CircularProgress } from "@mui/material";
 import { fetchLanduse } from "../../api/landuseApi";
+
+import {
+  createColormap,
+  normalizeValue,
+  computeRobustRange,
+} from "../../utils/colormap";
+
 import DataLayersControl from "./controls/DataLayers/DataLayers";
 import ZoomInControl from "./controls/ZoomIn";
 import ZoomOutControl from "./controls/ZoomOut";
@@ -103,11 +111,37 @@ export default function WatershedMap(): JSX.Element {
     getChoroplethStyle,
   } = useChoropleth();
 
-  // Create a key that changes when choropleth state changes to force style updates
+  const {
+    dataByWeppId: scenarioDataByWeppId,
+    hasData: hasScenarioData,
+    isLoading: scenarioLoading,
+    selectedScenario,
+  } = useScenarioData();
+
+  const scenarioRange = useMemo(() => {
+    if (!hasScenarioData || scenarioDataByWeppId.size === 0) return null;
+    const values = Array.from(scenarioDataByWeppId.values()).map(
+      (row) => row.sediment_yield,
+    );
+    return computeRobustRange(values);
+  }, [hasScenarioData, scenarioDataByWeppId]);
+
+  const scenarioColormap = useMemo(() => {
+    if (!scenarioRange) return null;
+    return createColormap({ colormap: "hot", nshades: 256, format: "rgba" });
+  }, [scenarioRange]);
+
   const choroplethKey = useMemo(
     () =>
-      `${choropleth}-${choroplethYear ?? "all"}-${choroplethBands}-${choroplethActive}`,
-    [choropleth, choroplethYear, choroplethBands, choroplethActive],
+      `${choropleth}-${choroplethYear ?? "all"}-${choroplethBands}-${choroplethActive}-${selectedScenario ?? "none"}-${hasScenarioData}`,
+    [
+      choropleth,
+      choroplethYear,
+      choroplethBands,
+      choroplethActive,
+      selectedScenario,
+      hasScenarioData,
+    ],
   );
 
   const runId =
@@ -263,6 +297,32 @@ export default function WatershedMap(): JSX.Element {
         }
       }
 
+      if (
+        hasScenarioData &&
+        scenarioColormap &&
+        scenarioRange &&
+        feature?.properties?.weppid
+      ) {
+        const scenarioRow = scenarioDataByWeppId.get(feature.properties.weppid);
+        if (scenarioRow) {
+          const normalized = normalizeValue(
+            scenarioRow.sediment_yield,
+            scenarioRange.min,
+            scenarioRange.max,
+          );
+          const colorIndex = Math.round(
+            normalized * (scenarioColormap.length - 1),
+          );
+          const [r, g, b] = scenarioColormap[colorIndex] || [128, 128, 128];
+          return {
+            color: "#2c2c2c",
+            weight: 0.75,
+            fillColor: `rgb(${r}, ${g}, ${b})`,
+            fillOpacity: 0.85,
+          };
+        }
+      }
+
       // Land use coloring - lookup by topazid
       if (landuse && feature?.properties?.topazid) {
         const landuseInfo = landuseData?.[feature.properties.topazid];
@@ -283,7 +343,16 @@ export default function WatershedMap(): JSX.Element {
         fillOpacity: 0,
       };
     },
-    [landuse, landuseData, choroplethActive, getChoroplethStyle],
+    [
+      landuse,
+      landuseData,
+      choroplethActive,
+      getChoroplethStyle,
+      hasScenarioData,
+      scenarioColormap,
+      scenarioRange,
+      scenarioDataByWeppId,
+    ],
   );
 
   const channelStyle = useCallback(
@@ -361,14 +430,15 @@ export default function WatershedMap(): JSX.Element {
           subLoading ||
           channelLoading ||
           choroplethLoading ||
-          landuseLoading) && (
-            <div
-              className={classes.mapLoadingOverlay}
-              data-testid="map-loading-overlay"
-            >
-              <CircularProgress size={50} color="inherit" />
-            </div>
-          )}
+          landuseLoading ||
+          scenarioLoading) && (
+          <div
+            className={classes.mapLoadingOverlay}
+            data-testid="map-loading-overlay"
+          >
+            <CircularProgress size={50} color="inherit" />
+          </div>
+        )}
 
         <TileLayer
           key={selectedLayerId}

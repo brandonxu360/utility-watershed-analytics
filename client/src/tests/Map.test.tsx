@@ -378,7 +378,7 @@ describe("Map Component", () => {
 
   describe("loading states", () => {
     it("shows loading overlay when watersheds are loading", async () => {
-      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedMap />);
 
@@ -1100,7 +1100,7 @@ describe("Map Component", () => {
         subcatchment: true,
         setSubcatchment: mockSetSubcatchment,
       });
-      mockFetchSubcatchments.mockReturnValue(new Promise(() => { }));
+      mockFetchSubcatchments.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedMap />);
 
@@ -1115,7 +1115,7 @@ describe("Map Component", () => {
         channels: true,
         setChannels: mockSetChannels,
       });
-      mockFetchChannels.mockReturnValue(new Promise(() => { }));
+      mockFetchChannels.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedMap />);
 

@@ -171,17 +171,17 @@ export const VegetationCover: React.FC = () => {
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-            mode: "hillslope",
-            topazId: selectedHillslopeId,
-            runId: runId,
-            year: selectedYear === "All" ? undefined : Number(selectedYear),
-          })
-          : runId
-            ? await fetchRap({
-              mode: "watershed",
+              mode: "hillslope",
+              topazId: selectedHillslopeId,
               runId: runId,
               year: selectedYear === "All" ? undefined : Number(selectedYear),
             })
+          : runId
+            ? await fetchRap({
+                mode: "watershed",
+                runId: runId,
+                year: selectedYear === "All" ? undefined : Number(selectedYear),
+              })
             : null;
 
         if (!mounted) return;
