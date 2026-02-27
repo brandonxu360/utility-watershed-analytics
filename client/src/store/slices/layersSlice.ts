@@ -12,16 +12,29 @@ export type ActiveDataLayer =
 
 export const AVAILABLE_SCENARIOS = [
   "undisturbed",
-  "prescribed_fire",
   "thinning_40_75",
   "thinning_65_93",
+  "prescribed_fire",
 ] as const;
 
 export type ScenarioType = (typeof AVAILABLE_SCENARIOS)[number];
 
+export const SCENARIO_VARIABLES = ["runoff", "sediment_yield"] as const;
+export type ScenarioVariableType = (typeof SCENARIO_VARIABLES)[number];
+
 export type ScenarioDataRow = {
   wepp_id: number;
+  runoff: number;
   sediment_yield: number;
+};
+
+/** Colormap assignment per client: water->winter, soil->jet2 */
+export const SCENARIO_VARIABLE_CONFIG: Record<
+  ScenarioVariableType,
+  { label: string; colormap: string; unit: string }
+> = {
+  runoff: { label: "Runoff Volume", colormap: "winter", unit: "mm" },
+  sediment_yield: { label: "Sediment Yield", colormap: "jet2", unit: "kg/ha" },
 };
 
 export type { SbsColorMode } from "../../api/types";
@@ -47,6 +60,7 @@ export interface LayersState {
   selectedHillslopeProps: Record<string, unknown> | null;
 
   selectedScenario: ScenarioType | null;
+  scenarioVariable: ScenarioVariableType;
 }
 
 export const initialLayersState: LayersState = {
@@ -64,6 +78,7 @@ export const initialLayersState: LayersState = {
   selectedHillslopeId: null,
   selectedHillslopeProps: null,
   selectedScenario: null,
+  scenarioVariable: "sediment_yield",
 };
 
 export interface LayersSlice extends LayersState {
@@ -90,6 +105,8 @@ export interface LayersSlice extends LayersState {
   clearSelectedHillslope: () => void;
 
   setSelectedScenario: (scenario: ScenarioType | null) => void;
+  setScenarioVariable: (variable: ScenarioVariableType) => void;
+  closeScenario: () => void;
 
   closeVegetationCover: () => void;
   closeLanduse: () => void;
@@ -110,9 +127,11 @@ export const createLayersSlice: StateCreator<
     if (layer === "none") {
       set({ activeDataLayer: "none" });
     } else {
+      // Scenarios are mutually exclusive with data layers
       set({
         activeDataLayer: layer,
         subcatchment: true,
+        selectedScenario: null,
       });
     }
   },
@@ -141,7 +160,20 @@ export const createLayersSlice: StateCreator<
   setSelectedScenario: (scenario) =>
     set({
       selectedScenario: scenario,
-      ...(scenario ? { subcatchment: true } : {}),
+      // Scenarios are mutually exclusive with other data layers
+      ...(scenario
+        ? { subcatchment: true, activeDataLayer: "none" }
+        : {}),
+    }),
+
+  setScenarioVariable: (variable) => set({ scenarioVariable: variable }),
+
+  closeScenario: () =>
+    set({
+      selectedScenario: null,
+      scenarioVariable: "sediment_yield",
+      selectedHillslopeId: null,
+      selectedHillslopeProps: null,
     }),
 
   closeVegetationCover: () =>

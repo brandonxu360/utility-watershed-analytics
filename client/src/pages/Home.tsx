@@ -3,6 +3,7 @@ import { useAppStore } from "../store/store";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import { tss } from "../utils/tss";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
+import { ScenarioPanel } from "../components/bottom-panels/ScenarioPanel";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
@@ -48,7 +49,9 @@ const useStyles = tss.create(({ theme }) => ({
 export default function Home(): JSX.Element {
   const { classes } = useStyles();
   const activeDataLayer = useAppStore((s) => s.activeDataLayer);
-  const isPanelOpen = activeDataLayer === "vegetationCover";
+  const selectedScenario = useAppStore((s) => s.selectedScenario);
+  const isVegetationOpen = activeDataLayer === "vegetationCover";
+  const isScenarioOpen = selectedScenario !== null;
 
   const runId =
     useParams({
@@ -74,9 +77,14 @@ export default function Home(): JSX.Element {
         <div className={classes.map}>
           <WatershedMap />
         </div>
-        {isPanelOpen && (
-          <BottomPanel isOpen={isPanelOpen}>
+        {isVegetationOpen && (
+          <BottomPanel isOpen={isVegetationOpen}>
             <VegetationCover />
+          </BottomPanel>
+        )}
+        {isScenarioOpen && (
+          <BottomPanel isOpen={isScenarioOpen}>
+            <ScenarioPanel />
           </BottomPanel>
         )}
       </div>

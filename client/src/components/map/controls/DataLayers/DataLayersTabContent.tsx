@@ -4,7 +4,10 @@ import { ChangeEvent } from "react";
 import {
   useAppStore,
   AVAILABLE_SCENARIOS,
+  SCENARIO_VARIABLES,
+  SCENARIO_VARIABLE_CONFIG,
   type ScenarioType,
+  type ScenarioVariableType,
 } from "../../../../store/store";
 
 import {
@@ -15,10 +18,11 @@ import {
 import { tss } from "../../../../utils/tss";
 import { Typography } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
+import Radio from "@mui/material/Radio";
 
 const useStyles = tss.create(({ theme }) => ({
   layers: {
-    maxHeight: "475px",
+    maxHeight: "375px",
     overflowY: "auto",
     padding: `${theme.spacing(0.5)} 0 ${theme.spacing(1)} 0`,
   },
@@ -47,6 +51,17 @@ const useStyles = tss.create(({ theme }) => ({
       opacity: 0.85,
     },
   },
+  variableRow: {
+    display: "flex",
+    alignItems: "center",
+    padding: `${theme.spacing(0.25)} ${theme.spacing(2)} ${theme.spacing(0.25)} ${theme.spacing(4)}`,
+  },
+  variableTitle: {
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.primary.dark,
+    flex: 1,
+    paddingLeft: theme.spacing(1),
+  },
   helpIcon: {
     color: theme.palette.accent.main,
     fontSize: "16px",
@@ -72,7 +87,9 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
     subcatchment,
     channels,
     selectedScenario,
+    scenarioVariable,
     setSelectedScenario,
+    setScenarioVariable,
   } = useAppStore();
 
   const { isLoading: scenarioLoading } = useScenarioData();
@@ -81,6 +98,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
   const vegetation = activeDataLayer === "vegetationCover";
   const sbsEnabled = activeDataLayer === "soilBurnSeverity";
   const hasActiveDataLayer = activeDataLayer !== "none";
+  const hasScenario = selectedScenario !== null;
 
   const handleScenarioChange = (scenario: ScenarioType) => {
     if (selectedScenario === scenario) {
@@ -88,6 +106,10 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
     } else {
       setSelectedScenario(scenario);
     }
+  };
+
+  const handleVariableChange = (variable: ScenarioVariableType) => {
+    setScenarioVariable(variable);
   };
 
   return (
@@ -101,7 +123,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Checkbox
               checked={subcatchment}
               onChange={handleChange}
-              disabled={hasActiveDataLayer}
+              disabled={hasActiveDataLayer || hasScenario}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "subcatchment" } }}
             />
@@ -115,6 +137,8 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               slotProps={{ input: { id: "channels" } }}
             />
           </div>
+
+          {/* Scenario toggles */}
           {AVAILABLE_SCENARIOS.map((scenario) => (
             <div key={scenario} className={classes.layer}>
               <Typography className={classes.layerTitle}>
@@ -123,12 +147,32 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               <Checkbox
                 checked={selectedScenario === scenario}
                 onChange={() => handleScenarioChange(scenario)}
-                disabled={scenarioLoading}
+                disabled={scenarioLoading || hasActiveDataLayer}
                 className={classes.layerCheckbox}
                 slotProps={{ input: { id: scenario } }}
               />
             </div>
           ))}
+
+          {/* Variable selection - shown when a scenario is active */}
+          {hasScenario && (
+            <>
+              <Typography className={classes.heading}>Variable</Typography>
+              {SCENARIO_VARIABLES.map((variable) => (
+                <div key={variable} className={classes.variableRow}>
+                  <Typography className={classes.variableTitle}>
+                    {SCENARIO_VARIABLE_CONFIG[variable].label}
+                  </Typography>
+                  <Radio
+                    checked={scenarioVariable === variable}
+                    onChange={() => handleVariableChange(variable)}
+                    size="small"
+                    slotProps={{ input: { id: `variable-${variable}` } }}
+                  />
+                </div>
+              ))}
+            </>
+          )}
         </>
       )}
       {activeTab === "Watershed Data" && (
@@ -140,7 +184,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Checkbox
               checked={landuse}
               onChange={handleChange}
-              disabled={vegetation}
+              disabled={vegetation || hasScenario}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "landuse" } }}
             />
@@ -152,6 +196,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Checkbox
               checked={vegetation}
               onChange={handleChange}
+              disabled={hasScenario}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "vegetationCover" } }}
             />
@@ -163,6 +208,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Checkbox
               checked={sbsEnabled}
               onChange={handleChange}
+              disabled={hasScenario}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "soilBurnSeverity" } }}
             />

@@ -26,7 +26,7 @@ import { fetchLanduse } from "../../api/landuseApi";
 import {
   createColormap,
   normalizeValue,
-  computeRobustRange,
+  RGBAArray,
 } from "../../utils/colormap";
 
 import DataLayersControl from "./controls/DataLayers/DataLayers";
@@ -116,30 +116,30 @@ export default function WatershedMap(): JSX.Element {
     hasData: hasScenarioData,
     isLoading: scenarioLoading,
     selectedScenario,
+    scenarioVariable,
+    variableConfig: scenarioVarConfig,
+    range: scenarioRange,
   } = useScenarioData();
 
-  const scenarioRange = useMemo(() => {
-    if (!hasScenarioData || scenarioDataByWeppId.size === 0) return null;
-    const values = Array.from(scenarioDataByWeppId.values()).map(
-      (row) => row.sediment_yield,
-    );
-    return computeRobustRange(values);
-  }, [hasScenarioData, scenarioDataByWeppId]);
-
-  const scenarioColormap = useMemo(() => {
+  const scenarioColormap = useMemo<RGBAArray | null>(() => {
     if (!scenarioRange) return null;
-    return createColormap({ colormap: "hot", nshades: 256, format: "rgba" });
-  }, [scenarioRange]);
+    return createColormap({
+      colormap: scenarioVarConfig.colormap,
+      nshades: 256,
+      format: "rgba",
+    }) as RGBAArray;
+  }, [scenarioRange, scenarioVarConfig.colormap]);
 
   const choroplethKey = useMemo(
     () =>
-      `${choropleth}-${choroplethYear ?? "all"}-${choroplethBands}-${choroplethActive}-${selectedScenario ?? "none"}-${hasScenarioData}`,
+      `${choropleth}-${choroplethYear ?? "all"}-${choroplethBands}-${choroplethActive}-${selectedScenario ?? "none"}-${scenarioVariable}-${hasScenarioData}`,
     [
       choropleth,
       choroplethYear,
       choroplethBands,
       choroplethActive,
       selectedScenario,
+      scenarioVariable,
       hasScenarioData,
     ],
   );
@@ -306,7 +306,7 @@ export default function WatershedMap(): JSX.Element {
         const scenarioRow = scenarioDataByWeppId.get(feature.properties.weppid);
         if (scenarioRow) {
           const normalized = normalizeValue(
-            scenarioRow.sediment_yield,
+            scenarioRow[scenarioVariable],
             scenarioRange.min,
             scenarioRange.max,
           );
@@ -352,6 +352,7 @@ export default function WatershedMap(): JSX.Element {
       scenarioColormap,
       scenarioRange,
       scenarioDataByWeppId,
+      scenarioVariable,
     ],
   );
 
@@ -432,13 +433,13 @@ export default function WatershedMap(): JSX.Element {
           choroplethLoading ||
           landuseLoading ||
           scenarioLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}

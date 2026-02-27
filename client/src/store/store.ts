@@ -8,9 +8,14 @@ export type {
   VegetationBandType,
   ScenarioType,
   ScenarioDataRow,
+  ScenarioVariableType,
 } from "./slices/layersSlice";
 
-export { AVAILABLE_SCENARIOS } from "./slices/layersSlice";
+export {
+  AVAILABLE_SCENARIOS,
+  SCENARIO_VARIABLES,
+  SCENARIO_VARIABLE_CONFIG,
+} from "./slices/layersSlice";
 
 export type AppState = LayersSlice;
 
