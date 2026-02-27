@@ -76,7 +76,8 @@ const useStyles = tss.create(({ theme }) => ({
  */
 export default function SbsLegend() {
   const { classes } = useStyles();
-  const { sbsColorMode, setSbsColorMode } = useAppStore();
+  const { layerDesired, dispatchLayerAction } = useAppStore();
+  const sbsColorMode = (layerDesired.sbs.params.mode as string) ?? "legacy";
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sbs-colormap", sbsColorMode],
@@ -100,7 +101,12 @@ export default function SbsLegend() {
               size="small"
               checked={sbsColorMode === "shift"}
               onChange={(_, checked) =>
-                setSbsColorMode(checked ? "shift" : "legacy")
+                dispatchLayerAction({
+                  type: "SET_PARAM",
+                  id: "sbs",
+                  key: "mode",
+                  value: checked ? "shift" : "legacy",
+                })
               }
               inputProps={{
                 "aria-label": "Colorblind-friendly palette toggle",

@@ -1,6 +1,7 @@
 import { tss } from "../../../utils/tss";
 import { Paper, Typography } from "@mui/material";
 import { useAppStore } from "../../../store/store";
+import { useEffectiveLayers } from "../../../hooks/useEffectiveLayers";
 
 const useStyles = tss.create(({ theme }) => ({
   landuseLegendWrapper: {
@@ -68,9 +69,12 @@ const useStyles = tss.create(({ theme }) => ({
 export default function LandUseLegend() {
   const { classes } = useStyles();
 
-  const { landuseLegendVisible, landuseLegendMap } = useAppStore();
+  const { landuseLegendMap } = useAppStore();
+  const { isEffective } = useEffectiveLayers();
 
-  if (!landuseLegendVisible) return null;
+  // Show legend only when landuse layer is effectively enabled and we have data
+  if (!isEffective("landuse") || Object.keys(landuseLegendMap).length === 0)
+    return null;
 
   return (
     <div

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
 import { useParams } from "@tanstack/react-router";
 import { useAppStore } from "../store/store";
-import { ChoroplethType } from "../store/slices/choroplethSlice";
 import { fetchRapChoropleth } from "../api/rapApi";
 
 import {
@@ -13,6 +12,16 @@ import {
 } from "../utils/colormap";
 
 import { VEGETATION_BANDS } from "../utils/constants";
+
+/**
+ * Choropleth metric types.  "none" means the choropleth layer is off.
+ * Kept in this module because useChoropleth is the only consumer that
+ * needs the discriminated union.
+ */
+export type ChoroplethType = "none" | "evapotranspiration" | "vegetationCover";
+
+/** Band-group shortcuts for the vegetation-cover metric. */
+export type VegetationBandType = "all" | "shrub" | "tree";
 
 export const CHOROPLETH_CONFIG: Record<
   Exclude<ChoroplethType, "none">,
@@ -62,11 +71,20 @@ export function useChoropleth(): UseChoroplethResult {
       shouldThrow: false,
     }) ?? null;
 
+  // Read control fields from the layer desired-state
+  const layerDesired = useAppStore((s) => s.layerDesired);
+  const choroplethDesired = layerDesired.choropleth;
+  const choroplethType = (
+    choroplethDesired.enabled
+      ? ((choroplethDesired.params.metric as ChoroplethType) ?? "none")
+      : "none"
+  ) as ChoroplethType;
+  const choroplethYear = choroplethDesired.params.year as number | null;
+  const choroplethBands = (choroplethDesired.params.bands as string) ?? "all";
+
+  // Read cache from the choropleth cache slice
   const {
-    choropleth: {
-      type: choroplethType,
-      year: choroplethYear,
-      bands: choroplethBands,
+    choroplethCache: {
       data: choroplethData,
       range: choroplethRange,
       loading: choroplethLoading,

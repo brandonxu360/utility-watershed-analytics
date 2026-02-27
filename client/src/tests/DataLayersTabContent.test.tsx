@@ -1,40 +1,26 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAppStore } from "../store/store";
-import { initialChoroplethState } from "../store/slices/choroplethSlice";
+import { INITIAL_DESIRED, INITIAL_RUNTIME } from "../layers/rules";
 import DataLayersTabContent from "../components/map/controls/DataLayers/DataLayersTabContent";
 import type { ReactElement, ReactNode } from "react";
-
-const mockUseChoropleth = vi.fn();
-
-vi.mock("../hooks/useChoropleth", () => ({
-  useChoropleth: () => mockUseChoropleth(),
-}));
 
 vi.mock("../components/bottom-panels/VegetationCover", () => ({
   VegetationCover: () => <div data-testid="vegetation-cover" />,
 }));
 
 describe("DataLayersTabContent", () => {
-  const handleChange =
-    vi.fn<(e: React.ChangeEvent<HTMLInputElement>) => void>();
-  const setSubcatchment = vi.fn();
-  const setLanduseLegendVisible = vi.fn();
-  const setChoroplethType = vi.fn();
+  const handleToggle = vi.fn<(id: string, checked: boolean) => void>();
+  const mockEnableLayerWithParams = vi.fn();
   const openPanel = vi.fn<(node: ReactNode) => void>();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseChoropleth.mockReturnValue({ isActive: false });
 
     useAppStore.setState({
-      subcatchment: false,
-      channels: false,
-      landuse: false,
-      choropleth: { ...initialChoroplethState, type: "none" },
-      setSubcatchment,
-      setLanduseLegendVisible,
-      setChoroplethType,
+      layerDesired: INITIAL_DESIRED,
+      layerRuntime: INITIAL_RUNTIME,
+      enableLayerWithParams: mockEnableLayerWithParams,
       openPanel,
     });
   });
@@ -43,7 +29,7 @@ describe("DataLayersTabContent", () => {
     const { container } = render(
       <DataLayersTabContent
         activeTab="WEPP Hillslopes"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -59,12 +45,18 @@ describe("DataLayersTabContent", () => {
   });
 
   it("disables the subcatchment checkbox when landuse && subcatchment", () => {
-    useAppStore.setState({ landuse: true, subcatchment: true });
+    useAppStore.setState({
+      layerDesired: {
+        ...INITIAL_DESIRED,
+        subcatchment: { ...INITIAL_DESIRED.subcatchment, enabled: true },
+        landuse: { ...INITIAL_DESIRED.landuse, enabled: true },
+      },
+    });
 
     const { container } = render(
       <DataLayersTabContent
         activeTab="WEPP Hillslopes"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -75,25 +67,25 @@ describe("DataLayersTabContent", () => {
     expect(subcatchmentBox.disabled).toBe(true);
   });
 
-  it("wires handleChange for WEPP Hillslopes checkboxes", () => {
+  it("wires handleToggle for WEPP Hillslopes checkboxes", () => {
     const { container } = render(
       <DataLayersTabContent
         activeTab="WEPP Hillslopes"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
     fireEvent.click(container.querySelector("input#subcatchment")!);
     fireEvent.click(container.querySelector("input#channels")!);
 
-    expect(handleChange).toHaveBeenCalledTimes(2);
+    expect(handleToggle).toHaveBeenCalledTimes(2);
   });
 
   it("renders Surface Data tab with landuse checkbox and choropleth buttons", () => {
     const { container } = render(
       <DataLayersTabContent
         activeTab="Surface Data"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -110,22 +102,28 @@ describe("DataLayersTabContent", () => {
     render(
       <DataLayersTabContent
         activeTab="Surface Data"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
     expect(screen.queryByTitle("Land Use Legend")).not.toBeInTheDocument();
   });
 
   it("bolds the active choropleth type when choropleth is active", () => {
-    mockUseChoropleth.mockReturnValue({ isActive: true });
     useAppStore.setState({
-      choropleth: { ...initialChoroplethState, type: "evapotranspiration" },
+      layerDesired: {
+        ...INITIAL_DESIRED,
+        choropleth: {
+          ...INITIAL_DESIRED.choropleth,
+          enabled: true,
+          params: { metric: "evapotranspiration", year: null, bands: "all" },
+        },
+      },
     });
 
     render(
       <DataLayersTabContent
         activeTab="Surface Data"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -134,26 +132,27 @@ describe("DataLayersTabContent", () => {
     ).toHaveStyle("font-weight: bold");
   });
 
-  it("renders Coverage tab and clicking Vegetation Cover opens the vegetation panel and sets choropleth type", () => {
+  it("renders Coverage tab and clicking Vegetation Cover opens the vegetation panel and calls enableLayerWithParams", () => {
     render(
-      <DataLayersTabContent activeTab="Coverage" handleChange={handleChange} />,
+      <DataLayersTabContent activeTab="Coverage" handleToggle={handleToggle} />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Vegetation Cover" }));
 
-    expect(setSubcatchment).toHaveBeenCalledWith(true);
-    expect(setChoroplethType).toHaveBeenCalledWith("vegetationCover");
+    expect(mockEnableLayerWithParams).toHaveBeenCalledWith("choropleth", {
+      metric: "vegetationCover",
+    });
     expect(openPanel).toHaveBeenCalledTimes(1);
 
     const element = openPanel.mock.calls[0]?.[0] as ReactElement;
     expect(element.type).toBeTruthy();
   });
 
-  it("renders Soil Burn tab and wires handleChange for checkboxes", () => {
+  it("renders Soil Burn tab and wires handleToggle for checkboxes", () => {
     const { container } = render(
       <DataLayersTabContent
         activeTab="Soil Burn"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -164,6 +163,6 @@ describe("DataLayersTabContent", () => {
     fireEvent.click(container.querySelector("input#fireSeverity")!);
     fireEvent.click(container.querySelector("input#soilBurnSeverity")!);
 
-    expect(handleChange).toHaveBeenCalledTimes(2);
+    expect(handleToggle).toHaveBeenCalledTimes(2);
   });
 });

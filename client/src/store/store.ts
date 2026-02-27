@@ -1,44 +1,32 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { createOverlaySlice, type OverlaySlice } from "./slices/overlaySlice";
-import { createLanduseSlice, type LanduseSlice } from "./slices/landuseSlice";
-import { createPanelSlice, type PanelSlice } from "./slices/panelSlice";
 
+import { createLayerSlice, type LayerSlice } from "./slices/layerSlice";
+import { createRuntimeSlice, type RuntimeSlice } from "./slices/runtimeSlice";
+import { createPanelSlice, type PanelSlice } from "./slices/panelSlice";
 import {
   createHillslopeSlice,
   type HillslopeSlice,
 } from "./slices/hillslopeSlice";
-
 import {
-  createChoroplethSlice,
-  type ChoroplethSlice,
-} from "./slices/choroplethSlice";
+  createChoroplethCacheSlice,
+  type ChoroplethCacheSlice,
+} from "./slices/choroplethCacheSlice";
 
-import {
-  createSharedActionsSlice,
-  type SharedActionsSlice,
-} from "./slices/sharedActionsSlice";
-
-import { createSbsSlice, type SbsSlice } from "./slices/sbsSlice";
-
-export type AppState = OverlaySlice &
-  LanduseSlice &
+export type AppState = LayerSlice &
+  RuntimeSlice &
   PanelSlice &
   HillslopeSlice &
-  ChoroplethSlice &
-  SharedActionsSlice &
-  SbsSlice;
+  ChoroplethCacheSlice;
 
 export const useAppStore = create<AppState>()(
   devtools(
     (...a) => ({
-      ...createOverlaySlice(...a),
-      ...createLanduseSlice(...a),
+      ...createLayerSlice(...a),
+      ...createRuntimeSlice(...a),
       ...createPanelSlice(...a),
       ...createHillslopeSlice(...a),
-      ...createChoroplethSlice(...a),
-      ...createSharedActionsSlice(...a),
-      ...createSbsSlice(...a),
+      ...createChoroplethCacheSlice(...a),
     }),
     { name: "app-store" },
   ),

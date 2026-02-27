@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
 import { useAppStore } from "../../store/store";
-import { VegetationBandType } from "../../store/slices/choroplethSlice";
+import { VegetationBandType } from "../../hooks/useChoropleth";
 import { useParams } from "@tanstack/react-router";
 import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
@@ -69,19 +69,18 @@ export const VegetationCover: React.FC = () => {
   const { classes } = useStyles();
   const {
     selectedHillslopeId,
-    choropleth: {
-      year: choroplethYear,
-      bands: choroplethBands,
-      range: choroplethRange,
-      loading: choroplethLoading,
-    },
+    layerDesired,
+    choroplethCache: { range: choroplethRange, loading: choroplethLoading },
     closePanel,
     clearSelectedHillslope,
-    setSubcatchment,
-    setChoroplethYear,
-    setChoroplethBands,
-    resetChoropleth,
+    dispatchLayerAction,
+    resetChoroplethCache,
   } = useAppStore();
+
+  // Read choropleth params from desired state
+  const choroplethYear = layerDesired.choropleth.params.year as number | null;
+  const choroplethBands =
+    (layerDesired.choropleth.params.bands as VegetationBandType) ?? "all";
 
   const { config } = useChoropleth();
 
@@ -148,13 +147,23 @@ export const VegetationCover: React.FC = () => {
   const handleVegetationChange = (v: string) => {
     const option = v as "All" | "Shrub" | "Tree";
     setVegetationOption(option);
-    setChoroplethBands(vegetationOptionToBand[option]);
+    dispatchLayerAction({
+      type: "SET_PARAM",
+      id: "choropleth",
+      key: "bands",
+      value: vegetationOptionToBand[option],
+    });
   };
 
   // Sync year changes to choropleth store
   const handleYearChange = (v: string) => {
     setSelectedYear(v);
-    setChoroplethYear(v === "All" ? null : Number(v));
+    dispatchLayerAction({
+      type: "SET_PARAM",
+      id: "choropleth",
+      key: "year",
+      value: v === "All" ? null : Number(v),
+    });
   };
 
   // RAP timeseries fetched for selected hillslope (topaz id)
@@ -283,8 +292,8 @@ export const VegetationCover: React.FC = () => {
             data-testid="veg-close-button"
             onClick={() => {
               clearSelectedHillslope();
-              setSubcatchment(false);
-              resetChoropleth();
+              dispatchLayerAction({ type: "RESET" });
+              resetChoroplethCache();
               closePanel();
             }}
           >

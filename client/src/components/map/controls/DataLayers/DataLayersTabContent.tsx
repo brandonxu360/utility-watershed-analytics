@@ -1,7 +1,5 @@
-import { FC } from "react";
-import { ChangeEvent } from "react";
+import { FC, ChangeEvent } from "react";
 import { VegetationCover } from "../../../bottom-panels/VegetationCover";
-import { useChoropleth } from "../../../../hooks/useChoropleth";
 import { useAppStore } from "../../../../store/store";
 import { tss } from "../../../../utils/tss";
 import Button from "@mui/material/Button";
@@ -48,29 +46,31 @@ const useStyles = tss.create(({ theme }) => ({
 
 type DataLayersTabContentProps = {
   activeTab: string;
-  handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleToggle: (id: string, checked: boolean) => void;
 };
 
 const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
   activeTab,
-  handleChange,
+  handleToggle,
 }) => {
   const { classes } = useStyles();
 
-  const {
-    subcatchment,
-    channels,
-    landuse,
-    sbsEnabled,
-    choropleth: { type: choroplethType },
-    setSubcatchment,
-    setLanduse,
-    setLanduseLegendVisible,
-    setChoroplethType,
-    openPanel,
-  } = useAppStore();
+  const { layerDesired, enableLayerWithParams, openPanel } = useAppStore();
 
-  const { isActive } = useChoropleth();
+  // Read desired state for checkbox checked values
+  const subcatchmentChecked = layerDesired.subcatchment.enabled;
+  const channelsChecked = layerDesired.channels.enabled;
+  const landuseChecked = layerDesired.landuse.enabled;
+  const sbsChecked = layerDesired.sbs.enabled;
+  const choroplethMetric = layerDesired.choropleth.params.metric as
+    | string
+    | undefined;
+  const choroplethEnabled = layerDesired.choropleth.enabled;
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { id, checked } = e.target;
+    handleToggle(id, checked);
+  };
 
   return (
     <div className={classes.layers}>
@@ -79,9 +79,9 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button className={classes.layerTitle}>Subcatchments</Button>
             <Checkbox
-              checked={subcatchment}
+              checked={subcatchmentChecked}
               onChange={handleChange}
-              disabled={landuse && subcatchment}
+              disabled={landuseChecked && subcatchmentChecked}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "subcatchment" } }}
             />
@@ -89,7 +89,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button className={classes.layerTitle}>WEPP Channels</Button>
             <Checkbox
-              checked={channels}
+              checked={channelsChecked}
               onChange={handleChange}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "channels" } }}
@@ -102,7 +102,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button className={classes.layerTitle}>Land Use (2025)</Button>
             <Checkbox
-              checked={landuse}
+              checked={landuseChecked}
               onChange={handleChange}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "landuse" } }}
@@ -114,7 +114,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               onClick={() => {}}
               style={{
                 fontWeight:
-                  isActive && choroplethType === "evapotranspiration"
+                  choroplethEnabled && choroplethMetric === "evapotranspiration"
                     ? "bold"
                     : "normal",
               }}
@@ -130,10 +130,9 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Button
               className={classes.layerTitle}
               onClick={() => {
-                setSubcatchment(true);
-                setLanduse(false);
-                setLanduseLegendVisible(false);
-                setChoroplethType("vegetationCover");
+                enableLayerWithParams("choropleth", {
+                  metric: "vegetationCover",
+                });
                 openPanel(<VegetationCover />);
               }}
             >
@@ -155,7 +154,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Button className={classes.layerTitle}>Soil Burn Severity</Button>
             <Checkbox
-              checked={sbsEnabled}
+              checked={sbsChecked}
               onChange={handleChange}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "soilBurnSeverity" } }}

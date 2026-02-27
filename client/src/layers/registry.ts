@@ -10,7 +10,12 @@
  * No business logic lives here — only static data.
  */
 
-import type { LayerId, LayerDescriptor, GroupDescriptor, GroupId } from "./types";
+import type {
+  LayerId,
+  LayerDescriptor,
+  GroupDescriptor,
+  GroupId,
+} from "./types";
 
 // ── Groups ──────────────────────────────────────────────────────────────────
 

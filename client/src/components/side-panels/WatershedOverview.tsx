@@ -162,7 +162,7 @@ export default function WatershedOverview() {
   const { classes } = useStyles();
   const navigate = useNavigate();
 
-  const { resetOverlays } = useAppStore();
+  const { dispatchLayerAction } = useAppStore();
 
   const runId =
     useParams({
@@ -202,7 +202,7 @@ export default function WatershedOverview() {
       <Button
         onClick={() => {
           navigate({ to: "/" });
-          resetOverlays();
+          dispatchLayerAction({ type: "RESET" });
         }}
         className={classes.closeButton}
         aria-label="Close watershed panel"

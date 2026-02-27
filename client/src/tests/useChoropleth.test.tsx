@@ -6,6 +6,7 @@ import {
   CHOROPLETH_YEARS,
 } from "../hooks/useChoropleth";
 import { useAppStore } from "../store/store";
+import { INITIAL_DESIRED, INITIAL_RUNTIME } from "../layers/rules";
 
 const mockUseParams = vi.fn(() => "batch;;test-batch;;test-run");
 
@@ -24,15 +25,36 @@ import { fetchRapChoropleth } from "../api/rapApi";
 
 const mockFetchRapChoropleth = vi.mocked(fetchRapChoropleth);
 
+/** Helper: enable choropleth with vegetationCover metric via the layer system */
+function enableChoropleth(
+  metric = "vegetationCover",
+  year: number | null = null,
+  bands = "all",
+) {
+  useAppStore.getState().enableLayerWithParams("choropleth", {
+    metric,
+    year,
+    bands,
+  });
+}
+
+/** Helper: disable choropleth via the layer system */
+function disableChoropleth() {
+  useAppStore
+    .getState()
+    .dispatchLayerAction({ type: "TOGGLE", id: "choropleth", on: false });
+}
+
 describe("useChoropleth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseParams.mockReturnValue("batch;;test-batch;;test-run");
-    useAppStore.getState().setChoroplethType("none");
-    useAppStore.getState().setChoroplethYear(null);
-    useAppStore.getState().setChoroplethData(null, null);
-    useAppStore.getState().setChoroplethLoading(false);
-    useAppStore.getState().setChoroplethError(null);
+    // Reset store to initial state
+    useAppStore.setState({
+      layerDesired: INITIAL_DESIRED,
+      layerRuntime: INITIAL_RUNTIME,
+      choroplethCache: { data: null, range: null, loading: false, error: null },
+    });
   });
 
   afterEach(() => {
@@ -66,7 +88,7 @@ describe("useChoropleth", () => {
   });
 
   describe("hook behavior", () => {
-    it("returns inactive state when choropleth is none", () => {
+    it("returns inactive state when choropleth is disabled", () => {
       const { result } = renderHook(() => useChoropleth());
 
       expect(result.current.isActive).toBe(false);
@@ -74,7 +96,7 @@ describe("useChoropleth", () => {
       expect(result.current.config).toBeNull();
     });
 
-    it("returns active state when choropleth is set", async () => {
+    it("returns active state when choropleth is enabled", async () => {
       mockFetchRapChoropleth.mockResolvedValue([
         { wepp_id: 1, value: 50 },
         { wepp_id: 2, value: 75 },
@@ -83,7 +105,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {
@@ -94,7 +116,7 @@ describe("useChoropleth", () => {
       expect(result.current.config).toEqual(CHOROPLETH_CONFIG.vegetationCover);
     });
 
-    it("fetches data when choropleth type changes", async () => {
+    it("fetches data when choropleth is enabled", async () => {
       mockFetchRapChoropleth.mockResolvedValue([
         { wepp_id: 1, value: 50 },
         { wepp_id: 2, value: 75 },
@@ -103,7 +125,7 @@ describe("useChoropleth", () => {
       renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {
@@ -121,8 +143,7 @@ describe("useChoropleth", () => {
       renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
-        useAppStore.getState().setChoroplethYear(2020);
+        enableChoropleth("vegetationCover", 2020);
       });
 
       await waitFor(() => {
@@ -140,7 +161,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {
@@ -154,7 +175,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {
@@ -173,7 +194,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {
@@ -188,13 +209,13 @@ describe("useChoropleth", () => {
       expect(result.current.getColor(3)).toBeNull();
     });
 
-    it("clears data when choropleth is set to none", async () => {
+    it("clears data when choropleth is disabled", async () => {
       mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
 
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {
@@ -202,7 +223,7 @@ describe("useChoropleth", () => {
       });
 
       act(() => {
-        useAppStore.getState().setChoroplethType("none");
+        disableChoropleth();
       });
 
       await waitFor(() => {
@@ -223,7 +244,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {
@@ -239,7 +260,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {
@@ -258,7 +279,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {
@@ -286,7 +307,7 @@ describe("useChoropleth", () => {
       const { result } = renderHook(() => useChoropleth());
 
       act(() => {
-        useAppStore.getState().setChoroplethType("vegetationCover");
+        enableChoropleth("vegetationCover");
       });
 
       await waitFor(() => {

@@ -11,7 +11,11 @@
  * and sharedActionsSlice resetOverlays.
  */
 
-import type { LayerId, LayerAction, DesiredMap, LayerDesiredState } from "./types";
+import type {
+  LayerId,
+  LayerAction,
+  DesiredMap,
+} from "./types";
 import {
   LAYER_REGISTRY,
   getDescriptor,
@@ -53,7 +57,10 @@ export const INITIAL_RUNTIME = {
  * interaction rules (requires, exclusive groups, dependent teardown) are
  * enforced here.
  */
-export function applyAction(current: DesiredMap, action: LayerAction): DesiredMap {
+export function applyAction(
+  current: DesiredMap,
+  action: LayerAction,
+): DesiredMap {
   switch (action.type) {
     case "TOGGLE":
       return applyToggle(current, action.id, action.on);
@@ -86,7 +93,11 @@ export function applyAction(current: DesiredMap, action: LayerAction): DesiredMa
  *  2. exclusive groups  → auto-disable siblings in the same exclusive group
  *  3. dependent teardown → auto-disable layers that require the one being disabled
  */
-function applyToggle(current: DesiredMap, id: LayerId, on: boolean): DesiredMap {
+function applyToggle(
+  current: DesiredMap,
+  id: LayerId,
+  on: boolean,
+): DesiredMap {
   const next: DesiredMap = { ...current };
   const desc = getDescriptor(id);
 
@@ -135,7 +146,7 @@ export function enableWithParams(
   params: Record<string, unknown>,
 ): DesiredMap {
   // First set the params
-  let next = { ...current };
+  const next = { ...current };
   next[id] = {
     ...next[id],
     params: { ...next[id].params, ...params },

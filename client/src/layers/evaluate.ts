@@ -31,9 +31,16 @@ import { LAYER_REGISTRY } from "./registry";
  * this with a proper topological sort.
  */
 function getProcessOrder(): LayerId[] {
-  const entries = Object.entries(LAYER_REGISTRY) as [LayerId, LayerDescriptor][];
-  const independent = entries.filter(([, d]) => !d.requires?.length).map(([id]) => id);
-  const dependent = entries.filter(([, d]) => d.requires?.length).map(([id]) => id);
+  const entries = Object.entries(LAYER_REGISTRY) as [
+    LayerId,
+    LayerDescriptor,
+  ][];
+  const independent = entries
+    .filter(([, d]) => !d.requires?.length)
+    .map(([id]) => id);
+  const dependent = entries
+    .filter(([, d]) => d.requires?.length)
+    .map(([id]) => id);
   return [...independent, ...dependent];
 }
 
@@ -59,7 +66,10 @@ const PROCESS_ORDER: LayerId[] = getProcessOrder();
  * The `loading` flag is purely informational — a loading layer is still
  * "effectively enabled" so the map can show a spinner or placeholder.
  */
-export function evaluate(desired: DesiredMap, runtime: LayerRuntime): EffectiveMap {
+export function evaluate(
+  desired: DesiredMap,
+  runtime: LayerRuntime,
+): EffectiveMap {
   const effective = {} as EffectiveMap;
 
   for (const id of PROCESS_ORDER) {

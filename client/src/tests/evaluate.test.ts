@@ -1,8 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { evaluate, selectOrderedActiveIds, isDesiredButBlocked } from "../layers/evaluate";
+import {
+  evaluate,
+  selectOrderedActiveIds,
+  isDesiredButBlocked,
+} from "../layers/evaluate";
 import { INITIAL_DESIRED, INITIAL_RUNTIME, applyAction } from "../layers/rules";
 import { LAYER_REGISTRY } from "../layers/registry";
-import type { DesiredMap, LayerRuntime, EffectiveMap } from "../layers/types";
+import type { DesiredMap, LayerRuntime } from "../layers/types";
 
 // Helpers
 function fresh(): DesiredMap {
@@ -26,7 +30,11 @@ describe("evaluate", () => {
   });
 
   it("enabled layer with no constraints passes through", () => {
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "channels", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "channels",
+      on: true,
+    });
     const eff = evaluate(desired, freshRuntime());
     expect(eff.channels.enabled).toBe(true);
     expect(eff.channels.blockedReasons).toEqual([]);
@@ -35,7 +43,11 @@ describe("evaluate", () => {
   // ─── Data availability blocking ───────────────────────────────────────
 
   it("blocks a layer when dataAvailability is false", () => {
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "channels", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "channels",
+      on: true,
+    });
     const runtime: LayerRuntime = {
       ...freshRuntime(),
       dataAvailability: { channels: false },
@@ -48,14 +60,22 @@ describe("evaluate", () => {
   });
 
   it("does NOT block when dataAvailability is undefined (not checked yet)", () => {
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "channels", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "channels",
+      on: true,
+    });
     // dataAvailability.channels is undefined (default)
     const eff = evaluate(desired, freshRuntime());
     expect(eff.channels.enabled).toBe(true);
   });
 
   it("does NOT block when dataAvailability is true", () => {
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "channels", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "channels",
+      on: true,
+    });
     const runtime: LayerRuntime = {
       ...freshRuntime(),
       dataAvailability: { channels: true },
@@ -68,7 +88,11 @@ describe("evaluate", () => {
 
   it("blocks landuse when subcatchment effective is disabled (missing data)", () => {
     // User enables landuse (which auto-enables subcatchment via rules)
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "landuse", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "landuse",
+      on: true,
+    });
     expect(desired.subcatchment.enabled).toBe(true);
     expect(desired.landuse.enabled).toBe(true);
 
@@ -98,7 +122,11 @@ describe("evaluate", () => {
     LAYER_REGISTRY.channels.zoomRange = { min: 10, max: 18 };
 
     try {
-      const desired = applyAction(fresh(), { type: "TOGGLE", id: "channels", on: true });
+      const desired = applyAction(fresh(), {
+        type: "TOGGLE",
+        id: "channels",
+        on: true,
+      });
       const runtime: LayerRuntime = { ...freshRuntime(), zoom: 8 };
       const eff = evaluate(desired, runtime);
       expect(eff.channels.enabled).toBe(false);
@@ -115,7 +143,11 @@ describe("evaluate", () => {
   // ─── Loading flag ─────────────────────────────────────────────────────
 
   it("sets loading=true when runtime.loading is true (does NOT block)", () => {
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "subcatchment", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "subcatchment",
+      on: true,
+    });
     const runtime: LayerRuntime = {
       ...freshRuntime(),
       loading: { subcatchment: true },
@@ -126,7 +158,11 @@ describe("evaluate", () => {
   });
 
   it("loading=false by default", () => {
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "subcatchment", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "subcatchment",
+      on: true,
+    });
     const eff = evaluate(desired, freshRuntime());
     expect(eff.subcatchment.loading).toBe(false);
   });
@@ -135,7 +171,11 @@ describe("evaluate", () => {
 
   it("passes through opacity from desired", () => {
     let desired = applyAction(fresh(), { type: "TOGGLE", id: "sbs", on: true });
-    desired = applyAction(desired, { type: "SET_OPACITY", id: "sbs", opacity: 0.4 });
+    desired = applyAction(desired, {
+      type: "SET_OPACITY",
+      id: "sbs",
+      opacity: 0.4,
+    });
     const eff = evaluate(desired, freshRuntime());
     expect(eff.sbs.opacity).toBe(0.4);
   });
@@ -144,7 +184,11 @@ describe("evaluate", () => {
 
   it("accumulates multiple blocked reasons", () => {
     // landuse requires subcatchment and its own data
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "landuse", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "landuse",
+      on: true,
+    });
     const runtime: LayerRuntime = {
       ...freshRuntime(),
       dataAvailability: { subcatchment: false, landuse: false },
@@ -161,8 +205,16 @@ describe("evaluate", () => {
 describe("selectOrderedActiveIds", () => {
   it("returns enabled layers sorted by zIndex", () => {
     let desired = fresh();
-    desired = applyAction(desired, { type: "TOGGLE", id: "subcatchment", on: true });
-    desired = applyAction(desired, { type: "TOGGLE", id: "channels", on: true });
+    desired = applyAction(desired, {
+      type: "TOGGLE",
+      id: "subcatchment",
+      on: true,
+    });
+    desired = applyAction(desired, {
+      type: "TOGGLE",
+      id: "channels",
+      on: true,
+    });
     const eff = evaluate(desired, freshRuntime());
     const ordered = selectOrderedActiveIds(eff);
     expect(ordered).toEqual(["subcatchment", "channels"]);
@@ -179,7 +231,11 @@ describe("selectOrderedActiveIds", () => {
 
 describe("isDesiredButBlocked", () => {
   it("returns true when user wants it on but it is blocked", () => {
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "channels", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "channels",
+      on: true,
+    });
     const runtime: LayerRuntime = {
       ...freshRuntime(),
       dataAvailability: { channels: false },
@@ -189,7 +245,11 @@ describe("isDesiredButBlocked", () => {
   });
 
   it("returns false when desired and effective agree", () => {
-    const desired = applyAction(fresh(), { type: "TOGGLE", id: "channels", on: true });
+    const desired = applyAction(fresh(), {
+      type: "TOGGLE",
+      id: "channels",
+      on: true,
+    });
     const eff = evaluate(desired, freshRuntime());
     expect(isDesiredButBlocked("channels", desired, eff)).toBe(false);
   });

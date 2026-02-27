@@ -123,7 +123,11 @@ export interface LayerRuntime {
 export type BlockedReason =
   | { kind: "missing-data"; detail: string }
   | { kind: "requires-layer"; layerId: LayerId }
-  | { kind: "zoom-out-of-range"; current: number; required: { min: number; max: number } }
+  | {
+      kind: "zoom-out-of-range";
+      current: number;
+      required: { min: number; max: number };
+    }
   | { kind: "excluded-by"; layerId: LayerId };
 
 // ── Effective state (what the map actually shows) ───────────────────────────

@@ -213,8 +213,8 @@ describe("WatershedOverview", () => {
     });
 
     it("navigates to home when back button is clicked", async () => {
-      const mockResetOverlays = vi.fn();
-      useAppStore.setState({ resetOverlays: mockResetOverlays });
+      const mockDispatchLayerAction = vi.fn();
+      useAppStore.setState({ dispatchLayerAction: mockDispatchLayerAction });
 
       renderWithProviders(<WatershedOverview />);
 
@@ -230,9 +230,9 @@ describe("WatershedOverview", () => {
       expect(mockNavigate).toHaveBeenCalledWith({ to: "/" });
     });
 
-    it("calls resetOverlays when back button is clicked", async () => {
-      const mockResetOverlays = vi.fn();
-      useAppStore.setState({ resetOverlays: mockResetOverlays });
+    it("calls dispatchLayerAction RESET when back button is clicked", async () => {
+      const mockDispatchLayerAction = vi.fn();
+      useAppStore.setState({ dispatchLayerAction: mockDispatchLayerAction });
 
       renderWithProviders(<WatershedOverview />);
 
@@ -245,7 +245,7 @@ describe("WatershedOverview", () => {
       });
       fireEvent.click(backButton);
 
-      expect(mockResetOverlays).toHaveBeenCalled();
+      expect(mockDispatchLayerAction).toHaveBeenCalledWith({ type: "RESET" });
     });
   });
 

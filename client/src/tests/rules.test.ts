@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { applyAction, enableWithParams, INITIAL_DESIRED } from "../layers/rules";
-import type { DesiredMap, LayerAction } from "../layers/types";
+import {
+  applyAction,
+  enableWithParams,
+  INITIAL_DESIRED,
+} from "../layers/rules";
+import type { DesiredMap } from "../layers/types";
 
 // Helper: get a fresh copy of initial state for each test
 function fresh(): DesiredMap {
@@ -12,25 +16,41 @@ describe("rules – applyAction", () => {
 
   describe("TOGGLE on", () => {
     it("enables a standalone layer (channels)", () => {
-      const next = applyAction(fresh(), { type: "TOGGLE", id: "channels", on: true });
+      const next = applyAction(fresh(), {
+        type: "TOGGLE",
+        id: "channels",
+        on: true,
+      });
       expect(next.channels.enabled).toBe(true);
     });
 
     it("auto-enables required layers (landuse → subcatchment)", () => {
-      const next = applyAction(fresh(), { type: "TOGGLE", id: "landuse", on: true });
+      const next = applyAction(fresh(), {
+        type: "TOGGLE",
+        id: "landuse",
+        on: true,
+      });
       expect(next.landuse.enabled).toBe(true);
       expect(next.subcatchment.enabled).toBe(true);
     });
 
     it("auto-enables required layers (choropleth → subcatchment)", () => {
-      const next = applyAction(fresh(), { type: "TOGGLE", id: "choropleth", on: true });
+      const next = applyAction(fresh(), {
+        type: "TOGGLE",
+        id: "choropleth",
+        on: true,
+      });
       expect(next.choropleth.enabled).toBe(true);
       expect(next.subcatchment.enabled).toBe(true);
     });
 
     it("enforces exclusive group: enabling landuse disables choropleth and sbs", () => {
       let state = fresh();
-      state = applyAction(state, { type: "TOGGLE", id: "choropleth", on: true });
+      state = applyAction(state, {
+        type: "TOGGLE",
+        id: "choropleth",
+        on: true,
+      });
       expect(state.choropleth.enabled).toBe(true);
 
       state = applyAction(state, { type: "TOGGLE", id: "landuse", on: true });
@@ -84,7 +104,11 @@ describe("rules – applyAction", () => {
       expect(state.subcatchment.enabled).toBe(true);
       expect(state.landuse.enabled).toBe(true);
 
-      state = applyAction(state, { type: "TOGGLE", id: "subcatchment", on: false });
+      state = applyAction(state, {
+        type: "TOGGLE",
+        id: "subcatchment",
+        on: false,
+      });
       expect(state.subcatchment.enabled).toBe(false);
       expect(state.landuse.enabled).toBe(false);
     });
@@ -104,7 +128,11 @@ describe("rules – applyAction", () => {
     it("updates opacity without changing enabled or params", () => {
       let state = fresh();
       state = applyAction(state, { type: "TOGGLE", id: "sbs", on: true });
-      state = applyAction(state, { type: "SET_OPACITY", id: "sbs", opacity: 0.5 });
+      state = applyAction(state, {
+        type: "SET_OPACITY",
+        id: "sbs",
+        opacity: 0.5,
+      });
       expect(state.sbs.opacity).toBe(0.5);
       expect(state.sbs.enabled).toBe(true);
       expect(state.sbs.params).toEqual({ mode: "legacy" });
@@ -116,7 +144,11 @@ describe("rules – applyAction", () => {
   describe("SET_PARAM", () => {
     it("sets a param without changing enabled or opacity", () => {
       let state = fresh();
-      state = applyAction(state, { type: "TOGGLE", id: "choropleth", on: true });
+      state = applyAction(state, {
+        type: "TOGGLE",
+        id: "choropleth",
+        on: true,
+      });
       state = applyAction(state, {
         type: "SET_PARAM",
         id: "choropleth",
@@ -129,7 +161,11 @@ describe("rules – applyAction", () => {
 
     it("merges params (does not clobber other keys)", () => {
       let state = fresh();
-      state = applyAction(state, { type: "TOGGLE", id: "choropleth", on: true });
+      state = applyAction(state, {
+        type: "TOGGLE",
+        id: "choropleth",
+        on: true,
+      });
       state = applyAction(state, {
         type: "SET_PARAM",
         id: "choropleth",
@@ -147,7 +183,11 @@ describe("rules – applyAction", () => {
     it("restores all layers to initial state", () => {
       let state = fresh();
       state = applyAction(state, { type: "TOGGLE", id: "landuse", on: true });
-      state = applyAction(state, { type: "SET_OPACITY", id: "sbs", opacity: 0.3 });
+      state = applyAction(state, {
+        type: "SET_OPACITY",
+        id: "sbs",
+        opacity: 0.3,
+      });
       state = applyAction(state, { type: "RESET" });
 
       for (const [id, layerState] of Object.entries(state)) {

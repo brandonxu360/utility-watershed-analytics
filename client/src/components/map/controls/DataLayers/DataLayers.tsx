@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { useAppStore } from "../../../../store/store";
 import DataLayersTabContent from "./DataLayersTabContent";
 
@@ -79,26 +79,18 @@ const useStyles = tss.create(({ theme }) => ({
 }));
 
 /**
- * DataLayersControl - toggles visibility of map data layers:
- * - Subcatchments
- * - Channels
- * - Land Use
+ * DataLayersControl - toggles visibility of map data layers.
+ *
+ * All toggle logic now flows through `dispatchLayerAction` which delegates
+ * to the pure rule engine. No more scattered side-effect handlers.
  */
 export default function DataLayersControl() {
   const { classes } = useStyles();
 
   const queryClient = useQueryClient();
 
-  const {
-    setSubcatchment,
-    setChannels,
-    setLanduse,
-    setLanduseLegendVisible,
-    clearSelectedHillslope,
-    closePanel,
-    resetOverlays,
-    setSbsEnabled,
-  } = useAppStore();
+  const { dispatchLayerAction, clearSelectedHillslope, closePanel } =
+    useAppStore();
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("WEPP Hillslopes");
@@ -112,37 +104,34 @@ export default function DataLayersControl() {
 
   const toggleOpen = () => setIsOpen((prev) => !prev);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { id, checked } = e.target;
+  const handleToggle = (id: string, checked: boolean) => {
+    // Map checkbox DOM ids to LayerIds
+    const layerIdMap: Record<
+      string,
+      import("../../../../layers/types").LayerId
+    > = {
+      subcatchment: "subcatchment",
+      channels: "channels",
+      landuse: "landuse",
+      soilBurnSeverity: "sbs",
+      fireSeverity: "fireSeverity",
+    };
 
-    if (id === "subcatchment") {
-      setSubcatchment(checked);
-      if (!checked) {
-        queryClient.cancelQueries({ queryKey: ["subcatchments"] });
-        closePanel();
-        setLanduse(false);
-        clearSelectedHillslope();
-      }
+    const layerId = layerIdMap[id];
+    if (!layerId) return;
+
+    // Dispatch the toggle — rule engine handles requires/excludes/dependents
+    dispatchLayerAction({ type: "TOGGLE", id: layerId, on: checked });
+
+    // Side effects that are outside the layer system's scope
+    if (id === "subcatchment" && !checked) {
+      queryClient.cancelQueries({ queryKey: ["subcatchments"] });
+      closePanel();
+      clearSelectedHillslope();
     }
 
-    if (id === "channels") {
-      setChannels(checked);
-      if (!checked) {
-        queryClient.cancelQueries({ queryKey: ["channels"] });
-      }
-    }
-
-    if (id === "landuse") {
-      setSubcatchment(checked);
-      setLanduse(checked);
-      setLanduseLegendVisible(checked);
-      if (!checked) {
-        resetOverlays();
-      }
-    }
-
-    if (id === "soilBurnSeverity") {
-      setSbsEnabled(checked);
+    if (id === "channels" && !checked) {
+      queryClient.cancelQueries({ queryKey: ["channels"] });
     }
   };
 
@@ -160,7 +149,7 @@ export default function DataLayersControl() {
             <div className={classes.heading}>{activeTab}</div>
             <DataLayersTabContent
               activeTab={activeTab}
-              handleChange={handleChange}
+              handleToggle={handleToggle}
             />
           </Paper>
         )}
