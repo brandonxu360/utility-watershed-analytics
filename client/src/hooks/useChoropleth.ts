@@ -20,9 +20,6 @@ import { VEGETATION_BANDS } from "../utils/constants";
  */
 export type ChoroplethType = "none" | "evapotranspiration" | "vegetationCover";
 
-/** Band-group shortcuts for the vegetation-cover metric. */
-export type VegetationBandType = "all" | "shrub" | "tree";
-
 export const CHOROPLETH_CONFIG: Record<
   Exclude<ChoroplethType, "none">,
   {

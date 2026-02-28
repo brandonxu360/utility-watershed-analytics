@@ -1,7 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
 import { useAppStore } from "../../store/store";
-import { VegetationBandType } from "../../hooks/useChoropleth";
+
+/** Band-group shortcuts for the vegetation-cover metric. */
+export type VegetationBandType = "all" | "shrub" | "tree";
 import { useParams } from "@tanstack/react-router";
 import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";

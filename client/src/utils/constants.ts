@@ -1,4 +1,4 @@
-import { VegetationBandType } from "../hooks/useChoropleth";
+import type { VegetationBandType } from "../components/bottom-panels/VegetationCover";
 
 // Band mapping for vegetation cover options
 export const VEGETATION_BANDS: Record<VegetationBandType, number[]> = {
