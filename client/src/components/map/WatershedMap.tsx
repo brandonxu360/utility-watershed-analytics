@@ -168,10 +168,15 @@ export default function WatershedMap(): JSX.Element {
     enabled: Boolean(layerDesired.landuse.enabled && runId),
   });
 
-  // Update runtime data availability for subcatchment / landuse
+  // Update runtime data availability for subcatchment
   useEffect(() => {
-    if (!runId || !layerDesired.subcatchment.enabled || subLoading)
+    if (!runId || !layerDesired.subcatchment.enabled) return;
+
+    // Clear stale availability while a fresh fetch is in progress
+    if (subLoading) {
+      setDataAvailability("subcatchment", undefined);
       return;
+    }
 
     const hasData = !subError && (subcatchments?.features?.length ?? 0) > 0;
     setDataAvailability("subcatchment", hasData);
@@ -184,16 +189,21 @@ export default function WatershedMap(): JSX.Element {
     setDataAvailability,
   ]);
 
+  // Update runtime data availability for landuse
   useEffect(() => {
-    if (!runId) return;
+    if (!runId || !layerDesired.landuse.enabled) return;
 
-    if (layerDesired.landuse.enabled && !landuseLoading) {
-      const hasData =
-        !landuseError &&
-        landuseData != null &&
-        Object.keys(landuseData).length > 0;
-      setDataAvailability("landuse", hasData);
+    // Clear stale availability while a fresh fetch is in progress
+    if (landuseLoading) {
+      setDataAvailability("landuse", undefined);
+      return;
     }
+
+    const hasData =
+      !landuseError &&
+      landuseData != null &&
+      Object.keys(landuseData).length > 0;
+    setDataAvailability("landuse", hasData);
   }, [
     layerDesired.landuse.enabled,
     landuseData,
@@ -205,7 +215,13 @@ export default function WatershedMap(): JSX.Element {
 
   // Update runtime data availability for channels
   useEffect(() => {
-    if (!runId || !layerDesired.channels.enabled || channelLoading) return;
+    if (!runId || !layerDesired.channels.enabled) return;
+
+    // Clear stale availability while a fresh fetch is in progress
+    if (channelLoading) {
+      setDataAvailability("channels", undefined);
+      return;
+    }
 
     const hasData = !channelError && (channelData?.features?.length ?? 0) > 0;
     setDataAvailability("channels", hasData);
