@@ -13,10 +13,12 @@ import type { AppState } from "../store";
 import type { DesiredMap, LayerAction } from "../../layers/types";
 import {
   INITIAL_DESIRED,
+  INITIAL_RUNTIME,
   applyAction,
   enableWithParams,
 } from "../../layers/rules";
 import type { LayerId } from "../../layers/types";
+import { initialChoroplethCacheState } from "./choroplethCacheSlice";
 
 export interface LayerSlice {
   /** The user's desired layer state — what they toggled on/off. */
@@ -34,6 +36,12 @@ export interface LayerSlice {
   /** Landuse legend map (color → description) — derived from fetched data. */
   landuseLegendMap: Record<string, string>;
   setLanduseLegendMap: (legend: Record<string, string>) => void;
+
+  /**
+   * Full map-state reset: desired layers + runtime flags + choropleth cache +
+   * legend map + bottom panel.  Replaces the old `resetOverlays` action.
+   */
+  resetMapState: () => void;
 }
 
 export const createLayerSlice: StateCreator<
@@ -64,4 +72,18 @@ export const createLayerSlice: StateCreator<
 
   landuseLegendMap: {},
   setLanduseLegendMap: (legend) => set({ landuseLegendMap: legend }),
+
+  resetMapState: () =>
+    set(
+      {
+        layerDesired: INITIAL_DESIRED,
+        layerRuntime: INITIAL_RUNTIME,
+        choroplethCache: initialChoroplethCacheState,
+        landuseLegendMap: {},
+        isPanelOpen: false,
+        panelContent: null,
+      },
+      undefined,
+      "layer/RESET_MAP_STATE",
+    ),
 });

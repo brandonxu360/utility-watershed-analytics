@@ -20,7 +20,7 @@ interface MapEffectProps {
  */
 export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
   const map = useMap();
-  const { dispatchLayerAction } = useAppStore();
+  const { resetMapState } = useAppStore();
 
   useEffect(() => {
     if (watershedId && watersheds && Array.isArray(watersheds.features)) {
@@ -30,13 +30,13 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
       );
 
       if (matchingFeature) {
-        // Create a temporary GeoJSON layer from the feature
-        dispatchLayerAction({ type: "RESET" });
+        // Full reset: desired layers + runtime + cache + panel
+        resetMapState();
         const tempLayer = L.geoJSON(matchingFeature);
         zoomToFeature(map, tempLayer);
       }
     }
-  }, [watershedId, watersheds, map, dispatchLayerAction]);
+  }, [watershedId, watersheds, map, resetMapState]);
 
   return null;
 }

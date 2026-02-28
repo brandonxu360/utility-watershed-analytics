@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams } from "@tanstack/react-router";
 import { useAppStore } from "../store/store";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
@@ -46,7 +47,7 @@ const useStyles = tss.create(({ theme }) => ({
 
 export default function Home(): JSX.Element {
   const { classes } = useStyles();
-  const { isPanelOpen, panelContent } = useAppStore();
+  const { isPanelOpen, panelContent, resetMapState } = useAppStore();
 
   const runId =
     useParams({
@@ -54,6 +55,15 @@ export default function Home(): JSX.Element {
       select: (params) => params?.webcloudRunId,
       shouldThrow: false,
     }) ?? null;
+
+  // Reset all map-scoped state when leaving the Home page (e.g. navigating
+  // to /team) or when the watershed changes.  This prevents stale panels,
+  // legends, and runtime flags from leaking across navigations.
+  useEffect(() => {
+    return () => {
+      resetMapState();
+    };
+  }, [runId, resetMapState]);
 
   const isSmallScreen = useIsSmallScreen();
 
