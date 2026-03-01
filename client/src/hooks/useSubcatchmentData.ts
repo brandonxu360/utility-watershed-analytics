@@ -3,14 +3,13 @@
  *
  * Responsibilities:
  *  1. `useQuery` for subcatchment GeoJSON (gated on `layerDesired.subcatchment.enabled`)
- *  2. Reports data-availability to layer runtime
- *  3. Reports loading flag to layer runtime
+ *  2. Reports data-availability and loading to layer runtime via `useLayerQuery`
  */
 
-import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchSubcatchments } from "../api/api";
 import { useWatershed } from "../contexts/WatershedContext";
+import { useLayerQuery } from "./useLayerQuery";
 
 export interface UseSubcatchmentDataResult {
   /** Subcatchment GeoJSON FeatureCollection (or undefined while loading). */
@@ -22,7 +21,7 @@ export interface UseSubcatchmentDataResult {
 export function useSubcatchmentData(
   runId: string | null,
 ): UseSubcatchmentDataResult {
-  const { layerDesired, setDataAvailability, setLayerLoading } = useWatershed();
+  const { layerDesired } = useWatershed();
 
   const subcatchmentEnabled = layerDesired.subcatchment.enabled;
 
@@ -37,31 +36,12 @@ export function useSubcatchmentData(
     enabled: Boolean(subcatchmentEnabled && runId),
   });
 
-  // ── Report data availability ──────────────────────────────────────────
-  useEffect(() => {
-    if (!runId || !subcatchmentEnabled) return;
-
-    // Clear stale availability while a fresh fetch is in progress
-    if (subLoading) {
-      setDataAvailability("subcatchment", undefined);
-      return;
-    }
-
-    const hasData = !subError && (subcatchments?.features?.length ?? 0) > 0;
-    setDataAvailability("subcatchment", hasData);
-  }, [
-    subcatchmentEnabled,
-    subLoading,
-    subError,
-    subcatchments,
-    runId,
-    setDataAvailability,
-  ]);
-
-  // ── Report loading flag ───────────────────────────────────────────────
-  useEffect(() => {
-    setLayerLoading("subcatchment", subLoading);
-  }, [subLoading, setLayerLoading]);
+  // ── Report data availability & loading ────────────────────────────────
+  useLayerQuery("subcatchment", {
+    enabled: Boolean(subcatchmentEnabled && runId),
+    isLoading: subLoading,
+    hasData: !subError && (subcatchments?.features?.length ?? 0) > 0,
+  });
 
   return { subcatchments, subLoading };
 }

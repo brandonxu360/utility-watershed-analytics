@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
 import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useWatershed } from "../contexts/WatershedContext";
+import { useLayerQuery } from "./useLayerQuery";
 import { fetchRapChoropleth } from "../api/rapApi";
 
 import {
@@ -71,7 +72,7 @@ export function useChoropleth(): UseChoroplethResult {
     }) ?? null;
 
   // Read control fields from the layer desired-state
-  const { layerDesired, setDataAvailability, setLayerLoading } = useWatershed();
+  const { layerDesired } = useWatershed();
   const choroplethDesired = layerDesired.choropleth;
   const choroplethType = (
     choroplethDesired.enabled
@@ -151,30 +152,13 @@ export function useChoropleth(): UseChoroplethResult {
     ? `Failed to load data: ${queryError instanceof Error ? queryError.message : String(queryError)}`
     : dataError;
 
-  // ── Report data availability to layer runtime ─────────────────────────
-  useEffect(() => {
-    if (!isEnabled) return;
-
-    if (choroplethLoading) {
-      setDataAvailability("choropleth", undefined);
-      return;
-    }
-
-    const hasData =
-      !choroplethError && choroplethData != null && choroplethData.size > 0;
-    setDataAvailability("choropleth", hasData);
-  }, [
-    isEnabled,
-    choroplethLoading,
-    choroplethError,
-    choroplethData,
-    setDataAvailability,
-  ]);
-
-  // ── Report loading flag to layer runtime ──────────────────────────────
-  useEffect(() => {
-    setLayerLoading("choropleth", choroplethLoading);
-  }, [choroplethLoading, setLayerLoading]);
+  // ── Report data availability & loading ────────────────────────────────
+  useLayerQuery("choropleth", {
+    enabled: isEnabled,
+    isLoading: choroplethLoading,
+    hasData:
+      !choroplethError && choroplethData != null && choroplethData.size > 0,
+  });
 
   const colormap = useMemo(() => {
     if (!config) return null;

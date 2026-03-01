@@ -4,17 +4,17 @@
  *
  * Responsibilities:
  *  1. `useQuery` for landuse data (gated on `layerDesired.landuse.enabled`)
- *  2. Reports data-availability to layer runtime
- *  3. Reports loading flag to layer runtime
- *  4. Derives the legend map (color → description) from raw data
+ *  2. Reports data-availability and loading to layer runtime via `useLayerQuery`
+ *  3. Derives the legend map (color → description) from raw data
  *
  * This keeps all landuse-specific side-effects out of WatershedMap.
  */
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLanduse } from "../api/landuseApi";
 import { useWatershed } from "../contexts/WatershedContext";
+import { useLayerQuery } from "./useLayerQuery";
 import type { LanduseMap } from "../api/types";
 
 export interface UseLanduseDataResult {
@@ -27,8 +27,7 @@ export interface UseLanduseDataResult {
 }
 
 export function useLanduseData(runId: string | null): UseLanduseDataResult {
-  const { layerDesired, setDataAvailability, setLayerLoading, isEffective } =
-    useWatershed();
+  const { layerDesired, isEffective } = useWatershed();
 
   const landuseEnabled = layerDesired.landuse.enabled;
   const landuseEffective = isEffective("landuse");
@@ -44,33 +43,15 @@ export function useLanduseData(runId: string | null): UseLanduseDataResult {
     enabled: Boolean(landuseEnabled && runId),
   });
 
-  // ── Report data availability ──────────────────────────────────────────
-  useEffect(() => {
-    if (!runId || !landuseEnabled) return;
-
-    if (landuseLoading) {
-      setDataAvailability("landuse", undefined);
-      return;
-    }
-
-    const hasData =
+  // ── Report data availability & loading ────────────────────────────────
+  useLayerQuery("landuse", {
+    enabled: Boolean(landuseEnabled && runId),
+    isLoading: landuseLoading,
+    hasData:
       !landuseError &&
       landuseData != null &&
-      Object.keys(landuseData).length > 0;
-    setDataAvailability("landuse", hasData);
-  }, [
-    landuseEnabled,
-    landuseData,
-    landuseLoading,
-    landuseError,
-    runId,
-    setDataAvailability,
-  ]);
-
-  // ── Report loading flag ───────────────────────────────────────────────
-  useEffect(() => {
-    setLayerLoading("landuse", landuseLoading);
-  }, [landuseLoading, setLayerLoading]);
+      Object.keys(landuseData).length > 0,
+  });
 
   // ── Derive legend map ─────────────────────────────────────────────────
   const landuseLegendMap = useMemo(() => {
