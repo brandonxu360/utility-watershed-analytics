@@ -58,7 +58,7 @@ export interface WatershedState {
   selectedHillslopeId: number | null;
 }
 
-export const INITIAL_STATE: WatershedState = {
+const INITIAL_STATE: WatershedState = {
   layerDesired: INITIAL_DESIRED,
   layerRuntime: INITIAL_RUNTIME,
   selectedHillslopeId: null,
@@ -80,7 +80,7 @@ export type WatershedAction =
 
 // ── Reducer ─────────────────────────────────────────────────────────────────
 
-export function watershedReducer(
+function watershedReducer(
   state: WatershedState,
   action: WatershedAction,
 ): WatershedState {
