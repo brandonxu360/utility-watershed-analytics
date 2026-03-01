@@ -25,21 +25,28 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 });
 
 const mockFetchWatersheds = vi.fn();
-const mockFetchSubcatchments = vi.fn();
-const mockFetchChannels = vi.fn();
 
 vi.mock("../api/api", () => ({
   fetchWatersheds: () => mockFetchWatersheds(),
-  fetchSubcatchments: (id: string) => mockFetchSubcatchments(id),
-  fetchChannels: (id: string) => mockFetchChannels(id),
 }));
 
-const { mockUseLanduseData } = vi.hoisted(() => ({
-  mockUseLanduseData: vi.fn(),
-}));
+const { mockUseLanduseData, mockUseSubcatchmentData, mockUseChannelData } =
+  vi.hoisted(() => ({
+    mockUseLanduseData: vi.fn(),
+    mockUseSubcatchmentData: vi.fn(),
+    mockUseChannelData: vi.fn(),
+  }));
 
 vi.mock("../hooks/useLanduseData", () => ({
   useLanduseData: (...args: unknown[]) => mockUseLanduseData(...args),
+}));
+
+vi.mock("../hooks/useSubcatchmentData", () => ({
+  useSubcatchmentData: (...args: unknown[]) => mockUseSubcatchmentData(...args),
+}));
+
+vi.mock("../hooks/useChannelData", () => ({
+  useChannelData: (...args: unknown[]) => mockUseChannelData(...args),
 }));
 
 vi.mock("react-toastify", () => ({
@@ -320,8 +327,14 @@ describe("Map Component", () => {
 
     mockUseParams.mockReturnValue(null);
     mockFetchWatersheds.mockResolvedValue(mockWatershedData);
-    mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
-    mockFetchChannels.mockResolvedValue(mockChannelData);
+    mockUseSubcatchmentData.mockReturnValue({
+      subcatchments: mockSubcatchmentData,
+      subLoading: false,
+    });
+    mockUseChannelData.mockReturnValue({
+      channelData: mockChannelData,
+      channelLoading: false,
+    });
     mockUseLanduseData.mockReturnValue({
       landuseData: {
         1: { desc: "Forest", color: "#ff0000" },
@@ -512,7 +525,6 @@ describe("Map Component", () => {
     it("shows subcatchment layer when enabled and data exists", async () => {
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("subcatchment");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -536,7 +548,10 @@ describe("Map Component", () => {
     it("shows watershed layer when subcatchment has no features", async () => {
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("subcatchment");
-      mockFetchSubcatchments.mockResolvedValue({ features: [] });
+      mockUseSubcatchmentData.mockReturnValue({
+        subcatchments: { features: [] },
+        subLoading: false,
+      });
 
       renderWithProviders(<WatershedMap />);
 
@@ -554,8 +569,6 @@ describe("Map Component", () => {
         isLoading: false,
         choropleth: "vegetationCover",
       });
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
-
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
@@ -569,7 +582,6 @@ describe("Map Component", () => {
     it("shows channels when enabled and data exists", async () => {
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("channels");
-      mockFetchChannels.mockResolvedValue(mockChannelData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -593,7 +605,6 @@ describe("Map Component", () => {
     it("applies correct style to channels", async () => {
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("channels");
-      mockFetchChannels.mockResolvedValue(mockChannelData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -606,50 +617,6 @@ describe("Map Component", () => {
         color: "#000080",
         fillOpacity: 1,
         weight: 2,
-      });
-    });
-  });
-
-  describe("auto-disable effects", () => {
-    it("reports subcatchment unavailable when no subcatchment data", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("subcatchment", "landuse");
-      mockFetchSubcatchments.mockResolvedValue({ features: [] });
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith(
-          "subcatchment",
-          false,
-        );
-      });
-    });
-
-    it("reports channels unavailable when no channel data", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("channels");
-      mockFetchChannels.mockResolvedValue({ features: [] });
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith("channels", false);
-      });
-    });
-
-    it("reports subcatchment unavailable when landuse is enabled but no subcatchment data", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("subcatchment", "landuse");
-      mockFetchSubcatchments.mockResolvedValue({ features: [] });
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith(
-          "subcatchment",
-          false,
-        );
       });
     });
   });
@@ -667,7 +634,6 @@ describe("Map Component", () => {
 
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("subcatchment");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -696,7 +662,6 @@ describe("Map Component", () => {
 
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("subcatchment");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -725,7 +690,6 @@ describe("Map Component", () => {
 
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("subcatchment", "landuse");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -757,7 +721,6 @@ describe("Map Component", () => {
 
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("subcatchment", "landuse");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -786,7 +749,6 @@ describe("Map Component", () => {
 
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("subcatchment");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -811,7 +773,6 @@ describe("Map Component", () => {
 
       mockUseParams.mockReturnValue("watershed-1");
       mockDesired = desiredWith("subcatchment");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -878,7 +839,6 @@ describe("Map Component", () => {
         isLoading: false,
         choropleth: "vegetationCover",
       });
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -907,7 +867,6 @@ describe("Map Component", () => {
         isLoading: false,
         choropleth: "vegetationCover",
       });
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
 
       renderWithProviders(<WatershedMap />);
 
@@ -942,55 +901,37 @@ describe("Map Component", () => {
       });
     });
 
-    it("does not fetch subcatchments when watershedID is null", async () => {
+    it("does not show subcatchment layer when hook returns no data", async () => {
       mockUseParams.mockReturnValue(null);
       mockDesired = desiredWith("subcatchment");
+      mockUseSubcatchmentData.mockReturnValue({
+        subcatchments: undefined,
+        subLoading: false,
+      });
 
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
-        expect(mockFetchSubcatchments).not.toHaveBeenCalled();
+        expect(
+          screen.queryByTestId("subcatchment-layer"),
+        ).not.toBeInTheDocument();
       });
     });
 
-    it("does not fetch channels when watershedID is null", async () => {
+    it("does not show channels when hook returns no data", async () => {
       mockUseParams.mockReturnValue(null);
       mockDesired = desiredWith("channels");
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockFetchChannels).not.toHaveBeenCalled();
+      mockUseChannelData.mockReturnValue({
+        channelData: undefined,
+        channelLoading: false,
       });
-    });
-
-    it("does not run auto-disable effect when subLoading is true", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("subcatchment");
-      mockFetchSubcatchments.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith(
-          "subcatchment",
-          undefined,
-        );
-      });
-    });
-
-    it("does not run channel auto-disable effect when channelLoading is true", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("channels");
-      mockFetchChannels.mockReturnValue(new Promise(() => {}));
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith(
-          "channels",
-          undefined,
-        );
+        expect(
+          screen.queryByTestId("channels-geojson"),
+        ).not.toBeInTheDocument();
       });
     });
   });

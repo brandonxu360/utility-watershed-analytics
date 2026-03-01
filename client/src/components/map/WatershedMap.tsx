@@ -1,15 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { MapEffect } from "../../utils/map/MapEffectUtil";
 
-import {
-  fetchChannels,
-  fetchSubcatchments,
-  fetchWatersheds,
-} from "../../api/api";
+import { fetchWatersheds } from "../../api/api";
 
 import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
 import { WatershedProperties } from "../../types/WatershedProperties";
@@ -20,6 +16,8 @@ import { tss } from "../../utils/tss";
 import { CircularProgress } from "@mui/material";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { useLanduseData } from "../../hooks/useLanduseData";
+import { useSubcatchmentData } from "../../hooks/useSubcatchmentData";
+import { useChannelData } from "../../hooks/useChannelData";
 import DataLayersControl from "./controls/DataLayers/DataLayers";
 import ZoomInControl from "./controls/ZoomIn";
 import ZoomOutControl from "./controls/ZoomOut";
@@ -81,8 +79,6 @@ export default function WatershedMap(): JSX.Element {
 
   const {
     layerDesired,
-    setDataAvailability,
-    setLayerLoading,
     effective,
     isEffective,
   } = useWatershed();
@@ -134,80 +130,11 @@ export default function WatershedMap(): JSX.Element {
     queryFn: fetchWatersheds,
   });
 
-  const {
-    data: subcatchments,
-    isLoading: subLoading,
-    isError: subError,
-  } = useQuery({
-    queryKey: ["subcatchments", runId],
-    queryFn: () => fetchSubcatchments(runId!),
-    enabled: Boolean(layerDesired.subcatchment.enabled && runId),
-  });
-
-  const {
-    data: channelData,
-    isLoading: channelLoading,
-    isError: channelError,
-  } = useQuery({
-    queryKey: ["channels", runId],
-    queryFn: () => fetchChannels(runId!),
-    enabled: Boolean(layerDesired.channels.enabled && runId),
-  });
-
-  // Landuse data, runtime reporting, and legend — colocated in one hook
+  // Layer data hooks — colocate fetching, availability, and loading reporting
+  const { subcatchments, subLoading } = useSubcatchmentData(runId);
+  const { channelData, channelLoading } = useChannelData(runId);
   const { landuseData, landuseLoading, landuseLegendMap } =
     useLanduseData(runId);
-
-  // Update runtime data availability for subcatchment
-  useEffect(() => {
-    if (!runId || !layerDesired.subcatchment.enabled) return;
-
-    // Clear stale availability while a fresh fetch is in progress
-    if (subLoading) {
-      setDataAvailability("subcatchment", undefined);
-      return;
-    }
-
-    const hasData = !subError && (subcatchments?.features?.length ?? 0) > 0;
-    setDataAvailability("subcatchment", hasData);
-  }, [
-    layerDesired.subcatchment.enabled,
-    subLoading,
-    subError,
-    subcatchments,
-    runId,
-    setDataAvailability,
-  ]);
-
-  // Update runtime data availability for channels
-  useEffect(() => {
-    if (!runId || !layerDesired.channels.enabled) return;
-
-    // Clear stale availability while a fresh fetch is in progress
-    if (channelLoading) {
-      setDataAvailability("channels", undefined);
-      return;
-    }
-
-    const hasData = !channelError && (channelData?.features?.length ?? 0) > 0;
-    setDataAvailability("channels", hasData);
-  }, [
-    layerDesired.channels.enabled,
-    runId,
-    channelData,
-    channelLoading,
-    channelError,
-    setDataAvailability,
-  ]);
-
-  // Update loading flags
-  useEffect(() => {
-    setLayerLoading("subcatchment", subLoading);
-  }, [subLoading, setLayerLoading]);
-
-  useEffect(() => {
-    setLayerLoading("channels", channelLoading);
-  }, [channelLoading, setLayerLoading]);
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
