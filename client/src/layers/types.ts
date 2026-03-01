@@ -12,18 +12,8 @@
 
 // ── Layer identifiers ──────────────────────────────────────────────────────
 
-/** Every toggleable layer known to the system. */
-export type LayerId =
-  | "subcatchment"
-  | "channels"
-  | "patches" // placeholder — no renderer yet
-  | "landuse"
-  | "choropleth"
-  | "sbs"
-  | "fireSeverity"; // placeholder — no renderer yet
-
 /** All layer ids as a const array (useful for iteration). */
-export const ALL_LAYER_IDS: LayerId[] = [
+export const ALL_LAYER_IDS = [
   "subcatchment",
   "channels",
   "patches",
@@ -31,7 +21,10 @@ export const ALL_LAYER_IDS: LayerId[] = [
   "choropleth",
   "sbs",
   "fireSeverity",
-];
+] as const;
+
+/** Every toggleable layer known to the system. */
+export type LayerId = (typeof ALL_LAYER_IDS)[number];
 
 // ── Group identifiers ──────────────────────────────────────────────────────
 
