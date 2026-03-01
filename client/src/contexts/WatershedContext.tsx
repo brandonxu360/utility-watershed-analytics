@@ -38,11 +38,7 @@ import type {
   EffectiveMap,
 } from "../layers/types";
 
-import {
-  INITIAL_DESIRED,
-  INITIAL_RUNTIME,
-  applyAction,
-} from "../layers/rules";
+import { INITIAL_DESIRED, INITIAL_RUNTIME, applyAction } from "../layers/rules";
 
 import {
   evaluate,
@@ -78,7 +74,11 @@ export const INITIAL_STATE: WatershedState = {
 
 export type WatershedAction =
   | LayerAction // TOGGLE, SET_OPACITY, SET_PARAM, RESET
-  | { type: "SET_DATA_AVAILABILITY"; id: LayerId; available: boolean | undefined }
+  | {
+      type: "SET_DATA_AVAILABILITY";
+      id: LayerId;
+      available: boolean | undefined;
+    }
   | { type: "SET_LAYER_LOADING"; id: LayerId; loading: boolean }
   | { type: "SET_ZOOM"; zoom: number }
   | { type: "SET_LANDUSE_LEGEND"; legend: Record<string, string> }
@@ -100,7 +100,10 @@ export function watershedReducer(
     case "TOGGLE":
     case "SET_OPACITY":
     case "SET_PARAM":
-      return { ...state, layerDesired: applyAction(state.layerDesired, action) };
+      return {
+        ...state,
+        layerDesired: applyAction(state.layerDesired, action),
+      };
 
     case "RESET":
       return INITIAL_STATE;
@@ -123,7 +126,10 @@ export function watershedReducer(
         ...state,
         layerRuntime: {
           ...state.layerRuntime,
-          loading: { ...state.layerRuntime.loading, [action.id]: action.loading },
+          loading: {
+            ...state.layerRuntime.loading,
+            [action.id]: action.loading,
+          },
         },
       };
 

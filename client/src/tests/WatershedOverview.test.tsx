@@ -222,8 +222,6 @@ describe("WatershedOverview", () => {
 
       expect(mockNavigate).toHaveBeenCalledWith({ to: "/" });
     });
-
-
   });
 
   describe("N/A fallbacks", () => {

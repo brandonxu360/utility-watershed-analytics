@@ -76,8 +76,11 @@ export const VegetationCover: React.FC = () => {
     clearSelectedHillslope,
   } = useWatershed();
 
-  const { config, range: choroplethRange, isLoading: choroplethLoading } =
-    useChoropleth();
+  const {
+    config,
+    range: choroplethRange,
+    isLoading: choroplethLoading,
+  } = useChoropleth();
 
   // Read choropleth params from desired state
   const choroplethYear = layerDesired.choropleth.params.year as number | null;
@@ -186,17 +189,17 @@ export const VegetationCover: React.FC = () => {
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-            mode: "hillslope",
-            topazId: selectedHillslopeId,
-            runId: runId,
-            year: selectedYear === "All" ? undefined : Number(selectedYear),
-          })
-          : runId
-            ? await fetchRap({
-              mode: "watershed",
+              mode: "hillslope",
+              topazId: selectedHillslopeId,
               runId: runId,
               year: selectedYear === "All" ? undefined : Number(selectedYear),
             })
+          : runId
+            ? await fetchRap({
+                mode: "watershed",
+                runId: runId,
+                year: selectedYear === "All" ? undefined : Number(selectedYear),
+              })
             : null;
 
         if (!mounted) return;
@@ -295,7 +298,11 @@ export const VegetationCover: React.FC = () => {
               // (ActiveBottomPanel renders null when isEffective("choropleth") is false)
               // Choropleth cache is local to useChoropleth — destroyed on unmount
               clearSelectedHillslope();
-              dispatchLayerAction({ type: "TOGGLE", id: "choropleth", on: false });
+              dispatchLayerAction({
+                type: "TOGGLE",
+                id: "choropleth",
+                on: false,
+              });
             }}
           >
             <CloseIcon />

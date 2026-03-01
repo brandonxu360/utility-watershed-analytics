@@ -11,11 +11,7 @@
  * and sharedActionsSlice resetOverlays.
  */
 
-import type {
-  LayerId,
-  LayerAction,
-  DesiredMap,
-} from "./types";
+import type { LayerId, LayerAction, DesiredMap } from "./types";
 import {
   LAYER_REGISTRY,
   getDescriptor,

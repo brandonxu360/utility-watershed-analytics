@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import Home from "../pages/Home";
-import type { LayerId } from "../layers/types";
 
 const mockNavigate = vi.fn();
 
@@ -46,7 +45,7 @@ vi.mock("../contexts/WatershedContext", () => ({
     <>{children}</>
   ),
   useWatershed: () => ({
-    isEffective: (_id: LayerId) => mockIsEffective,
+    isEffective: () => mockIsEffective,
   }),
 }));
 

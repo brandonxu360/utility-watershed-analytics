@@ -2,9 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { INITIAL_DESIRED, INITIAL_RUNTIME } from "../layers/rules";
-import { evaluate, selectOrderedActiveIds, isDesiredButBlocked } from "../layers/evaluate";
+import {
+  evaluate,
+  selectOrderedActiveIds,
+  isDesiredButBlocked,
+} from "../layers/evaluate";
 import type { LayerId, DesiredMap, LayerRuntime } from "../layers/types";
-import { toast } from "react-toastify";
 import WatershedMap from "../components/map/WatershedMap";
 
 const mockNavigate = vi.fn();
@@ -41,8 +44,6 @@ vi.mock("react-toastify", () => ({
     error: vi.fn(),
   },
 }));
-
-const toastErrorMock = vi.mocked(toast.error);
 
 const mockGetChoroplethStyle = vi.fn();
 const { mockUseChoropleth } = vi.hoisted(() => ({
@@ -615,7 +616,10 @@ describe("Map Component", () => {
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith("subcatchment", false);
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "subcatchment",
+          false,
+        );
       });
     });
 
@@ -639,7 +643,10 @@ describe("Map Component", () => {
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith("subcatchment", false);
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "subcatchment",
+          false,
+        );
       });
     });
   });
@@ -957,7 +964,11 @@ describe("Map Component", () => {
     it("generates correct choropleth key", async () => {
       mockUseParams.mockReturnValue("watershed-1");
       const ld = desiredWith("subcatchment", "choropleth");
-      ld.choropleth.params = { metric: "vegetationCover", year: 2020, bands: "tree" };
+      ld.choropleth.params = {
+        metric: "vegetationCover",
+        year: 2020,
+        bands: "tree",
+      };
       mockDesired = ld;
       mockUseChoropleth.mockReturnValue({
         isActive: true,
@@ -982,7 +993,11 @@ describe("Map Component", () => {
     it("uses 'all' for null year in choropleth key", async () => {
       mockUseParams.mockReturnValue("watershed-1");
       const ld = desiredWith("subcatchment", "choropleth");
-      ld.choropleth.params = { metric: "vegetationCover", year: null, bands: "all" };
+      ld.choropleth.params = {
+        metric: "vegetationCover",
+        year: null,
+        bands: "all",
+      };
       mockDesired = ld;
       mockUseChoropleth.mockReturnValue({
         isActive: true,
@@ -1055,7 +1070,10 @@ describe("Map Component", () => {
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith("subcatchment", undefined);
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "subcatchment",
+          undefined,
+        );
       });
     });
 
@@ -1067,7 +1085,10 @@ describe("Map Component", () => {
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith("channels", undefined);
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "channels",
+          undefined,
+        );
       });
     });
   });

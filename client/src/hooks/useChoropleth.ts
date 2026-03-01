@@ -83,10 +83,18 @@ export function useChoropleth(): UseChoroplethResult {
   // Local cache — lives as long as the hook's consumer is mounted.
   // When the choropleth layer is disabled, ActiveBottomPanel unmounts
   // VegetationCover → this hook is destroyed → cache is GC'd.
-  const [choroplethData, setChoroplethDataLocal] = useState<Map<number, number> | null>(null);
-  const [choroplethRange, setChoroplethRangeLocal] = useState<{ min: number; max: number } | null>(null);
+  const [choroplethData, setChoroplethDataLocal] = useState<Map<
+    number,
+    number
+  > | null>(null);
+  const [choroplethRange, setChoroplethRangeLocal] = useState<{
+    min: number;
+    max: number;
+  } | null>(null);
   const [choroplethLoading, setChoroplethLoadingLocal] = useState(false);
-  const [choroplethError, setChoroplethErrorLocal] = useState<string | null>(null);
+  const [choroplethError, setChoroplethErrorLocal] = useState<string | null>(
+    null,
+  );
 
   const config =
     choroplethType !== "none" ? CHOROPLETH_CONFIG[choroplethType] : null;
@@ -164,13 +172,7 @@ export function useChoropleth(): UseChoroplethResult {
     return () => {
       mounted = false;
     };
-  }, [
-    choroplethType,
-    choroplethYear,
-    effectiveBands,
-    config,
-    runId,
-  ]);
+  }, [choroplethType, choroplethYear, effectiveBands, config, runId]);
 
   const colormap = useMemo(() => {
     if (!config) return null;

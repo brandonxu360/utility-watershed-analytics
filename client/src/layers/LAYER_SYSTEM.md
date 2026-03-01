@@ -60,13 +60,13 @@ every component that consumes the system.
 
 ## 1. Design Goals
 
-| Goal | How It's Achieved |
-|---|---|
-| **Single source of truth** | Every layer's metadata lives in `LAYER_REGISTRY`; desired state in one Zustand slice. |
-| **Separation of intent vs. reality** | "Desired" (what the user asked for) and "Runtime" (what the app knows) are separate state trees. "Effective" is a pure derivation. |
-| **Pure business logic** | `applyAction`, `enableWithParams`, and `evaluate` are pure functions with no side effects, no store access, and no React. Trivially unit-testable. |
-| **Structured errors** | `BlockedReason` is a discriminated union — never a stringly-typed message. UI code pattern-matches on `kind`. |
-| **No scattered toggles** | All toggle / param / opacity mutations route through `dispatchLayerAction` → `applyAction`. No ad-hoc boolean setters. |
+| Goal                                 | How It's Achieved                                                                                                                                  |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Single source of truth**           | Every layer's metadata lives in `LAYER_REGISTRY`; desired state in one Zustand slice.                                                              |
+| **Separation of intent vs. reality** | "Desired" (what the user asked for) and "Runtime" (what the app knows) are separate state trees. "Effective" is a pure derivation.                 |
+| **Pure business logic**              | `applyAction`, `enableWithParams`, and `evaluate` are pure functions with no side effects, no store access, and no React. Trivially unit-testable. |
+| **Structured errors**                | `BlockedReason` is a discriminated union — never a stringly-typed message. UI code pattern-matches on `kind`.                                      |
+| **No scattered toggles**             | All toggle / param / opacity mutations route through `dispatchLayerAction` → `applyAction`. No ad-hoc boolean setters.                             |
 
 ---
 
@@ -180,13 +180,13 @@ client/src/
 
 ```typescript
 type LayerId =
-  | "subcatchment"   // Vector overlay — subcatchment polygons
-  | "channels"       // Vector overlay — WEPP channel lines
-  | "patches"        // Vector overlay — patch boundaries (placeholder)
-  | "landuse"        // Vector coverage — land-use coloring per subcatchment
-  | "choropleth"     // Vector coverage — RAP vegetation / ET coloring
-  | "sbs"            // Raster coverage — Soil Burn Severity tiles
-  | "fireSeverity";  // Raster overlay — fire severity tiles (placeholder)
+  | "subcatchment" // Vector overlay — subcatchment polygons
+  | "channels" // Vector overlay — WEPP channel lines
+  | "patches" // Vector overlay — patch boundaries (placeholder)
+  | "landuse" // Vector coverage — land-use coloring per subcatchment
+  | "choropleth" // Vector coverage — RAP vegetation / ET coloring
+  | "sbs" // Raster coverage — Soil Burn Severity tiles
+  | "fireSeverity"; // Raster overlay — fire severity tiles (placeholder)
 ```
 
 The `ALL_LAYER_IDS` constant array provides these in iteration order.
@@ -207,25 +207,25 @@ type GroupType = "multi" | "exclusive";
 
 Each `LayerDescriptor` carries:
 
-| Field | Type | Purpose |
-|---|---|---|
-| `id` | `LayerId` | Unique identifier |
-| `label` | `string` | Human-readable name (used in UI and toasts) |
-| `group` | `GroupId` | Which group this layer belongs to |
-| `kind` | `"vector" \| "raster"` | Rendering paradigm |
-| `pane` | `"overlayPane" \| "rasterPane"` | Leaflet pane for z-ordering |
-| `zIndex` | `number` | z-index within its pane |
-| `requires?` | `LayerId[]` | Prerequisite layers (e.g. `landuse` requires `subcatchment`) |
-| `zoomRange?` | `{ min, max }` | Zoom bounds (inclusive) — not currently used by any layer |
-| `defaults` | `{ opacity, params }` | Initial desired state values |
+| Field        | Type                            | Purpose                                                      |
+| ------------ | ------------------------------- | ------------------------------------------------------------ |
+| `id`         | `LayerId`                       | Unique identifier                                            |
+| `label`      | `string`                        | Human-readable name (used in UI and toasts)                  |
+| `group`      | `GroupId`                       | Which group this layer belongs to                            |
+| `kind`       | `"vector" \| "raster"`          | Rendering paradigm                                           |
+| `pane`       | `"overlayPane" \| "rasterPane"` | Leaflet pane for z-ordering                                  |
+| `zIndex`     | `number`                        | z-index within its pane                                      |
+| `requires?`  | `LayerId[]`                     | Prerequisite layers (e.g. `landuse` requires `subcatchment`) |
+| `zoomRange?` | `{ min, max }`                  | Zoom bounds (inclusive) — not currently used by any layer    |
+| `defaults`   | `{ opacity, params }`           | Initial desired state values                                 |
 
 ### Desired State
 
 ```typescript
 interface LayerDesiredState {
-  enabled: boolean;                    // user wants this layer on/off
-  opacity: number;                     // user's chosen opacity
-  params: Record<string, unknown>;     // layer-specific config (metric, year, bands, mode, etc.)
+  enabled: boolean; // user wants this layer on/off
+  opacity: number; // user's chosen opacity
+  params: Record<string, unknown>; // layer-specific config (metric, year, bands, mode, etc.)
 }
 
 type DesiredMap = Record<LayerId, LayerDesiredState>;
@@ -238,9 +238,9 @@ fully populated — every `LayerId` has an entry.
 
 ```typescript
 interface LayerRuntime {
-  zoom: number;                                        // current Leaflet map zoom
+  zoom: number; // current Leaflet map zoom
   dataAvailability: Partial<Record<LayerId, boolean>>; // per-layer data status
-  loading: Partial<Record<LayerId, boolean>>;          // per-layer loading flags
+  loading: Partial<Record<LayerId, boolean>>; // per-layer loading flags
 }
 ```
 
@@ -250,23 +250,23 @@ interface LayerRuntime {
 
 ### Blocked Reasons
 
-A discriminated union describing *why* a layer's effective state differs from
+A discriminated union describing _why_ a layer's effective state differs from
 desired:
 
-| `kind` | Fields | Meaning |
-|---|---|---|
-| `"missing-data"` | `detail: string` | Server returned 0 features |
-| `"requires-layer"` | `layerId: LayerId` | A prerequisite layer is not effective |
-| `"zoom-out-of-range"` | `current`, `required: { min, max }` | Map zoom is outside allowed bounds |
-| `"excluded-by"` | `layerId: LayerId` | Another layer in the same exclusive group is active |
+| `kind`                | Fields                              | Meaning                                             |
+| --------------------- | ----------------------------------- | --------------------------------------------------- |
+| `"missing-data"`      | `detail: string`                    | Server returned 0 features                          |
+| `"requires-layer"`    | `layerId: LayerId`                  | A prerequisite layer is not effective               |
+| `"zoom-out-of-range"` | `current`, `required: { min, max }` | Map zoom is outside allowed bounds                  |
+| `"excluded-by"`       | `layerId: LayerId`                  | Another layer in the same exclusive group is active |
 
 ### Effective State
 
 ```typescript
 interface LayerEffectiveState {
-  enabled: boolean;              // should the layer render?
-  opacity: number;               // passthrough from desired
-  loading: boolean;              // data currently being fetched (informational — does NOT block)
+  enabled: boolean; // should the layer render?
+  opacity: number; // passthrough from desired
+  loading: boolean; // data currently being fetched (informational — does NOT block)
   blockedReasons: BlockedReason[]; // empty when effective matches desired
 }
 
@@ -277,10 +277,10 @@ type EffectiveMap = Record<LayerId, LayerEffectiveState>;
 
 ```typescript
 type LayerAction =
-  | { type: "TOGGLE"; id: LayerId; on: boolean }         // toggle a layer
+  | { type: "TOGGLE"; id: LayerId; on: boolean } // toggle a layer
   | { type: "SET_OPACITY"; id: LayerId; opacity: number } // change opacity
   | { type: "SET_PARAM"; id: LayerId; key: string; value: unknown } // set a param
-  | { type: "RESET" };                                    // reset all to defaults
+  | { type: "RESET" }; // reset all to defaults
 ```
 
 All layer state mutations are expressed as one of these four action types.
@@ -291,22 +291,22 @@ All layer state mutations are expressed as one of these four action types.
 
 ### Groups Table
 
-| Group ID | Label | Type | Members |
-|---|---|---|---|
-| `overlays` | Overlays | multi | subcatchment, channels, patches, fireSeverity |
-| `coverageStyle` | Coverage Style | exclusive | landuse, choropleth, sbs |
+| Group ID        | Label          | Type      | Members                                       |
+| --------------- | -------------- | --------- | --------------------------------------------- |
+| `overlays`      | Overlays       | multi     | subcatchment, channels, patches, fireSeverity |
+| `coverageStyle` | Coverage Style | exclusive | landuse, choropleth, sbs                      |
 
 ### Layer Descriptors Table
 
-| ID | Label | Group | Kind | Pane | zIndex | Requires | Default Opacity | Default Params |
-|---|---|---|---|---|---|---|---|---|
-| `subcatchment` | Subcatchments | overlays | vector | overlayPane | 400 | — | 0 | `{}` |
-| `channels` | WEPP Channels | overlays | vector | overlayPane | 410 | — | 1 | `{}` |
-| `patches` | Patches | overlays | vector | overlayPane | 405 | — | 0.5 | `{}` |
-| `landuse` | Land Use (2025) | coverageStyle | vector | overlayPane | 420 | subcatchment | 1 | `{}` |
-| `choropleth` | Coverage (Choropleth) | coverageStyle | vector | overlayPane | 420 | subcatchment | 0.85 | `{ metric: "vegetationCover", year: null, bands: "all" }` |
-| `sbs` | Soil Burn Severity | coverageStyle | raster | rasterPane | 500 | — | 0.8 | `{ mode: "legacy" }` |
-| `fireSeverity` | Fire Severity | overlays | raster | rasterPane | 490 | — | 0.8 | `{}` |
+| ID             | Label                 | Group         | Kind   | Pane        | zIndex | Requires     | Default Opacity | Default Params                                            |
+| -------------- | --------------------- | ------------- | ------ | ----------- | ------ | ------------ | --------------- | --------------------------------------------------------- |
+| `subcatchment` | Subcatchments         | overlays      | vector | overlayPane | 400    | —            | 0               | `{}`                                                      |
+| `channels`     | WEPP Channels         | overlays      | vector | overlayPane | 410    | —            | 1               | `{}`                                                      |
+| `patches`      | Patches               | overlays      | vector | overlayPane | 405    | —            | 0.5             | `{}`                                                      |
+| `landuse`      | Land Use (2025)       | coverageStyle | vector | overlayPane | 420    | subcatchment | 1               | `{}`                                                      |
+| `choropleth`   | Coverage (Choropleth) | coverageStyle | vector | overlayPane | 420    | subcatchment | 0.85            | `{ metric: "vegetationCover", year: null, bands: "all" }` |
+| `sbs`          | Soil Burn Severity    | coverageStyle | raster | rasterPane  | 500    | —            | 0.8             | `{ mode: "legacy" }`                                      |
+| `fireSeverity` | Fire Severity         | overlays      | raster | rasterPane  | 490    | —            | 0.8             | `{}`                                                      |
 
 ### Helper Look-ups
 
@@ -348,17 +348,17 @@ Zoom 7 matches `WatershedMap`'s default center zoom.
 The single entry point for all desired-state mutations:
 
 ```typescript
-function applyAction(current: DesiredMap, action: LayerAction): DesiredMap
+function applyAction(current: DesiredMap, action: LayerAction): DesiredMap;
 ```
 
 Dispatches on `action.type`:
 
-| Action | Behavior |
-|---|---|
-| `TOGGLE` | Delegates to `applyToggle(current, id, on)` |
-| `SET_OPACITY` | Returns new DesiredMap with `[id].opacity` updated |
-| `SET_PARAM` | Returns new DesiredMap with `[id].params[key]` updated |
-| `RESET` | Returns a fresh `buildInitialDesired()` — all layers off, defaults restored |
+| Action        | Behavior                                                                    |
+| ------------- | --------------------------------------------------------------------------- |
+| `TOGGLE`      | Delegates to `applyToggle(current, id, on)`                                 |
+| `SET_OPACITY` | Returns new DesiredMap with `[id].opacity` updated                          |
+| `SET_PARAM`   | Returns new DesiredMap with `[id].params[key]` updated                      |
+| `RESET`       | Returns a fresh `buildInitialDesired()` — all layers off, defaults restored |
 
 ### Toggle Logic
 
@@ -387,7 +387,7 @@ function enableWithParams(
   current: DesiredMap,
   id: LayerId,
   params: Record<string, unknown>,
-): DesiredMap
+): DesiredMap;
 ```
 
 Convenience: sets params first, then calls `applyToggle(next, id, true)`.
@@ -399,7 +399,7 @@ choropleth with `metric: "vegetationCover"` in one shot.
 ## 7. Evaluator (`evaluate.ts`)
 
 ```typescript
-function evaluate(desired: DesiredMap, runtime: LayerRuntime): EffectiveMap
+function evaluate(desired: DesiredMap, runtime: LayerRuntime): EffectiveMap;
 ```
 
 The evaluator is **pure** — it takes the two state trees and returns the
@@ -453,18 +453,18 @@ system; two (`panelSlice`, `hillslopeSlice`) are orthogonal.
 
 **State:**
 
-| Field | Type | Purpose |
-|---|---|---|
-| `layerDesired` | `DesiredMap` | Complete desired state for all layers |
+| Field              | Type                     | Purpose                                    |
+| ------------------ | ------------------------ | ------------------------------------------ |
+| `layerDesired`     | `DesiredMap`             | Complete desired state for all layers      |
 | `landuseLegendMap` | `Record<string, string>` | Color → description map for LandUse legend |
 
 **Actions:**
 
-| Action | Signature | DevTools Label |
-|---|---|---|
-| `dispatchLayerAction` | `(action: LayerAction) => void` | `layer/TOGGLE/subcatchment`, `layer/SET_PARAM/choropleth`, `layer/RESET`, etc. |
-| `enableLayerWithParams` | `(id: LayerId, params: Record<string, unknown>) => void` | `layer/ENABLE_WITH_PARAMS/choropleth` |
-| `setLanduseLegendMap` | `(legend: Record<string, string>) => void` | — |
+| Action                  | Signature                                                | DevTools Label                                                                 |
+| ----------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `dispatchLayerAction`   | `(action: LayerAction) => void`                          | `layer/TOGGLE/subcatchment`, `layer/SET_PARAM/choropleth`, `layer/RESET`, etc. |
+| `enableLayerWithParams` | `(id: LayerId, params: Record<string, unknown>) => void` | `layer/ENABLE_WITH_PARAMS/choropleth`                                          |
+| `setLanduseLegendMap`   | `(legend: Record<string, string>) => void`               | —                                                                              |
 
 Under the hood, `dispatchLayerAction` calls `applyAction(state.layerDesired, action)`
 and writes the result back. This is the **only** code path that modifies desired state.
@@ -473,17 +473,17 @@ and writes the result back. This is the **only** code path that modifies desired
 
 **State:**
 
-| Field | Type | Purpose |
-|---|---|---|
+| Field          | Type           | Purpose                                |
+| -------------- | -------------- | -------------------------------------- |
 | `layerRuntime` | `LayerRuntime` | Zoom, data availability, loading flags |
 
 **Actions:**
 
-| Action | Signature | DevTools Label |
-|---|---|---|
+| Action                | Signature                                                | DevTools Label                           |
+| --------------------- | -------------------------------------------------------- | ---------------------------------------- |
 | `setDataAvailability` | `(id: LayerId, available: boolean \| undefined) => void` | `runtime/DATA_AVAILABILITY/subcatchment` |
-| `setLayerLoading` | `(id: LayerId, loading: boolean) => void` | `runtime/LOADING/landuse` |
-| `setZoom` | `(zoom: number) => void` | `runtime/ZOOM` |
+| `setLayerLoading`     | `(id: LayerId, loading: boolean) => void`                | `runtime/LOADING/landuse`                |
+| `setZoom`             | `(zoom: number) => void`                                 | `runtime/ZOOM`                           |
 
 These are called by `useEffect` hooks in `WatershedMap` that watch React Query
 results and forward the availability / loading facts.
@@ -495,36 +495,43 @@ The control fields (metric, year, bands) live in `layerDesired.choropleth.params
 
 **State:**
 
-| Field | Type | Purpose |
-|---|---|---|
-| `choroplethCache.data` | `Map<number, number> \| null` | wepp_id → aggregated value |
-| `choroplethCache.range` | `{ min, max } \| null` | Robust percentile range for color normalization |
-| `choroplethCache.loading` | `boolean` | Fetch in progress |
-| `choroplethCache.error` | `string \| null` | Error message |
+| Field                     | Type                          | Purpose                                         |
+| ------------------------- | ----------------------------- | ----------------------------------------------- |
+| `choroplethCache.data`    | `Map<number, number> \| null` | wepp_id → aggregated value                      |
+| `choroplethCache.range`   | `{ min, max } \| null`        | Robust percentile range for color normalization |
+| `choroplethCache.loading` | `boolean`                     | Fetch in progress                               |
+| `choroplethCache.error`   | `string \| null`              | Error message                                   |
 
 **Actions:**
 
-| Action | Purpose |
-|---|---|
+| Action                           | Purpose                                   |
+| -------------------------------- | ----------------------------------------- |
 | `setChoroplethData(data, range)` | Store fetched data + range, clear loading |
-| `setChoroplethLoading(loading)` | Set loading flag |
-| `setChoroplethError(error)` | Store error, clear loading |
-| `resetChoroplethCache()` | Reset to initial state |
+| `setChoroplethLoading(loading)`  | Set loading flag                          |
+| `setChoroplethError(error)`      | Store error, clear loading                |
+| `resetChoroplethCache()`         | Reset to initial state                    |
 
 ### Store Composition
 
 ```typescript
 // store.ts
-export type AppState = LayerSlice & RuntimeSlice & PanelSlice & HillslopeSlice & ChoroplethCacheSlice;
+export type AppState = LayerSlice &
+  RuntimeSlice &
+  PanelSlice &
+  HillslopeSlice &
+  ChoroplethCacheSlice;
 
 export const useAppStore = create<AppState>()(
-  devtools((...a) => ({
-    ...createLayerSlice(...a),
-    ...createRuntimeSlice(...a),
-    ...createPanelSlice(...a),
-    ...createHillslopeSlice(...a),
-    ...createChoroplethCacheSlice(...a),
-  }), { name: "app-store" }),
+  devtools(
+    (...a) => ({
+      ...createLayerSlice(...a),
+      ...createRuntimeSlice(...a),
+      ...createPanelSlice(...a),
+      ...createHillslopeSlice(...a),
+      ...createChoroplethCacheSlice(...a),
+    }),
+    { name: "app-store" },
+  ),
 );
 ```
 
@@ -540,7 +547,7 @@ function useEffectiveLayers(): {
   activeIds: LayerId[];
   isBlocked: (id: LayerId) => boolean;
   isEffective: (id: LayerId) => boolean;
-}
+};
 ```
 
 Subscribes to `layerDesired` and `layerRuntime` from the store, calls
@@ -552,7 +559,7 @@ selectors. Recomputes only when desired or runtime actually change.
 ### `useLayerToasts`
 
 ```typescript
-function useLayerToasts(desired: DesiredMap, effective: EffectiveMap): void
+function useLayerToasts(desired: DesiredMap, effective: EffectiveMap): void;
 ```
 
 Called once in `WatershedMap`. Tracks the previous effective and desired state
@@ -567,25 +574,25 @@ via refs. On each update, for every layer, fires a `toast.error` when:
 Toast format: `"${label}: ${reasonText}"` where `label` comes from
 `LAYER_REGISTRY` and `reasonText` is derived from the `BlockedReason`:
 
-| Reason kind | Example toast text |
-|---|---|
-| `missing-data` | "Subcatchments: Subcatchments data is not available" |
-| `requires-layer` | "Land Use (2025): Requires Subcatchments" |
-| `zoom-out-of-range` | "Patches: Visible at zoom 12–18" |
-| `excluded-by` | "Choropleth: Excluded by Land Use (2025)" |
+| Reason kind         | Example toast text                                   |
+| ------------------- | ---------------------------------------------------- |
+| `missing-data`      | "Subcatchments: Subcatchments data is not available" |
+| `requires-layer`    | "Land Use (2025): Requires Subcatchments"            |
+| `zoom-out-of-range` | "Patches: Visible at zoom 12–18"                     |
+| `excluded-by`       | "Choropleth: Excluded by Land Use (2025)"            |
 
 ### `useChoropleth`
 
 ```typescript
 function useChoropleth(): {
-  choropleth: ChoroplethType;   // "none" | "evapotranspiration" | "vegetationCover"
+  choropleth: ChoroplethType; // "none" | "evapotranspiration" | "vegetationCover"
   isLoading: boolean;
   error: string | null;
   getColor: (id: number | undefined) => string | null;
   getChoroplethStyle: (id: number | undefined) => PathOptions | null;
   isActive: boolean;
-  config: { title, unit, colormap, bands } | null;
-}
+  config: { title; unit; colormap; bands } | null;
+};
 ```
 
 Reads control fields from `layerDesired.choropleth.params` (metric, year, bands)
@@ -606,17 +613,17 @@ and data from `choroplethCache`. Handles:
 
 The primary consumer. Integration points:
 
-| Concern | How It Uses the Layer System |
-|---|---|
-| **Read desired state** | `layerDesired.subcatchment.enabled` gates React Query `enabled` flags |
-| **Compute effective state** | `useEffectiveLayers()` → `isEffective("subcatchment")` etc. |
-| **Fire block toasts** | `useLayerToasts(layerDesired, effective)` |
+| Concern                      | How It Uses the Layer System                                                       |
+| ---------------------------- | ---------------------------------------------------------------------------------- |
+| **Read desired state**       | `layerDesired.subcatchment.enabled` gates React Query `enabled` flags              |
+| **Compute effective state**  | `useEffectiveLayers()` → `isEffective("subcatchment")` etc.                        |
+| **Fire block toasts**        | `useLayerToasts(layerDesired, effective)`                                          |
 | **Report data availability** | `useEffect` watches query results → `setDataAvailability("subcatchment", hasData)` |
-| **Report loading** | `useEffect` watches query loading → `setLayerLoading("subcatchment", subLoading)` |
-| **Conditional rendering** | `subcatchmentEffective && <SubcatchmentLayer .../>` |
-| **Choropleth styling** | `useChoropleth().getChoroplethStyle(feature.properties.weppid)` |
-| **Land use styling** | `landuseEffective && landuseData[topazid]` in subcatchment style callback |
-| **Legends** | `<LandUseLegend />` (auto-hides), `sbsEffective && <SbsLegend />` |
+| **Report loading**           | `useEffect` watches query loading → `setLayerLoading("subcatchment", subLoading)`  |
+| **Conditional rendering**    | `subcatchmentEffective && <SubcatchmentLayer .../>`                                |
+| **Choropleth styling**       | `useChoropleth().getChoroplethStyle(feature.properties.weppid)`                    |
+| **Land use styling**         | `landuseEffective && landuseData[topazid]` in subcatchment style callback          |
+| **Legends**                  | `<LandUseLegend />` (auto-hides), `sbsEffective && <SbsLegend />`                  |
 
 ### `DataLayers` / `DataLayersTabContent`
 
@@ -635,10 +642,12 @@ The UI panel that lets users toggle layers.
 ### `VegetationCover`
 
 Bottom panel for vegetation cover charting. Reads:
+
 - `layerDesired.choropleth.params.year` and `.bands` for current selections
 - `choroplethCache.range` and `.loading` for scale display
 
 Dispatches:
+
 - `dispatchLayerAction({ type: "SET_PARAM", id: "choropleth", key: "year", value })` on year change
 - `dispatchLayerAction({ type: "SET_PARAM", id: "choropleth", key: "bands", value })` on band change
 - `dispatchLayerAction({ type: "RESET" })` + `resetChoroplethCache()` on close
@@ -659,7 +668,7 @@ dispatchLayerAction({
   id: "sbs",
   key: "mode",
   value: checked ? "shift" : "legacy",
-})
+});
 ```
 
 ### `MapEffect`
@@ -679,18 +688,18 @@ detail view to clear all layer state.
 All layer system code is covered by unit and integration tests.
 **378 tests pass across 31 test files.**
 
-| Test File | Tests | What It Covers |
-|---|---|---|
-| `evaluate.test.ts` | 16 | All evaluator rules: data availability, requires, zoom range, processing order, derived helpers |
-| `rules.test.ts` | 16 | `applyAction` for all action types, toggle with requires/exclusive/dependent teardown, `enableWithParams`, `INITIAL_DESIRED`/`INITIAL_RUNTIME` |
-| `useChoropleth.test.tsx` | 17 | Hook integration: reads from `layerDesired.choropleth.params`, fetches data, color mapping, cache interactions |
-| `Map.test.tsx` | 46 | `WatershedMap` integration: effective state rendering, data availability reporting, loading overlays, query gating, toast integration |
-| `VegetationCover.test.tsx` | 35 | Panel: year/band selection via `SET_PARAM`, close via `RESET`, store integration, RAP data fetching |
-| `DataLayers.test.tsx` | 6 | Toggle dispatch, panel open/close |
-| `DataLayersTabContent.test.tsx` | 8 | Checkbox binding, `enableLayerWithParams`, effective state display |
-| `LandUseLegend.test.tsx` | 3 | Conditional rendering based on `isEffective("landuse")` |
-| `WatershedOverview.test.tsx` | 17 | Back button → `RESET` dispatch |
-| `MapEffectUtil.test.tsx` | 9 | Navigation → `RESET` dispatch |
+| Test File                       | Tests | What It Covers                                                                                                                                 |
+| ------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `evaluate.test.ts`              | 16    | All evaluator rules: data availability, requires, zoom range, processing order, derived helpers                                                |
+| `rules.test.ts`                 | 16    | `applyAction` for all action types, toggle with requires/exclusive/dependent teardown, `enableWithParams`, `INITIAL_DESIRED`/`INITIAL_RUNTIME` |
+| `useChoropleth.test.tsx`        | 17    | Hook integration: reads from `layerDesired.choropleth.params`, fetches data, color mapping, cache interactions                                 |
+| `Map.test.tsx`                  | 46    | `WatershedMap` integration: effective state rendering, data availability reporting, loading overlays, query gating, toast integration          |
+| `VegetationCover.test.tsx`      | 35    | Panel: year/band selection via `SET_PARAM`, close via `RESET`, store integration, RAP data fetching                                            |
+| `DataLayers.test.tsx`           | 6     | Toggle dispatch, panel open/close                                                                                                              |
+| `DataLayersTabContent.test.tsx` | 8     | Checkbox binding, `enableLayerWithParams`, effective state display                                                                             |
+| `LandUseLegend.test.tsx`        | 3     | Conditional rendering based on `isEffective("landuse")`                                                                                        |
+| `WatershedOverview.test.tsx`    | 17    | Back button → `RESET` dispatch                                                                                                                 |
+| `MapEffectUtil.test.tsx`        | 9     | Navigation → `RESET` dispatch                                                                                                                  |
 
 ---
 
@@ -707,6 +716,7 @@ All layer system code is covered by unit and integration tests.
 
 3. **Build a renderer** — Create a component (e.g. `NewLayer.tsx`) and render
    it conditionally in `WatershedMap`:
+
    ```tsx
    {isEffective("newLayer") && <NewLayer ... />}
    ```

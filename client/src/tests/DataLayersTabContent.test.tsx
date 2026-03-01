@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { INITIAL_DESIRED } from "../layers/rules";
 import DataLayersTabContent from "../components/map/controls/DataLayers/DataLayersTabContent";
-import type { DesiredMap, LayerId } from "../layers/types";
+import type { DesiredMap } from "../layers/types";
 
 const mockDispatchLayerAction = vi.fn();
 const mockEnableLayerWithParams = vi.fn();

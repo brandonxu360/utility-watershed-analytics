@@ -130,7 +130,11 @@ beforeEach(() => {
     ]),
   );
   mockUseParams.mockReturnValue("batch;;test-batch;;test-run");
-  mockUseChoropleth.mockReturnValue({ config: null, range: null, isLoading: false });
+  mockUseChoropleth.mockReturnValue({
+    config: null,
+    range: null,
+    isLoading: false,
+  });
   mockDesired = desiredWith("choropleth");
   mockSelectedHillslopeId = null;
   mockSelectedHillslopeProps = null;
