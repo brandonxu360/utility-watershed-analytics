@@ -178,7 +178,7 @@ describe("DataLayersTabContent", () => {
     expect(screen.getByText("Predict")).toBeInTheDocument();
 
     fireEvent.click(container.querySelector("input#fireSeverity")!);
-    fireEvent.click(container.querySelector("input#soilBurnSeverity")!);
+    fireEvent.click(container.querySelector("input#sbs")!);
 
     expect(handleToggle).toHaveBeenCalledTimes(2);
   });

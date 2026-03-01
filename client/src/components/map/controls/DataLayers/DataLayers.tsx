@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useWatershed } from "../../../../contexts/WatershedContext";
+import { ALL_LAYER_IDS } from "../../../../layers/types";
+import type { LayerId } from "../../../../layers/types";
 import DataLayersTabContent from "./DataLayersTabContent";
 
 import {
@@ -104,20 +106,8 @@ export default function DataLayersControl() {
   const toggleOpen = () => setIsOpen((prev) => !prev);
 
   const handleToggle = (id: string, checked: boolean) => {
-    // Map checkbox DOM ids to LayerIds
-    const layerIdMap: Record<
-      string,
-      import("../../../../layers/types").LayerId
-    > = {
-      subcatchment: "subcatchment",
-      channels: "channels",
-      landuse: "landuse",
-      soilBurnSeverity: "sbs",
-      fireSeverity: "fireSeverity",
-    };
-
-    const layerId = layerIdMap[id];
-    if (!layerId) return;
+    if (!ALL_LAYER_IDS.includes(id as LayerId)) return;
+    const layerId = id as LayerId;
 
     // Dispatch the toggle — rule engine handles requires/excludes/dependents
     dispatchLayerAction({ type: "TOGGLE", id: layerId, on: checked });

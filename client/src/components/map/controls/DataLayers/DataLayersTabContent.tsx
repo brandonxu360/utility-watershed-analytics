@@ -167,7 +167,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               checked={sbsChecked}
               onChange={handleChange}
               className={classes.layerCheckbox}
-              slotProps={{ input: { id: "soilBurnSeverity" } }}
+              slotProps={{ input: { id: "sbs" } }}
             />
           </div>
           <div className={classes.layer}>
