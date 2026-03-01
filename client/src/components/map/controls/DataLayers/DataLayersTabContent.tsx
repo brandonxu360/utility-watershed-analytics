@@ -1,8 +1,19 @@
 import { FC, ChangeEvent } from "react";
 import { useWatershed } from "../../../../contexts/WatershedContext";
+import { getDependents } from "../../../../layers/registry";
+import type { LayerId, DesiredMap } from "../../../../layers/types";
 import { tss } from "../../../../utils/tss";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+
+/**
+ * Returns true when any layer that `requires` the given layer is currently
+ * enabled.  Used to disable the checkbox so users can't accidentally
+ * cascade-disable a dependency chain.
+ */
+function hasActiveDependents(id: LayerId, desired: DesiredMap): boolean {
+  return getDependents(id).some((depId) => desired[depId].enabled);
+}
 
 const useStyles = tss.create(({ theme }) => ({
   layers: {
@@ -80,7 +91,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Checkbox
               checked={subcatchmentChecked}
               onChange={handleChange}
-              disabled={landuseChecked && subcatchmentChecked}
+              disabled={hasActiveDependents("subcatchment", layerDesired)}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "subcatchment" } }}
             />

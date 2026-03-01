@@ -44,11 +44,36 @@ describe("DataLayersTabContent", () => {
     ).toBeTruthy();
   });
 
-  it("disables the subcatchment checkbox when landuse && subcatchment", () => {
+  it("disables subcatchment checkbox when a dependent layer (landuse) is enabled", () => {
     mockDesired = {
       ...INITIAL_DESIRED,
       subcatchment: { ...INITIAL_DESIRED.subcatchment, enabled: true },
       landuse: { ...INITIAL_DESIRED.landuse, enabled: true },
+    };
+
+    const { container } = render(
+      <DataLayersTabContent
+        activeTab="WEPP Hillslopes"
+        handleToggle={handleToggle}
+      />,
+    );
+
+    const subcatchmentBox = container.querySelector(
+      "input#subcatchment",
+    ) as HTMLInputElement;
+    expect(subcatchmentBox).toBeTruthy();
+    expect(subcatchmentBox.disabled).toBe(true);
+  });
+
+  it("disables subcatchment checkbox when a dependent layer (choropleth) is enabled", () => {
+    mockDesired = {
+      ...INITIAL_DESIRED,
+      subcatchment: { ...INITIAL_DESIRED.subcatchment, enabled: true },
+      choropleth: {
+        ...INITIAL_DESIRED.choropleth,
+        enabled: true,
+        params: { metric: "vegetationCover", year: null, bands: "all" },
+      },
     };
 
     const { container } = render(
