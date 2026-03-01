@@ -7,7 +7,6 @@ import {
   act,
 } from "@testing-library/react";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
-import { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import { INITIAL_DESIRED } from "../layers/rules";
 import type { LayerId, DesiredMap } from "../layers/types";
 
@@ -108,14 +107,12 @@ const mockDispatchLayerAction = vi.fn();
 
 let mockDesired: DesiredMap = desiredWith("choropleth");
 let mockSelectedHillslopeId: number | null = null;
-let mockSelectedHillslopeProps: SubcatchmentProperties | null = null;
 
 vi.mock("../contexts/WatershedContext", () => ({
   useWatershed: () => ({
     layerDesired: mockDesired,
     dispatchLayerAction: mockDispatchLayerAction,
     selectedHillslopeId: mockSelectedHillslopeId,
-    selectedHillslopeProps: mockSelectedHillslopeProps,
     clearSelectedHillslope: mockClearSelectedHillslope,
   }),
 }));
@@ -137,12 +134,10 @@ beforeEach(() => {
   });
   mockDesired = desiredWith("choropleth");
   mockSelectedHillslopeId = null;
-  mockSelectedHillslopeProps = null;
 });
 
 afterEach(async () => {
   mockSelectedHillslopeId = null;
-  mockSelectedHillslopeProps = null;
 });
 
 describe("VegetationCover", () => {
@@ -520,7 +515,6 @@ describe("VegetationCover", () => {
   describe("hillslope selection", () => {
     it("shows selected hillslope in chart title", async () => {
       mockSelectedHillslopeId = 42;
-      mockSelectedHillslopeProps = {} as SubcatchmentProperties;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -536,7 +530,6 @@ describe("VegetationCover", () => {
 
     it("fetches hillslope-specific data when hillslope is selected", async () => {
       mockSelectedHillslopeId = 123;
-      mockSelectedHillslopeProps = {} as SubcatchmentProperties;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -571,7 +564,6 @@ describe("VegetationCover", () => {
       d.choropleth.params.year = 2010;
       mockDesired = d;
       mockSelectedHillslopeId = 99;
-      mockSelectedHillslopeProps = {} as SubcatchmentProperties;
 
       await act(async () => {
         render(<VegetationCover />);

@@ -131,10 +131,7 @@ export default function SubcatchmentLayer({
               // Set new selection
               e.target.setStyle(selectedStyle);
               setSelection(clickFid, e.target, feature);
-              setSelectedHillslope(
-                feature.properties.topazid,
-                feature.properties,
-              );
+              setSelectedHillslope(feature.properties.topazid);
             }
 
             zoomToFeature(map, layer);

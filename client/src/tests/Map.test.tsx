@@ -76,7 +76,6 @@ vi.mock("../contexts/WatershedContext", () => ({
       layerRuntime: mockRuntime,
       landuseLegendMap: {},
       selectedHillslopeId: null,
-      selectedHillslopeProps: null,
       dispatch: vi.fn(),
       dispatchLayerAction: mockDispatchLayerAction,
       enableLayerWithParams: mockEnableLayerWithParams,

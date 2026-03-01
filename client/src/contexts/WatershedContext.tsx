@@ -46,8 +46,6 @@ import {
   isDesiredButBlocked,
 } from "../layers/evaluate";
 
-import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
-
 // ── State shape ─────────────────────────────────────────────────────────────
 
 export interface WatershedState {
@@ -57,9 +55,9 @@ export interface WatershedState {
   layerRuntime: LayerRuntime;
   /** Derived from fetched landuse data — keyed by color → description. */
   landuseLegendMap: Record<string, string>;
-  /** Currently selected subcatchment/hillslope (user interaction). */
+  /** Currently selected subcatchment/hillslope ID (cross-layer: written by
+   *  SubcatchmentLayer, read by VegetationCover for hillslope-scoped queries). */
   selectedHillslopeId: number | null;
-  selectedHillslopeProps: SubcatchmentProperties | null;
 }
 
 export const INITIAL_STATE: WatershedState = {
@@ -67,7 +65,6 @@ export const INITIAL_STATE: WatershedState = {
   layerRuntime: INITIAL_RUNTIME,
   landuseLegendMap: {},
   selectedHillslopeId: null,
-  selectedHillslopeProps: null,
 };
 
 // ── Actions ─────────────────────────────────────────────────────────────────
@@ -82,11 +79,7 @@ export type WatershedAction =
   | { type: "SET_LAYER_LOADING"; id: LayerId; loading: boolean }
   | { type: "SET_ZOOM"; zoom: number }
   | { type: "SET_LANDUSE_LEGEND"; legend: Record<string, string> }
-  | {
-      type: "SET_SELECTED_HILLSLOPE";
-      id: number | null;
-      props: SubcatchmentProperties | null;
-    }
+  | { type: "SET_SELECTED_HILLSLOPE"; id: number | null }
   | { type: "CLEAR_SELECTED_HILLSLOPE" };
 
 // ── Reducer ─────────────────────────────────────────────────────────────────
@@ -145,18 +138,10 @@ export function watershedReducer(
 
     // ── Hillslope selection ──
     case "SET_SELECTED_HILLSLOPE":
-      return {
-        ...state,
-        selectedHillslopeId: action.id,
-        selectedHillslopeProps: action.props,
-      };
+      return { ...state, selectedHillslopeId: action.id };
 
     case "CLEAR_SELECTED_HILLSLOPE":
-      return {
-        ...state,
-        selectedHillslopeId: null,
-        selectedHillslopeProps: null,
-      };
+      return { ...state, selectedHillslopeId: null };
 
     default:
       return state;
@@ -171,7 +156,6 @@ export interface WatershedContextValue {
   layerRuntime: LayerRuntime;
   landuseLegendMap: Record<string, string>;
   selectedHillslopeId: number | null;
-  selectedHillslopeProps: SubcatchmentProperties | null;
 
   // Dispatch
   dispatch: (action: WatershedAction) => void;
@@ -183,10 +167,7 @@ export interface WatershedContextValue {
   setLayerLoading: (id: LayerId, loading: boolean) => void;
   setZoom: (zoom: number) => void;
   setLanduseLegendMap: (legend: Record<string, string>) => void;
-  setSelectedHillslope: (
-    id: number | null,
-    props?: SubcatchmentProperties | null,
-  ) => void;
+  setSelectedHillslope: (id: number | null) => void;
   clearSelectedHillslope: () => void;
 
   // Derived
@@ -259,8 +240,8 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
   );
 
   const setSelectedHillslope = useCallback(
-    (id: number | null, props?: SubcatchmentProperties | null) =>
-      dispatch({ type: "SET_SELECTED_HILLSLOPE", id, props: props ?? null }),
+    (id: number | null) =>
+      dispatch({ type: "SET_SELECTED_HILLSLOPE", id }),
     [],
   );
 
@@ -299,7 +280,6 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
       layerRuntime: state.layerRuntime,
       landuseLegendMap: state.landuseLegendMap,
       selectedHillslopeId: state.selectedHillslopeId,
-      selectedHillslopeProps: state.selectedHillslopeProps,
       dispatch,
       dispatchLayerAction,
       enableLayerWithParams,
@@ -319,7 +299,6 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
       state.layerRuntime,
       state.landuseLegendMap,
       state.selectedHillslopeId,
-      state.selectedHillslopeProps,
       dispatchLayerAction,
       enableLayerWithParams,
       setDataAvailability,

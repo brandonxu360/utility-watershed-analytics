@@ -169,7 +169,7 @@ describe("SubcatchmentLayer", () => {
     layer.__handlers.click?.({ target: layer });
 
     expect(layer.setStyle).toHaveBeenCalledWith(selectedStyle);
-    expect(setSelectedHillslope).toHaveBeenCalledWith(101, feature.properties);
+    expect(setSelectedHillslope).toHaveBeenCalledWith(101);
     expect(mockZoomToFeature).toHaveBeenCalledWith(mockMap, layer);
   });
 
@@ -238,7 +238,6 @@ describe("SubcatchmentLayer", () => {
     expect(layer2.setStyle).toHaveBeenCalledWith(selectedStyle);
     expect(setSelectedHillslope).toHaveBeenLastCalledWith(
       202,
-      feature2.properties,
     );
   });
 
@@ -462,9 +461,7 @@ describe("SubcatchmentLayer", () => {
 
     layer.__handlers.click?.({ target: layer });
 
-    expect(setSelectedHillslope).toHaveBeenCalledWith(undefined, {
-      weppid: 202,
-    });
+    expect(setSelectedHillslope).toHaveBeenCalledWith(undefined);
     expect(mockZoomToFeature).toHaveBeenCalledWith(mockMap, layer);
   });
 
