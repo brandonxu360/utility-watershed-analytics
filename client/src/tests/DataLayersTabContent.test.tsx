@@ -1,28 +1,28 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useAppStore } from "../store/store";
-import { INITIAL_DESIRED, INITIAL_RUNTIME } from "../layers/rules";
+import { INITIAL_DESIRED } from "../layers/rules";
 import DataLayersTabContent from "../components/map/controls/DataLayers/DataLayersTabContent";
-import type { ReactElement, ReactNode } from "react";
+import type { DesiredMap, LayerId } from "../layers/types";
 
-vi.mock("../components/bottom-panels/VegetationCover", () => ({
-  VegetationCover: () => <div data-testid="vegetation-cover" />,
+const mockDispatchLayerAction = vi.fn();
+const mockEnableLayerWithParams = vi.fn();
+
+let mockDesired: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
+
+vi.mock("../contexts/WatershedContext", () => ({
+  useWatershed: () => ({
+    layerDesired: mockDesired,
+    dispatchLayerAction: mockDispatchLayerAction,
+    enableLayerWithParams: mockEnableLayerWithParams,
+  }),
 }));
 
 describe("DataLayersTabContent", () => {
   const handleToggle = vi.fn<(id: string, checked: boolean) => void>();
-  const mockEnableLayerWithParams = vi.fn();
-  const openPanel = vi.fn<(node: ReactNode) => void>();
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    useAppStore.setState({
-      layerDesired: INITIAL_DESIRED,
-      layerRuntime: INITIAL_RUNTIME,
-      enableLayerWithParams: mockEnableLayerWithParams,
-      openPanel,
-    });
+    mockDesired = JSON.parse(JSON.stringify(INITIAL_DESIRED));
   });
 
   it("renders WEPP Hillslopes tab with subcatchment + channels checkboxes", () => {
@@ -45,13 +45,11 @@ describe("DataLayersTabContent", () => {
   });
 
   it("disables the subcatchment checkbox when landuse && subcatchment", () => {
-    useAppStore.setState({
-      layerDesired: {
-        ...INITIAL_DESIRED,
-        subcatchment: { ...INITIAL_DESIRED.subcatchment, enabled: true },
-        landuse: { ...INITIAL_DESIRED.landuse, enabled: true },
-      },
-    });
+    mockDesired = {
+      ...INITIAL_DESIRED,
+      subcatchment: { ...INITIAL_DESIRED.subcatchment, enabled: true },
+      landuse: { ...INITIAL_DESIRED.landuse, enabled: true },
+    };
 
     const { container } = render(
       <DataLayersTabContent
@@ -109,16 +107,14 @@ describe("DataLayersTabContent", () => {
   });
 
   it("bolds the active choropleth type when choropleth is active", () => {
-    useAppStore.setState({
-      layerDesired: {
-        ...INITIAL_DESIRED,
-        choropleth: {
-          ...INITIAL_DESIRED.choropleth,
-          enabled: true,
-          params: { metric: "evapotranspiration", year: null, bands: "all" },
-        },
+    mockDesired = {
+      ...INITIAL_DESIRED,
+      choropleth: {
+        ...INITIAL_DESIRED.choropleth,
+        enabled: true,
+        params: { metric: "evapotranspiration", year: null, bands: "all" },
       },
-    });
+    };
 
     render(
       <DataLayersTabContent
@@ -132,7 +128,7 @@ describe("DataLayersTabContent", () => {
     ).toHaveStyle("font-weight: bold");
   });
 
-  it("renders Coverage tab and clicking Vegetation Cover opens the vegetation panel and calls enableLayerWithParams", () => {
+  it("renders Coverage tab and clicking Vegetation Cover calls enableLayerWithParams", () => {
     render(
       <DataLayersTabContent activeTab="Coverage" handleToggle={handleToggle} />,
     );
@@ -142,10 +138,6 @@ describe("DataLayersTabContent", () => {
     expect(mockEnableLayerWithParams).toHaveBeenCalledWith("choropleth", {
       metric: "vegetationCover",
     });
-    expect(openPanel).toHaveBeenCalledTimes(1);
-
-    const element = openPanel.mock.calls[0]?.[0] as ReactElement;
-    expect(element.type).toBeTruthy();
   });
 
   it("renders Soil Burn tab and wires handleToggle for checkboxes", () => {

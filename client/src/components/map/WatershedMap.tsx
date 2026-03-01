@@ -16,10 +16,10 @@ import { WatershedProperties } from "../../types/WatershedProperties";
 import { LeafletMouseEvent } from "leaflet";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { selectedStyle, defaultStyle } from "./constants";
-import { useAppStore } from "../../store/store";
 import { tss } from "../../utils/tss";
 import { CircularProgress } from "@mui/material";
 import { fetchLanduse } from "../../api/landuseApi";
+import { useWatershed } from "../../contexts/WatershedContext";
 import DataLayersControl from "./controls/DataLayers/DataLayers";
 import ZoomInControl from "./controls/ZoomIn";
 import ZoomOutControl from "./controls/ZoomOut";
@@ -30,7 +30,6 @@ import LandUseLegend from "./controls/LandUseLegend";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import SubcatchmentLayer from "./SubcatchmentLayer";
-import { useEffectiveLayers } from "../../hooks/useEffectiveLayers";
 import { useLayerToasts } from "../../hooks/useLayerToasts";
 import "leaflet/dist/leaflet.css";
 
@@ -82,14 +81,12 @@ export default function WatershedMap(): JSX.Element {
 
   const {
     layerDesired,
-    closePanel,
     setLanduseLegendMap,
     setDataAvailability,
     setLayerLoading,
-  } = useAppStore();
-
-  // Effective layer state (desired + runtime → what actually renders)
-  const { effective, isEffective } = useEffectiveLayers();
+    effective,
+    isEffective,
+  } = useWatershed();
 
   // Fire toasts when layers are blocked
   useLayerToasts(layerDesired, effective);
@@ -253,7 +250,7 @@ export default function WatershedMap(): JSX.Element {
     const feature = layer.feature;
     console.log(feature);
 
-    closePanel(); // TODO: The panel should only close if watershed id changes
+    // Navigation triggers runId change → WatershedProvider dispatches RESET
     navigate({
       to: `/watershed/${feature.id}`,
     });

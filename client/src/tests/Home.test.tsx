@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useAppStore } from "../store/store";
 import Home from "../pages/Home";
+import type { LayerId } from "../layers/types";
 
 const mockNavigate = vi.fn();
 
@@ -26,19 +26,35 @@ vi.mock("../components/side-panels/WatershedOverview", () => ({
 }));
 
 vi.mock("../components/bottom-panels/BottomPanel", () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <aside aria-label="Bottom panel">{children}</aside>
+  default: ({
+    children,
+    isOpen,
+  }: {
+    children: React.ReactNode;
+    isOpen: boolean;
+  }) => (isOpen ? <aside aria-label="Bottom panel">{children}</aside> : null),
+}));
+
+vi.mock("../components/bottom-panels/VegetationCover", () => ({
+  VegetationCover: () => <div data-testid="vegetation-cover" />,
+}));
+
+let mockIsEffective = false;
+
+vi.mock("../contexts/WatershedContext", () => ({
+  WatershedProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
   ),
+  useWatershed: () => ({
+    isEffective: (_id: LayerId) => mockIsEffective,
+  }),
 }));
 
 describe("Home Component Tests", () => {
   beforeEach(() => {
-    useAppStore.setState({
-      isPanelOpen: false,
-      panelContent: null,
-    });
     mockUseParams.mockReset();
     mockNavigate.mockReset();
+    mockIsEffective = false;
   });
 
   describe("rendering", () => {
@@ -83,26 +99,23 @@ describe("Home Component Tests", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("does not render BottomPanel when isPanelOpen is false", () => {
+    it("does not render BottomPanel when choropleth is not effective", () => {
       mockUseParams.mockReturnValue(null);
-      useAppStore.setState({ isPanelOpen: false, panelContent: "Hello" });
+      mockIsEffective = false;
       render(<Home />);
       expect(
         screen.queryByRole("complementary", { name: /bottom panel/i }),
       ).not.toBeInTheDocument();
     });
 
-    it("renders BottomPanel with panelContent when isPanelOpen is true", () => {
+    it("renders BottomPanel with VegetationCover when choropleth is effective", () => {
       mockUseParams.mockReturnValue(null);
-      useAppStore.setState({
-        isPanelOpen: true,
-        panelContent: "Test Panel Content",
-      });
+      mockIsEffective = true;
       render(<Home />);
       expect(
         screen.getByRole("complementary", { name: /bottom panel/i }),
       ).toBeInTheDocument();
-      expect(screen.getByText("Test Panel Content")).toBeInTheDocument();
+      expect(screen.getByTestId("vegetation-cover")).toBeInTheDocument();
     });
 
     it("shows the small-screen notice when width < 768px", async () => {

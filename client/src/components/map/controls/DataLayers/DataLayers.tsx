@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAppStore } from "../../../../store/store";
+import { useWatershed } from "../../../../contexts/WatershedContext";
 import DataLayersTabContent from "./DataLayersTabContent";
 
 import {
@@ -89,8 +89,7 @@ export default function DataLayersControl() {
 
   const queryClient = useQueryClient();
 
-  const { dispatchLayerAction, clearSelectedHillslope, closePanel } =
-    useAppStore();
+  const { dispatchLayerAction, clearSelectedHillslope } = useWatershed();
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("WEPP Hillslopes");
@@ -126,8 +125,8 @@ export default function DataLayersControl() {
     // Side effects that are outside the layer system's scope
     if (id === "subcatchment" && !checked) {
       queryClient.cancelQueries({ queryKey: ["subcatchments"] });
-      closePanel();
       clearSelectedHillslope();
+      // Panel closes automatically: subcatchment off → choropleth blocked → isEffective false
     }
 
     if (id === "channels" && !checked) {

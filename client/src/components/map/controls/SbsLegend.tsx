@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Paper, Switch, Typography } from "@mui/material";
 import { tss } from "../../../utils/tss";
-import { useAppStore } from "../../../store/store";
+import { useWatershed } from "../../../contexts/WatershedContext";
 import { fetchSbsColormap } from "../../../api/sbsApi";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -76,7 +76,7 @@ const useStyles = tss.create(({ theme }) => ({
  */
 export default function SbsLegend() {
   const { classes } = useStyles();
-  const { layerDesired, dispatchLayerAction } = useAppStore();
+  const { layerDesired, dispatchLayerAction } = useWatershed();
   const sbsColorMode = (layerDesired.sbs.params.mode as string) ?? "legacy";
 
   const { data, isLoading, isError } = useQuery({

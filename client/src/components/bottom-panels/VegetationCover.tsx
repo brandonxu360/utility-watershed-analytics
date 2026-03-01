@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
-import { useAppStore } from "../../store/store";
+import { useWatershed } from "../../contexts/WatershedContext";
 
 /** Band-group shortcuts for the vegetation-cover metric. */
 export type VegetationBandType = "all" | "shrub" | "tree";
@@ -70,21 +70,19 @@ const useStyles = tss.create(({ theme }) => ({
 export const VegetationCover: React.FC = () => {
   const { classes } = useStyles();
   const {
-    selectedHillslopeId,
     layerDesired,
-    choroplethCache: { range: choroplethRange, loading: choroplethLoading },
-    closePanel,
-    clearSelectedHillslope,
     dispatchLayerAction,
-    resetChoroplethCache,
-  } = useAppStore();
+    selectedHillslopeId,
+    clearSelectedHillslope,
+  } = useWatershed();
+
+  const { config, range: choroplethRange, isLoading: choroplethLoading } =
+    useChoropleth();
 
   // Read choropleth params from desired state
   const choroplethYear = layerDesired.choropleth.params.year as number | null;
   const choroplethBands =
     (layerDesired.choropleth.params.bands as VegetationBandType) ?? "all";
-
-  const { config } = useChoropleth();
 
   const runId =
     useParams({
@@ -293,10 +291,11 @@ export const VegetationCover: React.FC = () => {
             className={classes.closeButton}
             data-testid="veg-close-button"
             onClick={() => {
+              // Disabling choropleth removes this panel declaratively
+              // (ActiveBottomPanel renders null when isEffective("choropleth") is false)
+              // Choropleth cache is local to useChoropleth — destroyed on unmount
               clearSelectedHillslope();
-              dispatchLayerAction({ type: "RESET" });
-              resetChoroplethCache();
-              closePanel();
+              dispatchLayerAction({ type: "TOGGLE", id: "choropleth", on: false });
             }}
           >
             <CloseIcon />

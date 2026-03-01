@@ -21,12 +21,7 @@ vi.mock("leaflet", () => ({
   },
 }));
 
-const mockResetMapState = vi.fn();
-vi.mock("../store/store", () => ({
-  useAppStore: () => ({
-    resetMapState: mockResetMapState,
-  }),
-}));
+
 
 const createWatershedData = (
   features: Array<{
@@ -81,14 +76,12 @@ describe("MapEffectUtil", () => {
       const watersheds = createWatershedData([{ id: "ws-1" }]);
       renderMapEffect({ watershedId: null, watersheds });
 
-      expect(mockResetMapState).not.toHaveBeenCalled();
       expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
 
     it("does not zoom when watersheds is null", () => {
       renderMapEffect({ watershedId: "ws-1", watersheds: null });
 
-      expect(mockResetMapState).not.toHaveBeenCalled();
       expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
 
@@ -105,7 +98,6 @@ describe("MapEffectUtil", () => {
         >,
       });
 
-      expect(mockResetMapState).not.toHaveBeenCalled();
       expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
 
@@ -113,7 +105,6 @@ describe("MapEffectUtil", () => {
       const watersheds = createWatershedData([{ id: "ws-1" }, { id: "ws-2" }]);
       renderMapEffect({ watershedId: "ws-999", watersheds });
 
-      expect(mockResetMapState).not.toHaveBeenCalled();
       expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
 
@@ -121,7 +112,6 @@ describe("MapEffectUtil", () => {
       const watersheds = createWatershedData([{ id: "ws-1" }, { id: "ws-2" }]);
       renderMapEffect({ watershedId: "ws-2", watersheds });
 
-      expect(mockResetMapState).toHaveBeenCalledTimes(1);
       expect(mockGeoJSON).toHaveBeenCalledWith(
         expect.objectContaining({ id: "ws-2" }),
       );
@@ -132,7 +122,6 @@ describe("MapEffectUtil", () => {
       const watersheds = createWatershedData([{ id: 123 }]);
       renderMapEffect({ watershedId: "123", watersheds });
 
-      expect(mockResetMapState).toHaveBeenCalledTimes(1);
       expect(mockZoomToFeature).toHaveBeenCalled();
     });
 
@@ -153,7 +142,6 @@ describe("MapEffectUtil", () => {
       };
       renderMapEffect({ watershedId: "ws-1", watersheds });
 
-      expect(mockResetMapState).not.toHaveBeenCalled();
       expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
 
@@ -161,7 +149,6 @@ describe("MapEffectUtil", () => {
       const watersheds = createWatershedData([]);
       renderMapEffect({ watershedId: "ws-1", watersheds });
 
-      expect(mockResetMapState).not.toHaveBeenCalled();
       expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
   });

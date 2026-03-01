@@ -1,10 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, act } from "@testing-library/react";
-import { useAppStore } from "../store/store";
 import { highlightedStyle, selectedStyle } from "../components/map/constants";
 import type { PathOptions } from "leaflet";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import SubcatchmentLayer from "../components/map/SubcatchmentLayer";
+
+const mockSetSelectedHillslope = vi.fn();
+const mockClearSelectedHillslope = vi.fn();
+
+vi.mock("../contexts/WatershedContext", () => ({
+  useWatershed: () => ({
+    setSelectedHillslope: mockSetSelectedHillslope,
+    clearSelectedHillslope: mockClearSelectedHillslope,
+  }),
+}));
 
 type Feature = GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>;
 
@@ -90,8 +99,8 @@ function createLayer(): MockLayer {
 }
 
 describe("SubcatchmentLayer", () => {
-  const setSelectedHillslope = vi.fn();
-  const clearSelectedHillslope = vi.fn();
+  const setSelectedHillslope = mockSetSelectedHillslope;
+  const clearSelectedHillslope = mockClearSelectedHillslope;
 
   const styleFn = vi.fn((feature: Feature | undefined): PathOptions => {
     const id = feature?.id?.toString?.() ?? "none";
@@ -114,11 +123,6 @@ describe("SubcatchmentLayer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     lastGeoJsonProps = null;
-
-    useAppStore.setState({
-      setSelectedHillslope,
-      clearSelectedHillslope,
-    });
   });
 
   it("binds a tooltip with formatted hillslope details", () => {

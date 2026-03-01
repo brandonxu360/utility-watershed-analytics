@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useAppStore } from "../store/store";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 
 const mockNavigate = vi.fn();
@@ -210,9 +209,6 @@ describe("WatershedOverview", () => {
     });
 
     it("navigates to home when back button is clicked", async () => {
-      const mockResetMapState = vi.fn();
-      useAppStore.setState({ resetMapState: mockResetMapState });
-
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
@@ -227,23 +223,7 @@ describe("WatershedOverview", () => {
       expect(mockNavigate).toHaveBeenCalledWith({ to: "/" });
     });
 
-    it("calls resetMapState when back button is clicked", async () => {
-      const mockResetMapState = vi.fn();
-      useAppStore.setState({ resetMapState: mockResetMapState });
 
-      renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() => {
-        expect(screen.getByText("Test Watershed")).toBeInTheDocument();
-      });
-
-      const backButton = screen.getByRole("button", {
-        name: /close watershed panel/i,
-      });
-      fireEvent.click(backButton);
-
-      expect(mockResetMapState).toHaveBeenCalled();
-    });
   });
 
   describe("N/A fallbacks", () => {

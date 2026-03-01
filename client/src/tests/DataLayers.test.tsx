@@ -1,7 +1,18 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useAppStore } from "../store/store";
 import { INITIAL_DESIRED, INITIAL_RUNTIME } from "../layers/rules";
+
+const mockDispatchLayerAction = vi.fn();
+const mockClearSelectedHillslope = vi.fn();
+
+vi.mock("../contexts/WatershedContext", () => ({
+  useWatershed: () => ({
+    layerDesired: INITIAL_DESIRED,
+    layerRuntime: INITIAL_RUNTIME,
+    dispatchLayerAction: mockDispatchLayerAction,
+    clearSelectedHillslope: mockClearSelectedHillslope,
+  }),
+}));
 
 vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
   default: ({
@@ -47,19 +58,8 @@ vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
 import DataLayersControl from "../components/map/controls/DataLayers/DataLayers";
 
 describe("DataLayersControl", () => {
-  const mockDispatchLayerAction = vi.fn();
-  const clearSelectedHillslope = vi.fn();
-  const closePanel = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
-    useAppStore.setState({
-      layerDesired: INITIAL_DESIRED,
-      layerRuntime: INITIAL_RUNTIME,
-      dispatchLayerAction: mockDispatchLayerAction,
-      clearSelectedHillslope,
-      closePanel,
-    });
   });
 
   it("renders and is closed by default", () => {
@@ -107,8 +107,7 @@ describe("DataLayersControl", () => {
       id: "subcatchment",
       on: true,
     });
-    expect(closePanel).not.toHaveBeenCalled();
-    expect(clearSelectedHillslope).not.toHaveBeenCalled();
+    expect(mockClearSelectedHillslope).not.toHaveBeenCalled();
 
     // Uncheck
     fireEvent.click(sub);
@@ -117,8 +116,8 @@ describe("DataLayersControl", () => {
       id: "subcatchment",
       on: false,
     });
-    expect(closePanel).toHaveBeenCalledTimes(1);
-    expect(clearSelectedHillslope).toHaveBeenCalledTimes(1);
+    // Panel closes automatically: subcatchment off → choropleth blocked → isEffective false
+    expect(mockClearSelectedHillslope).toHaveBeenCalledTimes(1);
   });
 
   it("handles channels toggle", () => {

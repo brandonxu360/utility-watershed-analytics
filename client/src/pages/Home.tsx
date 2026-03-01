@@ -1,12 +1,12 @@
-import { useEffect } from "react";
 import { useParams } from "@tanstack/react-router";
-import { useAppStore } from "../store/store";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import { tss } from "../utils/tss";
+import { WatershedProvider, useWatershed } from "../contexts/WatershedContext";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import BottomPanel from "../components/bottom-panels/BottomPanel";
+import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import WatershedMap from "../components/map/WatershedMap";
 import Paper from "@mui/material/Paper";
 
@@ -47,7 +47,6 @@ const useStyles = tss.create(({ theme }) => ({
 
 export default function Home(): JSX.Element {
   const { classes } = useStyles();
-  const { isPanelOpen, panelContent, resetMapState } = useAppStore();
 
   const runId =
     useParams({
@@ -56,15 +55,6 @@ export default function Home(): JSX.Element {
       shouldThrow: false,
     }) ?? null;
 
-  // Reset all map-scoped state when leaving the Home page (e.g. navigating
-  // to /team) or when the watershed changes.  This prevents stale panels,
-  // legends, and runtime flags from leaking across navigations.
-  useEffect(() => {
-    return () => {
-      resetMapState();
-    };
-  }, [runId, resetMapState]);
-
   const isSmallScreen = useIsSmallScreen();
 
   if (isSmallScreen) {
@@ -72,20 +62,37 @@ export default function Home(): JSX.Element {
   }
 
   return (
-    <div className={classes.root}>
-      <Paper elevation={3} className={classes.sidePanel} square>
-        <div className={classes.sidePanelContent}>
-          {runId ? <WatershedOverview /> : <HomeSidePanelContent />}
+    <WatershedProvider runId={runId}>
+      <div className={classes.root}>
+        <Paper elevation={3} className={classes.sidePanel} square>
+          <div className={classes.sidePanelContent}>
+            {runId ? <WatershedOverview /> : <HomeSidePanelContent />}
+          </div>
+        </Paper>
+        <div className={classes.mapWrapper}>
+          <div className={classes.map}>
+            <WatershedMap />
+          </div>
+          <ActiveBottomPanel />
         </div>
-      </Paper>
-      <div className={classes.mapWrapper}>
-        <div className={classes.map}>
-          <WatershedMap />
-        </div>
-        {isPanelOpen && (
-          <BottomPanel isOpen={isPanelOpen}>{panelContent}</BottomPanel>
-        )}
       </div>
-    </div>
+    </WatershedProvider>
+  );
+}
+
+/**
+ * Declarative bottom panel — renders when the choropleth layer is effectively
+ * active. No `isPanelOpen` state needed; the panel appears/disappears based
+ * on layer state and vanishes automatically on watershed switch or layer toggle.
+ */
+function ActiveBottomPanel(): JSX.Element | null {
+  const { isEffective } = useWatershed();
+
+  if (!isEffective("choropleth")) return null;
+
+  return (
+    <BottomPanel isOpen>
+      <VegetationCover />
+    </BottomPanel>
   );
 }

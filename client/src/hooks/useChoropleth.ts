@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { PathOptions } from "leaflet";
 import { useParams } from "@tanstack/react-router";
-import { useAppStore } from "../store/store";
+import { useWatershed } from "../contexts/WatershedContext";
 import { fetchRapChoropleth } from "../api/rapApi";
 
 import {
@@ -54,6 +54,7 @@ interface UseChoroplethResult {
   choropleth: ChoroplethType;
   isLoading: boolean;
   error: string | null;
+  range: { min: number; max: number } | null;
   getColor: (id: number | undefined) => string | null;
   getChoroplethStyle: ChoroplethStyleFn;
   isActive: boolean;
@@ -69,7 +70,7 @@ export function useChoropleth(): UseChoroplethResult {
     }) ?? null;
 
   // Read control fields from the layer desired-state
-  const layerDesired = useAppStore((s) => s.layerDesired);
+  const { layerDesired } = useWatershed();
   const choroplethDesired = layerDesired.choropleth;
   const choroplethType = (
     choroplethDesired.enabled
@@ -79,18 +80,13 @@ export function useChoropleth(): UseChoroplethResult {
   const choroplethYear = choroplethDesired.params.year as number | null;
   const choroplethBands = (choroplethDesired.params.bands as string) ?? "all";
 
-  // Read cache from the choropleth cache slice
-  const {
-    choroplethCache: {
-      data: choroplethData,
-      range: choroplethRange,
-      loading: choroplethLoading,
-      error: choroplethError,
-    },
-    setChoroplethData,
-    setChoroplethLoading,
-    setChoroplethError,
-  } = useAppStore();
+  // Local cache — lives as long as the hook's consumer is mounted.
+  // When the choropleth layer is disabled, ActiveBottomPanel unmounts
+  // VegetationCover → this hook is destroyed → cache is GC'd.
+  const [choroplethData, setChoroplethDataLocal] = useState<Map<number, number> | null>(null);
+  const [choroplethRange, setChoroplethRangeLocal] = useState<{ min: number; max: number } | null>(null);
+  const [choroplethLoading, setChoroplethLoadingLocal] = useState(false);
+  const [choroplethError, setChoroplethErrorLocal] = useState<string | null>(null);
 
   const config =
     choroplethType !== "none" ? CHOROPLETH_CONFIG[choroplethType] : null;
@@ -110,15 +106,16 @@ export function useChoropleth(): UseChoroplethResult {
       effectiveBands.length === 0 ||
       !runId
     ) {
-      setChoroplethData(null, null);
+      setChoroplethDataLocal(null);
+      setChoroplethRangeLocal(null);
       return;
     }
 
     let mounted = true;
 
     async function loadData() {
-      setChoroplethLoading(true);
-      setChoroplethError(null);
+      setChoroplethLoadingLocal(true);
+      setChoroplethErrorLocal(null);
 
       try {
         const data = await fetchRapChoropleth({
@@ -141,23 +138,25 @@ export function useChoropleth(): UseChoroplethResult {
 
         // Handle empty or invalid data
         if (values.length === 0) {
-          setChoroplethData(null, null);
-          setChoroplethError(
+          setChoroplethDataLocal(null);
+          setChoroplethRangeLocal(null);
+          setChoroplethErrorLocal(
             "No valid data available for the selected options",
           );
-          setChoroplethLoading(false);
+          setChoroplethLoadingLocal(false);
           return;
         }
 
         const range = computeRobustRange(values, 0.02, 0.98);
 
-        setChoroplethData(dataMap, range);
-        setChoroplethLoading(false);
+        setChoroplethDataLocal(dataMap);
+        setChoroplethRangeLocal(range);
+        setChoroplethLoadingLocal(false);
       } catch (err: unknown) {
         if (!mounted) return;
         const message = err instanceof Error ? err.message : String(err);
-        setChoroplethError(`Failed to load data: ${message}`);
-        setChoroplethLoading(false);
+        setChoroplethErrorLocal(`Failed to load data: ${message}`);
+        setChoroplethLoadingLocal(false);
       }
     }
 
@@ -171,9 +170,6 @@ export function useChoropleth(): UseChoroplethResult {
     effectiveBands,
     config,
     runId,
-    setChoroplethData,
-    setChoroplethLoading,
-    setChoroplethError,
   ]);
 
   const colormap = useMemo(() => {
@@ -229,6 +225,7 @@ export function useChoropleth(): UseChoroplethResult {
     choropleth: choroplethType,
     isLoading: choroplethLoading,
     error: choroplethError,
+    range: choroplethRange,
     isActive: choroplethType !== "none",
     config,
     getColor,

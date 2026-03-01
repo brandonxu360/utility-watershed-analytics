@@ -1,6 +1,5 @@
 import { FC, ChangeEvent } from "react";
-import { VegetationCover } from "../../../bottom-panels/VegetationCover";
-import { useAppStore } from "../../../../store/store";
+import { useWatershed } from "../../../../contexts/WatershedContext";
 import { tss } from "../../../../utils/tss";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -55,7 +54,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
 }) => {
   const { classes } = useStyles();
 
-  const { layerDesired, enableLayerWithParams, openPanel } = useAppStore();
+  const { layerDesired, enableLayerWithParams } = useWatershed();
 
   // Read desired state for checkbox checked values
   const subcatchmentChecked = layerDesired.subcatchment.enabled;
@@ -130,10 +129,10 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Button
               className={classes.layerTitle}
               onClick={() => {
+                // Enabling choropleth causes ActiveBottomPanel to render VegetationCover
                 enableLayerWithParams("choropleth", {
                   metric: "vegetationCover",
                 });
-                openPanel(<VegetationCover />);
               }}
             >
               Vegetation Cover

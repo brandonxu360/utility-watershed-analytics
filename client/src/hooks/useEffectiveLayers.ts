@@ -1,19 +1,13 @@
 /**
  * Hook that derives effective layer state from desired + runtime.
  *
- * Uses the pure `evaluate()` function from the layer system, memoized
- * so it only recomputes when desired or runtime actually change.
+ * Now delegates to WatershedContext which owns both desired and runtime
+ * state and memoizes the evaluation internally.
  *
  * Returns the full EffectiveMap plus convenience selectors.
  */
 
-import { useMemo } from "react";
-import { useAppStore } from "../store/store";
-import {
-  evaluate,
-  selectOrderedActiveIds,
-  isDesiredButBlocked,
-} from "../layers/evaluate";
+import { useWatershed } from "../contexts/WatershedContext";
 import type { EffectiveMap, LayerId } from "../layers/types";
 
 export interface UseEffectiveLayersResult {
@@ -28,28 +22,6 @@ export interface UseEffectiveLayersResult {
 }
 
 export function useEffectiveLayers(): UseEffectiveLayersResult {
-  const desired = useAppStore((s) => s.layerDesired);
-  const runtime = useAppStore((s) => s.layerRuntime);
-
-  const effective = useMemo(
-    () => evaluate(desired, runtime),
-    [desired, runtime],
-  );
-
-  const activeIds = useMemo(
-    () => selectOrderedActiveIds(effective),
-    [effective],
-  );
-
-  const isBlocked = useMemo(
-    () => (id: LayerId) => isDesiredButBlocked(id, desired, effective),
-    [desired, effective],
-  );
-
-  const isEffective = useMemo(
-    () => (id: LayerId) => effective[id].enabled,
-    [effective],
-  );
-
+  const { effective, activeIds, isBlocked, isEffective } = useWatershed();
   return { effective, activeIds, isBlocked, isEffective };
 }
