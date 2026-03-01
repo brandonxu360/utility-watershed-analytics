@@ -14,6 +14,7 @@ import {
 } from "../utils/colormap";
 
 import { VEGETATION_BANDS } from "../utils/constants";
+import type { VegetationBandType } from "../components/bottom-panels/VegetationCover";
 
 /**
  * Choropleth metric types.  "none" means the choropleth layer is off.
@@ -88,7 +89,7 @@ export function useChoropleth(): UseChoroplethResult {
   const effectiveBands = useMemo(() => {
     if (!config) return [];
     if (choroplethType === "vegetationCover") {
-      return VEGETATION_BANDS[choroplethBands];
+      return VEGETATION_BANDS[choroplethBands as VegetationBandType];
     }
     return config.bands;
   }, [config, choroplethType, choroplethBands]);

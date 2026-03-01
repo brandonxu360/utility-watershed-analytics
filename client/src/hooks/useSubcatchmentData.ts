@@ -13,7 +13,7 @@ import { useLayerQuery } from "./useLayerQuery";
 
 export interface UseSubcatchmentDataResult {
   /** Subcatchment GeoJSON FeatureCollection (or undefined while loading). */
-  subcatchments: unknown;
+  subcatchments: GeoJSON.FeatureCollection | undefined;
   /** Whether the query is currently in-flight. */
   subLoading: boolean;
 }

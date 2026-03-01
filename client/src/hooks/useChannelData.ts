@@ -13,7 +13,7 @@ import { useLayerQuery } from "./useLayerQuery";
 
 export interface UseChannelDataResult {
   /** Channel GeoJSON FeatureCollection (or undefined while loading). */
-  channelData: unknown;
+  channelData: GeoJSON.FeatureCollection | undefined;
   /** Whether the query is currently in-flight. */
   channelLoading: boolean;
 }

@@ -36,11 +36,17 @@ vi.mock("../api/rapApi", () => ({
   fetchRap: mockFetchRap,
 }));
 
-const mockUseChoropleth = vi.fn(() => ({
-  config: null,
-  range: null,
-  isLoading: false,
-}));
+const mockUseChoropleth = vi.fn(
+  (): {
+    config: { colormap: string; unit: string } | null;
+    range: { min: number; max: number } | null;
+    isLoading: boolean;
+  } => ({
+    config: null,
+    range: null,
+    isLoading: false,
+  }),
+);
 
 vi.mock("../hooks/useChoropleth", () => ({
   useChoropleth: () => mockUseChoropleth(),
