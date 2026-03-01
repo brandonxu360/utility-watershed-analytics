@@ -29,6 +29,7 @@ import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import { useLayerToasts } from "../../hooks/useLayerToasts";
+import type { SbsColorMode } from "../../api/types";
 import "leaflet/dist/leaflet.css";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -94,7 +95,8 @@ export default function WatershedMap(): JSX.Element {
   const channelsEffective = isEffective("channels");
   const landuseEffective = isEffective("landuse");
   const sbsEffective = isEffective("sbs");
-  const sbsColorMode = (layerDesired.sbs.params.mode as string) ?? "legacy";
+  const sbsColorMode =
+    (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
 
   // Create a key that changes when choropleth state changes to force style updates
   const choroplethYear = layerDesired.choropleth.params.year as number | null;
