@@ -103,7 +103,6 @@ the React hooks, and every component that consumes the system.
             │  WatershedState      │  Single state object via useReducer
             │  ├─ layerDesired     │
             │  ├─ layerRuntime     │
-            │  ├─ landuseLegendMap │
             │  └─ hillslope state  │
             └──────────┬──────────┘
                        │
@@ -152,7 +151,6 @@ client/src/
 │   └── WatershedContext.tsx         # All watershed-scoped state in one reducer
 │                                    #   ├─ layerDesired (DesiredMap)
 │                                    #   ├─ layerRuntime (LayerRuntime)
-│                                    #   ├─ landuseLegendMap
 │                                    #   └─ hillslope selection
 │
 ├── store/
@@ -162,7 +160,10 @@ client/src/
 ├── hooks/
 │   ├── useEffectiveLayers.ts        # Thin wrapper over WatershedContext
 │   ├── useLayerToasts.ts            # Toast notifications on block transitions
-│   └── useChoropleth.ts             # Choropleth data fetching & styling
+│   ├── useLanduseData.ts            # Fetch + runtime reporting + legend derivation
+│   ├── useSubcatchmentData.ts       # Fetch + runtime reporting for subcatchments
+│   ├── useChannelData.ts            # Fetch + runtime reporting for channels
+│   └── useChoropleth.ts             # Choropleth data fetching & styling (useQuery)
 │
 ├── pages/
 │   └── Home.tsx                     # Mounts <WatershedProvider runId={…}>
@@ -472,19 +473,19 @@ managed this state.
 interface WatershedState {
   layerDesired: DesiredMap; // what the user toggled
   layerRuntime: LayerRuntime; // zoom, data, loading
-  landuseLegendMap: Record<string, string>; // color → description
   selectedHillslopeId: number | null; // user interaction
-  selectedHillslopeProps: SubcatchmentProperties | null;
 }
 ```
 
-| Field                    | Type                     | Purpose                                    |
-| ------------------------ | ------------------------ | ------------------------------------------ |
-| `layerDesired`           | `DesiredMap`             | Complete desired state for all layers      |
-| `layerRuntime`           | `LayerRuntime`           | Zoom, data availability, loading flags     |
-| `landuseLegendMap`       | `Record<string, string>` | Color → description map for LandUse legend |
-| `selectedHillslopeId`    | `number \| null`         | Currently selected subcatchment/hillslope  |
-| `selectedHillslopeProps` | `SubcatchmentProperties` | Properties of the selected subcatchment    |
+| Field                 | Type             | Purpose                                   |
+| --------------------- | ---------------- | ----------------------------------------- |
+| `layerDesired`        | `DesiredMap`     | Complete desired state for all layers     |
+| `layerRuntime`        | `LayerRuntime`   | Zoom, data availability, loading flags    |
+| `selectedHillslopeId` | `number \| null` | Currently selected subcatchment/hillslope |
+
+> **Removed fields**: `landuseLegendMap` (now derived in `useLanduseData`
+> hook and passed as a prop to `LandUseLegend`) and
+> `selectedHillslopeProps` (dead state — was never read).
 
 ### Reducer Actions
 
@@ -499,8 +500,7 @@ The `watershedReducer` handles all state transitions in one function:
 | `SET_DATA_AVAILABILITY`    | `id, available`  | Updates `layerRuntime.dataAvailability[id]`          |
 | `SET_LAYER_LOADING`        | `id, loading`    | Updates `layerRuntime.loading[id]`                   |
 | `SET_ZOOM`                 | `zoom`           | Updates `layerRuntime.zoom`                          |
-| `SET_LANDUSE_LEGEND`       | `legend`         | Updates `landuseLegendMap`                           |
-| `SET_SELECTED_HILLSLOPE`   | `id, props`      | Updates hillslope selection                          |
+| `SET_SELECTED_HILLSLOPE`   | `id`             | Updates hillslope selection                          |
 | `CLEAR_SELECTED_HILLSLOPE` | —                | Clears hillslope selection to `null`                 |
 
 Layer-related actions (`TOGGLE`, `SET_OPACITY`, `SET_PARAM`) delegate to the
@@ -538,12 +538,12 @@ previously existed in `sharedActionsSlice.resetOverlays`.
 
 The context value is assembled with `useMemo` and exposes:
 
-| Category                    | Members                                                                                                                                                                                                      |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Raw state**               | `layerDesired`, `layerRuntime`, `landuseLegendMap`, `selectedHillslopeId`, `selectedHillslopeProps`                                                                                                          |
-| **Dispatch**                | `dispatch(action)` — raw React dispatch                                                                                                                                                                      |
-| **Convenience dispatchers** | `dispatchLayerAction`, `enableLayerWithParams`, `setDataAvailability`, `setLayerLoading`, `setZoom`, `setLanduseLegendMap`, `setSelectedHillslope`, `clearSelectedHillslope` (all stable `useCallback` refs) |
-| **Derived state**           | `effective` (EffectiveMap), `activeIds` (ordered), `isBlocked(id)`, `isEffective(id)`                                                                                                                        |
+| Category                    | Members                                                                                                                                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Raw state**               | `layerDesired`, `layerRuntime`, `selectedHillslopeId`                                                                                                                                 |
+| **Dispatch**                | `dispatch(action)` — raw React dispatch                                                                                                                                               |
+| **Convenience dispatchers** | `dispatchLayerAction`, `enableLayerWithParams`, `setDataAvailability`, `setLayerLoading`, `setZoom`, `setSelectedHillslope`, `clearSelectedHillslope` (all stable `useCallback` refs) |
+| **Derived state**           | `effective` (EffectiveMap), `activeIds` (ordered), `isBlocked(id)`, `isEffective(id)`                                                                                                 |
 
 The `effective` map and `activeIds` are computed via `useMemo` inside the
 provider, so consumers get pre-computed derived state without needing to
@@ -602,6 +602,7 @@ function useChoropleth(): {
   choropleth: ChoroplethType; // "none" | "evapotranspiration" | "vegetationCover"
   isLoading: boolean;
   error: string | null;
+  range: { min: number; max: number } | null;
   getColor: (id: number | undefined) => string | null;
   getChoroplethStyle: (id: number | undefined) => PathOptions | null;
   isActive: boolean;
@@ -610,15 +611,60 @@ function useChoropleth(): {
 ```
 
 Reads control fields from `layerDesired.choropleth.params` (metric, year, bands)
-and data from `choroplethCache`. Handles:
+and fetches data via `useQuery`. Handles:
 
-1. **Data fetching** — Calls `fetchRapChoropleth` when metric/year/bands change.
+1. **Data fetching** — Calls `fetchRapChoropleth` via `useQuery` when
+   metric/year/bands change. The query key includes all parameters, so
+   TanStack Query handles caching, deduplication, and refetching automatically.
 2. **Color mapping** — Creates a colormap (e.g. viridis), normalizes values to
    the robust percentile range, and returns `getColor(weppId)` and
    `getChoroplethStyle(weppId)` callbacks.
-3. **Cache management** — Stores fetched data in local `useState` hooks.
-   When the choropleth layer is disabled, `ActiveBottomPanel` unmounts
-   `VegetationCover` → the hook is destroyed → cache is garbage-collected.
+3. **Runtime reporting** — Reports `setDataAvailability("choropleth", ...)`
+   and `setLayerLoading("choropleth", ...)` to the layer runtime, following
+   the same pattern as the other data hooks.
+
+### `useLanduseData`
+
+```typescript
+function useLanduseData(runId: string | null): {
+  landuseData: LanduseMap | undefined;
+  landuseLoading: boolean;
+  landuseLegendMap: Record<string, string>;
+};
+```
+
+Colocates landuse data fetching, runtime reporting, and legend derivation.
+Fetches via `useQuery` gated on `layerDesired.landuse.enabled`. Reports
+`setDataAvailability("landuse", ...)` and `setLayerLoading("landuse", ...)`.
+Derives the `landuseLegendMap` (color → description) via `useMemo` from raw
+data — this was previously stored in `WatershedContext` state but is now a
+pure derivation.
+
+**Consumers:** `WatershedMap` (passes `landuseLegendMap` as prop to
+`LandUseLegend`).
+
+### `useSubcatchmentData`
+
+```typescript
+function useSubcatchmentData(runId: string | null): {
+  subcatchments: GeoJSON.FeatureCollection | undefined;
+  subLoading: boolean;
+};
+```
+
+Colocates subcatchment GeoJSON fetching and runtime reporting. Same
+`useQuery` + `setDataAvailability` / `setLayerLoading` pattern.
+
+### `useChannelData`
+
+```typescript
+function useChannelData(runId: string | null): {
+  channelData: GeoJSON.FeatureCollection | undefined;
+  channelLoading: boolean;
+};
+```
+
+Colocates channel GeoJSON fetching and runtime reporting. Same pattern.
 
 ---
 
@@ -628,17 +674,16 @@ and data from `choroplethCache`. Handles:
 
 The primary consumer. Integration points:
 
-| Concern                      | How It Uses the Layer System                                                       |
-| ---------------------------- | ---------------------------------------------------------------------------------- |
-| **Read desired state**       | `layerDesired.subcatchment.enabled` gates React Query `enabled` flags              |
-| **Compute effective state**  | `useEffectiveLayers()` → `isEffective("subcatchment")` etc.                        |
-| **Fire block toasts**        | `useLayerToasts(layerDesired, effective)`                                          |
-| **Report data availability** | `useEffect` watches query results → `setDataAvailability("subcatchment", hasData)` |
-| **Report loading**           | `useEffect` watches query loading → `setLayerLoading("subcatchment", subLoading)`  |
-| **Conditional rendering**    | `subcatchmentEffective && <SubcatchmentLayer .../>`                                |
-| **Choropleth styling**       | `useChoropleth().getChoroplethStyle(feature.properties.weppid)`                    |
-| **Land use styling**         | `landuseEffective && landuseData[topazid]` in subcatchment style callback          |
-| **Legends**                  | `<LandUseLegend />` (auto-hides), `sbsEffective && <SbsLegend />`                  |
+| Concern                     | How It Uses the Layer System                                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Read desired state**      | `layerDesired` gates which hooks and components are active                                                         |
+| **Compute effective state** | `useEffectiveLayers()` → `isEffective("subcatchment")` etc.                                                        |
+| **Fire block toasts**       | `useLayerToasts(layerDesired, effective)`                                                                          |
+| **Data hooks**              | `useLanduseData(runId)`, `useSubcatchmentData(runId)`, `useChannelData(runId)` handle fetching + runtime reporting |
+| **Conditional rendering**   | `subcatchmentEffective && <SubcatchmentLayer .../>`                                                                |
+| **Choropleth styling**      | `useChoropleth().getChoroplethStyle(feature.properties.weppid)`                                                    |
+| **Land use styling**        | `landuseEffective && landuseData[topazid]` in subcatchment style callback                                          |
+| **Legends**                 | `<LandUseLegend />` (auto-hides), `sbsEffective && <SbsLegend />`                                                  |
 
 ### `DataLayers` / `DataLayersTabContent`
 
@@ -650,7 +695,9 @@ The UI panel that lets users toggle layers.
   closing panels, clearing selected hillslope).
 
 - **`DataLayersTabContent.tsx`** — Reads `layerDesired` for checkbox `checked`
-  values and `useEffectiveLayers()` for `effective` / `isBlocked`. Calls
+  values. Uses `hasActiveDependents(id, layerDesired)` (derived from the
+  registry's `requires` metadata via `getDependents()`) to disable checkboxes
+  when a dependent layer is active. Calls
   `enableLayerWithParams("choropleth", { metric: "vegetationCover" })` for
   the Vegetation Cover button.
 
@@ -659,18 +706,20 @@ The UI panel that lets users toggle layers.
 Bottom panel for vegetation cover charting. Reads:
 
 - `layerDesired.choropleth.params.year` and `.bands` for current selections
-- `choroplethCache.range` and `.loading` for scale display
+- `useChoropleth()` for `range`, `isLoading`, and `config`
 
 Dispatches:
 
 - `dispatchLayerAction({ type: "SET_PARAM", id: "choropleth", key: "year", value })` on year change
 - `dispatchLayerAction({ type: "SET_PARAM", id: "choropleth", key: "bands", value })` on band change
-- `dispatchLayerAction({ type: "RESET" })` + `resetChoroplethCache()` on close
+- `dispatchLayerAction({ type: "TOGGLE", id: "choropleth", on: false })` on close
 
 ### `LandUseLegend`
 
-Conditionally renders based on `isEffective("landuse")` from
-`useEffectiveLayers()` and whether `landuseLegendMap` has entries.
+Accepts `landuseLegendMap` as a prop (derived in `useLanduseData` and passed
+down from `WatershedMap`). Conditionally renders based on
+`isEffective("landuse")` from `useEffectiveLayers()` and whether the
+legend map has entries.
 
 ### `SbsLegend`
 
@@ -715,19 +764,23 @@ effectively active.
 ## 11. Test Coverage
 
 All layer system code is covered by unit and integration tests.
-**378 tests pass across 31 test files.**
+**385 tests pass across 34 test files.**
 
 | Test File                       | Tests | What It Covers                                                                                                                                 |
 | ------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `evaluate.test.ts`              | 16    | All evaluator rules: data availability, requires, zoom range, processing order, derived helpers                                                |
 | `rules.test.ts`                 | 16    | `applyAction` for all action types, toggle with requires/exclusive/dependent teardown, `enableWithParams`, `INITIAL_DESIRED`/`INITIAL_RUNTIME` |
-| `useChoropleth.test.tsx`        | 17    | Hook integration: reads from `layerDesired.choropleth.params`, fetches data, color mapping, cache interactions                                 |
-| `Map.test.tsx`                  | 46    | `WatershedMap` integration: effective state rendering, data availability reporting, loading overlays, query gating, toast integration          |
-| `VegetationCover.test.tsx`      | 35    | Panel: year/band selection via `SET_PARAM`, close via `RESET`, store integration, RAP data fetching                                            |
+| `useChoropleth.test.tsx`        | 22    | Hook: reads `layerDesired.choropleth.params`, useQuery integration, color mapping, runtime reporting                                           |
+| `useLanduseData.test.tsx`       | 7     | Hook: useQuery fetch, data availability reporting, loading flag, legend derivation                                                             |
+| `useSubcatchmentData.test.tsx`  | 6     | Hook: useQuery fetch, data availability reporting, loading flag                                                                                |
+| `useChannelData.test.tsx`       | 6     | Hook: useQuery fetch, data availability reporting, loading flag                                                                                |
+| `Map.test.tsx`                  | 35    | `WatershedMap` integration: effective state rendering, hook wiring, loading overlays, query gating, toast integration                          |
+| `VegetationCover.test.tsx`      | 35    | Panel: year/band selection via `SET_PARAM`, close via `TOGGLE`, RAP data fetching                                                              |
 | `DataLayers.test.tsx`           | 6     | Toggle dispatch, panel open/close                                                                                                              |
-| `DataLayersTabContent.test.tsx` | 8     | Checkbox binding, `enableLayerWithParams`, effective state display                                                                             |
+| `DataLayersTabContent.test.tsx` | 9     | Checkbox binding, `enableLayerWithParams`, registry-derived disabled state                                                                     |
 | `LandUseLegend.test.tsx`        | 3     | Conditional rendering based on `isEffective("landuse")`                                                                                        |
-| `WatershedOverview.test.tsx`    | 17    | Back button → `RESET` dispatch                                                                                                                 |
+| `SubcatchmentLayer.test.tsx`    | 17    | Subcatchment GeoJSON rendering, style application, click interactions                                                                          |
+| `WatershedOverview.test.tsx`    | 16    | Back button → `RESET` dispatch                                                                                                                 |
 | `MapEffectUtil.test.tsx`        | 9     | Navigation → `RESET` dispatch                                                                                                                  |
 
 ---
@@ -750,8 +803,21 @@ All layer system code is covered by unit and integration tests.
    {isEffective("newLayer") && <NewLayer ... />}
    ```
 
-4. **Wire data availability** — If the layer fetches data, add a `useEffect`
-   in `WatershedMap` that calls `setDataAvailability("newLayer", hasData)`.
+4. **Create a data hook** — If the layer fetches data, create a dedicated hook
+   (e.g. `useNewLayerData.ts`) following the pattern of `useLanduseData`,
+   `useSubcatchmentData`, etc.:
+
+   ```typescript
+   // Inside the hook:
+   const { data, isLoading, isError } = useQuery({ ... });
+
+   // Report to runtime:
+   useEffect(() => { setDataAvailability("newLayer", hasData); }, [...]);
+   useEffect(() => { setLayerLoading("newLayer", isLoading); }, [...]);
+   ```
+
+   Call the hook from `WatershedMap`. This keeps data-fetching and runtime
+   reporting colocated — `WatershedMap` stays clean.
 
 5. **Add toggle UI** — Add a checkbox / button in `DataLayersTabContent` that
    calls `handleToggle("newLayer", checked)` (for checkboxes) or
@@ -772,18 +838,18 @@ This section documents the architectural migration completed in the
 
 ### What Changed
 
-| Before (Zustand)                          | After (WatershedContext)                             |
-| ----------------------------------------- | ---------------------------------------------------- |
-| 6 Zustand slices composed in `store.ts`   | 1 `useReducer` in `WatershedContext.tsx`             |
-| `overlaySlice` (4 boolean setters)        | `layerDesired` via `TOGGLE` action                   |
-| `sbsSlice` (2 fields)                     | `layerDesired.sbs.params` via `SET_PARAM`            |
-| `landuseSlice` (2 fields)                 | `landuseLegendMap` + `isEffective("landuse")`        |
-| `choroplethSlice` (7 fields, 7 setters)   | `layerDesired.choropleth.params` + local hook state  |
-| `hillslopeSlice` (selection state)        | `selectedHillslopeId/Props` in reducer               |
-| `panelSlice` (`isPanelOpen`, content)     | Declarative: `isEffective("choropleth")` in JSX      |
-| `sharedActionsSlice.resetOverlays`        | `RESET` action returns `INITIAL_STATE`               |
-| Global store — never resets automatically | Provider unmounts on nav, resets on watershed switch |
-| `useAppStore` selectors everywhere        | `useWatershed()` hook                                |
+| Before (Zustand)                          | After (WatershedContext)                                        |
+| ----------------------------------------- | --------------------------------------------------------------- |
+| 6 Zustand slices composed in `store.ts`   | 1 `useReducer` in `WatershedContext.tsx`                        |
+| `overlaySlice` (4 boolean setters)        | `layerDesired` via `TOGGLE` action                              |
+| `sbsSlice` (2 fields)                     | `layerDesired.sbs.params` via `SET_PARAM`                       |
+| `landuseSlice` (2 fields)                 | `useLanduseData` hook + prop to `LandUseLegend`                 |
+| `choroplethSlice` (7 fields, 7 setters)   | `layerDesired.choropleth.params` + `useChoropleth` (`useQuery`) |
+| `hillslopeSlice` (selection state)        | `selectedHillslopeId/Props` in reducer                          |
+| `panelSlice` (`isPanelOpen`, content)     | Declarative: `isEffective("choropleth")` in JSX                 |
+| `sharedActionsSlice.resetOverlays`        | `RESET` action returns `INITIAL_STATE`                          |
+| Global store — never resets automatically | Provider unmounts on nav, resets on watershed switch            |
+| `useAppStore` selectors everywhere        | `useWatershed()` hook                                           |
 
 ### Why
 
