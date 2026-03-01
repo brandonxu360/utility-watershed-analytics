@@ -1,11 +1,11 @@
 # Layer System Architecture
 
-> Last updated: 2026-02-26
+> Last updated: 2026-02-28
 
 This document describes the declarative layer system that manages all toggleable
 map layers in the client. It covers the type model, the registry, the
-rule engine, the evaluator, the Zustand store slices, the React hooks, and
-every component that consumes the system.
+rule engine, the evaluator, the React Context provider (`WatershedContext`),
+the React hooks, and every component that consumes the system.
 
 ---
 
@@ -36,11 +36,11 @@ every component that consumes the system.
    - [Processing Order](#processing-order)
    - [Evaluation Rules](#evaluation-rules)
    - [Derived Helpers](#derived-helpers)
-8. [Store Slices](#8-store-slices)
-   - [`layerSlice`](#layerslice)
-   - [`runtimeSlice`](#runtimeslice)
-   - [`choroplethCacheSlice`](#choroplethcacheslice)
-   - [Store Composition](#store-composition)
+8. [WatershedContext](#8-watershedcontext)
+   - [State Shape](#state-shape)
+   - [Reducer Actions](#reducer-actions)
+   - [Provider & Automatic Reset](#provider--automatic-reset)
+   - [Context Value](#context-value)
 9. [React Hooks](#9-react-hooks)
    - [`useEffectiveLayers`](#useeffectivelayers)
    - [`useLayerToasts`](#uselayertoasts)
@@ -62,63 +62,72 @@ every component that consumes the system.
 
 | Goal                                 | How It's Achieved                                                                                                                                  |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Single source of truth**           | Every layer's metadata lives in `LAYER_REGISTRY`; desired state in one Zustand slice.                                                              |
+| **Single source of truth**           | Every layer's metadata lives in `LAYER_REGISTRY`; desired + runtime state in a single `useReducer` inside `WatershedContext`.                      |
 | **Separation of intent vs. reality** | "Desired" (what the user asked for) and "Runtime" (what the app knows) are separate state trees. "Effective" is a pure derivation.                 |
 | **Pure business logic**              | `applyAction`, `enableWithParams`, and `evaluate` are pure functions with no side effects, no store access, and no React. Trivially unit-testable. |
 | **Structured errors**                | `BlockedReason` is a discriminated union — never a stringly-typed message. UI code pattern-matches on `kind`.                                      |
 | **No scattered toggles**             | All toggle / param / opacity mutations route through `dispatchLayerAction` → `applyAction`. No ad-hoc boolean setters.                             |
+| **Automatic lifecycle**              | `WatershedProvider` mounts inside `Home` — state is GC'd on navigation. Watershed switches dispatch `RESET` automatically.                        |
 
 ---
 
 ## 2. High-Level Data Flow
 
 ```
-                ┌──────────────┐
-  User clicks   │   UI Event   │
-  toggle / btn  └──────┬───────┘
-                       │
-                       ▼
+              ┌──────────────────────────────────────────────────┐
+              │           WatershedProvider (Home.tsx)           │
+              │  useReducer(watershedReducer, INITIAL_STATE)     │
+              │  mounts when Home loads, unmounts on navigate    │
+              │  dispatches RESET when runId changes             │
+              └──────────────────────┬─────────────────────────┘
+                                     │
+                ┌──────────────┐     │
+  User clicks   │   UI Event   │     │
+  toggle / btn  └──────┬───────┘     │
+                       │             │
+                       ▼             │
+            ┌──────────────────────┐ │
+            │  dispatch(action)    │ │  (React dispatch — WatershedContext)
+            │  { type, id, ... }  │ │
+            └──────────┬──────────┘ │
+                       │            │
+                       ▼            │
+            ┌──────────────────────┐│
+            │  watershedReducer()  ││  Delegates TOGGLE/SET_OPACITY/SET_PARAM
+            │  ├─ applyAction()    ││  to pure rules.ts, handles runtime
+            │  └─ runtime updates  ││  facts (zoom, data, loading) directly
+            └──────────┬──────────┘│
+                       │           │
+                       ▼           │
             ┌──────────────────────┐
-            │  dispatchLayerAction │  (Zustand action — layerSlice)
-            │  { type, id, ... }  │
-            └──────────┬──────────┘
-                       │
-                       ▼
-            ┌──────────────────────┐
-            │   applyAction()      │  (Pure — rules.ts)
-            │   current → next     │
-            └──────────┬──────────┘
-                       │  Enforces requires / exclusive / dependents
-                       ▼
-            ┌──────────────────────┐
-            │  layerDesired (store)│  ← new DesiredMap written to store
+            │  WatershedState      │  Single state object via useReducer
+            │  ├─ layerDesired     │
+            │  ├─ layerRuntime     │
+            │  ├─ landuseLegendMap │
+            │  └─ hillslope state  │
             └──────────┬──────────┘
                        │
      ┌─────────────────┼─────────────────┐
      │                 │                 │
      ▼                 ▼                 ▼
-  Queries use       Runtime slice     useEffectiveLayers()
-  desired.enabled   updated by          │
-  to gate fetch     data hooks          │ evaluate(desired, runtime)
-     │                 │                │    (Pure — evaluate.ts)
-     │                 ▼                │
-     │          ┌──────────────┐       │
-     └─────────►│ layerRuntime │───────┘
-                └──────────────┘
-                       │
-                       ▼
-            ┌──────────────────────┐
-            │   EffectiveMap       │  Derived (memoized in hook)
-            │   effective.*.enabled│
-            │   effective.*.loading│
-            │   blockedReasons     │
-            └──────────┬──────────┘
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-     Render layers  Show legends  useLayerToasts()
-     on the map     conditionally fires toast on
-                                  enabled → blocked
+  Queries use     useMemo derives     useLayerToasts()
+  desired.enabled  effective state     fires toast on
+  to gate fetch     │                  enabled → blocked
+     │              │ evaluate(desired, runtime)
+     │              │    (Pure — evaluate.ts)
+     │              ▼
+     │    ┌──────────────────────┐
+     └───►│   EffectiveMap       │  Derived (memoized in provider)
+          │   effective.*.enabled│
+          │   effective.*.loading│
+          │   blockedReasons     │
+          └──────────┬──────────┘
+                     │
+        ┌────────────┼────────────┐
+        ▼            ▼            ▼
+   Render layers  Show legends  ActiveBottomPanel
+   on the map     conditionally (declarative — no
+                                isPanelOpen state)
 ```
 
 Key insight: **Desired state is never mutated by runtime conditions.** If a
@@ -137,22 +146,27 @@ client/src/
 │   ├── types.ts                     # All type definitions
 │   ├── registry.ts                  # Static metadata for every layer
 │   ├── rules.ts                     # State-transition functions
-│   ├── evaluate.ts                  # desired + runtime → effective
-│   └── index.ts                     # Barrel re-exports
+│   └── evaluate.ts                  # desired + runtime → effective
+│
+├── contexts/
+│   └── WatershedContext.tsx         # All watershed-scoped state in one reducer
+│                                    #   ├─ layerDesired (DesiredMap)
+│                                    #   ├─ layerRuntime (LayerRuntime)
+│                                    #   ├─ landuseLegendMap
+│                                    #   └─ hillslope selection
 │
 ├── store/
-│   ├── store.ts                     # Zustand store composition
-│   └── slices/
-│       ├── layerSlice.ts            # Desired state + dispatchLayerAction
-│       ├── runtimeSlice.ts          # Runtime facts (zoom, data, loading)
-│       ├── choroplethCacheSlice.ts  # Choropleth fetched data cache
-│       ├── panelSlice.ts            # Bottom panel open/close
-│       └── hillslopeSlice.ts        # Selected hillslope state
+│   └── store.ts                     # Zustand store — now empty shell
+│                                    # (kept for backward compat; will be removed)
 │
 ├── hooks/
-│   ├── useEffectiveLayers.ts        # Derives EffectiveMap from store
+│   ├── useEffectiveLayers.ts        # Thin wrapper over WatershedContext
 │   ├── useLayerToasts.ts            # Toast notifications on block transitions
 │   └── useChoropleth.ts             # Choropleth data fetching & styling
+│
+├── pages/
+│   └── Home.tsx                     # Mounts <WatershedProvider runId={…}>
+│                                    #   └─ ActiveBottomPanel (declarative)
 │
 └── components/
     ├── map/
@@ -444,96 +458,96 @@ layer is still "effectively enabled" so the map can show a spinner.
 
 ---
 
-## 8. Store Slices
+## 8. WatershedContext
 
-The Zustand store is composed from five slices. Three are part of the layer
-system; two (`panelSlice`, `hillslopeSlice`) are orthogonal.
+All watershed-scoped state lives in a single `useReducer` inside
+`WatershedContext.tsx`. This replaces the six Zustand store slices
+(`overlaySlice`, `sbsSlice`, `landuseSlice`, `choroplethSlice`,
+`hillslopeSlice`, `panelSlice`, and `sharedActionsSlice`) that previously
+managed this state.
 
-### `layerSlice`
-
-**State:**
-
-| Field              | Type                     | Purpose                                    |
-| ------------------ | ------------------------ | ------------------------------------------ |
-| `layerDesired`     | `DesiredMap`             | Complete desired state for all layers      |
-| `landuseLegendMap` | `Record<string, string>` | Color → description map for LandUse legend |
-
-**Actions:**
-
-| Action                  | Signature                                                | DevTools Label                                                                 |
-| ----------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `dispatchLayerAction`   | `(action: LayerAction) => void`                          | `layer/TOGGLE/subcatchment`, `layer/SET_PARAM/choropleth`, `layer/RESET`, etc. |
-| `enableLayerWithParams` | `(id: LayerId, params: Record<string, unknown>) => void` | `layer/ENABLE_WITH_PARAMS/choropleth`                                          |
-| `setLanduseLegendMap`   | `(legend: Record<string, string>) => void`               | —                                                                              |
-
-Under the hood, `dispatchLayerAction` calls `applyAction(state.layerDesired, action)`
-and writes the result back. This is the **only** code path that modifies desired state.
-
-### `runtimeSlice`
-
-**State:**
-
-| Field          | Type           | Purpose                                |
-| -------------- | -------------- | -------------------------------------- |
-| `layerRuntime` | `LayerRuntime` | Zoom, data availability, loading flags |
-
-**Actions:**
-
-| Action                | Signature                                                | DevTools Label                           |
-| --------------------- | -------------------------------------------------------- | ---------------------------------------- |
-| `setDataAvailability` | `(id: LayerId, available: boolean \| undefined) => void` | `runtime/DATA_AVAILABILITY/subcatchment` |
-| `setLayerLoading`     | `(id: LayerId, loading: boolean) => void`                | `runtime/LOADING/landuse`                |
-| `setZoom`             | `(zoom: number) => void`                                 | `runtime/ZOOM`                           |
-
-These are called by `useEffect` hooks in `WatershedMap` that watch React Query
-results and forward the availability / loading facts.
-
-### `choroplethCacheSlice`
-
-This slice holds **only** the fetched/computed data for choropleth rendering.
-The control fields (metric, year, bands) live in `layerDesired.choropleth.params`.
-
-**State:**
-
-| Field                     | Type                          | Purpose                                         |
-| ------------------------- | ----------------------------- | ----------------------------------------------- |
-| `choroplethCache.data`    | `Map<number, number> \| null` | wepp_id → aggregated value                      |
-| `choroplethCache.range`   | `{ min, max } \| null`        | Robust percentile range for color normalization |
-| `choroplethCache.loading` | `boolean`                     | Fetch in progress                               |
-| `choroplethCache.error`   | `string \| null`              | Error message                                   |
-
-**Actions:**
-
-| Action                           | Purpose                                   |
-| -------------------------------- | ----------------------------------------- |
-| `setChoroplethData(data, range)` | Store fetched data + range, clear loading |
-| `setChoroplethLoading(loading)`  | Set loading flag                          |
-| `setChoroplethError(error)`      | Store error, clear loading                |
-| `resetChoroplethCache()`         | Reset to initial state                    |
-
-### Store Composition
+### State Shape
 
 ```typescript
-// store.ts
-export type AppState = LayerSlice &
-  RuntimeSlice &
-  PanelSlice &
-  HillslopeSlice &
-  ChoroplethCacheSlice;
-
-export const useAppStore = create<AppState>()(
-  devtools(
-    (...a) => ({
-      ...createLayerSlice(...a),
-      ...createRuntimeSlice(...a),
-      ...createPanelSlice(...a),
-      ...createHillslopeSlice(...a),
-      ...createChoroplethCacheSlice(...a),
-    }),
-    { name: "app-store" },
-  ),
-);
+interface WatershedState {
+  layerDesired:          DesiredMap;                   // what the user toggled
+  layerRuntime:          LayerRuntime;                 // zoom, data, loading
+  landuseLegendMap:      Record<string, string>;       // color → description
+  selectedHillslopeId:   number | null;                // user interaction
+  selectedHillslopeProps: SubcatchmentProperties | null;
+}
 ```
+
+| Field                    | Type                     | Purpose                                              |
+| ------------------------ | ------------------------ | ---------------------------------------------------- |
+| `layerDesired`           | `DesiredMap`             | Complete desired state for all layers                |
+| `layerRuntime`           | `LayerRuntime`           | Zoom, data availability, loading flags               |
+| `landuseLegendMap`       | `Record<string, string>` | Color → description map for LandUse legend           |
+| `selectedHillslopeId`    | `number \| null`         | Currently selected subcatchment/hillslope            |
+| `selectedHillslopeProps` | `SubcatchmentProperties` | Properties of the selected subcatchment              |
+
+### Reducer Actions
+
+The `watershedReducer` handles all state transitions in one function:
+
+| Action Type                | Payload                          | Behavior                                                        |
+| -------------------------- | -------------------------------- | --------------------------------------------------------------- |
+| `TOGGLE`                   | `id, on`                         | Delegates to `applyAction()` (pure rules.ts)                    |
+| `SET_OPACITY`              | `id, opacity`                    | Delegates to `applyAction()`                                    |
+| `SET_PARAM`                | `id, key, value`                 | Delegates to `applyAction()`                                    |
+| `RESET`                    | —                                | Returns `INITIAL_STATE` — all fields cleared at once            |
+| `SET_DATA_AVAILABILITY`    | `id, available`                  | Updates `layerRuntime.dataAvailability[id]`                     |
+| `SET_LAYER_LOADING`        | `id, loading`                    | Updates `layerRuntime.loading[id]`                              |
+| `SET_ZOOM`                 | `zoom`                           | Updates `layerRuntime.zoom`                                     |
+| `SET_LANDUSE_LEGEND`       | `legend`                         | Updates `landuseLegendMap`                                      |
+| `SET_SELECTED_HILLSLOPE`   | `id, props`                      | Updates hillslope selection                                     |
+| `CLEAR_SELECTED_HILLSLOPE` | —                                | Clears hillslope selection to `null`                            |
+
+Layer-related actions (`TOGGLE`, `SET_OPACITY`, `SET_PARAM`) delegate to the
+pure `applyAction()` from `rules.ts` — the same function used before. The
+reducer is the **only** code path that modifies desired state.
+
+### Provider & Automatic Reset
+
+```
+ ┌─────────────────────────────────────────────────────────┐
+ │  Home.tsx                                               │
+ │                                                         │
+ │  <WatershedProvider runId={runId}>                      │
+ │    ├─ Side panel (WatershedOverview or HomeInfoPanel)   │
+ │    ├─ WatershedMap                                      │
+ │    └─ ActiveBottomPanel (declarative — shows when       │
+ │       choropleth is effective, no isPanelOpen state)    │
+ │  </WatershedProvider>                                   │
+ └─────────────────────────────────────────────────────────┘
+```
+
+The provider:
+
+1. **Mounts** inside `Home` — state is garbage-collected when the user
+   navigates away (e.g. to `/team` or `/about`).
+2. **Resets** automatically when `runId` changes (watershed switch) via a
+   `useEffect` that dispatches `RESET`.
+3. **Skips reset on initial render** using a `useRef(true)` guard — the
+   reducer already starts at `INITIAL_STATE`.
+
+This eliminates the manual "enumerate every field to clear" pattern that
+previously existed in `sharedActionsSlice.resetOverlays`.
+
+### Context Value
+
+The context value is assembled with `useMemo` and exposes:
+
+| Category                   | Members                                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Raw state**              | `layerDesired`, `layerRuntime`, `landuseLegendMap`, `selectedHillslopeId`, `selectedHillslopeProps`              |
+| **Dispatch**               | `dispatch(action)` — raw React dispatch                                                                          |
+| **Convenience dispatchers**| `dispatchLayerAction`, `enableLayerWithParams`, `setDataAvailability`, `setLayerLoading`, `setZoom`, `setLanduseLegendMap`, `setSelectedHillslope`, `clearSelectedHillslope` (all stable `useCallback` refs) |
+| **Derived state**          | `effective` (EffectiveMap), `activeIds` (ordered), `isBlocked(id)`, `isEffective(id)`                            |
+
+The `effective` map and `activeIds` are computed via `useMemo` inside the
+provider, so consumers get pre-computed derived state without needing to
+call `evaluate()` themselves.
 
 ---
 
@@ -550,9 +564,9 @@ function useEffectiveLayers(): {
 };
 ```
 
-Subscribes to `layerDesired` and `layerRuntime` from the store, calls
-`evaluate()` in a `useMemo`, and returns the effective map plus convenience
-selectors. Recomputes only when desired or runtime actually change.
+Thin wrapper around `useWatershed()` from `WatershedContext`. The effective
+state is already computed and memoized inside the provider — this hook simply
+extracts and re-exports the relevant fields for backward compatibility.
 
 **Consumers:** `WatershedMap`, `DataLayersTabContent`, `LandUseLegend`.
 
@@ -602,8 +616,9 @@ and data from `choroplethCache`. Handles:
 2. **Color mapping** — Creates a colormap (e.g. viridis), normalizes values to
    the robust percentile range, and returns `getColor(weppId)` and
    `getChoroplethStyle(weppId)` callbacks.
-3. **Cache management** — Writes fetched data to `choroplethCacheSlice` via
-   `setChoroplethData`, `setChoroplethLoading`, `setChoroplethError`.
+3. **Cache management** — Stores fetched data in local `useState` hooks.
+   When the choropleth layer is disabled, `ActiveBottomPanel` unmounts
+   `VegetationCover` → the hook is destroyed → cache is garbage-collected.
 
 ---
 
@@ -671,15 +686,29 @@ dispatchLayerAction({
 });
 ```
 
-### `MapEffect`
+### `Home` / `ActiveBottomPanel`
 
-Dispatches `{ type: "RESET" }` when navigating to a new watershed to clear
-all layer state before zooming.
+`Home.tsx` wraps its children in `<WatershedProvider runId={runId}>`. The
+provider auto-resets on watershed switch, so no manual reset is needed in
+`MapEffect` or `WatershedOverview`.
 
-### `WatershedOverview`
+`ActiveBottomPanel` is a small declarative component inside `Home.tsx`:
 
-Dispatches `{ type: "RESET" }` when the user navigates back from the watershed
-detail view to clear all layer state.
+```tsx
+function ActiveBottomPanel(): JSX.Element | null {
+  const { isEffective } = useWatershed();
+  if (!isEffective("choropleth")) return null;
+  return (
+    <BottomPanel isOpen>
+      <VegetationCover />
+    </BottomPanel>
+  );
+}
+```
+
+This replaces the old `isPanelOpen` / `panelContent` state in `panelSlice` —
+the panel appears/disappears based purely on whether the choropleth layer is
+effectively active.
 
 ---
 
@@ -733,3 +762,54 @@ All layer system code is covered by unit and integration tests.
 No changes to `rules.ts` or `evaluate.ts` needed — the rule engine and evaluator
 work entirely from the registry. The exclusive group, requires, zoom range, and
 dependent teardown behaviors are all automatic.
+
+---
+
+## 13. Migration Notes (Zustand → WatershedContext)
+
+This section documents the architectural migration completed in the
+`frontend-map-layer-overhaul` branch.
+
+### What Changed
+
+| Before (Zustand)                          | After (WatershedContext)                              |
+| ----------------------------------------- | ----------------------------------------------------- |
+| 6 Zustand slices composed in `store.ts`   | 1 `useReducer` in `WatershedContext.tsx`              |
+| `overlaySlice` (4 boolean setters)        | `layerDesired` via `TOGGLE` action                    |
+| `sbsSlice` (2 fields)                     | `layerDesired.sbs.params` via `SET_PARAM`             |
+| `landuseSlice` (2 fields)                 | `landuseLegendMap` + `isEffective("landuse")`         |
+| `choroplethSlice` (7 fields, 7 setters)   | `layerDesired.choropleth.params` + local hook state   |
+| `hillslopeSlice` (selection state)        | `selectedHillslopeId/Props` in reducer                |
+| `panelSlice` (`isPanelOpen`, content)     | Declarative: `isEffective("choropleth")` in JSX       |
+| `sharedActionsSlice.resetOverlays`        | `RESET` action returns `INITIAL_STATE`                |
+| Global store — never resets automatically | Provider unmounts on nav, resets on watershed switch  |
+| `useAppStore` selectors everywhere        | `useWatershed()` hook                                 |
+
+### Why
+
+1. **Lifecycle alignment** — Watershed state should not survive navigation to
+   `/team` or `/about`. A context provider that mounts inside `Home` and
+   unmounts on navigation achieves this automatically.
+
+2. **Simpler resets** — The old `resetOverlays` had to manually enumerate
+   every field. The reducer's `RESET` case returns `INITIAL_STATE`.
+
+3. **Fewer moving parts** — Six slice files, a store compositor, and scattered
+   selectors replaced by a single file with a reducer and provider.
+
+4. **Declarative UI** — Bottom panels and legends derive visibility from
+   `isEffective(id)` instead of imperative `isPanelOpen` / `setPanelContent`
+   state.
+
+### Deleted Files
+
+- `store/slices/overlaySlice.ts`
+- `store/slices/sbsSlice.ts`
+- `store/slices/landuseSlice.ts`
+- `store/slices/choroplethSlice.ts`
+- `store/slices/hillslopeSlice.ts`
+- `store/slices/panelSlice.ts`
+- `store/slices/sharedActionsSlice.ts`
+- `routes/router.tsx` (replaced by file-based routing)
+- `routes/LoginRoute.tsx`, `routes/RegisterRoute.tsx` (inlined into file routes)
+- `layers/index.ts` (unused barrel file)
