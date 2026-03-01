@@ -67,7 +67,7 @@ the React hooks, and every component that consumes the system.
 | **Pure business logic**              | `applyAction`, `enableWithParams`, and `evaluate` are pure functions with no side effects, no store access, and no React. Trivially unit-testable. |
 | **Structured errors**                | `BlockedReason` is a discriminated union — never a stringly-typed message. UI code pattern-matches on `kind`.                                      |
 | **No scattered toggles**             | All toggle / param / opacity mutations route through `dispatchLayerAction` → `applyAction`. No ad-hoc boolean setters.                             |
-| **Automatic lifecycle**              | `WatershedProvider` mounts inside `Home` — state is GC'd on navigation. Watershed switches dispatch `RESET` automatically.                        |
+| **Automatic lifecycle**              | `WatershedProvider` mounts inside `Home` — state is GC'd on navigation. Watershed switches dispatch `RESET` automatically.                         |
 
 ---
 
@@ -470,38 +470,38 @@ managed this state.
 
 ```typescript
 interface WatershedState {
-  layerDesired:          DesiredMap;                   // what the user toggled
-  layerRuntime:          LayerRuntime;                 // zoom, data, loading
-  landuseLegendMap:      Record<string, string>;       // color → description
-  selectedHillslopeId:   number | null;                // user interaction
+  layerDesired: DesiredMap; // what the user toggled
+  layerRuntime: LayerRuntime; // zoom, data, loading
+  landuseLegendMap: Record<string, string>; // color → description
+  selectedHillslopeId: number | null; // user interaction
   selectedHillslopeProps: SubcatchmentProperties | null;
 }
 ```
 
-| Field                    | Type                     | Purpose                                              |
-| ------------------------ | ------------------------ | ---------------------------------------------------- |
-| `layerDesired`           | `DesiredMap`             | Complete desired state for all layers                |
-| `layerRuntime`           | `LayerRuntime`           | Zoom, data availability, loading flags               |
-| `landuseLegendMap`       | `Record<string, string>` | Color → description map for LandUse legend           |
-| `selectedHillslopeId`    | `number \| null`         | Currently selected subcatchment/hillslope            |
-| `selectedHillslopeProps` | `SubcatchmentProperties` | Properties of the selected subcatchment              |
+| Field                    | Type                     | Purpose                                    |
+| ------------------------ | ------------------------ | ------------------------------------------ |
+| `layerDesired`           | `DesiredMap`             | Complete desired state for all layers      |
+| `layerRuntime`           | `LayerRuntime`           | Zoom, data availability, loading flags     |
+| `landuseLegendMap`       | `Record<string, string>` | Color → description map for LandUse legend |
+| `selectedHillslopeId`    | `number \| null`         | Currently selected subcatchment/hillslope  |
+| `selectedHillslopeProps` | `SubcatchmentProperties` | Properties of the selected subcatchment    |
 
 ### Reducer Actions
 
 The `watershedReducer` handles all state transitions in one function:
 
-| Action Type                | Payload                          | Behavior                                                        |
-| -------------------------- | -------------------------------- | --------------------------------------------------------------- |
-| `TOGGLE`                   | `id, on`                         | Delegates to `applyAction()` (pure rules.ts)                    |
-| `SET_OPACITY`              | `id, opacity`                    | Delegates to `applyAction()`                                    |
-| `SET_PARAM`                | `id, key, value`                 | Delegates to `applyAction()`                                    |
-| `RESET`                    | —                                | Returns `INITIAL_STATE` — all fields cleared at once            |
-| `SET_DATA_AVAILABILITY`    | `id, available`                  | Updates `layerRuntime.dataAvailability[id]`                     |
-| `SET_LAYER_LOADING`        | `id, loading`                    | Updates `layerRuntime.loading[id]`                              |
-| `SET_ZOOM`                 | `zoom`                           | Updates `layerRuntime.zoom`                                     |
-| `SET_LANDUSE_LEGEND`       | `legend`                         | Updates `landuseLegendMap`                                      |
-| `SET_SELECTED_HILLSLOPE`   | `id, props`                      | Updates hillslope selection                                     |
-| `CLEAR_SELECTED_HILLSLOPE` | —                                | Clears hillslope selection to `null`                            |
+| Action Type                | Payload          | Behavior                                             |
+| -------------------------- | ---------------- | ---------------------------------------------------- |
+| `TOGGLE`                   | `id, on`         | Delegates to `applyAction()` (pure rules.ts)         |
+| `SET_OPACITY`              | `id, opacity`    | Delegates to `applyAction()`                         |
+| `SET_PARAM`                | `id, key, value` | Delegates to `applyAction()`                         |
+| `RESET`                    | —                | Returns `INITIAL_STATE` — all fields cleared at once |
+| `SET_DATA_AVAILABILITY`    | `id, available`  | Updates `layerRuntime.dataAvailability[id]`          |
+| `SET_LAYER_LOADING`        | `id, loading`    | Updates `layerRuntime.loading[id]`                   |
+| `SET_ZOOM`                 | `zoom`           | Updates `layerRuntime.zoom`                          |
+| `SET_LANDUSE_LEGEND`       | `legend`         | Updates `landuseLegendMap`                           |
+| `SET_SELECTED_HILLSLOPE`   | `id, props`      | Updates hillslope selection                          |
+| `CLEAR_SELECTED_HILLSLOPE` | —                | Clears hillslope selection to `null`                 |
 
 Layer-related actions (`TOGGLE`, `SET_OPACITY`, `SET_PARAM`) delegate to the
 pure `applyAction()` from `rules.ts` — the same function used before. The
@@ -538,12 +538,12 @@ previously existed in `sharedActionsSlice.resetOverlays`.
 
 The context value is assembled with `useMemo` and exposes:
 
-| Category                   | Members                                                                                                          |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Raw state**              | `layerDesired`, `layerRuntime`, `landuseLegendMap`, `selectedHillslopeId`, `selectedHillslopeProps`              |
-| **Dispatch**               | `dispatch(action)` — raw React dispatch                                                                          |
-| **Convenience dispatchers**| `dispatchLayerAction`, `enableLayerWithParams`, `setDataAvailability`, `setLayerLoading`, `setZoom`, `setLanduseLegendMap`, `setSelectedHillslope`, `clearSelectedHillslope` (all stable `useCallback` refs) |
-| **Derived state**          | `effective` (EffectiveMap), `activeIds` (ordered), `isBlocked(id)`, `isEffective(id)`                            |
+| Category                    | Members                                                                                                                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Raw state**               | `layerDesired`, `layerRuntime`, `landuseLegendMap`, `selectedHillslopeId`, `selectedHillslopeProps`                                                                                                          |
+| **Dispatch**                | `dispatch(action)` — raw React dispatch                                                                                                                                                                      |
+| **Convenience dispatchers** | `dispatchLayerAction`, `enableLayerWithParams`, `setDataAvailability`, `setLayerLoading`, `setZoom`, `setLanduseLegendMap`, `setSelectedHillslope`, `clearSelectedHillslope` (all stable `useCallback` refs) |
+| **Derived state**           | `effective` (EffectiveMap), `activeIds` (ordered), `isBlocked(id)`, `isEffective(id)`                                                                                                                        |
 
 The `effective` map and `activeIds` are computed via `useMemo` inside the
 provider, so consumers get pre-computed derived state without needing to
@@ -772,18 +772,18 @@ This section documents the architectural migration completed in the
 
 ### What Changed
 
-| Before (Zustand)                          | After (WatershedContext)                              |
-| ----------------------------------------- | ----------------------------------------------------- |
-| 6 Zustand slices composed in `store.ts`   | 1 `useReducer` in `WatershedContext.tsx`              |
-| `overlaySlice` (4 boolean setters)        | `layerDesired` via `TOGGLE` action                    |
-| `sbsSlice` (2 fields)                     | `layerDesired.sbs.params` via `SET_PARAM`             |
-| `landuseSlice` (2 fields)                 | `landuseLegendMap` + `isEffective("landuse")`         |
-| `choroplethSlice` (7 fields, 7 setters)   | `layerDesired.choropleth.params` + local hook state   |
-| `hillslopeSlice` (selection state)        | `selectedHillslopeId/Props` in reducer                |
-| `panelSlice` (`isPanelOpen`, content)     | Declarative: `isEffective("choropleth")` in JSX       |
-| `sharedActionsSlice.resetOverlays`        | `RESET` action returns `INITIAL_STATE`                |
-| Global store — never resets automatically | Provider unmounts on nav, resets on watershed switch  |
-| `useAppStore` selectors everywhere        | `useWatershed()` hook                                 |
+| Before (Zustand)                          | After (WatershedContext)                             |
+| ----------------------------------------- | ---------------------------------------------------- |
+| 6 Zustand slices composed in `store.ts`   | 1 `useReducer` in `WatershedContext.tsx`             |
+| `overlaySlice` (4 boolean setters)        | `layerDesired` via `TOGGLE` action                   |
+| `sbsSlice` (2 fields)                     | `layerDesired.sbs.params` via `SET_PARAM`            |
+| `landuseSlice` (2 fields)                 | `landuseLegendMap` + `isEffective("landuse")`        |
+| `choroplethSlice` (7 fields, 7 setters)   | `layerDesired.choropleth.params` + local hook state  |
+| `hillslopeSlice` (selection state)        | `selectedHillslopeId/Props` in reducer               |
+| `panelSlice` (`isPanelOpen`, content)     | Declarative: `isEffective("choropleth")` in JSX      |
+| `sharedActionsSlice.resetOverlays`        | `RESET` action returns `INITIAL_STATE`               |
+| Global store — never resets automatically | Provider unmounts on nav, resets on watershed switch |
+| `useAppStore` selectors everywhere        | `useWatershed()` hook                                |
 
 ### Why
 

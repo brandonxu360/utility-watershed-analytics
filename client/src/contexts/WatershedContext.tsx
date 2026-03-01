@@ -224,8 +224,7 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
   );
 
   const setSelectedHillslope = useCallback(
-    (id: number | null) =>
-      dispatch({ type: "SET_SELECTED_HILLSLOPE", id }),
+    (id: number | null) => dispatch({ type: "SET_SELECTED_HILLSLOPE", id }),
     [],
   );
 

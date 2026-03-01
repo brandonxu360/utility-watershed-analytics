@@ -77,11 +77,7 @@ export default function WatershedMap(): JSX.Element {
   const { classes } = useStyles();
   const navigate = useNavigate();
 
-  const {
-    layerDesired,
-    effective,
-    isEffective,
-  } = useWatershed();
+  const { layerDesired, effective, isEffective } = useWatershed();
 
   // Fire toasts when layers are blocked
   useLayerToasts(layerDesired, effective);

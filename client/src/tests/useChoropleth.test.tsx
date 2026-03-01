@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import {
   useChoropleth,
   CHOROPLETH_CONFIG,
@@ -29,9 +31,14 @@ const mockFetchRapChoropleth = vi.mocked(fetchRapChoropleth);
 
 let mockDesired: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
 
+const mockSetDataAvailability = vi.fn();
+const mockSetLayerLoading = vi.fn();
+
 vi.mock("../contexts/WatershedContext", () => ({
   useWatershed: () => ({
     layerDesired: mockDesired,
+    setDataAvailability: mockSetDataAvailability,
+    setLayerLoading: mockSetLayerLoading,
   }),
 }));
 
@@ -46,6 +53,16 @@ function desiredWithChoropleth(
   d.choropleth.params = { metric, year, bands };
   return d;
 }
+
+/** Wrapper providing a fresh QueryClient for each test. */
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  });
+  return ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
 
 describe("useChoropleth", () => {
   beforeEach(() => {
@@ -86,7 +103,9 @@ describe("useChoropleth", () => {
 
   describe("hook behavior", () => {
     it("returns inactive state when choropleth is disabled", () => {
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.isActive).toBe(false);
       expect(result.current.choropleth).toBe("none");
@@ -100,7 +119,9 @@ describe("useChoropleth", () => {
       ]);
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isActive).toBe(true);
@@ -117,7 +138,9 @@ describe("useChoropleth", () => {
       ]);
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      renderHook(() => useChoropleth());
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(mockFetchRapChoropleth).toHaveBeenCalledWith({
@@ -132,7 +155,9 @@ describe("useChoropleth", () => {
       mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
 
       mockDesired = desiredWithChoropleth("vegetationCover", 2020);
-      renderHook(() => useChoropleth());
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(mockFetchRapChoropleth).toHaveBeenCalledWith({
@@ -147,7 +172,9 @@ describe("useChoropleth", () => {
       mockFetchRapChoropleth.mockRejectedValue(new Error("Network error"));
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.error).toContain("Failed to load data");
@@ -158,7 +185,9 @@ describe("useChoropleth", () => {
       mockFetchRapChoropleth.mockResolvedValue([]);
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.error).toContain("No valid data available");
@@ -174,7 +203,9 @@ describe("useChoropleth", () => {
       ]);
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -190,7 +221,9 @@ describe("useChoropleth", () => {
       mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      const { result, rerender } = renderHook(() => useChoropleth());
+      const { result, rerender } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isActive).toBe(true);
@@ -207,7 +240,9 @@ describe("useChoropleth", () => {
 
   describe("getColor", () => {
     it("returns null when choropleth is inactive", () => {
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
       expect(result.current.getColor(1)).toBeNull();
     });
 
@@ -215,7 +250,9 @@ describe("useChoropleth", () => {
       mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -228,7 +265,9 @@ describe("useChoropleth", () => {
       mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -244,7 +283,9 @@ describe("useChoropleth", () => {
       ]);
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -258,7 +299,9 @@ describe("useChoropleth", () => {
 
   describe("getChoroplethStyle", () => {
     it("returns null when choropleth is inactive", () => {
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
       expect(result.current.getChoroplethStyle(1)).toBeNull();
     });
 
@@ -269,7 +312,9 @@ describe("useChoropleth", () => {
       ]);
 
       mockDesired = desiredWithChoropleth("vegetationCover");
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -281,6 +326,87 @@ describe("useChoropleth", () => {
       expect(style).toHaveProperty("weight", 0.75);
       expect(style).toHaveProperty("fillColor");
       expect(style).toHaveProperty("fillOpacity", 0.85);
+    });
+  });
+
+  describe("runtime reporting", () => {
+    it("reports loading to layer runtime while fetching", async () => {
+      mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
+
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      // Initially loading
+      expect(mockSetLayerLoading).toHaveBeenCalledWith("choropleth", true);
+
+      await waitFor(() => {
+        expect(mockSetLayerLoading).toHaveBeenCalledWith("choropleth", false);
+      });
+    });
+
+    it("reports data availability after successful fetch", async () => {
+      mockFetchRapChoropleth.mockResolvedValue([
+        { wepp_id: 1, value: 50 },
+        { wepp_id: 2, value: 75 },
+      ]);
+
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "choropleth",
+          true,
+        );
+      });
+    });
+
+    it("reports data unavailable when fetch returns empty data", async () => {
+      mockFetchRapChoropleth.mockResolvedValue([]);
+
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "choropleth",
+          false,
+        );
+      });
+    });
+
+    it("reports data unavailable on fetch error", async () => {
+      mockFetchRapChoropleth.mockRejectedValue(new Error("Network error"));
+
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "choropleth",
+          false,
+        );
+      });
+    });
+
+    it("does not report availability when choropleth is disabled", () => {
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      // setLayerLoading is called for loading=false even when inactive
+      expect(mockSetDataAvailability).not.toHaveBeenCalledWith(
+        "choropleth",
+        expect.anything(),
+      );
     });
   });
 });

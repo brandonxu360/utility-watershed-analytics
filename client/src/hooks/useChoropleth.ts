@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useCallback, useState } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
 import { useParams } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useWatershed } from "../contexts/WatershedContext";
 import { fetchRapChoropleth } from "../api/rapApi";
 
@@ -70,7 +71,7 @@ export function useChoropleth(): UseChoroplethResult {
     }) ?? null;
 
   // Read control fields from the layer desired-state
-  const { layerDesired } = useWatershed();
+  const { layerDesired, setDataAvailability, setLayerLoading } = useWatershed();
   const choroplethDesired = layerDesired.choropleth;
   const choroplethType = (
     choroplethDesired.enabled
@@ -79,22 +80,6 @@ export function useChoropleth(): UseChoroplethResult {
   ) as ChoroplethType;
   const choroplethYear = choroplethDesired.params.year as number | null;
   const choroplethBands = (choroplethDesired.params.bands as string) ?? "all";
-
-  // Local cache — lives as long as the hook's consumer is mounted.
-  // When the choropleth layer is disabled, ActiveBottomPanel unmounts
-  // VegetationCover → this hook is destroyed → cache is GC'd.
-  const [choroplethData, setChoroplethDataLocal] = useState<Map<
-    number,
-    number
-  > | null>(null);
-  const [choroplethRange, setChoroplethRangeLocal] = useState<{
-    min: number;
-    max: number;
-  } | null>(null);
-  const [choroplethLoading, setChoroplethLoadingLocal] = useState(false);
-  const [choroplethError, setChoroplethErrorLocal] = useState<string | null>(
-    null,
-  );
 
   const config =
     choroplethType !== "none" ? CHOROPLETH_CONFIG[choroplethType] : null;
@@ -107,72 +92,89 @@ export function useChoropleth(): UseChoroplethResult {
     return config.bands;
   }, [config, choroplethType, choroplethBands]);
 
-  useEffect(() => {
-    if (
-      choroplethType === "none" ||
-      !config ||
-      effectiveBands.length === 0 ||
-      !runId
-    ) {
-      setChoroplethDataLocal(null);
-      setChoroplethRangeLocal(null);
-      return;
+  // ── Fetch via useQuery (replaces manual useState/useEffect fetch) ─────
+  const isEnabled =
+    choroplethType !== "none" && !!runId && effectiveBands.length > 0;
+
+  const {
+    data: rawData,
+    isLoading: choroplethLoading,
+    isError,
+    error: queryError,
+  } = useQuery({
+    queryKey: [
+      "rap-choropleth",
+      runId,
+      choroplethType,
+      choroplethYear,
+      effectiveBands,
+    ],
+    queryFn: () =>
+      fetchRapChoropleth({
+        runId: runId!,
+        band: effectiveBands,
+        year: choroplethYear,
+      }),
+    enabled: isEnabled,
+  });
+
+  // ── Derive processed data from raw query result ───────────────────────
+  const { choroplethData, choroplethRange, dataError } = useMemo(() => {
+    if (!rawData) {
+      return { choroplethData: null, choroplethRange: null, dataError: null };
     }
 
-    let mounted = true;
+    const dataMap = new Map<number, number>();
+    const values: number[] = [];
 
-    async function loadData() {
-      setChoroplethLoadingLocal(true);
-      setChoroplethErrorLocal(null);
-
-      try {
-        const data = await fetchRapChoropleth({
-          runId: runId!,
-          band: effectiveBands,
-          year: choroplethYear,
-        });
-
-        if (!mounted) return;
-
-        const dataMap = new Map<number, number>();
-        const values: number[] = [];
-
-        for (const row of data) {
-          if (Number.isFinite(row.value)) {
-            dataMap.set(row.wepp_id, row.value);
-            values.push(row.value);
-          }
-        }
-
-        // Handle empty or invalid data
-        if (values.length === 0) {
-          setChoroplethDataLocal(null);
-          setChoroplethRangeLocal(null);
-          setChoroplethErrorLocal(
-            "No valid data available for the selected options",
-          );
-          setChoroplethLoadingLocal(false);
-          return;
-        }
-
-        const range = computeRobustRange(values, 0.02, 0.98);
-
-        setChoroplethDataLocal(dataMap);
-        setChoroplethRangeLocal(range);
-        setChoroplethLoadingLocal(false);
-      } catch (err: unknown) {
-        if (!mounted) return;
-        const message = err instanceof Error ? err.message : String(err);
-        setChoroplethErrorLocal(`Failed to load data: ${message}`);
-        setChoroplethLoadingLocal(false);
+    for (const row of rawData) {
+      if (Number.isFinite(row.value)) {
+        dataMap.set(row.wepp_id, row.value);
+        values.push(row.value);
       }
     }
 
-    loadData();
-    return () => {
-      mounted = false;
-    };
-  }, [choroplethType, choroplethYear, effectiveBands, config, runId]);
+    if (values.length === 0) {
+      return {
+        choroplethData: null,
+        choroplethRange: null,
+        dataError: "No valid data available for the selected options",
+      };
+    }
+
+    const range = computeRobustRange(values, 0.02, 0.98);
+    return { choroplethData: dataMap, choroplethRange: range, dataError: null };
+  }, [rawData]);
+
+  // Combine query-level errors with data-processing errors
+  const choroplethError = isError
+    ? `Failed to load data: ${queryError instanceof Error ? queryError.message : String(queryError)}`
+    : dataError;
+
+  // ── Report data availability to layer runtime ─────────────────────────
+  useEffect(() => {
+    if (!isEnabled) return;
+
+    if (choroplethLoading) {
+      setDataAvailability("choropleth", undefined);
+      return;
+    }
+
+    const hasData =
+      !choroplethError && choroplethData != null && choroplethData.size > 0;
+    setDataAvailability("choropleth", hasData);
+  }, [
+    isEnabled,
+    choroplethLoading,
+    choroplethError,
+    choroplethData,
+    setDataAvailability,
+  ]);
+
+  // ── Report loading flag to layer runtime ──────────────────────────────
+  useEffect(() => {
+    setLayerLoading("choropleth", choroplethLoading);
+  }, [choroplethLoading, setLayerLoading]);
 
   const colormap = useMemo(() => {
     if (!config) return null;

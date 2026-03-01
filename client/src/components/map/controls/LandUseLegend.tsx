@@ -69,7 +69,9 @@ interface LandUseLegendProps {
   landuseLegendMap: Record<string, string>;
 }
 
-export default function LandUseLegend({ landuseLegendMap }: LandUseLegendProps) {
+export default function LandUseLegend({
+  landuseLegendMap,
+}: LandUseLegendProps) {
   const { classes } = useStyles();
 
   const { isEffective } = useEffectiveLayers();

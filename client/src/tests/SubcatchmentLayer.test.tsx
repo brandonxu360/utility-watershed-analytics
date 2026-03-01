@@ -236,9 +236,7 @@ describe("SubcatchmentLayer", () => {
 
     expect(layer1.setStyle).toHaveBeenCalledWith(styleFn(feature1));
     expect(layer2.setStyle).toHaveBeenCalledWith(selectedStyle);
-    expect(setSelectedHillslope).toHaveBeenLastCalledWith(
-      202,
-    );
+    expect(setSelectedHillslope).toHaveBeenLastCalledWith(202);
   });
 
   it("mouseover uses highlightedStyle when choropleth is inactive and not selected", () => {
