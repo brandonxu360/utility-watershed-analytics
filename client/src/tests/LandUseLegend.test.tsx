@@ -19,17 +19,6 @@ vi.mock("../contexts/WatershedContext", () => ({
   },
 }));
 
-vi.mock("../hooks/useEffectiveLayers", () => ({
-  useEffectiveLayers: () => {
-    const eff = evaluate(mockDesired, mockRuntime);
-    return {
-      effective: eff,
-      isEffective: (id: LayerId) => eff[id].enabled,
-      isBlocked: (id: LayerId) => isDesiredButBlocked(id, mockDesired, eff),
-    };
-  },
-}));
-
 describe("Land Use Legend Component Tests", () => {
   beforeEach(() => {
     mockDesired = JSON.parse(JSON.stringify(INITIAL_DESIRED));

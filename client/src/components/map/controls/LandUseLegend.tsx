@@ -1,6 +1,6 @@
 import { tss } from "../../../utils/tss";
 import { Paper, Typography } from "@mui/material";
-import { useEffectiveLayers } from "../../../hooks/useEffectiveLayers";
+import { useWatershed } from "../../../contexts/WatershedContext";
 
 const useStyles = tss.create(({ theme }) => ({
   landuseLegendWrapper: {
@@ -74,7 +74,7 @@ export default function LandUseLegend({
 }: LandUseLegendProps) {
   const { classes } = useStyles();
 
-  const { isEffective } = useEffectiveLayers();
+  const { isEffective } = useWatershed();
 
   // Show legend only when landuse layer is effectively enabled and we have data
   if (!isEffective("landuse") || Object.keys(landuseLegendMap).length === 0)
