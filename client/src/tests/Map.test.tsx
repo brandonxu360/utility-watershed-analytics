@@ -27,7 +27,6 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
 const mockFetchWatersheds = vi.fn();
 const mockFetchSubcatchments = vi.fn();
 const mockFetchChannels = vi.fn();
-const mockFetchLanduse = vi.fn();
 
 vi.mock("../api/api", () => ({
   fetchWatersheds: () => mockFetchWatersheds(),
@@ -35,8 +34,12 @@ vi.mock("../api/api", () => ({
   fetchChannels: (id: string) => mockFetchChannels(id),
 }));
 
-vi.mock("../api/landuseApi", () => ({
-  fetchLanduse: (opts: { runId: string }) => mockFetchLanduse(opts),
+const { mockUseLanduseData } = vi.hoisted(() => ({
+  mockUseLanduseData: vi.fn(),
+}));
+
+vi.mock("../hooks/useLanduseData", () => ({
+  useLanduseData: (...args: unknown[]) => mockUseLanduseData(...args),
 }));
 
 vi.mock("react-toastify", () => ({
@@ -57,7 +60,6 @@ vi.mock("../hooks/useChoropleth", () => ({
 /* ── useWatershed mock ────────────────────────────────────────────────── */
 
 const mockDispatchLayerAction = vi.fn();
-const mockSetLanduseLegendMap = vi.fn();
 const mockSetDataAvailability = vi.fn();
 const mockSetLayerLoading = vi.fn();
 const mockSetZoom = vi.fn();
@@ -74,7 +76,6 @@ vi.mock("../contexts/WatershedContext", () => ({
     return {
       layerDesired: mockDesired,
       layerRuntime: mockRuntime,
-      landuseLegendMap: {},
       selectedHillslopeId: null,
       dispatch: vi.fn(),
       dispatchLayerAction: mockDispatchLayerAction,
@@ -82,7 +83,6 @@ vi.mock("../contexts/WatershedContext", () => ({
       setDataAvailability: mockSetDataAvailability,
       setLayerLoading: mockSetLayerLoading,
       setZoom: mockSetZoom,
-      setLanduseLegendMap: mockSetLanduseLegendMap,
       setSelectedHillslope: mockSetSelectedHillslope,
       clearSelectedHillslope: mockClearSelectedHillslope,
       effective: eff,
@@ -322,9 +322,13 @@ describe("Map Component", () => {
     mockFetchWatersheds.mockResolvedValue(mockWatershedData);
     mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
     mockFetchChannels.mockResolvedValue(mockChannelData);
-    mockFetchLanduse.mockResolvedValue({
-      1: { desc: "Forest", color: "#ff0000" },
-      2: { desc: "Grassland", color: "#00ff00" },
+    mockUseLanduseData.mockReturnValue({
+      landuseData: {
+        1: { desc: "Forest", color: "#ff0000" },
+        2: { desc: "Grassland", color: "#00ff00" },
+      },
+      landuseLoading: false,
+      landuseLegendMap: {},
     });
     mockUseChoropleth.mockReturnValue({
       isActive: false,
@@ -646,107 +650,6 @@ describe("Map Component", () => {
           "subcatchment",
           false,
         );
-      });
-    });
-  });
-
-  describe("landuse legend", () => {
-    it("sets landuse legend map when landuse is enabled", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("subcatchment", "landuse");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({
-          "#ff0000": "Forest",
-          "#00ff00": "Grassland",
-        });
-      });
-    });
-
-    it("prefers undisturbed landuse parquet values when available", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("subcatchment", "landuse");
-
-      mockFetchSubcatchments.mockResolvedValue({
-        features: [
-          {
-            id: "sub-1",
-            type: "Feature",
-            geometry: { type: "Polygon", coordinates: [] },
-            properties: { topazid: 1, weppid: 101 },
-          },
-        ],
-      });
-
-      mockFetchLanduse.mockResolvedValue({
-        1: { desc: "Pasture/Hay", color: "#dbd83d" },
-      });
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockFetchLanduse).toHaveBeenCalledWith({
-          runId: "watershed-1",
-        });
-        expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({
-          "#dbd83d": "Pasture/Hay",
-        });
-      });
-    });
-
-    it("clears landuse legend map when landuse is disabled", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("subcatchment");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
-      });
-    });
-
-    it("handles landuse entries without color/desc", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("subcatchment", "landuse");
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
-      mockFetchLanduse.mockResolvedValue({
-        1: { desc: "", color: "" },
-        2: { desc: "", color: "" },
-      });
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
-      });
-    });
-
-    it("reports landuse unavailable when undisturbed scenario returns no rows", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      mockDesired = desiredWith("subcatchment", "landuse");
-
-      mockFetchLanduse.mockResolvedValue({});
-      mockFetchSubcatchments.mockResolvedValue(mockSubcatchmentData);
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockSetDataAvailability).toHaveBeenCalledWith("landuse", false);
-      });
-    });
-
-    it("clears landuse legend when returning to home without watershed", async () => {
-      mockUseParams.mockReturnValue(undefined);
-      mockDesired = desiredWith("landuse");
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        expect(mockSetLanduseLegendMap).toHaveBeenCalledWith({});
       });
     });
   });

@@ -7,13 +7,11 @@ import type { DesiredMap, LayerRuntime, LayerId } from "../layers/types";
 
 let mockDesired: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
 let mockRuntime: LayerRuntime = JSON.parse(JSON.stringify(INITIAL_RUNTIME));
-let mockLanduseLegendMap: Record<string, string> = {};
 
 vi.mock("../contexts/WatershedContext", () => ({
   useWatershed: () => {
     const eff = evaluate(mockDesired, mockRuntime);
     return {
-      landuseLegendMap: mockLanduseLegendMap,
       effective: eff,
       isEffective: (id: LayerId) => eff[id].enabled,
       isBlocked: (id: LayerId) => isDesiredButBlocked(id, mockDesired, eff),
@@ -36,11 +34,10 @@ describe("Land Use Legend Component Tests", () => {
   beforeEach(() => {
     mockDesired = JSON.parse(JSON.stringify(INITIAL_DESIRED));
     mockRuntime = JSON.parse(JSON.stringify(INITIAL_RUNTIME));
-    mockLanduseLegendMap = {};
   });
 
   it("renders nothing when landuse is not effectively enabled", () => {
-    render(<LandUseLegend />);
+    render(<LandUseLegend landuseLegendMap={{}} />);
     expect(
       screen.queryByRole("region", { name: /land use legend/i }),
     ).not.toBeInTheDocument();
@@ -56,8 +53,7 @@ describe("Land Use Legend Component Tests", () => {
       ...INITIAL_RUNTIME,
       dataAvailability: { subcatchment: true, landuse: true },
     };
-    mockLanduseLegendMap = {};
-    render(<LandUseLegend />);
+    render(<LandUseLegend landuseLegendMap={{}} />);
 
     expect(
       screen.queryByRole("region", { name: /land use legend/i }),
@@ -74,12 +70,14 @@ describe("Land Use Legend Component Tests", () => {
       ...INITIAL_RUNTIME,
       dataAvailability: { subcatchment: true, landuse: true },
     };
-    mockLanduseLegendMap = {
+    const legendMap = {
       "#ff0000": "Forest",
       "#00ff00": "Grass",
     };
 
-    const { container } = render(<LandUseLegend />);
+    const { container } = render(
+      <LandUseLegend landuseLegendMap={legendMap} />,
+    );
 
     expect(screen.getByText("Forest")).toBeInTheDocument();
     expect(screen.getByText("Grass")).toBeInTheDocument();

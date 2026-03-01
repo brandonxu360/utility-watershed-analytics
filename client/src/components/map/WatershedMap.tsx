@@ -18,8 +18,8 @@ import { useChoropleth } from "../../hooks/useChoropleth";
 import { selectedStyle, defaultStyle } from "./constants";
 import { tss } from "../../utils/tss";
 import { CircularProgress } from "@mui/material";
-import { fetchLanduse } from "../../api/landuseApi";
 import { useWatershed } from "../../contexts/WatershedContext";
+import { useLanduseData } from "../../hooks/useLanduseData";
 import DataLayersControl from "./controls/DataLayers/DataLayers";
 import ZoomInControl from "./controls/ZoomIn";
 import ZoomOutControl from "./controls/ZoomOut";
@@ -81,7 +81,6 @@ export default function WatershedMap(): JSX.Element {
 
   const {
     layerDesired,
-    setLanduseLegendMap,
     setDataAvailability,
     setLayerLoading,
     effective,
@@ -155,15 +154,9 @@ export default function WatershedMap(): JSX.Element {
     enabled: Boolean(layerDesired.channels.enabled && runId),
   });
 
-  const {
-    data: landuseData,
-    isLoading: landuseLoading,
-    error: landuseError,
-  } = useQuery({
-    queryKey: ["landuse-undisturbed", runId],
-    queryFn: () => fetchLanduse({ runId: runId! }),
-    enabled: Boolean(layerDesired.landuse.enabled && runId),
-  });
+  // Landuse data, runtime reporting, and legend — colocated in one hook
+  const { landuseData, landuseLoading, landuseLegendMap } =
+    useLanduseData(runId);
 
   // Update runtime data availability for subcatchment
   useEffect(() => {
@@ -182,30 +175,6 @@ export default function WatershedMap(): JSX.Element {
     subLoading,
     subError,
     subcatchments,
-    runId,
-    setDataAvailability,
-  ]);
-
-  // Update runtime data availability for landuse
-  useEffect(() => {
-    if (!runId || !layerDesired.landuse.enabled) return;
-
-    // Clear stale availability while a fresh fetch is in progress
-    if (landuseLoading) {
-      setDataAvailability("landuse", undefined);
-      return;
-    }
-
-    const hasData =
-      !landuseError &&
-      landuseData != null &&
-      Object.keys(landuseData).length > 0;
-    setDataAvailability("landuse", hasData);
-  }, [
-    layerDesired.landuse.enabled,
-    landuseData,
-    landuseLoading,
-    landuseError,
     runId,
     setDataAvailability,
   ]);
@@ -240,10 +209,6 @@ export default function WatershedMap(): JSX.Element {
     setLayerLoading("channels", channelLoading);
   }, [channelLoading, setLayerLoading]);
 
-  useEffect(() => {
-    setLayerLoading("landuse", landuseLoading);
-  }, [landuseLoading, setLayerLoading]);
-
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
     const layer = e.sourceTarget;
@@ -270,25 +235,6 @@ export default function WatershedMap(): JSX.Element {
     ) => (feature?.id?.toString() === runId ? selectedStyle : defaultStyle),
     [runId],
   );
-
-  // Build landuse legend directly from landuse data
-  useEffect(() => {
-    if (
-      landuseEffective &&
-      landuseData &&
-      Object.keys(landuseData).length > 0
-    ) {
-      const legend: Record<string, string> = {};
-      for (const { color, desc } of Object.values(landuseData)) {
-        if (color && desc && !(color in legend)) {
-          legend[color] = desc;
-        }
-      }
-      setLanduseLegendMap(legend);
-    } else if (!landuseEffective || !runId) {
-      setLanduseLegendMap({});
-    }
-  }, [landuseEffective, landuseData, runId, setLanduseLegendMap]);
 
   const subcatchmentStyle = useCallback(
     (
@@ -473,7 +419,7 @@ export default function WatershedMap(): JSX.Element {
         )}
       </MapContainer>
 
-      <LandUseLegend />
+      <LandUseLegend landuseLegendMap={landuseLegendMap} />
 
       {sbsEffective && <SbsLegend />}
 
