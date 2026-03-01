@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWatersheds } from "../../api/api";
 import { WatershedProperties } from "../../types/WatershedProperties";
-import { useAppStore } from "../../store/store";
 import { tss } from "../../utils/tss";
 import { toast } from "react-toastify";
 import Typography from "@mui/material/Typography";
@@ -163,8 +162,6 @@ export default function WatershedOverview() {
   const { classes } = useStyles();
   const navigate = useNavigate();
 
-  const { resetLayers } = useAppStore();
-
   const runId =
     useParams({
       from: "/watershed/$webcloudRunId",
@@ -202,8 +199,8 @@ export default function WatershedOverview() {
     <div>
       <Button
         onClick={() => {
+          // Navigation triggers runId change → WatershedProvider dispatches RESET
           navigate({ to: "/" });
-          resetLayers();
         }}
         className={classes.closeButton}
         aria-label="Close watershed panel"

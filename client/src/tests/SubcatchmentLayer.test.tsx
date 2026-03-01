@@ -1,10 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, act } from "@testing-library/react";
-import { useAppStore } from "../store/store";
 import { highlightedStyle, selectedStyle } from "../components/map/constants";
 import type { PathOptions } from "leaflet";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import SubcatchmentLayer from "../components/map/SubcatchmentLayer";
+
+const mockSetSelectedHillslope = vi.fn();
+const mockClearSelectedHillslope = vi.fn();
+
+vi.mock("../contexts/WatershedContext", () => ({
+  useWatershed: () => ({
+    setSelectedHillslope: mockSetSelectedHillslope,
+    clearSelectedHillslope: mockClearSelectedHillslope,
+  }),
+}));
 
 type Feature = GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>;
 
@@ -90,8 +99,8 @@ function createLayer(): MockLayer {
 }
 
 describe("SubcatchmentLayer", () => {
-  const setSelectedHillslope = vi.fn();
-  const clearSelectedHillslope = vi.fn();
+  const setSelectedHillslope = mockSetSelectedHillslope;
+  const clearSelectedHillslope = mockClearSelectedHillslope;
 
   const styleFn = vi.fn((feature: Feature | undefined): PathOptions => {
     const id = feature?.id?.toString?.() ?? "none";
@@ -114,11 +123,6 @@ describe("SubcatchmentLayer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     lastGeoJsonProps = null;
-
-    useAppStore.setState({
-      setSelectedHillslope,
-      clearSelectedHillslope,
-    });
   });
 
   it("binds a tooltip with formatted hillslope details", () => {
@@ -165,7 +169,7 @@ describe("SubcatchmentLayer", () => {
     layer.__handlers.click?.({ target: layer });
 
     expect(layer.setStyle).toHaveBeenCalledWith(selectedStyle);
-    expect(setSelectedHillslope).toHaveBeenCalledWith(101, feature.properties);
+    expect(setSelectedHillslope).toHaveBeenCalledWith(101);
     expect(mockZoomToFeature).toHaveBeenCalledWith(mockMap, layer);
   });
 
@@ -232,10 +236,7 @@ describe("SubcatchmentLayer", () => {
 
     expect(layer1.setStyle).toHaveBeenCalledWith(styleFn(feature1));
     expect(layer2.setStyle).toHaveBeenCalledWith(selectedStyle);
-    expect(setSelectedHillslope).toHaveBeenLastCalledWith(
-      202,
-      feature2.properties,
-    );
+    expect(setSelectedHillslope).toHaveBeenLastCalledWith(202);
   });
 
   it("mouseover uses highlightedStyle when choropleth is inactive and not selected", () => {
@@ -458,9 +459,7 @@ describe("SubcatchmentLayer", () => {
 
     layer.__handlers.click?.({ target: layer });
 
-    expect(setSelectedHillslope).toHaveBeenCalledWith(undefined, {
-      weppid: 202,
-    });
+    expect(setSelectedHillslope).toHaveBeenCalledWith(undefined);
     expect(mockZoomToFeature).toHaveBeenCalledWith(mockMap, layer);
   });
 

@@ -1,15 +1,26 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useAppStore } from "../store/store";
-import type { ChangeEvent } from "react";
+import { INITIAL_DESIRED, INITIAL_RUNTIME } from "../layers/rules";
+
+const mockDispatchLayerAction = vi.fn();
+const mockClearSelectedHillslope = vi.fn();
+
+vi.mock("../contexts/WatershedContext", () => ({
+  useWatershed: () => ({
+    layerDesired: INITIAL_DESIRED,
+    layerRuntime: INITIAL_RUNTIME,
+    dispatchLayerAction: mockDispatchLayerAction,
+    clearSelectedHillslope: mockClearSelectedHillslope,
+  }),
+}));
 
 vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
   default: ({
     activeTab,
-    handleChange,
+    handleToggle,
   }: {
     activeTab: string;
-    handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    handleToggle: (id: string, checked: boolean) => void;
   }) => (
     <div role="tabpanel" aria-label="Data layers tab content">
       <span>{activeTab}</span>
@@ -19,7 +30,7 @@ vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
           aria-label="subcatchment"
           type="checkbox"
           id="subcatchment"
-          onChange={handleChange}
+          onChange={(e) => handleToggle(e.target.id, e.target.checked)}
         />
       </label>
       <label>
@@ -28,7 +39,7 @@ vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
           aria-label="channels"
           type="checkbox"
           id="channels"
-          onChange={handleChange}
+          onChange={(e) => handleToggle(e.target.id, e.target.checked)}
         />
       </label>
       <label>
@@ -37,16 +48,7 @@ vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
           aria-label="landuse"
           type="checkbox"
           id="landuse"
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Vegetation Cover
-        <input
-          aria-label="vegetationCover"
-          type="checkbox"
-          id="vegetationCover"
-          onChange={handleChange}
+          onChange={(e) => handleToggle(e.target.id, e.target.checked)}
         />
       </label>
     </div>
@@ -56,26 +58,8 @@ vi.mock("../components/map/controls/DataLayers/DataLayersTabContent", () => ({
 import DataLayersControl from "../components/map/controls/DataLayers/DataLayers";
 
 describe("DataLayersControl", () => {
-  const setSubcatchment = vi.fn();
-  const setChannels = vi.fn();
-  const setActiveDataLayer = vi.fn();
-  const closeVegetationCover = vi.fn();
-  const closeLanduse = vi.fn();
-  const closeSoilBurnSeverity = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
-    useAppStore.setState({
-      activeDataLayer: "none",
-      subcatchment: false,
-      channels: false,
-      setSubcatchment,
-      setChannels,
-      setActiveDataLayer,
-      closeVegetationCover,
-      closeLanduse,
-      closeSoilBurnSeverity,
-    });
   });
 
   it("renders with panel open by default", () => {
@@ -119,11 +103,22 @@ describe("DataLayersControl", () => {
 
     // Check
     fireEvent.click(sub);
-    expect(setSubcatchment).toHaveBeenCalledWith(true);
+    expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+      type: "TOGGLE",
+      id: "subcatchment",
+      on: true,
+    });
+    expect(mockClearSelectedHillslope).not.toHaveBeenCalled();
 
     // Uncheck
     fireEvent.click(sub);
-    expect(setSubcatchment).toHaveBeenCalledWith(false);
+    expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+      type: "TOGGLE",
+      id: "subcatchment",
+      on: false,
+    });
+    // Panel closes automatically: subcatchment off → choropleth blocked → isEffective false
+    expect(mockClearSelectedHillslope).toHaveBeenCalledTimes(1);
   });
 
   it("handles channels toggle", () => {
@@ -133,39 +128,32 @@ describe("DataLayersControl", () => {
     const channelsBox = screen.getByLabelText("channels") as HTMLInputElement;
 
     fireEvent.click(channelsBox);
-    expect(setChannels).toHaveBeenCalledWith(true);
+    expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+      type: "TOGGLE",
+      id: "channels",
+      on: true,
+    });
 
     fireEvent.click(channelsBox);
-    expect(setChannels).toHaveBeenCalledWith(false);
+    expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+      type: "TOGGLE",
+      id: "channels",
+      on: false,
+    });
   });
 
-  it("handles landuse toggle", () => {
+  it("handles landuse toggle via rule engine", () => {
     render(<DataLayersControl />);
     // Panel is open by default
 
     const landuseBox = screen.getByLabelText("landuse") as HTMLInputElement;
 
-    // Enable
+    // Enable — rule engine auto-enables subcatchment
     fireEvent.click(landuseBox);
-    expect(setActiveDataLayer).toHaveBeenCalledWith("landuse");
-
-    // Disable
-    fireEvent.click(landuseBox);
-    expect(closeLanduse).toHaveBeenCalled();
-  });
-
-  it("handles vegetation toggle", () => {
-    render(<DataLayersControl />);
-    // Panel is open by default
-
-    const vegBox = screen.getByLabelText("vegetationCover") as HTMLInputElement;
-
-    // Enable
-    fireEvent.click(vegBox);
-    expect(setActiveDataLayer).toHaveBeenCalledWith("vegetationCover");
-
-    // Disable
-    fireEvent.click(vegBox);
-    expect(closeVegetationCover).toHaveBeenCalled();
+    expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+      type: "TOGGLE",
+      id: "landuse",
+      on: true,
+    });
   });
 });

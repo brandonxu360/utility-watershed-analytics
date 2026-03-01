@@ -1,23 +1,19 @@
-import { FC } from "react";
-import { ChangeEvent } from "react";
-
-import {
-  useAppStore,
-  AVAILABLE_SCENARIOS,
-  SCENARIO_VARIABLES,
-  SCENARIO_VARIABLE_CONFIG,
-  type ScenarioType,
-  type ScenarioVariableType,
-} from "../../../../store/store";
-
-import {
-  useScenarioData,
-  formatScenarioLabel,
-} from "../../../../hooks/useScenarioData";
-
+import { FC, ChangeEvent } from "react";
+import { useWatershed } from "../../../../contexts/WatershedContext";
+import { getDependents } from "../../../../layers/registry";
+import type { LayerId, DesiredMap } from "../../../../layers/types";
 import { tss } from "../../../../utils/tss";
 import { Typography } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
+
+/**
+ * Returns true when any layer that `requires` the given layer is currently
+ * enabled.  Used to disable the checkbox so users can't accidentally
+ * cascade-disable a dependency chain.
+ */
+function hasActiveDependents(id: LayerId, desired: DesiredMap): boolean {
+  return getDependents(id).some((depId) => desired[depId].enabled);
+}
 import Radio from "@mui/material/Radio";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -73,43 +69,30 @@ const useStyles = tss.create(({ theme }) => ({
 
 type DataLayersTabContentProps = {
   activeTab: string;
-  handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleToggle: (id: string, checked: boolean) => void;
 };
 
 const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
   activeTab,
-  handleChange,
+  handleToggle,
 }) => {
   const { classes } = useStyles();
 
-  const {
-    activeDataLayer,
-    subcatchment,
-    channels,
-    selectedScenario,
-    scenarioVariable,
-    setSelectedScenario,
-    setScenarioVariable,
-  } = useAppStore();
+  const { layerDesired, enableLayerWithParams } = useWatershed();
 
-  const { isLoading: scenarioLoading } = useScenarioData();
+  // Read desired state for checkbox checked values
+  const subcatchmentChecked = layerDesired.subcatchment.enabled;
+  const channelsChecked = layerDesired.channels.enabled;
+  const landuseChecked = layerDesired.landuse.enabled;
+  const sbsChecked = layerDesired.sbs.enabled;
+  const choroplethMetric = layerDesired.choropleth.params.metric as
+    | string
+    | undefined;
+  const choroplethEnabled = layerDesired.choropleth.enabled;
 
-  const landuse = activeDataLayer === "landuse";
-  const vegetation = activeDataLayer === "vegetationCover";
-  const sbsEnabled = activeDataLayer === "soilBurnSeverity";
-  const hasActiveDataLayer = activeDataLayer !== "none";
-  const hasScenario = selectedScenario !== null;
-
-  const handleScenarioChange = (scenario: ScenarioType) => {
-    if (selectedScenario === scenario) {
-      setSelectedScenario(null);
-    } else {
-      setSelectedScenario(scenario);
-    }
-  };
-
-  const handleVariableChange = (variable: ScenarioVariableType) => {
-    setScenarioVariable(variable);
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { id, checked } = e.target;
+    handleToggle(id, checked);
   };
 
   return (
@@ -121,9 +104,9 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               Subcatchments
             </Typography>
             <Checkbox
-              checked={subcatchment}
+              checked={subcatchmentChecked}
               onChange={handleChange}
-              disabled={hasActiveDataLayer || hasScenario}
+              disabled={hasActiveDependents("subcatchment", layerDesired)}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "subcatchment" } }}
             />
@@ -131,7 +114,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           <div className={classes.layer}>
             <Typography className={classes.layerTitle}>Channels</Typography>
             <Checkbox
-              checked={channels}
+              checked={channelsChecked}
               onChange={handleChange}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "channels" } }}
@@ -182,7 +165,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               Land Use (2025)
             </Typography>
             <Checkbox
-              checked={landuse}
+              checked={landuseChecked}
               onChange={handleChange}
               disabled={vegetation || hasScenario}
               className={classes.layerCheckbox}
@@ -190,7 +173,33 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             />
           </div>
           <div className={classes.layer}>
-            <Typography className={classes.layerTitle}>
+            <Button
+              className={classes.layerTitle}
+              onClick={() => { }}
+              style={{
+                fontWeight:
+                  choroplethEnabled && choroplethMetric === "evapotranspiration"
+                    ? "bold"
+                    : "normal",
+              }}
+            >
+              Evapotranspiration
+            </Button>
+          </div>
+        </>
+      )}
+      {activeTab === "Coverage" && (
+        <>
+          <div className={classes.layer}>
+            <Button
+              className={classes.layerTitle}
+              onClick={() => {
+                // Enabling choropleth causes ActiveBottomPanel to render VegetationCover
+                enableLayerWithParams("choropleth", {
+                  metric: "vegetationCover",
+                });
+              }}
+            >
               Vegetation Cover
             </Typography>
             <Checkbox
@@ -206,11 +215,11 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               Soil Burn Severity
             </Typography>
             <Checkbox
-              checked={sbsEnabled}
+              checked={sbsChecked}
               onChange={handleChange}
               disabled={hasScenario}
               className={classes.layerCheckbox}
-              slotProps={{ input: { id: "soilBurnSeverity" } }}
+              slotProps={{ input: { id: "sbs" } }}
             />
           </div>
         </>

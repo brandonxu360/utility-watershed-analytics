@@ -7,7 +7,8 @@ import {
   act,
 } from "@testing-library/react";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
-import { useAppStore } from "../store/store";
+import { INITIAL_DESIRED } from "../layers/rules";
+import type { LayerId, DesiredMap } from "../layers/types";
 
 const { mockUseParams } = vi.hoisted(() => ({
   mockUseParams: vi.fn(),
@@ -35,9 +36,17 @@ vi.mock("../api/rapApi", () => ({
   fetchRap: mockFetchRap,
 }));
 
-const mockUseChoropleth = vi.fn(() => ({
-  config: null,
-}));
+const mockUseChoropleth = vi.fn(
+  (): {
+    config: { colormap: string; unit: string } | null;
+    range: { min: number; max: number } | null;
+    isLoading: boolean;
+  } => ({
+    config: null,
+    range: null,
+    isLoading: false,
+  }),
+);
 
 vi.mock("../hooks/useChoropleth", () => ({
   useChoropleth: () => mockUseChoropleth(),
@@ -77,9 +86,42 @@ vi.mock("../components/CoverageLineChart", () => ({
   ),
 }));
 
-const mockCloseVegetationCover = vi.fn();
-const mockSetChoroplethYear = vi.fn();
-const mockSetChoroplethBands = vi.fn();
+vi.mock("react-icons/fa6", () => ({
+  FaXmark: ({
+    className,
+    onClick,
+  }: {
+    className?: string;
+    onClick?: () => void;
+  }) => (
+    <span data-testid="close-icon" className={className} onClick={onClick}>
+      X
+    </span>
+  ),
+  FaChevronDown: () => <span data-testid="chevron-down">▼</span>,
+}));
+
+/** Build a DesiredMap with the given layer IDs enabled. */
+const desiredWith = (...ids: LayerId[]): DesiredMap => {
+  const d = JSON.parse(JSON.stringify(INITIAL_DESIRED)) as DesiredMap;
+  for (const id of ids) d[id].enabled = true;
+  return d;
+};
+
+const mockClearSelectedHillslope = vi.fn();
+const mockDispatchLayerAction = vi.fn();
+
+let mockDesired: DesiredMap = desiredWith("choropleth");
+let mockSelectedHillslopeId: number | null = null;
+
+vi.mock("../contexts/WatershedContext", () => ({
+  useWatershed: () => ({
+    layerDesired: mockDesired,
+    dispatchLayerAction: mockDispatchLayerAction,
+    selectedHillslopeId: mockSelectedHillslopeId,
+    clearSelectedHillslope: mockClearSelectedHillslope,
+  }),
+}));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -91,31 +133,17 @@ beforeEach(() => {
     ]),
   );
   mockUseParams.mockReturnValue("batch;;test-batch;;test-run");
-  mockUseChoropleth.mockReturnValue({ config: null });
-
-  useAppStore.setState({
-    closeVegetationCover: mockCloseVegetationCover,
-    setChoroplethYear: mockSetChoroplethYear,
-    setChoroplethBands: mockSetChoroplethBands,
-    selectedHillslopeId: null,
-    selectedHillslopeProps: null,
-    activeDataLayer: "vegetationCover",
-    choroplethYear: null,
-    choroplethBands: "all",
-    choroplethRange: null,
-    choroplethLoading: false,
-    choroplethData: null,
-    choroplethError: null,
+  mockUseChoropleth.mockReturnValue({
+    config: null,
+    range: null,
+    isLoading: false,
   });
+  mockDesired = desiredWith("choropleth");
+  mockSelectedHillslopeId = null;
 });
 
 afterEach(async () => {
-  await act(async () => {
-    useAppStore.setState({
-      selectedHillslopeId: null,
-      selectedHillslopeProps: null,
-    });
-  });
+  mockSelectedHillslopeId = null;
 });
 
 describe("VegetationCover", () => {
@@ -138,15 +166,9 @@ describe("VegetationCover", () => {
     });
 
     it("renders with initial choropleth year from store", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: 2020,
-        choroplethBands: "all",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.year = 2020;
+      mockDesired = d;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -161,15 +183,9 @@ describe("VegetationCover", () => {
     });
 
     it("renders with initial shrub band from store", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: null,
-        choroplethBands: "shrub",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.bands = "shrub";
+      mockDesired = d;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -185,15 +201,9 @@ describe("VegetationCover", () => {
     });
 
     it("renders with initial tree band from store", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: null,
-        choroplethBands: "tree",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.bands = "tree";
+      mockDesired = d;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -237,16 +247,8 @@ describe("VegetationCover", () => {
     it("renders ChoroplethScale when config and range are available", async () => {
       mockUseChoropleth.mockReturnValue({
         config: { colormap: "viridis", unit: "% cover" },
-      } as unknown as ReturnType<typeof mockUseChoropleth>);
-
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: null,
-        choroplethBands: "all",
-        choroplethRange: { min: 0, max: 100 },
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
+        range: { min: 0, max: 100 },
+        isLoading: false,
       });
 
       await act(async () => {
@@ -266,16 +268,8 @@ describe("VegetationCover", () => {
     it("does not render ChoroplethScale when loading", async () => {
       mockUseChoropleth.mockReturnValue({
         config: { colormap: "viridis", unit: "% cover" },
-      } as unknown as ReturnType<typeof mockUseChoropleth>);
-
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: null,
-        choroplethBands: "all",
-        choroplethRange: { min: 0, max: 100 },
-        choroplethLoading: true,
-        choroplethData: null,
-        choroplethError: null,
+        range: { min: 0, max: 100 },
+        isLoading: true,
       });
 
       await act(async () => {
@@ -288,7 +282,9 @@ describe("VegetationCover", () => {
     it("does not render ChoroplethScale when range is null", async () => {
       mockUseChoropleth.mockReturnValue({
         config: { colormap: "viridis", unit: "% cover" },
-      } as unknown as ReturnType<typeof mockUseChoropleth>);
+        range: null,
+        isLoading: false,
+      });
 
       await act(async () => {
         render(<VegetationCover />);
@@ -302,14 +298,10 @@ describe("VegetationCover", () => {
     });
 
     it("does not render ChoroplethScale when config is null", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: null,
-        choroplethBands: "all",
-        choroplethRange: { min: 0, max: 100 },
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
+      mockUseChoropleth.mockReturnValue({
+        config: null,
+        range: { min: 0, max: 100 },
+        isLoading: false,
       });
 
       await act(async () => {
@@ -341,8 +333,12 @@ describe("VegetationCover", () => {
         fireEvent.click(closeButton);
       });
 
-      // Close button calls closeVegetationCover
-      expect(mockCloseVegetationCover).toHaveBeenCalled();
+      expect(mockClearSelectedHillslope).toHaveBeenCalled();
+      expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+        type: "TOGGLE",
+        id: "choropleth",
+        on: false,
+      });
     });
   });
 
@@ -373,7 +369,12 @@ describe("VegetationCover", () => {
         expect(chart).toHaveTextContent("Shrub Coverage");
       });
 
-      expect(mockSetChoroplethBands).toHaveBeenCalledWith("shrub");
+      expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+        type: "SET_PARAM",
+        id: "choropleth",
+        key: "bands",
+        value: "shrub",
+      });
     });
 
     it("changes to Tree option and updates store", async () => {
@@ -401,19 +402,18 @@ describe("VegetationCover", () => {
         );
       });
 
-      expect(mockSetChoroplethBands).toHaveBeenCalledWith("tree");
+      expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+        type: "SET_PARAM",
+        id: "choropleth",
+        key: "bands",
+        value: "tree",
+      });
     });
 
     it("changes back to All option and updates store", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: null,
-        choroplethBands: "tree",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.bands = "tree";
+      mockDesired = d;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -439,7 +439,12 @@ describe("VegetationCover", () => {
         );
       });
 
-      expect(mockSetChoroplethBands).toHaveBeenCalledWith("all");
+      expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+        type: "SET_PARAM",
+        id: "choropleth",
+        key: "bands",
+        value: "all",
+      });
     });
   });
 
@@ -469,19 +474,18 @@ describe("VegetationCover", () => {
         );
       });
 
-      expect(mockSetChoroplethYear).toHaveBeenCalledWith(2020);
+      expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+        type: "SET_PARAM",
+        id: "choropleth",
+        key: "year",
+        value: 2020,
+      });
     });
 
     it("changes back to All years and updates store with null", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: 2020,
-        choroplethBands: "all",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.year = 2020;
+      mockDesired = d;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -505,16 +509,18 @@ describe("VegetationCover", () => {
         expect(screen.getByTestId("coverage-chart")).toHaveTextContent("(All)");
       });
 
-      expect(mockSetChoroplethYear).toHaveBeenCalledWith(null);
+      expect(mockDispatchLayerAction).toHaveBeenCalledWith({
+        type: "SET_PARAM",
+        id: "choropleth",
+        key: "year",
+        value: null,
+      });
     });
   });
 
   describe("hillslope selection", () => {
     it("shows selected hillslope in chart title", async () => {
-      useAppStore.setState({
-        selectedHillslopeId: 42,
-        selectedHillslopeProps: {} as Record<string, unknown>,
-      });
+      mockSelectedHillslopeId = 42;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -529,10 +535,7 @@ describe("VegetationCover", () => {
     });
 
     it("fetches hillslope-specific data when hillslope is selected", async () => {
-      useAppStore.setState({
-        selectedHillslopeId: 123,
-        selectedHillslopeProps: {} as Record<string, unknown>,
-      });
+      mockSelectedHillslopeId = 123;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -563,17 +566,10 @@ describe("VegetationCover", () => {
     });
 
     it("fetches hillslope data with specific year", async () => {
-      useAppStore.setState({
-        selectedHillslopeId: 99,
-        selectedHillslopeProps: {} as Record<string, unknown>,
-        activeDataLayer: "vegetationCover",
-        choroplethYear: 2010,
-        choroplethBands: "all",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.year = 2010;
+      mockDesired = d;
+      mockSelectedHillslopeId = 99;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -591,15 +587,9 @@ describe("VegetationCover", () => {
     });
 
     it("fetches watershed data with specific year", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: 2005,
-        choroplethBands: "all",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.year = 2005;
+      mockDesired = d;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -663,15 +653,9 @@ describe("VegetationCover", () => {
     });
 
     it("fetches data with specific year parameter", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: 2015,
-        choroplethBands: "all",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.year = 2015;
+      mockDesired = d;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -751,15 +735,9 @@ describe("VegetationCover", () => {
 
   describe("chart data processing", () => {
     it("processes single year data correctly", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: 2020,
-        choroplethBands: "all",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.year = 2020;
+      mockDesired = d;
 
       mockFetchRap.mockImplementation(() =>
         Promise.resolve([{ year: 2020, shrub: 30, tree: 40, coverage: 70 }]),
@@ -814,15 +792,9 @@ describe("VegetationCover", () => {
     });
 
     it("handles missing row for selected year", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: 1990,
-        choroplethBands: "all",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.year = 1990;
+      mockDesired = d;
 
       mockFetchRap.mockImplementation(() =>
         Promise.resolve([{ year: 1986, shrub: 10, tree: 20, coverage: 30 }]),
@@ -854,15 +826,9 @@ describe("VegetationCover", () => {
     });
 
     it("uses only shrub key for Shrub option", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: null,
-        choroplethBands: "shrub",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.bands = "shrub";
+      mockDesired = d;
 
       await act(async () => {
         render(<VegetationCover />);
@@ -876,15 +842,9 @@ describe("VegetationCover", () => {
     });
 
     it("uses only tree key for Tree option", async () => {
-      useAppStore.setState({
-        activeDataLayer: "vegetationCover",
-        choroplethYear: null,
-        choroplethBands: "tree",
-        choroplethRange: null,
-        choroplethLoading: false,
-        choroplethData: null,
-        choroplethError: null,
-      });
+      const d = desiredWith("choropleth");
+      d.choropleth.params.bands = "tree";
+      mockDesired = d;
 
       await act(async () => {
         render(<VegetationCover />);

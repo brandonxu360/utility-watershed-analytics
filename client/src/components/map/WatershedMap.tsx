@@ -1,15 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { MapEffect } from "../../utils/map/MapEffectUtil";
 
-import {
-  fetchChannels,
-  fetchSubcatchments,
-  fetchWatersheds,
-} from "../../api/api";
+import { fetchWatersheds } from "../../api/api";
 
 import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
 import { WatershedProperties } from "../../types/WatershedProperties";
@@ -17,11 +13,12 @@ import { LeafletMouseEvent } from "leaflet";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { useScenarioData } from "../../hooks/useScenarioData";
 import { selectedStyle, defaultStyle } from "./constants";
-import { useAppStore } from "../../store/store";
-import { toast } from "react-toastify";
 import { tss } from "../../utils/tss";
 import { CircularProgress } from "@mui/material";
-import { fetchLanduse } from "../../api/landuseApi";
+import { useWatershed } from "../../contexts/WatershedContext";
+import { useLanduseData } from "../../hooks/useLanduseData";
+import { useSubcatchmentData } from "../../hooks/useSubcatchmentData";
+import { useChannelData } from "../../hooks/useChannelData";
 
 import {
   createColormap,
@@ -39,6 +36,8 @@ import LandUseLegend from "./controls/LandUseLegend";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import SubcatchmentLayer from "./SubcatchmentLayer";
+import { useLayerToasts } from "../../hooks/useLayerToasts";
+import type { SbsColorMode } from "../../api/types";
 import "leaflet/dist/leaflet.css";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -87,39 +86,17 @@ export default function WatershedMap(): JSX.Element {
   const { classes } = useStyles();
   const navigate = useNavigate();
 
-  const {
-    activeDataLayer,
-    subcatchment,
-    channels,
-    sbsColorMode,
-    choroplethYear,
-    choroplethBands,
-    setSubcatchment,
-    setChannels,
-    setLanduseLegendMap,
-    closeLanduse,
-  } = useAppStore();
+  const { layerDesired, effective, isEffective } = useWatershed();
 
-  const landuse = activeDataLayer === "landuse";
-  const sbsEnabled = activeDataLayer === "soilBurnSeverity";
+  // Fire toasts when layers are blocked
+  useLayerToasts(layerDesired, effective);
 
   // Use the choropleth hook for data fetching and styling
   const {
-    choropleth,
     isActive: choroplethActive,
     isLoading: choroplethLoading,
     getChoroplethStyle,
   } = useChoropleth();
-
-  const {
-    dataByWeppId: scenarioDataByWeppId,
-    hasData: hasScenarioData,
-    isLoading: scenarioLoading,
-    selectedScenario,
-    scenarioVariable,
-    variableConfig: scenarioVarConfig,
-    range: scenarioRange,
-  } = useScenarioData();
 
   const scenarioColormap = useMemo<RGBAArray | null>(() => {
     if (!scenarioRange) return null;
@@ -130,17 +107,25 @@ export default function WatershedMap(): JSX.Element {
     }) as RGBAArray;
   }, [scenarioRange, scenarioVarConfig.colormap]);
 
+  // Shorthand booleans from effective state for rendering
+  const subcatchmentEffective = isEffective("subcatchment");
+  const channelsEffective = isEffective("channels");
+  const landuseEffective = isEffective("landuse");
+  const sbsEffective = isEffective("sbs");
+  const sbsColorMode =
+    (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
+
+  // Create a key that changes when choropleth state changes to force style updates
+  const choroplethYear = layerDesired.choropleth.params.year as number | null;
+  const choroplethBands = layerDesired.choropleth.params.bands as string;
   const choroplethKey = useMemo(
     () =>
-      `${choropleth}-${choroplethYear ?? "all"}-${choroplethBands}-${choroplethActive}-${selectedScenario ?? "none"}-${scenarioVariable}-${hasScenarioData}`,
+      `${layerDesired.choropleth.params.metric}-${choroplethYear ?? "all"}-${choroplethBands}-${choroplethActive}`,
     [
-      choropleth,
+      layerDesired.choropleth.params.metric,
       choroplethYear,
       choroplethBands,
       choroplethActive,
-      selectedScenario,
-      scenarioVariable,
-      hasScenarioData,
     ],
   );
 
@@ -160,88 +145,11 @@ export default function WatershedMap(): JSX.Element {
     queryFn: fetchWatersheds,
   });
 
-  const { data: subcatchments, isLoading: subLoading } = useQuery({
-    queryKey: ["subcatchments", runId],
-    queryFn: () => fetchSubcatchments(runId!),
-    enabled: Boolean(subcatchment && runId),
-  });
-
-  const { data: channelData, isLoading: channelLoading } = useQuery({
-    queryKey: ["channels", runId],
-    queryFn: () => fetchChannels(runId!),
-    enabled: Boolean(channels && runId),
-  });
-
-  const {
-    data: landuseData,
-    isLoading: landuseLoading,
-    error: landuseError,
-  } = useQuery({
-    queryKey: ["landuse-undisturbed", runId],
-    queryFn: () => fetchLanduse({ runId: runId! }),
-    enabled: Boolean(landuse && runId),
-  });
-
-  // Auto-disable features that depend on subcatchment data or missing landuse
-  useEffect(() => {
-    if (!runId) return;
-
-    // Handle subcatchment data unavailability
-    if (!subLoading && subcatchments) {
-      const noSubData = subcatchments.features?.length === 0;
-      if (noSubData && (subcatchment || landuse)) {
-        if (subcatchment) setSubcatchment(false);
-        if (landuse) closeLanduse();
-        toast.error("No subcatchment data available");
-        return;
-      }
-    }
-
-    // Handle landuse data unavailability
-    if (landuse && !landuseLoading) {
-      const noLanduseData =
-        landuseError || (landuseData && Object.keys(landuseData).length === 0);
-      if (noLanduseData) {
-        toast.error("Land use data is not available for this watershed");
-        closeLanduse();
-      }
-    }
-  }, [
-    landuse,
-    landuseData,
-    subLoading,
-    landuseError,
-    landuseLoading,
-    subcatchment,
-    subcatchments,
-    runId,
-    closeLanduse,
-    setSubcatchment,
-  ]);
-
-  // Auto-disable channels if data unavailable
-  useEffect(() => {
-    if (!runId || channelLoading || !channelData) return;
-
-    if (channelData.features?.length === 0 && channels) {
-      setChannels(false);
-      toast.error("No channel data available");
-    }
-  }, [
-    runId,
-    channelData,
-    channelLoading,
-    channelData?.features?.length,
-    channels,
-    setChannels,
-  ]);
-
-  const resetLayers = useAppStore((s) => s.resetLayers);
-  useEffect(() => {
-    if (!runId && activeDataLayer !== "none") {
-      resetLayers();
-    }
-  }, [runId, activeDataLayer, resetLayers]);
+  // Layer data hooks — colocate fetching, availability, and loading reporting
+  const { subcatchments, subLoading } = useSubcatchmentData(runId);
+  const { channelData, channelLoading } = useChannelData(runId);
+  const { landuseData, landuseLoading, landuseLegendMap } =
+    useLanduseData(runId);
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
@@ -267,21 +175,6 @@ export default function WatershedMap(): JSX.Element {
     ) => (feature?.id?.toString() === runId ? selectedStyle : defaultStyle),
     [runId],
   );
-
-  // Build landuse legend directly from landuse data
-  useEffect(() => {
-    if (landuse && landuseData && Object.keys(landuseData).length > 0) {
-      const legend: Record<string, string> = {};
-      for (const { color, desc } of Object.values(landuseData)) {
-        if (color && desc && !(color in legend)) {
-          legend[color] = desc;
-        }
-      }
-      setLanduseLegendMap(legend);
-    } else if (!landuse || !runId) {
-      setLanduseLegendMap({});
-    }
-  }, [landuse, landuseData, runId, setLanduseLegendMap]);
 
   const subcatchmentStyle = useCallback(
     (
@@ -324,7 +217,7 @@ export default function WatershedMap(): JSX.Element {
       }
 
       // Land use coloring - lookup by topazid
-      if (landuse && feature?.properties?.topazid) {
+      if (landuseEffective && feature?.properties?.topazid) {
         const landuseInfo = landuseData?.[feature.properties.topazid];
         if (landuseInfo?.color) {
           return {
@@ -343,17 +236,7 @@ export default function WatershedMap(): JSX.Element {
         fillOpacity: 0,
       };
     },
-    [
-      landuse,
-      landuseData,
-      choroplethActive,
-      getChoroplethStyle,
-      hasScenarioData,
-      scenarioColormap,
-      scenarioRange,
-      scenarioDataByWeppId,
-      scenarioVariable,
-    ],
+    [landuseEffective, landuseData, choroplethActive, getChoroplethStyle],
   );
 
   const channelStyle = useCallback(
@@ -431,8 +314,7 @@ export default function WatershedMap(): JSX.Element {
           subLoading ||
           channelLoading ||
           choroplethLoading ||
-          landuseLoading ||
-          scenarioLoading) && (
+          landuseLoading) && (
             <div
               className={classes.mapLoadingOverlay}
               data-testid="map-loading-overlay"
@@ -473,7 +355,7 @@ export default function WatershedMap(): JSX.Element {
         <MapEffect watershedId={runId} watersheds={memoWatersheds} />
 
         {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
-        {(!subcatchment || !memoSubcatchments?.features?.length) &&
+        {(!subcatchmentEffective || !memoSubcatchments?.features?.length) &&
           memoWatersheds && (
             <GeoJSON
               data={memoWatersheds}
@@ -485,7 +367,7 @@ export default function WatershedMap(): JSX.Element {
           )}
 
         {/* Show subcatchments only when enabled AND data exists with features */}
-        {subcatchment && memoSubcatchments?.features?.length && (
+        {subcatchmentEffective && memoSubcatchments?.features?.length && (
           <SubcatchmentLayer
             data={memoSubcatchments}
             style={subcatchmentStyle}
@@ -494,18 +376,18 @@ export default function WatershedMap(): JSX.Element {
           />
         )}
 
-        {channels && memoChannels && (
+        {channelsEffective && memoChannels && (
           <GeoJSON data={memoChannels} style={channelStyle} />
         )}
 
-        {sbsEnabled && runId && (
+        {sbsEffective && runId && (
           <SbsLayer runId={runId} mode={sbsColorMode} bounds={sbsBounds} />
         )}
       </MapContainer>
 
-      <LandUseLegend />
+      <LandUseLegend landuseLegendMap={landuseLegendMap} />
 
-      {sbsEnabled && <SbsLegend />}
+      {sbsEffective && <SbsLegend />}
 
       {runId && (
         <div style={{ position: "absolute", right: "10px", bottom: "30px" }}>

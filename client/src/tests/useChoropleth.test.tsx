@@ -1,11 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, waitFor, act } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import {
   useChoropleth,
   CHOROPLETH_CONFIG,
   CHOROPLETH_YEARS,
 } from "../hooks/useChoropleth";
-import { useAppStore } from "../store/store";
+import { INITIAL_DESIRED } from "../layers/rules";
+import type { DesiredMap } from "../layers/types";
 
 const mockUseParams = vi.fn(() => "batch;;test-batch;;test-run");
 
@@ -24,16 +27,48 @@ import { fetchRapChoropleth } from "../api/rapApi";
 
 const mockFetchRapChoropleth = vi.mocked(fetchRapChoropleth);
 
+/* ── useWatershed mock ─────────────────────────────────────── */
+
+let mockDesired: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
+
+const mockSetDataAvailability = vi.fn();
+const mockSetLayerLoading = vi.fn();
+
+vi.mock("../contexts/WatershedContext", () => ({
+  useWatershed: () => ({
+    layerDesired: mockDesired,
+    setDataAvailability: mockSetDataAvailability,
+    setLayerLoading: mockSetLayerLoading,
+  }),
+}));
+
+/** Helper: build a DesiredMap with choropleth enabled and params set. */
+function desiredWithChoropleth(
+  metric = "vegetationCover",
+  year: number | null = null,
+  bands = "all",
+): DesiredMap {
+  const d: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
+  d.choropleth.enabled = true;
+  d.choropleth.params = { metric, year, bands };
+  return d;
+}
+
+/** Wrapper providing a fresh QueryClient for each test. */
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  });
+  return ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
+
 describe("useChoropleth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseParams.mockReturnValue("batch;;test-batch;;test-run");
-    // Reset to initial state using the new activeDataLayer approach
-    useAppStore.setState({ activeDataLayer: "none" });
-    useAppStore.getState().setChoroplethYear(null);
-    useAppStore.getState().setChoroplethData(null, null);
-    useAppStore.getState().setChoroplethLoading(false);
-    useAppStore.getState().setChoroplethError(null);
+    mockDesired = JSON.parse(JSON.stringify(INITIAL_DESIRED));
   });
 
   afterEach(() => {
@@ -58,24 +93,25 @@ describe("useChoropleth", () => {
   });
 
   describe("hook behavior", () => {
-    it("returns inactive state when choropleth is none", () => {
-      const { result } = renderHook(() => useChoropleth());
+    it("returns inactive state when choropleth is disabled", () => {
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.isActive).toBe(false);
       expect(result.current.choropleth).toBe("none");
       expect(result.current.config).toBeNull();
     });
 
-    it("returns active state when choropleth is set", async () => {
+    it("returns active state when choropleth is enabled", async () => {
       mockFetchRapChoropleth.mockResolvedValue([
         { wepp_id: 1, value: 50 },
         { wepp_id: 2, value: 75 },
       ]);
 
-      const { result } = renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -86,16 +122,15 @@ describe("useChoropleth", () => {
       expect(result.current.config).toEqual(CHOROPLETH_CONFIG.vegetationCover);
     });
 
-    it("fetches data when choropleth type changes", async () => {
+    it("fetches data when choropleth is enabled", async () => {
       mockFetchRapChoropleth.mockResolvedValue([
         { wepp_id: 1, value: 50 },
         { wepp_id: 2, value: 75 },
       ]);
 
-      renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -110,11 +145,9 @@ describe("useChoropleth", () => {
     it("fetches data with year filter when year is set", async () => {
       mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
 
-      renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
-        useAppStore.getState().setChoroplethYear(2020);
+      mockDesired = desiredWithChoropleth("vegetationCover", 2020);
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -129,10 +162,9 @@ describe("useChoropleth", () => {
     it("sets error state when fetch fails", async () => {
       mockFetchRapChoropleth.mockRejectedValue(new Error("Network error"));
 
-      const { result } = renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -143,10 +175,9 @@ describe("useChoropleth", () => {
     it("sets error when response has no valid data", async () => {
       mockFetchRapChoropleth.mockResolvedValue([]);
 
-      const { result } = renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -162,40 +193,35 @@ describe("useChoropleth", () => {
         { wepp_id: 4, value: 75 },
       ]);
 
-      const { result } = renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      // Only valid values (50 and 75) should be in the data
       expect(result.current.getColor(1)).not.toBeNull();
       expect(result.current.getColor(4)).not.toBeNull();
-      // Invalid values should not be stored
       expect(result.current.getColor(2)).toBeNull();
       expect(result.current.getColor(3)).toBeNull();
     });
 
-    it("clears data when choropleth is set to none", async () => {
+    it("clears data when choropleth is disabled", async () => {
       mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
 
-      const { result } = renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      const { result, rerender } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
         expect(result.current.isActive).toBe(true);
       });
 
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "none" });
-      });
+      mockDesired = JSON.parse(JSON.stringify(INITIAL_DESIRED));
+      rerender();
 
       await waitFor(() => {
         expect(result.current.isActive).toBe(false);
@@ -205,17 +231,18 @@ describe("useChoropleth", () => {
 
   describe("getColor", () => {
     it("returns null when choropleth is inactive", () => {
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
       expect(result.current.getColor(1)).toBeNull();
     });
 
     it("returns null for undefined id", async () => {
       mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
 
-      const { result } = renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -228,10 +255,9 @@ describe("useChoropleth", () => {
     it("returns null for unknown id", async () => {
       mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
 
-      const { result } = renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -247,10 +273,9 @@ describe("useChoropleth", () => {
         { wepp_id: 2, value: 100 },
       ]);
 
-      const { result } = renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -265,7 +290,9 @@ describe("useChoropleth", () => {
 
   describe("getChoroplethStyle", () => {
     it("returns null when choropleth is inactive", () => {
-      const { result } = renderHook(() => useChoropleth());
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
       expect(result.current.getChoroplethStyle(1)).toBeNull();
     });
 
@@ -275,10 +302,9 @@ describe("useChoropleth", () => {
         { wepp_id: 2, value: 100 },
       ]);
 
-      const { result } = renderHook(() => useChoropleth());
-
-      act(() => {
-        useAppStore.setState({ activeDataLayer: "vegetationCover" });
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      const { result } = renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -291,6 +317,87 @@ describe("useChoropleth", () => {
       expect(style).toHaveProperty("weight", 0.75);
       expect(style).toHaveProperty("fillColor");
       expect(style).toHaveProperty("fillOpacity", 0.85);
+    });
+  });
+
+  describe("runtime reporting", () => {
+    it("reports loading to layer runtime while fetching", async () => {
+      mockFetchRapChoropleth.mockResolvedValue([{ wepp_id: 1, value: 50 }]);
+
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      // Initially loading
+      expect(mockSetLayerLoading).toHaveBeenCalledWith("choropleth", true);
+
+      await waitFor(() => {
+        expect(mockSetLayerLoading).toHaveBeenCalledWith("choropleth", false);
+      });
+    });
+
+    it("reports data availability after successful fetch", async () => {
+      mockFetchRapChoropleth.mockResolvedValue([
+        { wepp_id: 1, value: 50 },
+        { wepp_id: 2, value: 75 },
+      ]);
+
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "choropleth",
+          true,
+        );
+      });
+    });
+
+    it("reports data unavailable when fetch returns empty data", async () => {
+      mockFetchRapChoropleth.mockResolvedValue([]);
+
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "choropleth",
+          false,
+        );
+      });
+    });
+
+    it("reports data unavailable on fetch error", async () => {
+      mockFetchRapChoropleth.mockRejectedValue(new Error("Network error"));
+
+      mockDesired = desiredWithChoropleth("vegetationCover");
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(mockSetDataAvailability).toHaveBeenCalledWith(
+          "choropleth",
+          false,
+        );
+      });
+    });
+
+    it("does not report availability when choropleth is disabled", () => {
+      renderHook(() => useChoropleth(), {
+        wrapper: createWrapper(),
+      });
+
+      // setLayerLoading is called for loading=false even when inactive
+      expect(mockSetDataAvailability).not.toHaveBeenCalledWith(
+        "choropleth",
+        expect.anything(),
+      );
     });
   });
 });

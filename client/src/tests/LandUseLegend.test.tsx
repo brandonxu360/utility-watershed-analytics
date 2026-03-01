@@ -1,44 +1,72 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect, beforeEach } from "vitest";
-import { useAppStore } from "../store/store";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import LandUseLegend from "../components/map/controls/LandUseLegend";
+import { INITIAL_DESIRED, INITIAL_RUNTIME } from "../layers/rules";
+import { evaluate, isDesiredButBlocked } from "../layers/evaluate";
+import type { DesiredMap, LayerRuntime, LayerId } from "../layers/types";
+
+let mockDesired: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
+let mockRuntime: LayerRuntime = JSON.parse(JSON.stringify(INITIAL_RUNTIME));
+
+vi.mock("../contexts/WatershedContext", () => ({
+  useWatershed: () => {
+    const eff = evaluate(mockDesired, mockRuntime);
+    return {
+      effective: eff,
+      isEffective: (id: LayerId) => eff[id].enabled,
+      isBlocked: (id: LayerId) => isDesiredButBlocked(id, mockDesired, eff),
+    };
+  },
+}));
 
 describe("Land Use Legend Component Tests", () => {
   beforeEach(() => {
-    useAppStore.setState({
-      activeDataLayer: "none",
-      landuseLegendMap: {},
-    });
+    mockDesired = JSON.parse(JSON.stringify(INITIAL_DESIRED));
+    mockRuntime = JSON.parse(JSON.stringify(INITIAL_RUNTIME));
   });
 
-  it("renders nothing when activeDataLayer is not landuse", () => {
-    render(<LandUseLegend />);
+  it("renders nothing when landuse is not effectively enabled", () => {
+    render(<LandUseLegend landuseLegendMap={{}} />);
     expect(
       screen.queryByRole("region", { name: /land use legend/i }),
     ).not.toBeInTheDocument();
   });
 
-  it("renders empty state when visible and legend map is empty", () => {
-    useAppStore.setState({ activeDataLayer: "landuse", landuseLegendMap: {} });
-    render(<LandUseLegend />);
+  it("renders nothing when landuse is effective but legend map is empty", () => {
+    mockDesired = {
+      ...INITIAL_DESIRED,
+      subcatchment: { ...INITIAL_DESIRED.subcatchment, enabled: true },
+      landuse: { ...INITIAL_DESIRED.landuse, enabled: true },
+    };
+    mockRuntime = {
+      ...INITIAL_RUNTIME,
+      dataAvailability: { subcatchment: true, landuse: true },
+    };
+    render(<LandUseLegend landuseLegendMap={{}} />);
 
     expect(
-      screen.getByRole("region", { name: /land use legend/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Land Use Legend")).toBeInTheDocument();
-    expect(screen.getByText("No legend data available.")).toBeInTheDocument();
+      screen.queryByRole("region", { name: /land use legend/i }),
+    ).not.toBeInTheDocument();
   });
 
-  it("renders legend items when legend map has entries", () => {
-    useAppStore.setState({
-      activeDataLayer: "landuse",
-      landuseLegendMap: {
-        "#ff0000": "Forest",
-        "#00ff00": "Grass",
-      },
-    });
+  it("renders legend items when landuse is effective and legend map has entries", () => {
+    mockDesired = {
+      ...INITIAL_DESIRED,
+      subcatchment: { ...INITIAL_DESIRED.subcatchment, enabled: true },
+      landuse: { ...INITIAL_DESIRED.landuse, enabled: true },
+    };
+    mockRuntime = {
+      ...INITIAL_RUNTIME,
+      dataAvailability: { subcatchment: true, landuse: true },
+    };
+    const legendMap = {
+      "#ff0000": "Forest",
+      "#00ff00": "Grass",
+    };
 
-    const { container } = render(<LandUseLegend />);
+    const { container } = render(
+      <LandUseLegend landuseLegendMap={legendMap} />,
+    );
 
     expect(screen.getByText("Forest")).toBeInTheDocument();
     expect(screen.getByText("Grass")).toBeInTheDocument();

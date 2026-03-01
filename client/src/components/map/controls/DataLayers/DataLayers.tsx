@@ -1,6 +1,7 @@
-import { ChangeEvent, useState } from "react";
-import { useAppStore } from "../../../../store/store";
-import type { ActiveDataLayer } from "../../../../store/slices/layersSlice";
+import { useState } from "react";
+import { useWatershed } from "../../../../contexts/WatershedContext";
+import { ALL_LAYER_IDS } from "../../../../layers/types";
+import type { LayerId } from "../../../../layers/types";
 import DataLayersTabContent from "./DataLayersTabContent";
 
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
@@ -69,25 +70,18 @@ const useStyles = tss.create(({ theme }) => ({
   },
 }));
 
-const DATA_LAYER_IDS: Record<string, ActiveDataLayer> = {
-  landuse: "landuse",
-  vegetationCover: "vegetationCover",
-  soilBurnSeverity: "soilBurnSeverity",
-};
-
+/**
+ * DataLayersControl - toggles visibility of map data layers.
+ *
+ * All toggle logic now flows through `dispatchLayerAction` which delegates
+ * to the pure rule engine. No more scattered side-effect handlers.
+ */
 export default function DataLayersControl() {
   const { classes } = useStyles();
 
   const queryClient = useQueryClient();
 
-  const {
-    setActiveDataLayer,
-    setSubcatchment,
-    setChannels,
-    closeVegetationCover,
-    closeLanduse,
-    closeSoilBurnSeverity,
-  } = useAppStore();
+  const { dispatchLayerAction, clearSelectedHillslope } = useWatershed();
 
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("WEPP");
@@ -96,37 +90,22 @@ export default function DataLayersControl() {
 
   const toggleOpen = () => setIsOpen((prev) => !prev);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { id, checked } = e.target;
+  const handleToggle = (id: string, checked: boolean) => {
+    if (!ALL_LAYER_IDS.includes(id as LayerId)) return;
+    const layerId = id as LayerId;
 
-    const handlers: Record<string, (c: boolean) => void> = {
-      subcatchment: (c) => {
-        if (!c) queryClient.cancelQueries({ queryKey: ["subcatchments"] });
-        setSubcatchment(c);
-      },
-      channels: (c) => {
-        if (!c) queryClient.cancelQueries({ queryKey: ["channels"] });
-        setChannels(c);
-      },
-    };
+    // Dispatch the toggle — rule engine handles requires/excludes/dependents
+    dispatchLayerAction({ type: "TOGGLE", id: layerId, on: checked });
 
-    if (handlers[id]) {
-      handlers[id](checked);
-      return;
+    // Side effects that are outside the layer system's scope
+    if (id === "subcatchment" && !checked) {
+      queryClient.cancelQueries({ queryKey: ["subcatchments"] });
+      clearSelectedHillslope();
+      // Panel closes automatically: subcatchment off → choropleth blocked → isEffective false
     }
 
-    // Handle mutually exclusive data layers
-    if (id in DATA_LAYER_IDS) {
-      if (checked) {
-        setActiveDataLayer(DATA_LAYER_IDS[id]);
-      } else {
-        const closeActions: Record<string, () => void> = {
-          landuse: closeLanduse,
-          vegetationCover: closeVegetationCover,
-          soilBurnSeverity: closeSoilBurnSeverity,
-        };
-        closeActions[id]?.();
-      }
+    if (id === "channels" && !checked) {
+      queryClient.cancelQueries({ queryKey: ["channels"] });
     }
   };
 
@@ -143,7 +122,7 @@ export default function DataLayersControl() {
           <Paper className={classes.tabContent}>
             <DataLayersTabContent
               activeTab={activeTab}
-              handleChange={handleChange}
+              handleToggle={handleToggle}
             />
           </Paper>
         )}

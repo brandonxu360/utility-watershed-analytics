@@ -1,6 +1,6 @@
 import { tss } from "../../../utils/tss";
 import { Paper, Typography } from "@mui/material";
-import { useAppStore } from "../../../store/store";
+import { useWatershed } from "../../../contexts/WatershedContext";
 
 const useStyles = tss.create(({ theme }) => ({
   landuseLegendWrapper: {
@@ -65,14 +65,20 @@ const useStyles = tss.create(({ theme }) => ({
   },
 }));
 
-export default function LandUseLegend() {
+interface LandUseLegendProps {
+  landuseLegendMap: Record<string, string>;
+}
+
+export default function LandUseLegend({
+  landuseLegendMap,
+}: LandUseLegendProps) {
   const { classes } = useStyles();
 
-  const activeDataLayer = useAppStore((s) => s.activeDataLayer);
-  const landuseLegendMap = useAppStore((s) => s.landuseLegendMap);
-  const isVisible = activeDataLayer === "landuse";
+  const { isEffective } = useWatershed();
 
-  if (!isVisible) return null;
+  // Show legend only when landuse layer is effectively enabled and we have data
+  if (!isEffective("landuse") || Object.keys(landuseLegendMap).length === 0)
+    return null;
 
   return (
     <div
