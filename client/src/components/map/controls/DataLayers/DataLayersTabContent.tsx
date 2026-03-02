@@ -1,7 +1,11 @@
 import { FC, ChangeEvent } from "react";
 import { useWatershed } from "../../../../contexts/WatershedContext";
 import { getDependents } from "../../../../layers/registry";
-import { getLayerParams, type LayerId, type DesiredMap } from "../../../../layers/types";
+import {
+  getLayerParams,
+  type LayerId,
+  type DesiredMap,
+} from "../../../../layers/types";
 
 import {
   AVAILABLE_SCENARIOS,
@@ -169,11 +173,20 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
         <>
           <div className={classes.scenarioGroup}>
             <FormControl fullWidth size="small" disabled={scenarioLoading}>
-              <InputLabel id="scenario-select-label" className={classes.scenarioLabel}>Scenario</InputLabel>
+              <InputLabel
+                id="scenario-select-label"
+                className={classes.scenarioLabel}
+              >
+                Scenario
+              </InputLabel>
               <Select
                 labelId="scenario-select-label"
                 id="scenario-select"
-                value={scenarioEnabled && selectedScenario ? selectedScenario : "none"}
+                value={
+                  scenarioEnabled && selectedScenario
+                    ? selectedScenario
+                    : "none"
+                }
                 label="Scenario"
                 onChange={handleScenarioSelect}
                 className={classes.scenarioSelect}

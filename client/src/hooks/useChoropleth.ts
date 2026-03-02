@@ -15,7 +15,7 @@ import {
 } from "../utils/colormap";
 
 import { VEGETATION_BANDS } from "../utils/constants";
-import type { VegetationBandType } from "../components/bottom-panels/VegetationCover";
+import type { VegetationBandType } from "../utils/constants";
 
 export type ChoroplethType = "none" | "vegetationCover";
 

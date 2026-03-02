@@ -101,7 +101,10 @@ export default function DataLayersControl() {
   return (
     <div className={classes.root}>
       <div>
-        <div className={classes.header} onClick={() => setActiveTab((prev) => prev ? null : "WEPP")}>
+        <div
+          className={classes.header}
+          onClick={() => setActiveTab((prev) => (prev ? null : "WEPP"))}
+        >
           <div>{activeTab ?? "WEPP"}</div>
           <span className={classes.chevron}>
             {activeTab ? <KeyboardArrowDown /> : <KeyboardArrowUp />}

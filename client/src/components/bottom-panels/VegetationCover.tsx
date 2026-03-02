@@ -2,27 +2,30 @@ import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
-
-/** Band-group shortcuts for the vegetation-cover metric. */
-export type VegetationBandType = "all" | "shrub" | "tree";
 import { useParams } from "@tanstack/react-router";
 import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { ChoroplethScale } from "../ChoroplethScale";
-import { endYear, startYear } from "../../utils/constants";
+
+import {
+  endYear,
+  startYear,
+  VEGETATION_OPTIONS,
+  type VegetationBandType,
+} from "../../utils/constants";
+
 import fetchRap from "../../api/rapApi";
-import Select from "../Select";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import MuiSelect, { type SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 
 type RapStatus = {
   state: "loading" | "ready" | "error";
   message?: string | null;
 };
-
-type VegetationOption = "All" | "Shrub" | "Tree";
 
 const useStyles = tss.create(({ theme }) => ({
   titleBar: {
@@ -56,6 +59,22 @@ const useStyles = tss.create(({ theme }) => ({
     whiteSpace: "nowrap",
     fontSize: theme.typography.subtitle2.fontSize,
   },
+  select: {
+    minWidth: 100,
+    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.primary.main,
+    fontSize: theme.typography.body2.fontSize,
+    "& .MuiSelect-select": {
+      padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
+      paddingRight: `${theme.spacing(4)} !important`,
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      border: "none",
+    },
+    "& .MuiSvgIcon-root": {
+      color: theme.palette.primary.contrastText,
+    },
+  },
   closeButton: {
     backgroundColor: theme.palette.error.main,
     color: theme.palette.primary.contrastText,
@@ -83,10 +102,13 @@ export const VegetationCover: React.FC = () => {
     isLoading: choroplethLoading,
   } = useChoropleth();
 
-  // Read choropleth params from desired state
   const choroplethParams = getLayerParams(layerDesired, "choropleth");
-  const choroplethYear = choroplethParams.year;
-  const choroplethBands = (choroplethParams.bands as VegetationBandType) ?? "all";
+  const bands = (choroplethParams.bands as VegetationBandType) ?? "all";
+  const selectedYear =
+    choroplethParams.year === null ? "All" : String(choroplethParams.year);
+
+  const vegOption =
+    VEGETATION_OPTIONS.find((o) => o.value === bands) ?? VEGETATION_OPTIONS[0];
 
   const runId =
     useParams({
@@ -95,73 +117,25 @@ export const VegetationCover: React.FC = () => {
       shouldThrow: false,
     }) ?? null;
 
-  // Map UI option to band type
-  const vegetationOptionToBand: Record<VegetationOption, VegetationBandType> = {
-    All: "all",
-    Shrub: "shrub",
-    Tree: "tree",
-  };
-
-  // Derive reverse mapping from vegetationOptionToBand to avoid duplicated definitions
-  const bandToVegetationOption: Record<VegetationBandType, VegetationOption> =
-    Object.entries(vegetationOptionToBand).reduce(
-      (acc, [option, band]) => {
-        acc[band as VegetationBandType] = option as VegetationOption;
-        return acc;
-      },
-      {} as Record<VegetationBandType, VegetationOption>,
-    );
-
-  // Initialize from store state
-  const [vegetationOption, setVegetationOption] = useState<VegetationOption>(
-    bandToVegetationOption[choroplethBands],
+  const years = useMemo(
+    () =>
+      Array.from({ length: endYear - startYear + 1 }, (_, i) =>
+        String(startYear + i),
+      ),
+    [],
   );
 
-  const barKeys = useMemo(() => {
-    const shrubKey = {
-      key: "shrub",
-      color: "#8B4513",
-      activeFill: "#d7a17a",
-      activeStroke: "#5c3317",
-    };
-    const treeKey = {
-      key: "tree",
-      color: "#4caf50",
-      activeFill: "#a5d6a7",
-      activeStroke: "#2e7d32",
-    };
-
-    return vegetationOption === "Shrub"
-      ? [shrubKey]
-      : vegetationOption === "Tree"
-        ? [treeKey]
-        : [shrubKey, treeKey];
-  }, [vegetationOption]);
-
-  const years = Array.from({ length: endYear - startYear + 1 }, (_, i) =>
-    String(startYear + i),
-  );
-
-  // Initialize from store state
-  const [selectedYear, setSelectedYear] = useState<string>(
-    choroplethYear === null ? "All" : String(choroplethYear),
-  );
-
-  // Sync vegetation option changes to choropleth store
-  const handleVegetationChange = (v: string) => {
-    const option = v as "All" | "Shrub" | "Tree";
-    setVegetationOption(option);
+  const handleBandsChange = (e: SelectChangeEvent) => {
     dispatchLayerAction({
       type: "SET_PARAM",
       id: "choropleth",
       key: "bands",
-      value: vegetationOptionToBand[option],
+      value: e.target.value,
     });
   };
 
-  // Sync year changes to choropleth store
-  const handleYearChange = (v: string) => {
-    setSelectedYear(v);
+  const handleYearChange = (e: SelectChangeEvent) => {
+    const v = e.target.value;
     dispatchLayerAction({
       type: "SET_PARAM",
       id: "choropleth",
@@ -170,7 +144,7 @@ export const VegetationCover: React.FC = () => {
     });
   };
 
-  // RAP timeseries fetched for selected hillslope (topaz id)
+  // RAP timeseries
   const [rapTimeSeries, setRapTimeSeries] = useState<AggregatedRapRow[] | null>(
     null,
   );
@@ -178,6 +152,7 @@ export const VegetationCover: React.FC = () => {
 
   useEffect(() => {
     let mounted = true;
+
     async function loadRap() {
       if (!runId) {
         setRapTimeSeries([]);
@@ -186,30 +161,28 @@ export const VegetationCover: React.FC = () => {
       }
 
       setRapStatus({ state: "loading" });
+      const yearParam =
+        selectedYear === "All" ? undefined : Number(selectedYear);
 
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-            mode: "hillslope",
-            topazId: selectedHillslopeId,
-            runId: runId,
-            year: selectedYear === "All" ? undefined : Number(selectedYear),
-          })
-          : runId
-            ? await fetchRap({
-              mode: "watershed",
-              runId: runId,
-              year: selectedYear === "All" ? undefined : Number(selectedYear),
+              mode: "hillslope",
+              topazId: selectedHillslopeId,
+              runId,
+              year: yearParam,
             })
-            : null;
+          : await fetchRap({ mode: "watershed", runId, year: yearParam });
 
         if (!mounted) return;
         setRapTimeSeries(Array.isArray(rows) ? rows : []);
         setRapStatus({ state: "ready" });
       } catch (err: unknown) {
         if (!mounted) return;
-        const message = err instanceof Error ? err.message : String(err);
-        setRapStatus({ state: "error", message });
+        setRapStatus({
+          state: "error",
+          message: err instanceof Error ? err.message : String(err),
+        });
         setRapTimeSeries(null);
       }
     }
@@ -220,10 +193,9 @@ export const VegetationCover: React.FC = () => {
     };
   }, [selectedHillslopeId, selectedYear, runId]);
 
-  const singleHillslopeChartData = useMemo(() => {
-    if (!rapTimeSeries || rapTimeSeries.length === 0) return null;
+  const chartData = useMemo(() => {
+    if (!rapTimeSeries?.length) return [];
 
-    const rows = rapTimeSeries as AggregatedRapRow[];
     const toSeries = (
       year: number,
       coverage: number,
@@ -233,7 +205,7 @@ export const VegetationCover: React.FC = () => {
 
     if (selectedYear !== "All") {
       const y = Number(selectedYear);
-      const r = rows.find((rr) => rr.year === y);
+      const r = rapTimeSeries.find((rr) => rr.year === y);
       return [toSeries(y, r?.coverage ?? 0, r?.shrub ?? 0, r?.tree ?? 0)];
     }
 
@@ -243,7 +215,7 @@ export const VegetationCover: React.FC = () => {
     >();
     for (let y = startYear; y <= endYear; y++)
       map.set(y, { coverage: 0, shrub: 0, tree: 0 });
-    for (const r of rows) {
+    for (const r of rapTimeSeries) {
       map.set(r.year, {
         coverage: r.coverage ?? 0,
         shrub: r.shrub ?? 0,
@@ -251,15 +223,13 @@ export const VegetationCover: React.FC = () => {
       });
     }
     return Array.from(map.entries())
-      .sort((a, b) => a[0] - b[0])
+      .sort(([a], [b]) => a - b)
       .map(([yr, v]) => toSeries(yr, v.coverage, v.shrub, v.tree));
   }, [rapTimeSeries, selectedYear]);
 
-  const chartData = singleHillslopeChartData || [];
-
   const chartTitle = selectedHillslopeId
-    ? `${vegetationOption} Coverage - Hillslope ${selectedHillslopeId} (${selectedYear})`
-    : `${vegetationOption} Coverage (${selectedYear})`;
+    ? `${vegOption.label} Coverage - Hillslope ${selectedHillslopeId} (${selectedYear})`
+    : `${vegOption.label} Coverage (${selectedYear})`;
 
   return (
     <div>
@@ -269,13 +239,21 @@ export const VegetationCover: React.FC = () => {
             <Typography className={classes.optionAlignLabel}>
               Vegetation Cover:
             </Typography>
-            <Select
+            <MuiSelect
               id="veg-cover-title"
-              value={vegetationOption}
-              onChange={handleVegetationChange}
-              options={["All", "Shrub", "Tree"]}
-              ariaLabel="Select vegetation type"
-            />
+              value={bands}
+              onChange={handleBandsChange}
+              size="small"
+              className={classes.select}
+              aria-label="Select vegetation type"
+              MenuProps={{ style: { zIndex: 20000 } }}
+            >
+              {VEGETATION_OPTIONS.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </MuiSelect>
           </div>
         </div>
         <div className={classes.dateSelector}>
@@ -283,21 +261,33 @@ export const VegetationCover: React.FC = () => {
             <Typography className={classes.optionAlignLabel}>
               Select Year:
             </Typography>
-            <Select
+            <MuiSelect
               id="veg-year"
               value={selectedYear}
               onChange={handleYearChange}
-              options={["All", ...years.slice().reverse()]}
-              ariaLabel="Select vegetation year"
-            />
+              size="small"
+              className={classes.select}
+              aria-label="Select vegetation year"
+              MenuProps={{
+                style: { zIndex: 20000 },
+                PaperProps: { style: { maxHeight: 200 } },
+              }}
+            >
+              <MenuItem value="All">All</MenuItem>
+              {years
+                .slice()
+                .reverse()
+                .map((y) => (
+                  <MenuItem key={y} value={y}>
+                    {y}
+                  </MenuItem>
+                ))}
+            </MuiSelect>
           </div>
           <IconButton
             className={classes.closeButton}
             data-testid="veg-close-button"
             onClick={() => {
-              // Disabling choropleth removes this panel declaratively
-              // (ActiveBottomPanel renders null when isEffective("choropleth") is false)
-              // Choropleth cache is local to useChoropleth — destroyed on unmount
               clearSelectedHillslope();
               dispatchLayerAction({
                 type: "TOGGLE",
@@ -318,7 +308,7 @@ export const VegetationCover: React.FC = () => {
       <CoverageLineChart
         data={chartData}
         title={chartTitle}
-        lineKeys={barKeys}
+        lineKeys={vegOption.chartKeys}
       />
 
       {config && !choroplethLoading && choroplethRange && (

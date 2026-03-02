@@ -127,7 +127,10 @@ describe("DataLayersTabContent", () => {
 
   it("renders Watershed Data tab with vegetation cover and sbs checkboxes", () => {
     const { container } = render(
-      <DataLayersTabContent activeTab="Watershed Data" handleToggle={handleToggle} />,
+      <DataLayersTabContent
+        activeTab="Watershed Data"
+        handleToggle={handleToggle}
+      />,
     );
 
     expect(screen.getByText("Vegetation Cover")).toBeInTheDocument();
@@ -140,7 +143,10 @@ describe("DataLayersTabContent", () => {
 
   it("enables choropleth via enableLayerWithParams when vegetation cover is checked", () => {
     const { container } = render(
-      <DataLayersTabContent activeTab="Watershed Data" handleToggle={handleToggle} />,
+      <DataLayersTabContent
+        activeTab="Watershed Data"
+        handleToggle={handleToggle}
+      />,
     );
 
     fireEvent.click(container.querySelector("input#vegetationCover")!);

@@ -352,21 +352,16 @@ describe("VegetationCover", () => {
         expect(mockFetchRap).toHaveBeenCalled();
       });
 
-      const chart = screen.getByTestId("coverage-chart");
-      expect(chart).toHaveTextContent("All Coverage");
+      expect(screen.getByTestId("coverage-chart")).toHaveTextContent(
+        "All Coverage",
+      );
 
       await act(async () => {
-        const selectButton = screen.getByTestId("select-veg-cover-title");
-        fireEvent.click(selectButton);
+        fireEvent.mouseDown(document.getElementById("veg-cover-title")!);
       });
 
       await act(async () => {
-        const shrubOption = screen.getByRole("option", { name: "Shrub" });
-        fireEvent.click(shrubOption);
-      });
-
-      await waitFor(() => {
-        expect(chart).toHaveTextContent("Shrub Coverage");
+        fireEvent.click(screen.getByRole("option", { name: "Shrub" }));
       });
 
       expect(mockDispatchLayerAction).toHaveBeenCalledWith({
@@ -387,19 +382,11 @@ describe("VegetationCover", () => {
       });
 
       await act(async () => {
-        const selectButton = screen.getByTestId("select-veg-cover-title");
-        fireEvent.click(selectButton);
+        fireEvent.mouseDown(document.getElementById("veg-cover-title")!);
       });
 
       await act(async () => {
-        const treeOption = screen.getByRole("option", { name: "Tree" });
-        fireEvent.click(treeOption);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId("coverage-chart")).toHaveTextContent(
-          "Tree Coverage",
-        );
+        fireEvent.click(screen.getByRole("option", { name: "Tree" }));
       });
 
       expect(mockDispatchLayerAction).toHaveBeenCalledWith({
@@ -423,20 +410,16 @@ describe("VegetationCover", () => {
         expect(mockFetchRap).toHaveBeenCalled();
       });
 
+      expect(screen.getByTestId("coverage-chart")).toHaveTextContent(
+        "Tree Coverage",
+      );
+
       await act(async () => {
-        const selectButton = screen.getByTestId("select-veg-cover-title");
-        fireEvent.click(selectButton);
+        fireEvent.mouseDown(document.getElementById("veg-cover-title")!);
       });
 
       await act(async () => {
-        const allOption = screen.getByRole("option", { name: "All" });
-        fireEvent.click(allOption);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId("coverage-chart")).toHaveTextContent(
-          "All Coverage",
-        );
+        fireEvent.click(screen.getByRole("option", { name: "All" }));
       });
 
       expect(mockDispatchLayerAction).toHaveBeenCalledWith({
@@ -459,19 +442,11 @@ describe("VegetationCover", () => {
       });
 
       await act(async () => {
-        const yearSelect = screen.getByTestId("select-veg-year");
-        fireEvent.click(yearSelect);
+        fireEvent.mouseDown(document.getElementById("veg-year")!);
       });
 
       await act(async () => {
-        const year2020 = screen.getByRole("option", { name: "2020" });
-        fireEvent.click(year2020);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId("coverage-chart")).toHaveTextContent(
-          "(2020)",
-        );
+        fireEvent.click(screen.getByRole("option", { name: "2020" }));
       });
 
       expect(mockDispatchLayerAction).toHaveBeenCalledWith({
@@ -495,18 +470,14 @@ describe("VegetationCover", () => {
         expect(mockFetchRap).toHaveBeenCalled();
       });
 
+      expect(screen.getByTestId("coverage-chart")).toHaveTextContent("(2020)");
+
       await act(async () => {
-        const yearSelect = screen.getByTestId("select-veg-year");
-        fireEvent.click(yearSelect);
+        fireEvent.mouseDown(document.getElementById("veg-year")!);
       });
 
       await act(async () => {
-        const allOption = screen.getByRole("option", { name: "All" });
-        fireEvent.click(allOption);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId("coverage-chart")).toHaveTextContent("(All)");
+        fireEvent.click(screen.getByRole("option", { name: "All" }));
       });
 
       expect(mockDispatchLayerAction).toHaveBeenCalledWith({

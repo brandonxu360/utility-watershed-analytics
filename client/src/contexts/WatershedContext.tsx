@@ -60,10 +60,10 @@ const INITIAL_STATE: WatershedState = {
 export type WatershedAction =
   | LayerAction
   | {
-    type: "SET_DATA_AVAILABILITY";
-    id: LayerId;
-    available: boolean | undefined;
-  }
+      type: "SET_DATA_AVAILABILITY";
+      id: LayerId;
+      available: boolean | undefined;
+    }
   | { type: "SET_LAYER_LOADING"; id: LayerId; loading: boolean }
   | { type: "SET_ZOOM"; zoom: number }
   | { type: "SET_SELECTED_HILLSLOPE"; id: number | null }

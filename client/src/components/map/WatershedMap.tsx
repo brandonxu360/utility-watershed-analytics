@@ -99,7 +99,8 @@ export default function WatershedMap(): JSX.Element {
   const channelsEffective = isEffective("channels");
   const landuseEffective = isEffective("landuse");
   const sbsEffective = isEffective("sbs");
-  const sbsColorMode = (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
+  const sbsColorMode =
+    (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
 
   const runId =
     useParams({
@@ -127,8 +128,16 @@ export default function WatershedMap(): JSX.Element {
   const coverageKey = useMemo(
     () =>
       JSON.stringify({
-        c: { ...layerDesired.choropleth.params, on: choroplethActive, data: !!choroplethRange },
-        s: { ...layerDesired.scenario.params, on: scenarioEffective, data: hasScenarioData },
+        c: {
+          ...layerDesired.choropleth.params,
+          on: choroplethActive,
+          data: !!choroplethRange,
+        },
+        s: {
+          ...layerDesired.scenario.params,
+          on: scenarioEffective,
+          data: hasScenarioData,
+        },
         l: { on: landuseEffective, data: !!landuseData },
       }),
     [
@@ -288,13 +297,13 @@ export default function WatershedMap(): JSX.Element {
           choroplethLoading ||
           landuseLoading ||
           scenarioLoading) && (
-            <div
-              className={classes.mapLoadingOverlay}
-              data-testid="map-loading-overlay"
-            >
-              <CircularProgress size={50} color="inherit" />
-            </div>
-          )}
+          <div
+            className={classes.mapLoadingOverlay}
+            data-testid="map-loading-overlay"
+          >
+            <CircularProgress size={50} color="inherit" />
+          </div>
+        )}
 
         <TileLayer
           key={selectedLayerId}
