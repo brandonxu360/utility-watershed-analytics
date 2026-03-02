@@ -1,12 +1,3 @@
-/**
- * Scenario-specific constants and types.
- *
- * These were previously in the zustand layersSlice. Now they live alongside
- * the declarative layer system since scenarios are just another LayerId.
- */
-
-// ── Scenario identifiers ───────────────────────────────────────────────────
-
 export const AVAILABLE_SCENARIOS = [
   "undisturbed",
   "thinning_40_75",
@@ -15,8 +6,6 @@ export const AVAILABLE_SCENARIOS = [
 ] as const;
 
 export type ScenarioType = (typeof AVAILABLE_SCENARIOS)[number];
-
-// ── Variable selection ──────────────────────────────────────────────────────
 
 export const SCENARIO_VARIABLES = ["runoff", "sediment_yield"] as const;
 
@@ -36,8 +25,6 @@ export const SCENARIO_VARIABLE_CONFIG: Record<
   runoff: { label: "Runoff Volume", colormap: "winter", unit: "mm" },
   sediment_yield: { label: "Sediment Yield", colormap: "jet2", unit: "kg/ha" },
 };
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Format scenario name for display (e.g., "thinning_40_75" → "Thinning 40-75") */
 export function formatScenarioLabel(scenario: ScenarioType): string {

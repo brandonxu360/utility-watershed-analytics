@@ -16,10 +16,14 @@ import { tss } from "../../../../utils/tss";
 import { Typography } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 import Radio from "@mui/material/Radio";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select, { type SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 
 /**
  * Returns true when any layer that `requires` the given layer is currently
- * enabled.  Used to disable the checkbox so users can't accidentally
+ * enabled. Used to disable the checkbox so users can't accidentally
  * cascade-disable a dependency chain.
  */
 function hasActiveDependents(id: LayerId, desired: DesiredMap): boolean {
@@ -28,7 +32,7 @@ function hasActiveDependents(id: LayerId, desired: DesiredMap): boolean {
 
 const useStyles = tss.create(({ theme }) => ({
   layers: {
-    maxHeight: "375px",
+    maxHeight: "350px",
     overflowY: "auto",
     padding: `${theme.spacing(0.5)} 0 ${theme.spacing(1)} 0`,
   },
@@ -57,16 +61,49 @@ const useStyles = tss.create(({ theme }) => ({
       opacity: 0.85,
     },
   },
+  scenarioGroup: {
+    margin: `${theme.spacing(1)} ${theme.spacing(1.75)}`,
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+    padding: theme.spacing(0, 1),
+  },
+  scenarioSelect: {
+    color: theme.palette.primary.dark,
+    "& .MuiSelect-select": {
+      fontSize: theme.typography.subtitle2.fontSize,
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.primary.dark,
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.primary.dark,
+    },
+    "& .MuiSvgIcon-root": {
+      color: theme.palette.primary.dark,
+    },
+  },
+  scenarioLabel: {
+    color: theme.palette.primary.dark,
+    "&.Mui-focused": {
+      color: theme.palette.primary.dark,
+    },
+  },
   variableRow: {
     display: "flex",
     alignItems: "center",
-    padding: `${theme.spacing(0.25)} ${theme.spacing(2)} ${theme.spacing(0.25)} ${theme.spacing(4)}`,
+    padding: `${theme.spacing(0.25)} 0`,
   },
   variableTitle: {
     fontSize: theme.typography.caption.fontSize,
     color: theme.palette.primary.dark,
     flex: 1,
-    paddingLeft: theme.spacing(1),
+    paddingLeft: theme.spacing(0.5),
+  },
+  radio: {
+    color: theme.palette.primary.dark,
+    "&.Mui-checked": {
+      color: theme.palette.primary.dark,
+    },
   },
 }));
 
@@ -106,12 +143,13 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
     handleToggle(id, checked);
   };
 
-  /** Toggle a scenario on/off. Toggling the same scenario off disables the layer. */
-  const handleScenarioChange = (scenario: ScenarioType) => {
-    if (selectedScenario === scenario) {
+  /** Handle scenario select change. "none" disables the layer. */
+  const handleScenarioSelect = (e: SelectChangeEvent) => {
+    const value = e.target.value;
+    if (value === "none") {
       dispatchLayerAction({ type: "TOGGLE", id: "scenario", on: false });
     } else {
-      enableLayerWithParams("scenario", { scenario });
+      enableLayerWithParams("scenario", { scenario: value as ScenarioType });
     }
   };
 
@@ -129,6 +167,56 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
     <div className={classes.layers}>
       {activeTab === "WEPP" && (
         <>
+          <div className={classes.scenarioGroup}>
+            <FormControl fullWidth size="small" disabled={scenarioLoading}>
+              <InputLabel id="scenario-select-label" className={classes.scenarioLabel}>Scenario</InputLabel>
+              <Select
+                labelId="scenario-select-label"
+                id="scenario-select"
+                value={scenarioEnabled && selectedScenario ? selectedScenario : "none"}
+                label="Scenario"
+                onChange={handleScenarioSelect}
+                className={classes.scenarioSelect}
+                MenuProps={{
+                  style: { zIndex: 10001 },
+                  PaperProps: { style: { maxHeight: 150 } },
+                }}
+              >
+                <MenuItem value="none">None</MenuItem>
+                {AVAILABLE_SCENARIOS.map((scenario) => (
+                  <MenuItem key={scenario} value={scenario}>
+                    {formatScenarioLabel(scenario)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {scenarioEnabled && selectedScenario && (
+              <>
+                <Typography
+                  className={classes.variableTitle}
+                  sx={{ fontWeight: 600, pt: 1.5, pb: 0.5 }}
+                >
+                  Variable
+                </Typography>
+                {SCENARIO_VARIABLES.map((variable) => (
+                  <div key={variable} className={classes.variableRow}>
+                    <Typography className={classes.variableTitle}>
+                      {SCENARIO_VARIABLE_CONFIG[variable].label}
+                    </Typography>
+                    <Radio
+                      className={classes.radio}
+                      checked={scenarioVariable === variable}
+                      onChange={() => handleVariableChange(variable)}
+                      size="small"
+                      slotProps={{ input: { id: `variable-${variable}` } }}
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+
           <div className={classes.layer}>
             <Typography className={classes.layerTitle}>
               Subcatchments
@@ -150,43 +238,6 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
               slotProps={{ input: { id: "channels" } }}
             />
           </div>
-
-          {/* Scenario checkboxes */}
-          <Typography className={classes.heading}>Scenarios</Typography>
-          {AVAILABLE_SCENARIOS.map((scenario) => (
-            <div key={scenario} className={classes.layer}>
-              <Typography className={classes.layerTitle}>
-                {formatScenarioLabel(scenario)}
-              </Typography>
-              <Checkbox
-                checked={scenarioEnabled && selectedScenario === scenario}
-                onChange={() => handleScenarioChange(scenario)}
-                disabled={scenarioLoading}
-                className={classes.layerCheckbox}
-                slotProps={{ input: { id: scenario } }}
-              />
-            </div>
-          ))}
-
-          {/* Variable selection — visible when a scenario is active */}
-          {scenarioEnabled && selectedScenario && (
-            <>
-              <Typography className={classes.heading}>Variable</Typography>
-              {SCENARIO_VARIABLES.map((variable) => (
-                <div key={variable} className={classes.variableRow}>
-                  <Typography className={classes.variableTitle}>
-                    {SCENARIO_VARIABLE_CONFIG[variable].label}
-                  </Typography>
-                  <Radio
-                    checked={scenarioVariable === variable}
-                    onChange={() => handleVariableChange(variable)}
-                    size="small"
-                    slotProps={{ input: { id: `variable-${variable}` } }}
-                  />
-                </div>
-              ))}
-            </>
-          )}
         </>
       )}
 
