@@ -1,3 +1,5 @@
+import type { ScenarioType, ScenarioVariableType } from "./scenario";
+
 /**
  * Core type definitions for the declarative layer system.
  *
@@ -10,9 +12,6 @@
  *  - BlockedReason:     Why effective differs from desired (structured, never stringly-typed).
  */
 
-// ── Layer identifiers ──────────────────────────────────────────────────────
-
-/** All layer ids as a const array (useful for iteration). */
 export const ALL_LAYER_IDS = [
   "subcatchment",
   "channels",
@@ -21,35 +20,27 @@ export const ALL_LAYER_IDS = [
   "choropleth",
   "sbs",
   "fireSeverity",
+  "scenario",
 ] as const;
 
-/** Every toggleable layer known to the system. */
 export type LayerId = (typeof ALL_LAYER_IDS)[number];
 
-// ── Group identifiers ──────────────────────────────────────────────────────
-
-/** Named groups of layers. */
 export type GroupId =
-  | "overlays" // multi-select: subcatchment, channels, patches, fireSeverity
-  | "coverageStyle"; // exclusive: landuse, choropleth, sbs
+  | "overlays" // multi-select: any number of layers can be enabled simultaneously.
+  | "coverageStyle"; // exclusive: at most one layer in the group may be enabled.
 
 export type GroupType = "multi" | "exclusive";
 
 export interface GroupDescriptor {
   id: GroupId;
   label: string;
-  /** "multi"     → any number of layers can be enabled simultaneously.
-   *  "exclusive" → at most one layer in the group may be enabled. */
   type: GroupType;
 }
-
-// ── Layer descriptors (registry entries) ────────────────────────────────────
 
 export type LayerKind = "vector" | "raster";
 
 /**
  * Leaflet pane where the layer should render.
- * Using custom panes ensures stable z-ordering independent of add-order.
  */
 export type LayerPane = "overlayPane" | "rasterPane";
 
@@ -60,21 +51,41 @@ export interface LayerDescriptor {
   kind: LayerKind;
   pane: LayerPane;
   zIndex: number;
-
-  /** Other layers that MUST be enabled for this layer to activate. */
   requires?: LayerId[];
-
-  /** Zoom range [min, max] (inclusive) in which the layer is visible. */
   zoomRange?: { min: number; max: number };
-
-  /** Default desired state when the layer is first created / reset. */
   defaults: {
     opacity: number;
     params: Record<string, unknown>;
   };
 }
 
-// ── Desired state (what the user asked for) ─────────────────────────────────
+export interface ScenarioParams {
+  scenario: ScenarioType | null;
+  variable: ScenarioVariableType;
+}
+
+export interface ChoroplethParams {
+  metric: "vegetationCover";
+  year: number | null;
+  bands: string;
+}
+
+export interface SbsParams {
+  mode: "legacy" | "shift";
+}
+
+type EmptyParams = Record<string, never>;
+
+export type LayerParamsMap = {
+  subcatchment: EmptyParams;
+  channels: EmptyParams;
+  patches: EmptyParams;
+  landuse: EmptyParams;
+  choropleth: ChoroplethParams;
+  sbs: SbsParams;
+  fireSeverity: EmptyParams;
+  scenario: ScenarioParams;
+};
 
 export interface LayerDesiredState {
   enabled: boolean;
@@ -82,17 +93,16 @@ export interface LayerDesiredState {
   params: Record<string, unknown>;
 }
 
-/** Complete desired-state map for all layers. */
 export type DesiredMap = Record<LayerId, LayerDesiredState>;
 
-// ── Runtime facts ───────────────────────────────────────────────────────────
+export function getLayerParams<K extends LayerId>(
+  map: DesiredMap,
+  id: K,
+): LayerParamsMap[K] {
+  return map[id].params as LayerParamsMap[K];
+}
 
-/**
- * Runtime facts that feed into the effective-state evaluation.
- * Updated by data-fetching hooks, zoom listeners, etc.
- */
 export interface LayerRuntime {
-  /** Current Leaflet map zoom level. */
   zoom: number;
 
   /**
@@ -110,20 +120,16 @@ export interface LayerRuntime {
   loading: Partial<Record<LayerId, boolean>>;
 }
 
-// ── Blocked reasons ─────────────────────────────────────────────────────────
-
 /** Structured reason explaining why a layer's effective state differs from desired. */
 export type BlockedReason =
   | { kind: "missing-data"; detail: string }
   | { kind: "requires-layer"; layerId: LayerId }
   | {
-      kind: "zoom-out-of-range";
-      current: number;
-      required: { min: number; max: number };
-    }
+    kind: "zoom-out-of-range";
+    current: number;
+    required: { min: number; max: number };
+  }
   | { kind: "excluded-by"; layerId: LayerId };
-
-// ── Effective state (what the map actually shows) ───────────────────────────
 
 export interface LayerEffectiveState {
   /**
@@ -145,13 +151,11 @@ export interface LayerEffectiveState {
   blockedReasons: BlockedReason[];
 }
 
-/** Complete effective-state map for all layers. */
 export type EffectiveMap = Record<LayerId, LayerEffectiveState>;
-
-// ── Actions (dispatched by UI) ──────────────────────────────────────────────
 
 export type LayerAction =
   | { type: "TOGGLE"; id: LayerId; on: boolean }
   | { type: "SET_OPACITY"; id: LayerId; opacity: number }
   | { type: "SET_PARAM"; id: LayerId; key: string; value: unknown }
+  | { type: "ENABLE_WITH_PARAMS"; id: LayerId; params: Record<string, unknown> }
   | { type: "RESET" };

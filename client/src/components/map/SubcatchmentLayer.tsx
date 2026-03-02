@@ -10,12 +10,12 @@ import { selectedStyle, highlightedStyle } from "./constants";
 export default function SubcatchmentLayer({
   data,
   style,
-  choroplethActive,
-  choroplethKey,
+  coverageActive,
+  coverageKey,
 }: {
   data: GeoJSON.FeatureCollection;
-  choroplethActive: boolean;
-  choroplethKey: string;
+  coverageActive: boolean;
+  coverageKey: string;
   style: (
     feature:
       | GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>
@@ -26,14 +26,13 @@ export default function SubcatchmentLayer({
 
   const { setSelectedHillslope, clearSelectedHillslope } = useWatershed();
 
-  // Use refs to always access the latest style and choroplethActive values in event handlers
   const styleRef = useRef(style);
-  const choroplethActiveRef = useRef(choroplethActive);
+  const coverageActiveRef = useRef(coverageActive);
 
   useEffect(() => {
     styleRef.current = style;
-    choroplethActiveRef.current = choroplethActive;
-  }, [style, choroplethActive]);
+    coverageActiveRef.current = coverageActive;
+  }, [style, coverageActive]);
 
   // Track selected feature id and layer using refs so event handlers
   // can read/update the current selection at event time without forcing rerenders.
@@ -68,7 +67,6 @@ export default function SubcatchmentLayer({
     }
   };
 
-  // Update all layer styles when choropleth data changes
   useEffect(() => {
     layersRef.current.forEach(({ layer, feature }) => {
       const fid = feature?.id?.toString?.() ?? null;
@@ -76,11 +74,11 @@ export default function SubcatchmentLayer({
         (layer as LeafletEvent["target"]).setStyle(styleRef.current(feature));
       }
     });
-  }, [choroplethKey]);
+  }, [coverageKey]);
 
   return (
     <GeoJSON
-      key={choroplethKey}
+      key={coverageKey}
       data={data}
       style={style}
       onEachFeature={(feature, layer) => {
@@ -143,7 +141,7 @@ export default function SubcatchmentLayer({
 
             if (selectedIdRef.current === hoverFid) {
               e.target.setStyle(selectedStyle);
-            } else if (choroplethActiveRef.current) {
+            } else if (coverageActiveRef.current) {
               const currentStyle = styleRef.current(feature);
               e.target.setStyle({
                 ...currentStyle,

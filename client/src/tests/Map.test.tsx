@@ -206,20 +206,20 @@ let lastSubcatchmentStyleFn: SubcatchmentStyleFn | null = null;
 vi.mock("../components/map/SubcatchmentLayer", () => ({
   default: ({
     style,
-    choroplethActive,
-    choroplethKey,
+    coverageActive,
+    coverageKey,
   }: {
     data: unknown;
     style: SubcatchmentStyleFn;
-    choroplethActive: boolean;
-    choroplethKey: string;
+    coverageActive: boolean;
+    coverageKey: string;
   }) => {
     lastSubcatchmentStyleFn = style;
     return (
       <div
         data-testid="subcatchment-layer"
-        data-choropleth-active={choroplethActive}
-        data-choropleth-key={choroplethKey}
+        data-coverage-active={coverageActive}
+        data-coverage-key={coverageKey}
       />
     );
   },
@@ -441,7 +441,7 @@ describe("Map Component", () => {
 
   describe("loading states", () => {
     it("shows loading overlay when watersheds are loading", async () => {
-      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedMap />);
 
@@ -573,7 +573,7 @@ describe("Map Component", () => {
 
       await waitFor(() => {
         const layer = screen.getByTestId("subcatchment-layer");
-        expect(layer.getAttribute("data-choropleth-active")).toBe("true");
+        expect(layer.getAttribute("data-coverage-active")).toBe("true");
       });
     });
   });
@@ -844,11 +844,11 @@ describe("Map Component", () => {
 
       await waitFor(() => {
         const layer = screen.getByTestId("subcatchment-layer");
-        expect(layer.getAttribute("data-choropleth-key")).toContain(
+        expect(layer.getAttribute("data-coverage-key")).toContain(
           "vegetationCover",
         );
-        expect(layer.getAttribute("data-choropleth-key")).toContain("2020");
-        expect(layer.getAttribute("data-choropleth-key")).toContain("tree");
+        expect(layer.getAttribute("data-coverage-key")).toContain("2020");
+        expect(layer.getAttribute("data-coverage-key")).toContain("tree");
       });
     });
 
@@ -872,7 +872,7 @@ describe("Map Component", () => {
 
       await waitFor(() => {
         const layer = screen.getByTestId("subcatchment-layer");
-        expect(layer.getAttribute("data-choropleth-key")).toContain("all");
+        expect(layer.getAttribute("data-coverage-key")).toContain("all");
       });
     });
   });

@@ -4,9 +4,7 @@ import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { MapEffect } from "../../utils/map/MapEffectUtil";
-
 import { fetchWatersheds } from "../../api/api";
-
 import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { LeafletMouseEvent } from "leaflet";
@@ -19,13 +17,7 @@ import { useWatershed } from "../../contexts/WatershedContext";
 import { useLanduseData } from "../../hooks/useLanduseData";
 import { useSubcatchmentData } from "../../hooks/useSubcatchmentData";
 import { useChannelData } from "../../hooks/useChannelData";
-
-import {
-  createColormap,
-  normalizeValue,
-  RGBAArray,
-} from "../../utils/colormap";
-
+import { useLayerToasts } from "../../hooks/useLayerToasts";
 import DataLayersControl from "./controls/DataLayers/DataLayers";
 import ZoomInControl from "./controls/ZoomIn";
 import ZoomOutControl from "./controls/ZoomOut";
@@ -36,7 +28,6 @@ import LandUseLegend from "./controls/LandUseLegend";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import SubcatchmentLayer from "./SubcatchmentLayer";
-import { useLayerToasts } from "../../hooks/useLayerToasts";
 import type { SbsColorMode } from "../../api/types";
 import "leaflet/dist/leaflet.css";
 
@@ -88,46 +79,27 @@ export default function WatershedMap(): JSX.Element {
 
   const { layerDesired, effective, isEffective } = useWatershed();
 
-  // Fire toasts when layers are blocked
   useLayerToasts(layerDesired, effective);
 
-  // Use the choropleth hook for data fetching and styling
   const {
     isActive: choroplethActive,
     isLoading: choroplethLoading,
+    range: choroplethRange,
     getChoroplethStyle,
   } = useChoropleth();
 
-  const scenarioColormap = useMemo<RGBAArray | null>(() => {
-    if (!scenarioRange) return null;
-    return createColormap({
-      colormap: scenarioVarConfig.colormap,
-      nshades: 256,
-      format: "rgba",
-    }) as RGBAArray;
-  }, [scenarioRange, scenarioVarConfig.colormap]);
+  const {
+    hasData: hasScenarioData,
+    isLoading: scenarioLoading,
+    getScenarioStyle,
+  } = useScenarioData();
 
-  // Shorthand booleans from effective state for rendering
+  const scenarioEffective = isEffective("scenario");
   const subcatchmentEffective = isEffective("subcatchment");
   const channelsEffective = isEffective("channels");
   const landuseEffective = isEffective("landuse");
   const sbsEffective = isEffective("sbs");
-  const sbsColorMode =
-    (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
-
-  // Create a key that changes when choropleth state changes to force style updates
-  const choroplethYear = layerDesired.choropleth.params.year as number | null;
-  const choroplethBands = layerDesired.choropleth.params.bands as string;
-  const choroplethKey = useMemo(
-    () =>
-      `${layerDesired.choropleth.params.metric}-${choroplethYear ?? "all"}-${choroplethBands}-${choroplethActive}`,
-    [
-      layerDesired.choropleth.params.metric,
-      choroplethYear,
-      choroplethBands,
-      choroplethActive,
-    ],
-  );
+  const sbsColorMode = (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
 
   const runId =
     useParams({
@@ -145,11 +117,31 @@ export default function WatershedMap(): JSX.Element {
     queryFn: fetchWatersheds,
   });
 
-  // Layer data hooks — colocate fetching, availability, and loading reporting
   const { subcatchments, subLoading } = useSubcatchmentData(runId);
   const { channelData, channelLoading } = useChannelData(runId);
   const { landuseData, landuseLoading, landuseLegendMap } =
     useLanduseData(runId);
+
+  // Key that forces GeoJSON remount when any coverage styling input changes.
+  // Includes params + data-availability flags for all three coverage sources.
+  const coverageKey = useMemo(
+    () =>
+      JSON.stringify({
+        c: { ...layerDesired.choropleth.params, on: choroplethActive, data: !!choroplethRange },
+        s: { ...layerDesired.scenario.params, on: scenarioEffective, data: hasScenarioData },
+        l: { on: landuseEffective, data: !!landuseData },
+      }),
+    [
+      layerDesired.choropleth.params,
+      choroplethActive,
+      choroplethRange,
+      layerDesired.scenario.params,
+      scenarioEffective,
+      hasScenarioData,
+      landuseEffective,
+      landuseData,
+    ],
+  );
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
@@ -161,12 +153,10 @@ export default function WatershedMap(): JSX.Element {
     });
   };
 
-  // Memoize GeoJSON data to prevent unnecessary re-renders
   const memoWatersheds = useMemo(() => watersheds, [watersheds]);
   const memoSubcatchments = useMemo(() => subcatchments, [subcatchments]);
   const memoChannels = useMemo(() => channelData, [channelData]);
 
-  // Memoize style functions
   const watershedStyle = useCallback(
     (
       feature:
@@ -182,7 +172,6 @@ export default function WatershedMap(): JSX.Element {
         | GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>
         | undefined,
     ) => {
-      // Choropleth coloring takes precedence (uses weppid since RAP data is aggregated by wepp_id)
       if (choroplethActive && feature?.properties?.weppid) {
         const choroplethStyle = getChoroplethStyle(feature.properties.weppid);
         if (choroplethStyle) {
@@ -190,33 +179,11 @@ export default function WatershedMap(): JSX.Element {
         }
       }
 
-      if (
-        hasScenarioData &&
-        scenarioColormap &&
-        scenarioRange &&
-        feature?.properties?.weppid
-      ) {
-        const scenarioRow = scenarioDataByWeppId.get(feature.properties.weppid);
-        if (scenarioRow) {
-          const normalized = normalizeValue(
-            scenarioRow[scenarioVariable],
-            scenarioRange.min,
-            scenarioRange.max,
-          );
-          const colorIndex = Math.round(
-            normalized * (scenarioColormap.length - 1),
-          );
-          const [r, g, b] = scenarioColormap[colorIndex] || [128, 128, 128];
-          return {
-            color: "#2c2c2c",
-            weight: 0.75,
-            fillColor: `rgb(${r}, ${g}, ${b})`,
-            fillOpacity: 0.85,
-          };
-        }
+      if (feature?.properties?.weppid) {
+        const scenarioStyle = getScenarioStyle(feature.properties.weppid);
+        if (scenarioStyle) return scenarioStyle;
       }
 
-      // Land use coloring - lookup by topazid
       if (landuseEffective && feature?.properties?.topazid) {
         const landuseInfo = landuseData?.[feature.properties.topazid];
         if (landuseInfo?.color) {
@@ -236,7 +203,13 @@ export default function WatershedMap(): JSX.Element {
         fillOpacity: 0,
       };
     },
-    [landuseEffective, landuseData, choroplethActive, getChoroplethStyle],
+    [
+      landuseEffective,
+      landuseData,
+      choroplethActive,
+      getChoroplethStyle,
+      getScenarioStyle,
+    ],
   );
 
   const channelStyle = useCallback(
@@ -291,7 +264,6 @@ export default function WatershedMap(): JSX.Element {
     }
   }, [runId, memoWatersheds]);
 
-  // Only crash on critical data failure (watersheds are required for the map to function)
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
 
   return (
@@ -314,7 +286,8 @@ export default function WatershedMap(): JSX.Element {
           subLoading ||
           channelLoading ||
           choroplethLoading ||
-          landuseLoading) && (
+          landuseLoading ||
+          scenarioLoading) && (
             <div
               className={classes.mapLoadingOverlay}
               data-testid="map-loading-overlay"
@@ -351,7 +324,6 @@ export default function WatershedMap(): JSX.Element {
           <ZoomOutControl />
         </div>
 
-        {/* Handles URL navigation to a specified watershed */}
         <MapEffect watershedId={runId} watersheds={memoWatersheds} />
 
         {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
@@ -371,8 +343,8 @@ export default function WatershedMap(): JSX.Element {
           <SubcatchmentLayer
             data={memoSubcatchments}
             style={subcatchmentStyle}
-            choroplethActive={choroplethActive}
-            choroplethKey={choroplethKey}
+            coverageActive={choroplethActive || scenarioEffective}
+            coverageKey={coverageKey}
           />
         )}
 

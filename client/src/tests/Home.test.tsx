@@ -38,14 +38,14 @@ vi.mock("../components/bottom-panels/VegetationCover", () => ({
   VegetationCover: () => <div data-testid="vegetation-cover" />,
 }));
 
-let mockIsEffective = false;
+let mockEffectiveLayers: Record<string, boolean> = {};
 
 vi.mock("../contexts/WatershedContext", () => ({
   WatershedProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
   ),
   useWatershed: () => ({
-    isEffective: () => mockIsEffective,
+    isEffective: (id: string) => !!mockEffectiveLayers[id],
   }),
 }));
 
@@ -53,7 +53,7 @@ describe("Home Component Tests", () => {
   beforeEach(() => {
     mockUseParams.mockReset();
     mockNavigate.mockReset();
-    mockIsEffective = false;
+    mockEffectiveLayers = {};
   });
 
   describe("rendering", () => {
@@ -100,7 +100,7 @@ describe("Home Component Tests", () => {
 
     it("does not render BottomPanel when choropleth is not effective", () => {
       mockUseParams.mockReturnValue(null);
-      mockIsEffective = false;
+      mockEffectiveLayers = {};
       render(<Home />);
       expect(
         screen.queryByRole("complementary", { name: /bottom panel/i }),
@@ -109,7 +109,7 @@ describe("Home Component Tests", () => {
 
     it("renders BottomPanel with VegetationCover when choropleth is effective", () => {
       mockUseParams.mockReturnValue(null);
-      mockIsEffective = true;
+      mockEffectiveLayers = { choropleth: true };
       render(<Home />);
       expect(
         screen.getByRole("complementary", { name: /bottom panel/i }),

@@ -130,8 +130,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -157,8 +157,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -178,8 +178,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -212,8 +212,8 @@ describe("SubcatchmentLayer", () => {
           >
         }
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -244,8 +244,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -264,8 +264,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={true}
-        choroplethKey="k1"
+        coverageActive={true}
+        coverageKey="k1"
       />,
     );
 
@@ -288,8 +288,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={true}
-        choroplethKey="k1"
+        coverageActive={true}
+        coverageKey="k1"
       />,
     );
 
@@ -309,8 +309,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -329,8 +329,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -347,7 +347,7 @@ describe("SubcatchmentLayer", () => {
     expect(layer.closeTooltip).toHaveBeenCalledTimes(1);
   });
 
-  it("updates non-selected layer styles when choroplethKey changes", async () => {
+  it("updates non-selected layer styles when coverageKey changes", async () => {
     const feature = createFeature("1");
     const layer = createLayer();
 
@@ -355,8 +355,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -368,8 +368,8 @@ describe("SubcatchmentLayer", () => {
         <SubcatchmentLayer
           data={data}
           style={styleFn}
-          choroplethActive={false}
-          choroplethKey="k2"
+          coverageActive={false}
+          coverageKey="k2"
         />,
       );
     });
@@ -377,7 +377,7 @@ describe("SubcatchmentLayer", () => {
     expect(layer.setStyle).toHaveBeenCalledWith(styleFn(feature));
   });
 
-  it("does not update the selected layer style when choroplethKey changes", async () => {
+  it("does not update the selected layer style when coverageKey changes", async () => {
     const feature = createFeature("1");
     const layer = createLayer();
 
@@ -385,8 +385,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -399,8 +399,8 @@ describe("SubcatchmentLayer", () => {
         <SubcatchmentLayer
           data={data}
           style={styleFn}
-          choroplethActive={false}
-          choroplethKey="k2"
+          coverageActive={false}
+          coverageKey="k2"
         />,
       );
     });
@@ -413,8 +413,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -442,8 +442,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -468,8 +468,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -493,8 +493,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -534,8 +534,8 @@ describe("SubcatchmentLayer", () => {
           >
         }
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -562,7 +562,7 @@ describe("SubcatchmentLayer", () => {
     expect(layer1.setStyle).toHaveBeenCalledWith(styleFn(feature1));
   });
 
-  it("event handlers use latest choroplethActive/style after rerender", async () => {
+  it("event handlers use latest coverageActive/style after rerender", async () => {
     const styleFn2 = vi.fn(
       (feature: Feature | undefined): PathOptions => ({
         color: `#ALT-${feature?.id?.toString?.() ?? "none"}`,
@@ -579,8 +579,8 @@ describe("SubcatchmentLayer", () => {
       <SubcatchmentLayer
         data={data}
         style={styleFn}
-        choroplethActive={false}
-        choroplethKey="k1"
+        coverageActive={false}
+        coverageKey="k1"
       />,
     );
 
@@ -592,8 +592,8 @@ describe("SubcatchmentLayer", () => {
         <SubcatchmentLayer
           data={data}
           style={styleFn2}
-          choroplethActive={true}
-          choroplethKey="k1"
+          coverageActive={true}
+          coverageKey="k1"
         />,
       );
     });

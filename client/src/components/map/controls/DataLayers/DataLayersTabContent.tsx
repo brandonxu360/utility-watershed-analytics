@@ -1,10 +1,21 @@
 import { FC, ChangeEvent } from "react";
 import { useWatershed } from "../../../../contexts/WatershedContext";
 import { getDependents } from "../../../../layers/registry";
-import type { LayerId, DesiredMap } from "../../../../layers/types";
+import { getLayerParams, type LayerId, type DesiredMap } from "../../../../layers/types";
+
+import {
+  AVAILABLE_SCENARIOS,
+  SCENARIO_VARIABLES,
+  SCENARIO_VARIABLE_CONFIG,
+  formatScenarioLabel,
+  type ScenarioType,
+  type ScenarioVariableType,
+} from "../../../../layers/scenario";
+
 import { tss } from "../../../../utils/tss";
 import { Typography } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
+import Radio from "@mui/material/Radio";
 
 /**
  * Returns true when any layer that `requires` the given layer is currently
@@ -14,7 +25,6 @@ import Checkbox from "@mui/material/Checkbox";
 function hasActiveDependents(id: LayerId, desired: DesiredMap): boolean {
   return getDependents(id).some((depId) => desired[depId].enabled);
 }
-import Radio from "@mui/material/Radio";
 
 const useStyles = tss.create(({ theme }) => ({
   layers: {
@@ -58,13 +68,6 @@ const useStyles = tss.create(({ theme }) => ({
     flex: 1,
     paddingLeft: theme.spacing(1),
   },
-  helpIcon: {
-    color: theme.palette.accent.main,
-    fontSize: "16px",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-  },
 }));
 
 type DataLayersTabContentProps = {
@@ -77,22 +80,49 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
   handleToggle,
 }) => {
   const { classes } = useStyles();
+  const {
+    layerDesired,
+    dispatchLayerAction,
+    enableLayerWithParams,
+    effective,
+  } = useWatershed();
 
-  const { layerDesired, enableLayerWithParams } = useWatershed();
-
-  // Read desired state for checkbox checked values
   const subcatchmentChecked = layerDesired.subcatchment.enabled;
   const channelsChecked = layerDesired.channels.enabled;
   const landuseChecked = layerDesired.landuse.enabled;
   const sbsChecked = layerDesired.sbs.enabled;
-  const choroplethMetric = layerDesired.choropleth.params.metric as
-    | string
-    | undefined;
   const choroplethEnabled = layerDesired.choropleth.enabled;
+  const choroplethParams = getLayerParams(layerDesired, "choropleth");
+  const choroplethMetric = choroplethParams.metric;
+
+  const scenarioParams = getLayerParams(layerDesired, "scenario");
+  const selectedScenario = scenarioParams.scenario ?? null;
+  const scenarioVariable = scenarioParams.variable ?? "sediment_yield";
+  const scenarioEnabled = layerDesired.scenario.enabled;
+  const scenarioLoading = effective.scenario.loading;
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = e.target;
     handleToggle(id, checked);
+  };
+
+  /** Toggle a scenario on/off. Toggling the same scenario off disables the layer. */
+  const handleScenarioChange = (scenario: ScenarioType) => {
+    if (selectedScenario === scenario) {
+      dispatchLayerAction({ type: "TOGGLE", id: "scenario", on: false });
+    } else {
+      enableLayerWithParams("scenario", { scenario });
+    }
+  };
+
+  /** Switch the active variable (runoff / sediment_yield). */
+  const handleVariableChange = (variable: ScenarioVariableType) => {
+    dispatchLayerAction({
+      type: "SET_PARAM",
+      id: "scenario",
+      key: "variable",
+      value: variable,
+    });
   };
 
   return (
@@ -121,24 +151,25 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             />
           </div>
 
-          {/* Scenario toggles */}
+          {/* Scenario checkboxes */}
+          <Typography className={classes.heading}>Scenarios</Typography>
           {AVAILABLE_SCENARIOS.map((scenario) => (
             <div key={scenario} className={classes.layer}>
               <Typography className={classes.layerTitle}>
                 {formatScenarioLabel(scenario)}
               </Typography>
               <Checkbox
-                checked={selectedScenario === scenario}
+                checked={scenarioEnabled && selectedScenario === scenario}
                 onChange={() => handleScenarioChange(scenario)}
-                disabled={scenarioLoading || hasActiveDataLayer}
+                disabled={scenarioLoading}
                 className={classes.layerCheckbox}
                 slotProps={{ input: { id: scenario } }}
               />
             </div>
           ))}
 
-          {/* Variable selection - shown when a scenario is active */}
-          {hasScenario && (
+          {/* Variable selection — visible when a scenario is active */}
+          {scenarioEnabled && selectedScenario && (
             <>
               <Typography className={classes.heading}>Variable</Typography>
               {SCENARIO_VARIABLES.map((variable) => (
@@ -158,6 +189,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
           )}
         </>
       )}
+
       {activeTab === "Watershed Data" && (
         <>
           <div className={classes.layer}>
@@ -167,45 +199,27 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Checkbox
               checked={landuseChecked}
               onChange={handleChange}
-              disabled={vegetation || hasScenario}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "landuse" } }}
             />
           </div>
           <div className={classes.layer}>
-            <Button
-              className={classes.layerTitle}
-              onClick={() => { }}
-              style={{
-                fontWeight:
-                  choroplethEnabled && choroplethMetric === "evapotranspiration"
-                    ? "bold"
-                    : "normal",
-              }}
-            >
-              Evapotranspiration
-            </Button>
-          </div>
-        </>
-      )}
-      {activeTab === "Coverage" && (
-        <>
-          <div className={classes.layer}>
-            <Button
-              className={classes.layerTitle}
-              onClick={() => {
-                // Enabling choropleth causes ActiveBottomPanel to render VegetationCover
-                enableLayerWithParams("choropleth", {
-                  metric: "vegetationCover",
-                });
-              }}
-            >
+            <Typography className={classes.layerTitle}>
               Vegetation Cover
             </Typography>
             <Checkbox
-              checked={vegetation}
-              onChange={handleChange}
-              disabled={hasScenario}
+              checked={
+                choroplethEnabled && choroplethMetric === "vegetationCover"
+              }
+              onChange={(e) => {
+                if (e.target.checked) {
+                  enableLayerWithParams("choropleth", {
+                    metric: "vegetationCover",
+                  });
+                } else {
+                  handleToggle("choropleth", false);
+                }
+              }}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "vegetationCover" } }}
             />
@@ -217,7 +231,6 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             <Checkbox
               checked={sbsChecked}
               onChange={handleChange}
-              disabled={hasScenario}
               className={classes.layerCheckbox}
               slotProps={{ input: { id: "sbs" } }}
             />

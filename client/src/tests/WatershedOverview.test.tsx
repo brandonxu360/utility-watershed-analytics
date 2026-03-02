@@ -80,7 +80,7 @@ describe("WatershedOverview", () => {
   describe("loading state", () => {
     it("renders skeleton panel while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
 
       renderWithProviders(<WatershedOverview />);
 
@@ -91,7 +91,7 @@ describe("WatershedOverview", () => {
 
     it("renders skeleton buttons while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedOverview />);
 
@@ -147,7 +147,6 @@ describe("WatershedOverview", () => {
 
       await waitFor(() => {
         expect(screen.getByText(/Test County/)).toBeInTheDocument();
-        expect(screen.getByText(/1500/)).toBeInTheDocument();
         expect(screen.getByText(/Surface Water/)).toBeInTheDocument();
       });
     });

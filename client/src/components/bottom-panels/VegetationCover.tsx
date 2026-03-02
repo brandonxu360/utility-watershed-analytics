@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
 import { useWatershed } from "../../contexts/WatershedContext";
+import { getLayerParams } from "../../layers/types";
 
 /** Band-group shortcuts for the vegetation-cover metric. */
 export type VegetationBandType = "all" | "shrub" | "tree";
@@ -83,9 +84,9 @@ export const VegetationCover: React.FC = () => {
   } = useChoropleth();
 
   // Read choropleth params from desired state
-  const choroplethYear = layerDesired.choropleth.params.year as number | null;
-  const choroplethBands =
-    (layerDesired.choropleth.params.bands as VegetationBandType) ?? "all";
+  const choroplethParams = getLayerParams(layerDesired, "choropleth");
+  const choroplethYear = choroplethParams.year;
+  const choroplethBands = (choroplethParams.bands as VegetationBandType) ?? "all";
 
   const runId =
     useParams({

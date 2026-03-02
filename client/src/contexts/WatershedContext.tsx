@@ -16,7 +16,6 @@
  * ### Declarative UI
  * Panel / legend components derive visibility from `isEffective`.
  * They render when their layer is active and vanish when it isn't.
- * There is no `isPanelOpen` or `panelContent` state.
  */
 
 import {
@@ -46,15 +45,9 @@ import {
   isDesiredButBlocked,
 } from "../layers/evaluate";
 
-// ── State shape ─────────────────────────────────────────────────────────────
-
 export interface WatershedState {
-  /** What the user toggled on/off, with opacity & params. */
   layerDesired: DesiredMap;
-  /** Runtime facts: zoom, data availability, loading flags. */
   layerRuntime: LayerRuntime;
-  /** Currently selected subcatchment/hillslope ID (cross-layer: written by
-   *  SubcatchmentLayer, read by VegetationCover for hillslope-scoped queries). */
   selectedHillslopeId: number | null;
 }
 
@@ -64,31 +57,27 @@ const INITIAL_STATE: WatershedState = {
   selectedHillslopeId: null,
 };
 
-// ── Actions ─────────────────────────────────────────────────────────────────
-
 export type WatershedAction =
-  | LayerAction // TOGGLE, SET_OPACITY, SET_PARAM, RESET
+  | LayerAction
   | {
-      type: "SET_DATA_AVAILABILITY";
-      id: LayerId;
-      available: boolean | undefined;
-    }
+    type: "SET_DATA_AVAILABILITY";
+    id: LayerId;
+    available: boolean | undefined;
+  }
   | { type: "SET_LAYER_LOADING"; id: LayerId; loading: boolean }
   | { type: "SET_ZOOM"; zoom: number }
   | { type: "SET_SELECTED_HILLSLOPE"; id: number | null }
   | { type: "CLEAR_SELECTED_HILLSLOPE" };
-
-// ── Reducer ─────────────────────────────────────────────────────────────────
 
 function watershedReducer(
   state: WatershedState,
   action: WatershedAction,
 ): WatershedState {
   switch (action.type) {
-    // ── Layer desired (delegates to pure rule engine) ──
     case "TOGGLE":
     case "SET_OPACITY":
     case "SET_PARAM":
+    case "ENABLE_WITH_PARAMS":
       return {
         ...state,
         layerDesired: applyAction(state.layerDesired, action),
@@ -97,7 +86,6 @@ function watershedReducer(
     case "RESET":
       return INITIAL_STATE;
 
-    // ── Runtime facts ──
     case "SET_DATA_AVAILABILITY":
       return {
         ...state,
@@ -128,7 +116,6 @@ function watershedReducer(
         layerRuntime: { ...state.layerRuntime, zoom: action.zoom },
       };
 
-    // ── Hillslope selection ──
     case "SET_SELECTED_HILLSLOPE":
       return { ...state, selectedHillslopeId: action.id };
 
@@ -140,18 +127,13 @@ function watershedReducer(
   }
 }
 
-// ── Context value shape ─────────────────────────────────────────────────────
-
 export interface WatershedContextValue {
-  // Raw state
   layerDesired: DesiredMap;
   layerRuntime: LayerRuntime;
   selectedHillslopeId: number | null;
 
-  // Dispatch
   dispatch: (action: WatershedAction) => void;
 
-  // Convenience dispatchers (stable refs)
   dispatchLayerAction: (action: LayerAction) => void;
   enableLayerWithParams: (id: LayerId, params: Record<string, unknown>) => void;
   setDataAvailability: (id: LayerId, available: boolean | undefined) => void;
@@ -160,7 +142,6 @@ export interface WatershedContextValue {
   setSelectedHillslope: (id: number | null) => void;
   clearSelectedHillslope: () => void;
 
-  // Derived
   effective: EffectiveMap;
   activeIds: LayerId[];
   isBlocked: (id: LayerId) => boolean;
@@ -168,8 +149,6 @@ export interface WatershedContextValue {
 }
 
 const WatershedContext = createContext<WatershedContextValue | null>(null);
-
-// ── Provider ────────────────────────────────────────────────────────────────
 
 interface WatershedProviderProps {
   runId: string | null;
@@ -179,7 +158,7 @@ interface WatershedProviderProps {
 export function WatershedProvider({ runId, children }: WatershedProviderProps) {
   const [state, dispatch] = useReducer(watershedReducer, INITIAL_STATE);
 
-  // ── Reset on watershed change (skip initial render — already INITIAL_STATE) ──
+  // Reset on watershed change
   const isFirstRender = useRef(true);
   useEffect(() => {
     if (isFirstRender.current) {
@@ -189,20 +168,14 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
     dispatch({ type: "RESET" });
   }, [runId]);
 
-  // ── Convenience dispatchers (stable refs) ──
-
   const dispatchLayerAction = useCallback(
     (action: LayerAction) => dispatch(action),
     [],
   );
 
   const enableLayerWithParams = useCallback(
-    (id: LayerId, params: Record<string, unknown>) => {
-      dispatch({ type: "TOGGLE", id, on: true });
-      for (const [key, value] of Object.entries(params)) {
-        dispatch({ type: "SET_PARAM", id, key, value });
-      }
-    },
+    (id: LayerId, params: Record<string, unknown>) =>
+      dispatch({ type: "ENABLE_WITH_PARAMS", id, params }),
     [],
   );
 
@@ -233,8 +206,6 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
     [],
   );
 
-  // ── Derived state ──
-
   const effective = useMemo(
     () => evaluate(state.layerDesired, state.layerRuntime),
     [state.layerDesired, state.layerRuntime],
@@ -254,8 +225,6 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
     (id: LayerId) => effective[id].enabled,
     [effective],
   );
-
-  // ── Assemble context value ──
 
   const value = useMemo<WatershedContextValue>(
     () => ({
@@ -299,8 +268,6 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
     </WatershedContext.Provider>
   );
 }
-
-// ── Hook ────────────────────────────────────────────────────────────────────
 
 export function useWatershed(): WatershedContextValue {
   const ctx = useContext(WatershedContext);

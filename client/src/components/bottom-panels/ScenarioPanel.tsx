@@ -1,11 +1,11 @@
 import React from "react";
 import { tss } from "../../utils/tss";
 import { Paper, Typography, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-
-import { useAppStore } from "../../store/store";
-import { useScenarioData, formatScenarioLabel } from "../../hooks/useScenarioData";
+import { useWatershed } from "../../contexts/WatershedContext";
+import { useScenarioData } from "../../hooks/useScenarioData";
+import { formatScenarioLabel } from "../../layers/scenario";
 import { ChoroplethScale } from "../ChoroplethScale";
+import CloseIcon from "@mui/icons-material/Close";
 
 const useStyles = tss.create(({ theme }) => ({
     root: {
@@ -40,14 +40,9 @@ const useStyles = tss.create(({ theme }) => ({
 
 export const ScenarioPanel: React.FC = () => {
     const { classes } = useStyles();
-    const { closeScenario } = useAppStore();
-    const {
-        selectedScenario,
-        variableConfig,
-        range,
-        isLoading,
-        hasData,
-    } = useScenarioData();
+    const { dispatchLayerAction } = useWatershed();
+    const { selectedScenario, variableConfig, range, isLoading, hasData } =
+        useScenarioData();
 
     if (!selectedScenario) return null;
 
@@ -61,7 +56,9 @@ export const ScenarioPanel: React.FC = () => {
                 </Typography>
                 <IconButton
                     size="small"
-                    onClick={() => closeScenario()}
+                    onClick={() =>
+                        dispatchLayerAction({ type: "TOGGLE", id: "scenario", on: false })
+                    }
                     className={classes.closeButton}
                     aria-label="Close scenario panel"
                 >

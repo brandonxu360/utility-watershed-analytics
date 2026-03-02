@@ -1,39 +1,40 @@
-import { useMemo, useEffect, useRef } from "react";
+import { useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import { toast } from "react-toastify";
+import { PathOptions } from "leaflet";
+import { useWatershed } from "../contexts/WatershedContext";
+import { useLayerQuery } from "./useLayerQuery";
+import { getLayerParams } from "../layers/types";
+import { fetchScenarioData } from "../api/scenarioApi";
 
 import {
-    useAppStore,
     type ScenarioType,
     type ScenarioDataRow,
-    type ScenarioVariableType,
     SCENARIO_VARIABLE_CONFIG,
-} from "../store/store";
-import { fetchScenarioData } from "../api/scenarioApi";
-import { computeRobustRange } from "../utils/colormap";
+} from "../layers/scenario";
 
-/** Format scenario name for display (e.g., "thinning_40_75" -> "Thinning 40-75") */
-export const formatScenarioLabel = (scenario: ScenarioType): string =>
-    scenario
-        .split("_")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ")
-        .replace(/(\d+)\s+(\d+)/g, "$1-$2");
+import {
+    computeRobustRange,
+    createColormap,
+    normalizeValue,
+    RGBAArray,
+} from "../utils/colormap";
 
 export interface UseScenarioDataResult {
     isLoading: boolean;
     hasData: boolean;
-    dataByWeppId: Map<number, ScenarioDataRow>;
     selectedScenario: ScenarioType | null;
-    scenarioVariable: ScenarioVariableType;
-    variableConfig: (typeof SCENARIO_VARIABLE_CONFIG)[ScenarioVariableType];
+    variableConfig: { label: string; colormap: string; unit: string };
     range: { min: number; max: number } | null;
+    getScenarioStyle: (weppid: number | undefined) => PathOptions | null;
 }
 
 /**
  * Hook to fetch scenario WEPP loss data.
- * Uses react-query for caching, shows toast on errors.
+ *
+ * Reads `scenario` and `variable` from the layer desired-state params.
+ * Reports loading / data-availability back to the layer runtime so the
+ * evaluator can block the layer when data is missing.
  */
 export function useScenarioData(): UseScenarioDataResult {
     const runId =
@@ -43,62 +44,103 @@ export function useScenarioData(): UseScenarioDataResult {
             shouldThrow: false,
         }) ?? null;
 
-    const selectedScenario = useAppStore((s) => s.selectedScenario);
-    const scenarioVariable = useAppStore((s) => s.scenarioVariable);
+    const { layerDesired, isEffective } = useWatershed();
+    const params = getLayerParams(layerDesired, "scenario");
 
-    const { data, isLoading, isError } = useQuery({
+    const selectedScenario = params.scenario ?? null;
+    const scenarioVariable = params.variable ?? "sediment_yield";
+    const scenarioEnabled = layerDesired.scenario.enabled;
+
+    const { data, isLoading } = useQuery({
         queryKey: ["scenarioData", runId, selectedScenario],
         queryFn: () =>
             fetchScenarioData({ runId: runId!, scenario: selectedScenario! }),
-        enabled: !!runId && !!selectedScenario,
-        staleTime: 5 * 60 * 1000,
+        enabled: !!runId && !!selectedScenario && scenarioEnabled,
+        staleTime: 5 * 60_000,
         retry: 1,
     });
-
-    // Track shown errors to prevent duplicate toasts
-    const shownErrorRef = useRef<string | null>(null);
-    useEffect(() => {
-        const key = `${selectedScenario}-error`;
-        if (isError && selectedScenario && shownErrorRef.current !== key) {
-            shownErrorRef.current = key;
-            toast.error(
-                `No data available for ${formatScenarioLabel(selectedScenario)}`,
-            );
-        } else if (!isError) {
-            shownErrorRef.current = null;
-        }
-    }, [isError, selectedScenario]);
 
     const dataByWeppId = useMemo(() => {
         const map = new Map<number, ScenarioDataRow>();
         if (data) {
-            for (const row of data) {
-                map.set(row.wepp_id, row);
-            }
+            for (const row of data) map.set(row.wepp_id, row);
         }
         return map;
     }, [data]);
 
-    // Compute range based on selected variable
+    const hasData = dataByWeppId.size > 0;
+
+    useLayerQuery("scenario", {
+        enabled: scenarioEnabled,
+        isLoading,
+        hasData,
+    });
+
     const range = useMemo(() => {
-        if (dataByWeppId.size === 0) return null;
+        if (!hasData) return null;
         const values = Array.from(dataByWeppId.values()).map(
             (row) => row[scenarioVariable],
         );
         return computeRobustRange(values);
-    }, [dataByWeppId, scenarioVariable]);
+    }, [hasData, dataByWeppId, scenarioVariable]);
 
     const variableConfig = SCENARIO_VARIABLE_CONFIG[scenarioVariable];
 
+    const scenarioEffective = isEffective("scenario");
+
+    const scenarioColormap = useMemo<RGBAArray | null>(() => {
+        if (!scenarioEffective || !range) return null;
+        return createColormap({
+            colormap: variableConfig.colormap,
+            nshades: 256,
+            format: "rgba",
+        }) as RGBAArray;
+    }, [scenarioEffective, range, variableConfig.colormap]);
+
+    const getScenarioStyle = useCallback(
+        (weppid: number | undefined): PathOptions | null => {
+            if (
+                !scenarioEffective ||
+                !hasData ||
+                !scenarioColormap ||
+                !range ||
+                weppid === undefined
+            )
+                return null;
+
+            const row = dataByWeppId.get(weppid);
+            if (!row) return null;
+
+            const normalized = normalizeValue(
+                row[scenarioVariable],
+                range.min,
+                range.max,
+            );
+            const colorIndex = Math.round(normalized * (scenarioColormap.length - 1));
+            const [r, g, b] = scenarioColormap[colorIndex] || [128, 128, 128];
+            return {
+                color: "#2c2c2c",
+                weight: 0.75,
+                fillColor: `rgb(${r}, ${g}, ${b})`,
+                fillOpacity: 0.85,
+            };
+        },
+        [
+            scenarioEffective,
+            hasData,
+            scenarioColormap,
+            range,
+            dataByWeppId,
+            scenarioVariable,
+        ],
+    );
+
     return {
         isLoading,
-        hasData: dataByWeppId.size > 0,
-        dataByWeppId,
+        hasData,
         selectedScenario,
-        scenarioVariable,
         variableConfig,
         range,
+        getScenarioStyle,
     };
 }
-
-export default useScenarioData;
