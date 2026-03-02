@@ -64,17 +64,14 @@ describe("DataLayersControl", () => {
 
   it("renders with panel open by default", () => {
     render(<DataLayersControl />);
-    // Panel is open by default
     expect(screen.getByRole("tabpanel")).toBeInTheDocument();
     expect(screen.getByRole("tabpanel")).toHaveTextContent("WEPP");
   });
 
   it("closes when clicking the header", () => {
     render(<DataLayersControl />);
-    // Panel starts open
     expect(screen.getByRole("tabpanel")).toBeInTheDocument();
 
-    // Click header to close
     fireEvent.click(screen.getAllByText(/WEPP/i)[0]);
     expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
   });
@@ -97,8 +94,6 @@ describe("DataLayersControl", () => {
 
   it("handles subcatchment toggle", () => {
     render(<DataLayersControl />);
-    // Panel is open by default, no need to click header
-
     const sub = screen.getByLabelText("subcatchment") as HTMLInputElement;
 
     // Check
@@ -117,13 +112,11 @@ describe("DataLayersControl", () => {
       id: "subcatchment",
       on: false,
     });
-    // Panel closes automatically: subcatchment off → choropleth blocked → isEffective false
     expect(mockClearSelectedHillslope).toHaveBeenCalledTimes(1);
   });
 
   it("handles channels toggle", () => {
     render(<DataLayersControl />);
-    // Panel is open by default
 
     const channelsBox = screen.getByLabelText("channels") as HTMLInputElement;
 
@@ -144,11 +137,10 @@ describe("DataLayersControl", () => {
 
   it("handles landuse toggle via rule engine", () => {
     render(<DataLayersControl />);
-    // Panel is open by default
 
     const landuseBox = screen.getByLabelText("landuse") as HTMLInputElement;
 
-    // Enable — rule engine auto-enables subcatchment
+    // Enable
     fireEvent.click(landuseBox);
     expect(mockDispatchLayerAction).toHaveBeenCalledWith({
       type: "TOGGLE",

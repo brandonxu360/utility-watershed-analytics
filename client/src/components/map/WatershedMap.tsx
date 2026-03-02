@@ -84,7 +84,6 @@ export default function WatershedMap(): JSX.Element {
   const {
     isActive: choroplethActive,
     isLoading: choroplethLoading,
-    range: choroplethRange,
     getChoroplethStyle,
   } = useChoropleth();
 
@@ -123,34 +122,11 @@ export default function WatershedMap(): JSX.Element {
   const { landuseData, landuseLoading, landuseLegendMap } =
     useLanduseData(runId);
 
-  // Key that forces GeoJSON remount when any coverage styling input changes.
-  // Includes params + data-availability flags for all three coverage sources.
-  const coverageKey = useMemo(
-    () =>
-      JSON.stringify({
-        c: {
-          ...layerDesired.choropleth.params,
-          on: choroplethActive,
-          data: !!choroplethRange,
-        },
-        s: {
-          ...layerDesired.scenario.params,
-          on: scenarioEffective,
-          data: hasScenarioData,
-        },
-        l: { on: landuseEffective, data: !!landuseData },
-      }),
-    [
-      layerDesired.choropleth.params,
-      choroplethActive,
-      choroplethRange,
-      layerDesired.scenario.params,
-      scenarioEffective,
-      hasScenarioData,
-      landuseEffective,
-      landuseData,
-    ],
-  );
+  // Simple key that changes when any coverage styling input changes,
+  // forcing SubcatchmentLayer to re-apply styles.
+  const { metric, year, bands } = layerDesired.choropleth.params;
+  const { scenario, variable } = layerDesired.scenario.params;
+  const coverageKey = `${choroplethActive}|${metric}|${year}|${bands}|${scenarioEffective}|${hasScenarioData}|${scenario}|${variable}|${landuseEffective}|${!!landuseData}`;
 
   /* Navigates to a watershed on click */
   const onWatershedClick = (e: LeafletMouseEvent) => {
@@ -297,13 +273,13 @@ export default function WatershedMap(): JSX.Element {
           choroplethLoading ||
           landuseLoading ||
           scenarioLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}
