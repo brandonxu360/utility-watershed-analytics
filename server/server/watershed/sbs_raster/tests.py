@@ -439,7 +439,7 @@ class SbsRasterTileViewTests(APITestCase):
         tif_url_arg = mock_tile.call_args[0][0]
         expected = (
             f'https://wepp.cloud/weppcloud/runs/{self.watershed.runid}'
-            '/disturbed_wbt/download/disturbed/prediction_wgs84_merged.wgs.tif'
+            '/disturbed_wbt/download/disturbed/sbs_4class.tif'
         )
         self.assertEqual(tif_url_arg, expected)
 

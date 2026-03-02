@@ -86,7 +86,7 @@ class SbsRasterTileView(APIView):
 
         config = get_config()
         base = config.api.weppcloud_base_url.rstrip('/')
-        tif_url = f"{base}/runs/{runid}/disturbed_wbt/download/disturbed/prediction_wgs84_merged.wgs.tif"
+        tif_url = f"{base}/runs/{runid}/disturbed_wbt/download/disturbed/sbs_4class.tif"
 
         try:
             png_bytes = get_tile_png(tif_url, z, x, y, mode)

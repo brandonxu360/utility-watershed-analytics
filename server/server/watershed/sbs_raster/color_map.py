@@ -2,7 +2,7 @@
 SBS (Soil Burn Severity) raster colormaps.
 
 Class definitions sourced from:
-  https://github.com/rogerlew/wepppy/blob/master/wepppy/nodb/mods/baer/README.sbs_map.md
+  https://github.com/rogerlew/wepppy/blob/master/wepppy/nodb/mods/baer/README.sbs_map.md#color-tables-and-palette-contracts
 
 The **backend is the source of truth** for all SBS colormaps.
 tile.py uses get_render_colormap() to render PNG tiles server-side; the frontend
