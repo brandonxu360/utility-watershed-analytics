@@ -20,6 +20,7 @@ import { tss } from "../../../../utils/tss";
 import { Typography } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
@@ -209,23 +210,32 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
                 <Typography
                   className={classes.variableTitle}
                   sx={{ fontWeight: 600, pt: 1.5, pb: 0.5 }}
+                  id="scenario-variable-label"
                 >
                   Variable
                 </Typography>
-                {SCENARIO_VARIABLES.map((variable) => (
-                  <div key={variable} className={classes.variableRow}>
-                    <Typography className={classes.variableTitle}>
-                      {SCENARIO_VARIABLE_CONFIG[variable].label}
-                    </Typography>
-                    <Radio
-                      className={classes.radio}
-                      checked={scenarioVariable === variable}
-                      onChange={() => handleVariableChange(variable)}
-                      size="small"
-                      slotProps={{ input: { id: `variable-${variable}` } }}
-                    />
-                  </div>
-                ))}
+                <RadioGroup
+                  aria-labelledby="scenario-variable-label"
+                  name="scenario-variable"
+                  value={scenarioVariable}
+                  onChange={(e) =>
+                    handleVariableChange(e.target.value as ScenarioVariableType)
+                  }
+                >
+                  {SCENARIO_VARIABLES.map((variable) => (
+                    <div key={variable} className={classes.variableRow}>
+                      <Typography className={classes.variableTitle}>
+                        {SCENARIO_VARIABLE_CONFIG[variable].label}
+                      </Typography>
+                      <Radio
+                        className={classes.radio}
+                        value={variable}
+                        size="small"
+                        slotProps={{ input: { id: `variable-${variable}` } }}
+                      />
+                    </div>
+                  ))}
+                </RadioGroup>
               </>
             )}
           </div>

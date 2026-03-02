@@ -80,10 +80,6 @@ export default function Home(): JSX.Element {
   );
 }
 
-/**
- * Declarative bottom panel — renders when the choropleth or scenario layer is
- * effectively active.
- */
 function ActiveBottomPanel(): JSX.Element | null {
   const { isEffective } = useWatershed();
 
