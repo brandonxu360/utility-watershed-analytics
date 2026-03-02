@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { useWatershed } from "../../../../contexts/WatershedContext";
 import { ALL_LAYER_IDS } from "../../../../layers/types";
-import type { LayerId } from "../../../../layers/types";
-import DataLayersTabContent from "./DataLayersTabContent";
-
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
-
 import { tss } from "../../../../utils/tss";
+import { useQueryClient } from "@tanstack/react-query";
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
-import { useQueryClient } from "@tanstack/react-query";
+import DataLayersTabContent from "./DataLayersTabContent";
+import type { LayerId } from "../../../../layers/types";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
@@ -62,7 +60,7 @@ const useStyles = tss.create(({ theme }) => ({
     cursor: "pointer",
     border: "none",
     borderRadius: 0,
-    "&:hover": {
+    "&:hover, &.active": {
       background: theme.palette.text.secondary,
     },
     fontSize: theme.typography.caption.fontSize,
@@ -72,9 +70,6 @@ const useStyles = tss.create(({ theme }) => ({
 
 /**
  * DataLayersControl - toggles visibility of map data layers.
- *
- * All toggle logic now flows through `dispatchLayerAction` which delegates
- * to the pure rule engine. No more scattered side-effect handlers.
  */
 export default function DataLayersControl() {
   const { classes } = useStyles();
@@ -83,25 +78,19 @@ export default function DataLayersControl() {
 
   const { dispatchLayerAction, clearSelectedHillslope } = useWatershed();
 
-  const [isOpen, setIsOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState("WEPP");
+  const [activeTab, setActiveTab] = useState<string | null>("WEPP");
 
   const navTabs = ["WEPP", "Watershed Data"];
-
-  const toggleOpen = () => setIsOpen((prev) => !prev);
 
   const handleToggle = (id: string, checked: boolean) => {
     if (!ALL_LAYER_IDS.includes(id as LayerId)) return;
     const layerId = id as LayerId;
 
-    // Dispatch the toggle — rule engine handles requires/excludes/dependents
     dispatchLayerAction({ type: "TOGGLE", id: layerId, on: checked });
 
-    // Side effects that are outside the layer system's scope
     if (id === "subcatchment" && !checked) {
       queryClient.cancelQueries({ queryKey: ["subcatchments"] });
       clearSelectedHillslope();
-      // Panel closes automatically: subcatchment off → choropleth blocked → isEffective false
     }
 
     if (id === "channels" && !checked) {
@@ -112,13 +101,13 @@ export default function DataLayersControl() {
   return (
     <div className={classes.root}>
       <div>
-        <div className={classes.header} onClick={toggleOpen}>
-          <div>{activeTab}</div>
+        <div className={classes.header} onClick={() => setActiveTab((prev) => prev ? null : "WEPP")}>
+          <div>{activeTab ?? "WEPP"}</div>
           <span className={classes.chevron}>
-            {isOpen ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
+            {activeTab ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
           </span>
         </div>
-        {isOpen && (
+        {activeTab && (
           <Paper className={classes.tabContent}>
             <DataLayersTabContent
               activeTab={activeTab}
@@ -136,10 +125,9 @@ export default function DataLayersControl() {
                   className={`${classes.navButton}${isActive ? " active" : ""}`}
                   onClick={() => {
                     if (isActive) {
-                      toggleOpen();
+                      setActiveTab(null);
                     } else {
                       setActiveTab(tab);
-                      setIsOpen(true);
                     }
                   }}
                   size="small"
