@@ -1,7 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
-import { useAppStore } from "../../store/store";
-import { VegetationBandType } from "../../store/slices/choroplethSlice";
+import { useWatershed } from "../../contexts/WatershedContext";
+
+/** Band-group shortcuts for the vegetation-cover metric. */
+export type VegetationBandType = "all" | "shrub" | "tree";
 import { useParams } from "@tanstack/react-router";
 import { CoverageLineChart } from "../CoverageLineChart";
 import { AggregatedRapRow } from "../../api/types";
@@ -68,22 +70,22 @@ const useStyles = tss.create(({ theme }) => ({
 export const VegetationCover: React.FC = () => {
   const { classes } = useStyles();
   const {
+    layerDesired,
+    dispatchLayerAction,
     selectedHillslopeId,
-    choropleth: {
-      year: choroplethYear,
-      bands: choroplethBands,
-      range: choroplethRange,
-      loading: choroplethLoading,
-    },
-    closePanel,
     clearSelectedHillslope,
-    setSubcatchment,
-    setChoroplethYear,
-    setChoroplethBands,
-    resetChoropleth,
-  } = useAppStore();
+  } = useWatershed();
 
-  const { config } = useChoropleth();
+  const {
+    config,
+    range: choroplethRange,
+    isLoading: choroplethLoading,
+  } = useChoropleth();
+
+  // Read choropleth params from desired state
+  const choroplethYear = layerDesired.choropleth.params.year as number | null;
+  const choroplethBands =
+    (layerDesired.choropleth.params.bands as VegetationBandType) ?? "all";
 
   const runId =
     useParams({
@@ -148,13 +150,23 @@ export const VegetationCover: React.FC = () => {
   const handleVegetationChange = (v: string) => {
     const option = v as "All" | "Shrub" | "Tree";
     setVegetationOption(option);
-    setChoroplethBands(vegetationOptionToBand[option]);
+    dispatchLayerAction({
+      type: "SET_PARAM",
+      id: "choropleth",
+      key: "bands",
+      value: vegetationOptionToBand[option],
+    });
   };
 
   // Sync year changes to choropleth store
   const handleYearChange = (v: string) => {
     setSelectedYear(v);
-    setChoroplethYear(v === "All" ? null : Number(v));
+    dispatchLayerAction({
+      type: "SET_PARAM",
+      id: "choropleth",
+      key: "year",
+      value: v === "All" ? null : Number(v),
+    });
   };
 
   // RAP timeseries fetched for selected hillslope (topaz id)
@@ -177,17 +189,17 @@ export const VegetationCover: React.FC = () => {
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-            mode: "hillslope",
-            topazId: selectedHillslopeId,
-            runId: runId,
-            year: selectedYear === "All" ? undefined : Number(selectedYear),
-          })
-          : runId
-            ? await fetchRap({
-              mode: "watershed",
+              mode: "hillslope",
+              topazId: selectedHillslopeId,
               runId: runId,
               year: selectedYear === "All" ? undefined : Number(selectedYear),
             })
+          : runId
+            ? await fetchRap({
+                mode: "watershed",
+                runId: runId,
+                year: selectedYear === "All" ? undefined : Number(selectedYear),
+              })
             : null;
 
         if (!mounted) return;
@@ -282,10 +294,15 @@ export const VegetationCover: React.FC = () => {
             className={classes.closeButton}
             data-testid="veg-close-button"
             onClick={() => {
+              // Disabling choropleth removes this panel declaratively
+              // (ActiveBottomPanel renders null when isEffective("choropleth") is false)
+              // Choropleth cache is local to useChoropleth — destroyed on unmount
               clearSelectedHillslope();
-              setSubcatchment(false);
-              resetChoropleth();
-              closePanel();
+              dispatchLayerAction({
+                type: "TOGGLE",
+                id: "choropleth",
+                on: false,
+              });
             }}
           >
             <CloseIcon />

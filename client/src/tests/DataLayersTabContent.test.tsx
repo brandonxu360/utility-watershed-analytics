@@ -1,49 +1,35 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useAppStore } from "../store/store";
-import { initialChoroplethState } from "../store/slices/choroplethSlice";
+import { INITIAL_DESIRED } from "../layers/rules";
 import DataLayersTabContent from "../components/map/controls/DataLayers/DataLayersTabContent";
-import type { ReactElement, ReactNode } from "react";
+import type { DesiredMap } from "../layers/types";
 
-const mockUseChoropleth = vi.fn();
+const mockDispatchLayerAction = vi.fn();
+const mockEnableLayerWithParams = vi.fn();
 
-vi.mock("../hooks/useChoropleth", () => ({
-  useChoropleth: () => mockUseChoropleth(),
-}));
+let mockDesired: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
 
-vi.mock("../components/bottom-panels/VegetationCover", () => ({
-  VegetationCover: () => <div data-testid="vegetation-cover" />,
+vi.mock("../contexts/WatershedContext", () => ({
+  useWatershed: () => ({
+    layerDesired: mockDesired,
+    dispatchLayerAction: mockDispatchLayerAction,
+    enableLayerWithParams: mockEnableLayerWithParams,
+  }),
 }));
 
 describe("DataLayersTabContent", () => {
-  const handleChange =
-    vi.fn<(e: React.ChangeEvent<HTMLInputElement>) => void>();
-  const setSubcatchment = vi.fn();
-  const setLanduseLegendVisible = vi.fn();
-  const setChoroplethType = vi.fn();
-  const openPanel = vi.fn<(node: ReactNode) => void>();
+  const handleToggle = vi.fn<(id: string, checked: boolean) => void>();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseChoropleth.mockReturnValue({ isActive: false });
-
-    useAppStore.setState({
-      subcatchment: false,
-      channels: false,
-      landuse: false,
-      choropleth: { ...initialChoroplethState, type: "none" },
-      setSubcatchment,
-      setLanduseLegendVisible,
-      setChoroplethType,
-      openPanel,
-    });
+    mockDesired = JSON.parse(JSON.stringify(INITIAL_DESIRED));
   });
 
   it("renders WEPP Hillslopes tab with subcatchment + channels checkboxes", () => {
     const { container } = render(
       <DataLayersTabContent
         activeTab="WEPP Hillslopes"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -58,13 +44,17 @@ describe("DataLayersTabContent", () => {
     ).toBeTruthy();
   });
 
-  it("disables the subcatchment checkbox when landuse && subcatchment", () => {
-    useAppStore.setState({ landuse: true, subcatchment: true });
+  it("disables subcatchment checkbox when a dependent layer (landuse) is enabled", () => {
+    mockDesired = {
+      ...INITIAL_DESIRED,
+      subcatchment: { ...INITIAL_DESIRED.subcatchment, enabled: true },
+      landuse: { ...INITIAL_DESIRED.landuse, enabled: true },
+    };
 
     const { container } = render(
       <DataLayersTabContent
         activeTab="WEPP Hillslopes"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -75,25 +65,50 @@ describe("DataLayersTabContent", () => {
     expect(subcatchmentBox.disabled).toBe(true);
   });
 
-  it("wires handleChange for WEPP Hillslopes checkboxes", () => {
+  it("disables subcatchment checkbox when a dependent layer (choropleth) is enabled", () => {
+    mockDesired = {
+      ...INITIAL_DESIRED,
+      subcatchment: { ...INITIAL_DESIRED.subcatchment, enabled: true },
+      choropleth: {
+        ...INITIAL_DESIRED.choropleth,
+        enabled: true,
+        params: { metric: "vegetationCover", year: null, bands: "all" },
+      },
+    };
+
     const { container } = render(
       <DataLayersTabContent
         activeTab="WEPP Hillslopes"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
+      />,
+    );
+
+    const subcatchmentBox = container.querySelector(
+      "input#subcatchment",
+    ) as HTMLInputElement;
+    expect(subcatchmentBox).toBeTruthy();
+    expect(subcatchmentBox.disabled).toBe(true);
+  });
+
+  it("wires handleToggle for WEPP Hillslopes checkboxes", () => {
+    const { container } = render(
+      <DataLayersTabContent
+        activeTab="WEPP Hillslopes"
+        handleToggle={handleToggle}
       />,
     );
 
     fireEvent.click(container.querySelector("input#subcatchment")!);
     fireEvent.click(container.querySelector("input#channels")!);
 
-    expect(handleChange).toHaveBeenCalledTimes(2);
+    expect(handleToggle).toHaveBeenCalledTimes(2);
   });
 
   it("renders Surface Data tab with landuse checkbox and choropleth buttons", () => {
     const { container } = render(
       <DataLayersTabContent
         activeTab="Surface Data"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -110,22 +125,26 @@ describe("DataLayersTabContent", () => {
     render(
       <DataLayersTabContent
         activeTab="Surface Data"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
     expect(screen.queryByTitle("Land Use Legend")).not.toBeInTheDocument();
   });
 
   it("bolds the active choropleth type when choropleth is active", () => {
-    mockUseChoropleth.mockReturnValue({ isActive: true });
-    useAppStore.setState({
-      choropleth: { ...initialChoroplethState, type: "evapotranspiration" },
-    });
+    mockDesired = {
+      ...INITIAL_DESIRED,
+      choropleth: {
+        ...INITIAL_DESIRED.choropleth,
+        enabled: true,
+        params: { metric: "evapotranspiration", year: null, bands: "all" },
+      },
+    };
 
     render(
       <DataLayersTabContent
         activeTab="Surface Data"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -134,26 +153,23 @@ describe("DataLayersTabContent", () => {
     ).toHaveStyle("font-weight: bold");
   });
 
-  it("renders Coverage tab and clicking Vegetation Cover opens the vegetation panel and sets choropleth type", () => {
+  it("renders Coverage tab and clicking Vegetation Cover calls enableLayerWithParams", () => {
     render(
-      <DataLayersTabContent activeTab="Coverage" handleChange={handleChange} />,
+      <DataLayersTabContent activeTab="Coverage" handleToggle={handleToggle} />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Vegetation Cover" }));
 
-    expect(setSubcatchment).toHaveBeenCalledWith(true);
-    expect(setChoroplethType).toHaveBeenCalledWith("vegetationCover");
-    expect(openPanel).toHaveBeenCalledTimes(1);
-
-    const element = openPanel.mock.calls[0]?.[0] as ReactElement;
-    expect(element.type).toBeTruthy();
+    expect(mockEnableLayerWithParams).toHaveBeenCalledWith("choropleth", {
+      metric: "vegetationCover",
+    });
   });
 
-  it("renders Soil Burn tab and wires handleChange for checkboxes", () => {
+  it("renders Soil Burn tab and wires handleToggle for checkboxes", () => {
     const { container } = render(
       <DataLayersTabContent
         activeTab="Soil Burn"
-        handleChange={handleChange}
+        handleToggle={handleToggle}
       />,
     );
 
@@ -162,8 +178,8 @@ describe("DataLayersTabContent", () => {
     expect(screen.getByText("Predict")).toBeInTheDocument();
 
     fireEvent.click(container.querySelector("input#fireSeverity")!);
-    fireEvent.click(container.querySelector("input#soilBurnSeverity")!);
+    fireEvent.click(container.querySelector("input#sbs")!);
 
-    expect(handleChange).toHaveBeenCalledTimes(2);
+    expect(handleToggle).toHaveBeenCalledTimes(2);
   });
 });

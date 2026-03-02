@@ -2,7 +2,6 @@ import { useMap } from "react-leaflet";
 import { useEffect } from "react";
 import { zoomToFeature } from "./MapUtil";
 import { WatershedProperties } from "../../types/WatershedProperties";
-import { useAppStore } from "../../store/store";
 import L from "leaflet";
 
 interface MapEffectProps {
@@ -14,13 +13,15 @@ interface MapEffectProps {
  * Helper function that zooms onto the specified watershed if the url matches
  * the /watershed/$watershedId format.
  *
+ * State reset is handled automatically by WatershedProvider's runId effect —
+ * this component only handles the map zoom transition.
+ *
  * @param webcloudRunId - The parsed watershed id taken from the url
  * @param watersheds - Our fetched watershed data from @see {@link fetchWatersheds}
  * @returns {null} - Doesn't return anything
  */
 export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
   const map = useMap();
-  const { resetOverlays } = useAppStore();
 
   useEffect(() => {
     if (watershedId && watersheds && Array.isArray(watersheds.features)) {
@@ -30,13 +31,11 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
       );
 
       if (matchingFeature) {
-        // Create a temporary GeoJSON layer from the feature
-        resetOverlays();
         const tempLayer = L.geoJSON(matchingFeature);
         zoomToFeature(map, tempLayer);
       }
     }
-  }, [watershedId, watersheds, map, resetOverlays]);
+  }, [watershedId, watersheds, map]);
 
   return null;
 }

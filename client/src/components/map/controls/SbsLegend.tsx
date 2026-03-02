@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Paper, Switch, Typography } from "@mui/material";
 import { tss } from "../../../utils/tss";
-import { useAppStore } from "../../../store/store";
+import { useWatershed } from "../../../contexts/WatershedContext";
 import { fetchSbsColormap } from "../../../api/sbsApi";
+import type { SbsColorMode } from "../../../api/types";
 
 const useStyles = tss.create(({ theme }) => ({
   wrapper: {
@@ -76,7 +77,9 @@ const useStyles = tss.create(({ theme }) => ({
  */
 export default function SbsLegend() {
   const { classes } = useStyles();
-  const { sbsColorMode, setSbsColorMode } = useAppStore();
+  const { layerDesired, dispatchLayerAction } = useWatershed();
+  const sbsColorMode =
+    (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sbs-colormap", sbsColorMode],
@@ -100,7 +103,12 @@ export default function SbsLegend() {
               size="small"
               checked={sbsColorMode === "shift"}
               onChange={(_, checked) =>
-                setSbsColorMode(checked ? "shift" : "legacy")
+                dispatchLayerAction({
+                  type: "SET_PARAM",
+                  id: "sbs",
+                  key: "mode",
+                  value: checked ? "shift" : "legacy",
+                })
               }
               inputProps={{
                 "aria-label": "Colorblind-friendly palette toggle",

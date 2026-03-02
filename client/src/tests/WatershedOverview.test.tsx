@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useAppStore } from "../store/store";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 
 const mockNavigate = vi.fn();
@@ -72,9 +71,6 @@ describe("WatershedOverview", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockNavigate.mockClear();
-    useAppStore.setState({
-      resetOverlays: vi.fn(),
-    });
   });
 
   afterEach(() => {
@@ -213,9 +209,6 @@ describe("WatershedOverview", () => {
     });
 
     it("navigates to home when back button is clicked", async () => {
-      const mockResetOverlays = vi.fn();
-      useAppStore.setState({ resetOverlays: mockResetOverlays });
-
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
@@ -228,24 +221,6 @@ describe("WatershedOverview", () => {
       fireEvent.click(backButton);
 
       expect(mockNavigate).toHaveBeenCalledWith({ to: "/" });
-    });
-
-    it("calls resetOverlays when back button is clicked", async () => {
-      const mockResetOverlays = vi.fn();
-      useAppStore.setState({ resetOverlays: mockResetOverlays });
-
-      renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() => {
-        expect(screen.getByText("Test Watershed")).toBeInTheDocument();
-      });
-
-      const backButton = screen.getByRole("button", {
-        name: /close watershed panel/i,
-      });
-      fireEvent.click(backButton);
-
-      expect(mockResetOverlays).toHaveBeenCalled();
     });
   });
 

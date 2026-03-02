@@ -71,8 +71,7 @@ function buildRapTimeseriesPayload(
 export async function fetchRap(
   opts: FetchRapOptions,
 ): Promise<AggregatedRapRow[]> {
-  const { mode, topazId, runId, year, include_schema, include_sql } =
-    opts;
+  const { mode, topazId, runId, year, include_schema, include_sql } = opts;
 
   let payload: Record<string, unknown>;
 
@@ -82,7 +81,6 @@ export async function fetchRap(
     payload = buildRapTimeseriesPayload(topazId, year);
     addQueryFlags(payload, include_schema, include_sql);
   } else {
-
     // Build parameterized filters array
     const filters: QueryFilter[] = [
       { column: "rap.band", operator: "IN", value: [1, 4, 5, 6] },
@@ -96,8 +94,14 @@ export async function fetchRap(
       columns: ["rap.year AS year"],
       filters,
       aggregations: [
-        { alias: "shrub", expression: "SUM(CASE WHEN rap.band = 5 THEN rap.value ELSE 0 END)" },
-        { alias: "tree", expression: "SUM(CASE WHEN rap.band = 6 THEN rap.value ELSE 0 END)" },
+        {
+          alias: "shrub",
+          expression: "SUM(CASE WHEN rap.band = 5 THEN rap.value ELSE 0 END)",
+        },
+        {
+          alias: "tree",
+          expression: "SUM(CASE WHEN rap.band = 6 THEN rap.value ELSE 0 END)",
+        },
         { alias: "coverage", expression: "SUM(rap.value)" },
       ],
       group_by: ["rap.year"],
