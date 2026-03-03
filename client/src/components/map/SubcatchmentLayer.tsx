@@ -12,6 +12,7 @@ export default function SubcatchmentLayer({
   style,
   coverageActive,
   coverageKey,
+  tooltipContent,
 }: {
   data: GeoJSON.FeatureCollection;
   coverageActive: boolean;
@@ -21,6 +22,7 @@ export default function SubcatchmentLayer({
       | GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>
       | undefined,
   ) => PathOptions;
+  tooltipContent: (props: Partial<SubcatchmentProperties>) => string;
 }) {
   const map = useMap();
 
@@ -28,11 +30,13 @@ export default function SubcatchmentLayer({
 
   const styleRef = useRef(style);
   const coverageActiveRef = useRef(coverageActive);
+  const tooltipContentRef = useRef(tooltipContent);
 
   useEffect(() => {
     styleRef.current = style;
     coverageActiveRef.current = coverageActive;
-  }, [style, coverageActive]);
+    tooltipContentRef.current = tooltipContent;
+  }, [style, coverageActive, tooltipContent]);
 
   // Track selected feature id and layer using refs so event handlers
   // can read/update the current selection at event time without forcing rerenders.
@@ -89,26 +93,11 @@ export default function SubcatchmentLayer({
           layersRef.current.set(fid, { layer, feature });
         }
 
-        layer.bindTooltip(
-          `<span class="tooltip-bold"><strong>Hillslope ID</strong>
-          <br/>TopazID: ${props.topazid ?? "N/A"}, WeppID: ${props.weppid ?? "N/A"}
-          <br/><strong>Width:</strong>
-          ${props.width?.toFixed(2) ?? "N/A"} m
-          <br/><strong>Length:</strong>
-          ${props.length?.toFixed(2) ?? "N/A"} m
-          <br/><strong>Area:</strong>
-          ${props.hillslope_area ?? "N/A"} m²
-          <br/><strong>Slope:</strong>
-          ${props.slope_scalar?.toFixed(2) ?? "N/A"}
-          <br/><strong>Aspect:</strong>
-          ${props.aspect?.toFixed(2) ?? "N/A"}
-          <br/><strong>Soil:</strong>
-          ${props.simple_texture ?? "N/A"}</span>`,
-          {
-            className: "tooltip",
-            offset: [12, -50],
-          },
-        );
+        layer.bindTooltip(tooltipContentRef.current(props), {
+          className: "tooltip",
+          offset: [12, -50],
+        });
+
         layer.on({
           click: (e) => {
             const clickFid = feature?.id?.toString?.() ?? null;
@@ -152,6 +141,8 @@ export default function SubcatchmentLayer({
               e.target.setStyle(highlightedStyle);
             }
 
+            // Refresh tooltip content so data updates are reflected
+            layer.setTooltipContent(tooltipContentRef.current(props));
             layer.openTooltip();
           },
         });

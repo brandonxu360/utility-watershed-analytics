@@ -14,7 +14,12 @@ export type ScenarioVariableType = (typeof SCENARIO_VARIABLES)[number];
 export type ScenarioDataRow = {
   wepp_id: number;
   runoff: number;
+  subrunoff: number;
+  baseflow: number;
+  soil_loss: number;
+  sediment_deposition: number;
   sediment_yield: number;
+  hillslope_area: number;
 };
 
 /** Colormap assignment per client requirements: water → winter, soil → jet2 */

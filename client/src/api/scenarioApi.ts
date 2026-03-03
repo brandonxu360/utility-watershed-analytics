@@ -26,7 +26,12 @@ export async function fetchScenarioData(
     columns: [
       "loss.wepp_id AS wepp_id",
       'loss."Runoff Volume" AS runoff',
+      'loss."Subrunoff Volume" AS subrunoff',
+      'loss."Baseflow Volume" AS baseflow',
+      'loss."Soil Loss" AS soil_loss',
+      'loss."Sediment Deposition" AS sediment_deposition',
       'loss."Sediment Yield" AS sediment_yield',
+      'loss."Hillslope Area" AS hillslope_area',
     ],
     order_by: ["loss.wepp_id"],
   };
@@ -38,7 +43,12 @@ export async function fetchScenarioData(
     return {
       wepp_id: toFiniteNumber(row.wepp_id, 0),
       runoff: toFiniteNumber(row.runoff, 0),
+      subrunoff: toFiniteNumber(row.subrunoff, 0),
+      baseflow: toFiniteNumber(row.baseflow, 0),
+      soil_loss: toFiniteNumber(row.soil_loss, 0),
+      sediment_deposition: toFiniteNumber(row.sediment_deposition, 0),
       sediment_yield: toFiniteNumber(row.sediment_yield, 0),
+      hillslope_area: toFiniteNumber(row.hillslope_area, 0),
     };
   });
 }

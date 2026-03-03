@@ -23,6 +23,7 @@ export interface UseScenarioDataResult {
   isLoading: boolean;
   hasData: boolean;
   getScenarioStyle: (weppid: number | undefined) => PathOptions | null;
+  getScenarioRow: (weppid: number | undefined) => ScenarioDataRow | null;
 }
 
 /**
@@ -127,9 +128,18 @@ export function useScenarioData(): UseScenarioDataResult {
     ],
   );
 
+  const getScenarioRow = useCallback(
+    (weppid: number | undefined): ScenarioDataRow | null => {
+      if (!scenarioEffective || !hasData || weppid === undefined) return null;
+      return dataByWeppId.get(weppid) ?? null;
+    },
+    [scenarioEffective, hasData, dataByWeppId],
+  );
+
   return {
     isLoading,
     hasData,
     getScenarioStyle,
+    getScenarioRow,
   };
 }
