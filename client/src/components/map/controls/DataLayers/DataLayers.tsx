@@ -1,22 +1,13 @@
 import { useState } from "react";
 import { useWatershed } from "../../../../contexts/WatershedContext";
 import { ALL_LAYER_IDS } from "../../../../layers/types";
-import type { LayerId } from "../../../../layers/types";
-import DataLayersTabContent from "./DataLayersTabContent";
-
-import {
-  FaChevronUp,
-  FaChevronDown,
-  FaWater,
-  FaGlobe,
-  FaTree,
-  FaFireAlt,
-} from "react-icons/fa";
-
+import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { tss } from "../../../../utils/tss";
+import { useQueryClient } from "@tanstack/react-query";
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
-import { useQueryClient } from "@tanstack/react-query";
+import DataLayersTabContent from "./DataLayersTabContent";
+import type { LayerId } from "../../../../layers/types";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
@@ -33,7 +24,7 @@ const useStyles = tss.create(({ theme }) => ({
     display: "flex",
     alignContent: "center",
     justifyContent: "space-between",
-    padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
+    padding: `${theme.spacing(1.25)} ${theme.spacing(2)}`,
     fontSize: theme.typography.subtitle2.fontSize,
     fontWeight: 700,
     color: theme.palette.primary.contrastText,
@@ -50,12 +41,6 @@ const useStyles = tss.create(({ theme }) => ({
     padding: 0,
     borderRadius: 0,
   },
-  heading: {
-    fontSize: theme.typography.subtitle2.fontSize,
-    fontWeight: 600,
-    color: theme.palette.primary.dark,
-    padding: `${theme.spacing(1)} ${theme.spacing(2)} 0 ${theme.spacing(2)}`,
-  },
   bottomNav: {
     background: theme.palette.primary.contrastText,
     display: "flex",
@@ -66,25 +51,25 @@ const useStyles = tss.create(({ theme }) => ({
   },
   navContainer: {
     display: "flex",
-    gap: theme.spacing(3),
+    gap: theme.spacing(2),
   },
   navButton: {
-    width: "40px",
     height: "40px",
     display: "flex",
     color: theme.palette.accent.main,
     cursor: "pointer",
-    "&:hover": {
+    border: "none",
+    borderRadius: 0,
+    "&:hover, &.active": {
       background: theme.palette.text.secondary,
     },
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: 600,
   },
 }));
 
 /**
  * DataLayersControl - toggles visibility of map data layers.
- *
- * All toggle logic now flows through `dispatchLayerAction` which delegates
- * to the pure rule engine. No more scattered side-effect handlers.
  */
 export default function DataLayersControl() {
   const { classes } = useStyles();
@@ -93,30 +78,19 @@ export default function DataLayersControl() {
 
   const { dispatchLayerAction, clearSelectedHillslope } = useWatershed();
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("WEPP Hillslopes");
+  const [activeTab, setActiveTab] = useState<string | null>("WEPP");
 
-  const navTabs = [
-    { key: "WEPP Hillslopes", icon: <FaWater title="WEPP Hillslopes" /> },
-    { key: "Surface Data", icon: <FaGlobe title="Coverage" /> },
-    { key: "Coverage", icon: <FaTree title="Vegetation" /> },
-    { key: "Soil Burn", icon: <FaFireAlt title="Soil Burn" /> },
-  ];
-
-  const toggleOpen = () => setIsOpen((prev) => !prev);
+  const navTabs = ["WEPP", "RHESSys", "Watershed Data"];
 
   const handleToggle = (id: string, checked: boolean) => {
     if (!ALL_LAYER_IDS.includes(id as LayerId)) return;
     const layerId = id as LayerId;
 
-    // Dispatch the toggle — rule engine handles requires/excludes/dependents
     dispatchLayerAction({ type: "TOGGLE", id: layerId, on: checked });
 
-    // Side effects that are outside the layer system's scope
     if (id === "subcatchment" && !checked) {
       queryClient.cancelQueries({ queryKey: ["subcatchments"] });
       clearSelectedHillslope();
-      // Panel closes automatically: subcatchment off → choropleth blocked → isEffective false
     }
 
     if (id === "channels" && !checked) {
@@ -127,15 +101,17 @@ export default function DataLayersControl() {
   return (
     <div className={classes.root}>
       <div>
-        <div className={classes.header} onClick={toggleOpen}>
-          Data Layers{" "}
+        <div
+          className={classes.header}
+          onClick={() => setActiveTab((prev) => (prev ? null : "WEPP"))}
+        >
+          <div>{activeTab ?? "WEPP"}</div>
           <span className={classes.chevron}>
-            {isOpen ? <FaChevronDown /> : <FaChevronUp />}
+            {activeTab ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
           </span>
         </div>
-        {isOpen && (
+        {activeTab && (
           <Paper className={classes.tabContent}>
-            <div className={classes.heading}>{activeTab}</div>
             <DataLayersTabContent
               activeTab={activeTab}
               handleToggle={handleToggle}
@@ -145,23 +121,22 @@ export default function DataLayersControl() {
         <div className={classes.bottomNav}>
           <div className={classes.navContainer}>
             {navTabs.map((tab) => {
-              const isActive = activeTab === tab.key;
+              const isActive = activeTab === tab;
               return (
                 <IconButton
-                  key={tab.key}
+                  key={tab}
                   className={`${classes.navButton}${isActive ? " active" : ""}`}
                   onClick={() => {
                     if (isActive) {
-                      toggleOpen();
+                      setActiveTab(null);
                     } else {
-                      setActiveTab(tab.key);
-                      setIsOpen(true);
+                      setActiveTab(tab);
                     }
                   }}
                   size="small"
-                  data-layer-tab={tab.key}
+                  data-layer-tab={tab}
                 >
-                  {tab.icon}
+                  {tab}
                 </IconButton>
               );
             })}

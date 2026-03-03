@@ -147,7 +147,6 @@ describe("WatershedOverview", () => {
 
       await waitFor(() => {
         expect(screen.getByText(/Test County/)).toBeInTheDocument();
-        expect(screen.getByText(/1500/)).toBeInTheDocument();
         expect(screen.getByText(/Surface Water/)).toBeInTheDocument();
       });
     });

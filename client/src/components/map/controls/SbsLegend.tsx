@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Paper, Switch, Typography } from "@mui/material";
 import { tss } from "../../../utils/tss";
 import { useWatershed } from "../../../contexts/WatershedContext";
+import { getLayerParams } from "../../../layers/types";
 import { fetchSbsColormap } from "../../../api/sbsApi";
-import type { SbsColorMode } from "../../../api/types";
 
 const useStyles = tss.create(({ theme }) => ({
   wrapper: {
@@ -78,8 +78,8 @@ const useStyles = tss.create(({ theme }) => ({
 export default function SbsLegend() {
   const { classes } = useStyles();
   const { layerDesired, dispatchLayerAction } = useWatershed();
-  const sbsColorMode =
-    (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
+  const sbsParams = getLayerParams(layerDesired, "sbs");
+  const sbsColorMode = sbsParams.mode ?? "legacy";
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sbs-colormap", sbsColorMode],

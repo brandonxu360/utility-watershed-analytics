@@ -2,11 +2,11 @@ import { useParams } from "@tanstack/react-router";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import { tss } from "../utils/tss";
 import { WatershedProvider, useWatershed } from "../contexts/WatershedContext";
+import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import BottomPanel from "../components/bottom-panels/BottomPanel";
-import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import WatershedMap from "../components/map/WatershedMap";
 import Paper from "@mui/material/Paper";
 
@@ -80,19 +80,16 @@ export default function Home(): JSX.Element {
   );
 }
 
-/**
- * Declarative bottom panel — renders when the choropleth layer is effectively
- * active. No `isPanelOpen` state needed; the panel appears/disappears based
- * on layer state and vanishes automatically on watershed switch or layer toggle.
- */
 function ActiveBottomPanel(): JSX.Element | null {
   const { isEffective } = useWatershed();
 
-  if (!isEffective("choropleth")) return null;
+  if (isEffective("choropleth")) {
+    return (
+      <BottomPanel isOpen>
+        <VegetationCover />
+      </BottomPanel>
+    );
+  }
 
-  return (
-    <BottomPanel isOpen>
-      <VegetationCover />
-    </BottomPanel>
-  );
+  return null;
 }

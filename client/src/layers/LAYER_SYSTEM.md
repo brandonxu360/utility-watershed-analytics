@@ -599,7 +599,7 @@ Toast format: `"${label}: ${reasonText}"` where `label` comes from
 
 ```typescript
 function useChoropleth(): {
-  choropleth: ChoroplethType; // "none" | "evapotranspiration" | "vegetationCover"
+  choropleth: ChoroplethType; // "none" | "vegetationCover"
   isLoading: boolean;
   error: string | null;
   range: { min: number; max: number } | null;

@@ -1,17 +1,26 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { INITIAL_DESIRED } from "../layers/rules";
+import { evaluate } from "../layers/evaluate";
+import type { LayerRuntime } from "../layers/types";
 import DataLayersTabContent from "../components/map/controls/DataLayers/DataLayersTabContent";
 import type { DesiredMap } from "../layers/types";
 
 const mockDispatchLayerAction = vi.fn();
 const mockEnableLayerWithParams = vi.fn();
 
+const INITIAL_RUNTIME: LayerRuntime = {
+  zoom: 7,
+  dataAvailability: {},
+  loading: {},
+};
+
 let mockDesired: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
 
 vi.mock("../contexts/WatershedContext", () => ({
   useWatershed: () => ({
     layerDesired: mockDesired,
+    effective: evaluate(mockDesired, INITIAL_RUNTIME),
     dispatchLayerAction: mockDispatchLayerAction,
     enableLayerWithParams: mockEnableLayerWithParams,
   }),
@@ -25,16 +34,13 @@ describe("DataLayersTabContent", () => {
     mockDesired = JSON.parse(JSON.stringify(INITIAL_DESIRED));
   });
 
-  it("renders WEPP Hillslopes tab with subcatchment + channels checkboxes", () => {
+  it("renders WEPP tab with subcatchment + channels checkboxes", () => {
     const { container } = render(
-      <DataLayersTabContent
-        activeTab="WEPP Hillslopes"
-        handleToggle={handleToggle}
-      />,
+      <DataLayersTabContent activeTab="WEPP" handleToggle={handleToggle} />,
     );
 
     expect(screen.getByText("Subcatchments")).toBeInTheDocument();
-    expect(screen.getByText("WEPP Channels")).toBeInTheDocument();
+    expect(screen.getByText("Channels")).toBeInTheDocument();
 
     expect(
       container.querySelector("input#subcatchment[type='checkbox']"),
@@ -52,10 +58,7 @@ describe("DataLayersTabContent", () => {
     };
 
     const { container } = render(
-      <DataLayersTabContent
-        activeTab="WEPP Hillslopes"
-        handleToggle={handleToggle}
-      />,
+      <DataLayersTabContent activeTab="WEPP" handleToggle={handleToggle} />,
     );
 
     const subcatchmentBox = container.querySelector(
@@ -77,10 +80,7 @@ describe("DataLayersTabContent", () => {
     };
 
     const { container } = render(
-      <DataLayersTabContent
-        activeTab="WEPP Hillslopes"
-        handleToggle={handleToggle}
-      />,
+      <DataLayersTabContent activeTab="WEPP" handleToggle={handleToggle} />,
     );
 
     const subcatchmentBox = container.querySelector(
@@ -90,12 +90,9 @@ describe("DataLayersTabContent", () => {
     expect(subcatchmentBox.disabled).toBe(true);
   });
 
-  it("wires handleToggle for WEPP Hillslopes checkboxes", () => {
+  it("wires handleToggle for WEPP checkboxes", () => {
     const { container } = render(
-      <DataLayersTabContent
-        activeTab="WEPP Hillslopes"
-        handleToggle={handleToggle}
-      />,
+      <DataLayersTabContent activeTab="WEPP" handleToggle={handleToggle} />,
     );
 
     fireEvent.click(container.querySelector("input#subcatchment")!);
@@ -104,10 +101,10 @@ describe("DataLayersTabContent", () => {
     expect(handleToggle).toHaveBeenCalledTimes(2);
   });
 
-  it("renders Surface Data tab with landuse checkbox and choropleth buttons", () => {
+  it("renders Watershed Data tab with landuse checkbox", () => {
     const { container } = render(
       <DataLayersTabContent
-        activeTab="Surface Data"
+        activeTab="Watershed Data"
         handleToggle={handleToggle}
       />,
     );
@@ -116,70 +113,46 @@ describe("DataLayersTabContent", () => {
     expect(
       container.querySelector("input#landuse[type='checkbox']"),
     ).toBeTruthy();
-    expect(
-      screen.getByRole("button", { name: "Evapotranspiration" }),
-    ).toBeInTheDocument();
   });
 
   it("does not show the land use legend help icon when landuse is false", () => {
     render(
       <DataLayersTabContent
-        activeTab="Surface Data"
+        activeTab="Watershed Data"
         handleToggle={handleToggle}
       />,
     );
     expect(screen.queryByTitle("Land Use Legend")).not.toBeInTheDocument();
   });
 
-  it("bolds the active choropleth type when choropleth is active", () => {
-    mockDesired = {
-      ...INITIAL_DESIRED,
-      choropleth: {
-        ...INITIAL_DESIRED.choropleth,
-        enabled: true,
-        params: { metric: "evapotranspiration", year: null, bands: "all" },
-      },
-    };
-
-    render(
+  it("renders Watershed Data tab with vegetation cover and sbs checkboxes", () => {
+    const { container } = render(
       <DataLayersTabContent
-        activeTab="Surface Data"
+        activeTab="Watershed Data"
         handleToggle={handleToggle}
       />,
     );
 
+    expect(screen.getByText("Vegetation Cover")).toBeInTheDocument();
+    expect(screen.getByText("Soil Burn Severity")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Evapotranspiration" }),
-    ).toHaveStyle("font-weight: bold");
+      container.querySelector("input#vegetationCover[type='checkbox']"),
+    ).toBeTruthy();
+    expect(container.querySelector("input#sbs[type='checkbox']")).toBeTruthy();
   });
 
-  it("renders Coverage tab and clicking Vegetation Cover calls enableLayerWithParams", () => {
-    render(
-      <DataLayersTabContent activeTab="Coverage" handleToggle={handleToggle} />,
+  it("enables choropleth via enableLayerWithParams when vegetation cover is checked", () => {
+    const { container } = render(
+      <DataLayersTabContent
+        activeTab="Watershed Data"
+        handleToggle={handleToggle}
+      />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Vegetation Cover" }));
+    fireEvent.click(container.querySelector("input#vegetationCover")!);
 
     expect(mockEnableLayerWithParams).toHaveBeenCalledWith("choropleth", {
       metric: "vegetationCover",
     });
-  });
-
-  it("renders Soil Burn tab and wires handleToggle for checkboxes", () => {
-    const { container } = render(
-      <DataLayersTabContent
-        activeTab="Soil Burn"
-        handleToggle={handleToggle}
-      />,
-    );
-
-    expect(screen.getByText("Fire Severity")).toBeInTheDocument();
-    expect(screen.getByText("Soil Burn Severity")).toBeInTheDocument();
-    expect(screen.getByText("Predict")).toBeInTheDocument();
-
-    fireEvent.click(container.querySelector("input#fireSeverity")!);
-    fireEvent.click(container.querySelector("input#sbs")!);
-
-    expect(handleToggle).toHaveBeenCalledTimes(2);
   });
 });

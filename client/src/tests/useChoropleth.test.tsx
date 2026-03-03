@@ -44,9 +44,9 @@ vi.mock("../contexts/WatershedContext", () => ({
 
 /** Helper: build a DesiredMap with choropleth enabled and params set. */
 function desiredWithChoropleth(
-  metric = "vegetationCover",
+  metric: string = "vegetationCover",
   year: number | null = null,
-  bands = "all",
+  bands: string = "all",
 ): DesiredMap {
   const d: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
   d.choropleth.enabled = true;
@@ -76,15 +76,6 @@ describe("useChoropleth", () => {
   });
 
   describe("CHOROPLETH_CONFIG", () => {
-    it("has configuration for evapotranspiration", () => {
-      expect(CHOROPLETH_CONFIG.evapotranspiration).toBeDefined();
-      expect(CHOROPLETH_CONFIG.evapotranspiration.title).toBe(
-        "Evapotranspiration",
-      );
-      expect(CHOROPLETH_CONFIG.evapotranspiration.colormap).toBe("et-blue");
-      expect(CHOROPLETH_CONFIG.evapotranspiration.bands).toEqual([1, 4, 5, 6]);
-    });
-
     it("has configuration for vegetationCover", () => {
       expect(CHOROPLETH_CONFIG.vegetationCover).toBeDefined();
       expect(CHOROPLETH_CONFIG.vegetationCover.title).toBe("Vegetation Cover");

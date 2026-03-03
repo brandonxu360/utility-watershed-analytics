@@ -62,42 +62,38 @@ describe("DataLayersControl", () => {
     vi.clearAllMocks();
   });
 
-  it("renders and is closed by default", () => {
+  it("renders with panel open by default", () => {
     render(<DataLayersControl />);
-    expect(screen.getByText(/Data Layers/i)).toBeInTheDocument();
-    expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
+    expect(screen.getByRole("tabpanel")).toBeInTheDocument();
+    expect(screen.getByRole("tabpanel")).toHaveTextContent("WEPP");
   });
 
-  it("opens when clicking the header and shows default active tab", () => {
+  it("closes when clicking the header", () => {
     render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
+    expect(screen.getByRole("tabpanel")).toBeInTheDocument();
 
-    const tabpanel = screen.getByRole("tabpanel");
-    expect(tabpanel).toBeInTheDocument();
-    expect(tabpanel).toHaveTextContent("WEPP Hillslopes");
+    fireEvent.click(screen.getAllByText(/WEPP/i)[0]);
+    expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
   });
 
   it("switches active tab when clicking a nav tab", () => {
     const { container } = render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
 
-    const surfaceTab = container.querySelector(
-      '[data-layer-tab="Surface Data"]',
+    const watershedTab = container.querySelector(
+      '[data-layer-tab="Watershed Data"]',
     );
-    expect(surfaceTab).toBeTruthy();
+    expect(watershedTab).toBeTruthy();
 
-    if (surfaceTab) {
-      fireEvent.click(surfaceTab);
+    if (watershedTab) {
+      fireEvent.click(watershedTab);
     }
 
     const tabpanel = screen.getByRole("tabpanel");
-    expect(tabpanel).toHaveTextContent("Surface Data");
+    expect(tabpanel).toHaveTextContent("Watershed Data");
   });
 
-  it("handles subcatchment toggle and performs cleanup on uncheck", () => {
+  it("handles subcatchment toggle", () => {
     render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
-
     const sub = screen.getByLabelText("subcatchment") as HTMLInputElement;
 
     // Check
@@ -116,13 +112,11 @@ describe("DataLayersControl", () => {
       id: "subcatchment",
       on: false,
     });
-    // Panel closes automatically: subcatchment off → choropleth blocked → isEffective false
     expect(mockClearSelectedHillslope).toHaveBeenCalledTimes(1);
   });
 
   it("handles channels toggle", () => {
     render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
 
     const channelsBox = screen.getByLabelText("channels") as HTMLInputElement;
 
@@ -143,11 +137,10 @@ describe("DataLayersControl", () => {
 
   it("handles landuse toggle via rule engine", () => {
     render(<DataLayersControl />);
-    fireEvent.click(screen.getByText(/Data Layers/i));
 
     const landuseBox = screen.getByLabelText("landuse") as HTMLInputElement;
 
-    // Enable — rule engine auto-enables subcatchment
+    // Enable
     fireEvent.click(landuseBox);
     expect(mockDispatchLayerAction).toHaveBeenCalledWith({
       type: "TOGGLE",

@@ -7,7 +7,6 @@
  *  2. Add a descriptor here
  *  3. Build a renderer component (or leave as placeholder)
  *
- * No business logic lives here — only static data.
  */
 
 import type {
@@ -16,8 +15,6 @@ import type {
   GroupDescriptor,
   GroupId,
 } from "./types";
-
-// ── Groups ──────────────────────────────────────────────────────────────────
 
 export const LAYER_GROUPS: Record<GroupId, GroupDescriptor> = {
   overlays: {
@@ -31,8 +28,6 @@ export const LAYER_GROUPS: Record<GroupId, GroupDescriptor> = {
     type: "exclusive",
   },
 };
-
-// ── Layer descriptors ───────────────────────────────────────────────────────
 
 export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
   subcatchment: {
@@ -111,9 +106,21 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     // Placeholder — no renderer yet
     defaults: { opacity: 0.8, params: {} },
   },
-};
 
-// ── Helper look-ups ─────────────────────────────────────────────────────────
+  scenario: {
+    id: "scenario",
+    label: "WEPP Scenario",
+    group: "coverageStyle",
+    kind: "vector",
+    pane: "overlayPane",
+    zIndex: 420,
+    requires: ["subcatchment"],
+    defaults: {
+      opacity: 0.85,
+      params: { scenario: null, variable: "sediment_yield" },
+    },
+  },
+};
 
 export function getDescriptor(id: LayerId): LayerDescriptor {
   return LAYER_REGISTRY[id];

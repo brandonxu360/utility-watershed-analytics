@@ -4,6 +4,7 @@ import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
+import { getLayerParams } from "../layers/types";
 import { fetchRapChoropleth } from "../api/rapApi";
 
 import {
@@ -14,14 +15,9 @@ import {
 } from "../utils/colormap";
 
 import { VEGETATION_BANDS } from "../utils/constants";
-import type { VegetationBandType } from "../components/bottom-panels/VegetationCover";
+import type { VegetationBandType } from "../utils/constants";
 
-/**
- * Choropleth metric types.  "none" means the choropleth layer is off.
- * Kept in this module because useChoropleth is the only consumer that
- * needs the discriminated union.
- */
-export type ChoroplethType = "none" | "evapotranspiration" | "vegetationCover";
+export type ChoroplethType = "none" | "vegetationCover";
 
 export const CHOROPLETH_CONFIG: Record<
   Exclude<ChoroplethType, "none">,
@@ -32,12 +28,6 @@ export const CHOROPLETH_CONFIG: Record<
     bands: number[];
   }
 > = {
-  evapotranspiration: {
-    title: "Evapotranspiration",
-    unit: "% cover",
-    colormap: "et-blue",
-    bands: [1, 4, 5, 6],
-  },
   vegetationCover: {
     title: "Vegetation Cover",
     unit: "% cover",
@@ -75,13 +65,12 @@ export function useChoropleth(): UseChoroplethResult {
   // Read control fields from the layer desired-state
   const { layerDesired } = useWatershed();
   const choroplethDesired = layerDesired.choropleth;
-  const choroplethType = (
-    choroplethDesired.enabled
-      ? ((choroplethDesired.params.metric as ChoroplethType) ?? "none")
-      : "none"
-  ) as ChoroplethType;
-  const choroplethYear = choroplethDesired.params.year as number | null;
-  const choroplethBands = (choroplethDesired.params.bands as string) ?? "all";
+  const params = getLayerParams(layerDesired, "choropleth");
+  const choroplethType: ChoroplethType = choroplethDesired.enabled
+    ? (params.metric ?? "none")
+    : "none";
+  const choroplethYear = params.year;
+  const choroplethBands = params.bands ?? "all";
 
   const config =
     choroplethType !== "none" ? CHOROPLETH_CONFIG[choroplethType] : null;
@@ -94,7 +83,6 @@ export function useChoropleth(): UseChoroplethResult {
     return config.bands;
   }, [config, choroplethType, choroplethBands]);
 
-  // ── Fetch via useQuery (replaces manual useState/useEffect fetch) ─────
   const isEnabled =
     choroplethType !== "none" && !!runId && effectiveBands.length > 0;
 
@@ -120,7 +108,6 @@ export function useChoropleth(): UseChoroplethResult {
     enabled: isEnabled,
   });
 
-  // ── Derive processed data from raw query result ───────────────────────
   const { choroplethData, choroplethRange, dataError } = useMemo(() => {
     if (!rawData) {
       return { choroplethData: null, choroplethRange: null, dataError: null };
@@ -148,12 +135,10 @@ export function useChoropleth(): UseChoroplethResult {
     return { choroplethData: dataMap, choroplethRange: range, dataError: null };
   }, [rawData]);
 
-  // Combine query-level errors with data-processing errors
   const choroplethError = isError
     ? `Failed to load data: ${queryError instanceof Error ? queryError.message : String(queryError)}`
     : dataError;
 
-  // ── Report data availability & loading ────────────────────────────────
   useLayerQuery("choropleth", {
     enabled: isEnabled,
     isLoading: choroplethLoading,
