@@ -140,7 +140,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
   const scenarioParams = getLayerParams(layerDesired, "scenario");
   const selectedScenario = scenarioParams.scenario ?? null;
   const scenarioVariable = scenarioParams.variable ?? "sediment_yield";
-  const scenarioEnabled = layerDesired.scenario.enabled;
+  const scenarioEnabled = effective.scenario.enabled;
   const scenarioLoading = effective.scenario.loading;
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

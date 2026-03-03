@@ -155,7 +155,7 @@ describe("useScenarioData", () => {
     });
   });
 
-  it("dispatches TOGGLE off when scenario has no data", async () => {
+  it("reports data unavailable (does not dispatch) when scenario returns no data", async () => {
     mockDesired = desiredWithScenario("undisturbed");
     mockFetchScenarioData.mockResolvedValue([]); // empty → no data
 
@@ -163,13 +163,11 @@ describe("useScenarioData", () => {
       wrapper: createWrapper(),
     });
 
+    // The layer system handles blocking via dataAvailability — no dispatch needed.
     await waitFor(() => {
-      expect(mockDispatchLayerAction).toHaveBeenCalledWith({
-        type: "TOGGLE",
-        id: "scenario",
-        on: false,
-      });
+      expect(mockSetDataAvailability).toHaveBeenCalledWith("scenario", false);
     });
+    expect(mockDispatchLayerAction).not.toHaveBeenCalled();
   });
 
   it("does NOT auto-revert when data is available", async () => {

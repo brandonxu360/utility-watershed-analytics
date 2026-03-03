@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect } from "react";
+import { useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { PathOptions } from "leaflet";
@@ -36,7 +36,7 @@ export function useScenarioData(): UseScenarioDataResult {
       shouldThrow: false,
     }) ?? null;
 
-  const { layerDesired, isEffective, dispatchLayerAction } = useWatershed();
+  const { layerDesired, isEffective } = useWatershed();
   const params = getLayerParams(layerDesired, "scenario");
 
   const selectedScenario = params.scenario ?? null;
@@ -67,18 +67,6 @@ export function useScenarioData(): UseScenarioDataResult {
     isLoading,
     hasData,
   });
-
-  // Auto-revert to "None" when the selected scenario has no data.
-  // Deferred one tick so useLayerToasts can observe the blocked effective
-  // state (desired=true, effective=false) and fire its toast before desired
-  // is set back to false.
-  useEffect(() => {
-    if (!scenarioEnabled || isLoading || hasData || !selectedScenario) return;
-    const id = setTimeout(() => {
-      dispatchLayerAction({ type: "TOGGLE", id: "scenario", on: false });
-    }, 0);
-    return () => clearTimeout(id);
-  }, [scenarioEnabled, isLoading, hasData, selectedScenario, dispatchLayerAction]);
 
   const range = useMemo(() => {
     if (!hasData) return null;
