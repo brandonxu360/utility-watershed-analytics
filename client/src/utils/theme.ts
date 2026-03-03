@@ -15,6 +15,7 @@ declare module "@mui/material/styles" {
       dark: string;
       overlay: string;
       border: string;
+      accordion: string;
     };
     muted: {
       main: string;
@@ -28,6 +29,7 @@ declare module "@mui/material/styles" {
       dark: string;
       overlay: string;
       border: string;
+      accordion: string;
     };
     muted?: {
       main: string;
@@ -68,17 +70,17 @@ const components: Components<Omit<Theme, "components">> = {
           border: `3px solid ${themeParam.palette.background.default}`,
         },
         "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus":
-          {
-            backgroundColor: themeParam.palette.accent.main,
-          },
+        {
+          backgroundColor: themeParam.palette.accent.main,
+        },
         "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active":
-          {
-            backgroundColor: themeParam.palette.accent.main,
-          },
+        {
+          backgroundColor: themeParam.palette.accent.main,
+        },
         "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover":
-          {
-            backgroundColor: themeParam.palette.accent.light,
-          },
+        {
+          backgroundColor: themeParam.palette.accent.light,
+        },
         "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
           backgroundColor: themeParam.palette.background.default,
         },
@@ -121,6 +123,7 @@ const darkPalette = {
     dark: "#121212",
     overlay: "rgba(0, 0, 0, 0.8)",
     border: "#000000",
+    accordion: "#333333",
   },
   muted: {
     main: "#666666",
@@ -161,6 +164,7 @@ const lightPalette = {
     dark: "#E0E0E0",
     overlay: "rgba(255, 255, 255, 0.8)",
     border: "#E0E0E0",
+    accordion: "#E4E4E4",
   },
   muted: {
     main: "#9E9E9E",

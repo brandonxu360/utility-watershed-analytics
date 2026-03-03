@@ -8,6 +8,11 @@ import { toast } from "react-toastify";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Link from "@mui/material/Link";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const useStyles = tss.create(({ theme }) => ({
   closeButton: {
@@ -37,19 +42,30 @@ const useStyles = tss.create(({ theme }) => ({
     paddingBottom: theme.spacing(1.5),
     display: "flex",
     flexDirection: "column",
-    gap: theme.spacing(1.5),
+    gap: theme.spacing(1),
   },
-  actionButton: {
-    width: "100%",
-    color: theme.palette.primary.contrastText,
-    borderBottom: `1px solid ${theme.palette.primary.contrastText}`,
-    padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
-    justifyContent: "flex-start",
-    textTransform: "none",
-    fontSize: theme.typography.body2.fontSize,
-    "&:hover": {
-      borderColor: theme.palette.accent.main,
+  accordion: {
+    backgroundColor: theme.palette.surface.accordion,
+    "&::before": {
+      display: "none",
     },
+  },
+  accordionSummary: {
+    fontSize: theme.typography.body2.fontSize,
+    fontWeight: theme.typography.fontWeightMedium,
+  },
+  accordionDetails: {
+    padding: `${theme.spacing(0.5)} ${theme.spacing(2)} ${theme.spacing(1.5)}`,
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(0.75),
+  },
+  actionLink: {
+    fontSize: theme.typography.body2.fontSize,
+    color: theme.palette.accent.main,
+    textAlign: "left",
+    cursor: "pointer",
+    display: "block",
   },
   skeletonClose: {
     marginTop: theme.spacing(1.5),
@@ -199,7 +215,6 @@ export default function WatershedOverview() {
     <div>
       <Button
         onClick={() => {
-          // Navigation triggers runId change → WatershedProvider dispatches RESET
           navigate({ to: "/" });
         }}
         className={classes.closeButton}
@@ -239,39 +254,52 @@ export default function WatershedOverview() {
           </Typography>
         </div>
         <div className={classes.accordionGroup} key={runId}>
-          <Button
-            className={classes.actionButton}
-            aria-label="View Calibrated WEPP Results"
-            title="View Calibrated WEPP Results"
-            variant="text"
-          >
-            View Calibrated WEPP Results
-          </Button>
+          {/* Short Term Impact */}
+          <Accordion className={classes.accordion} disableGutters>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="short-term-content"
+              id="short-term-header"
+              className={classes.accordionSummary}
+            >
+              <Typography component="span" variant="body2" fontWeight="medium">
+                Short Term Impact
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails className={classes.accordionDetails}>
+              <Link
+                component="button"
+                className={classes.actionLink}
+                underline="hover"
+                aria-label="View Detailed WEPP Model Results"
+                onClick={() =>
+                  window.open(
+                    `https://wepp.cloud/weppcloud/runs/${runId}/disturbed9002_wbt/gl-dashboard`,
+                    "_blank",
+                    "noopener,noreferrer",
+                  )
+                }
+              >
+                View Detailed WEPP Model Results
+              </Link>
+            </AccordionDetails>
+          </Accordion>
 
-          <Button
-            className={classes.actionButton}
-            aria-label="View Calibrated RHESSys Results"
-            title="View Calibrated RHESSys Results"
-            variant="text"
-          >
-            View Calibrated RHESSys Results
-          </Button>
-
-          <Button
-            className={classes.actionButton}
-            aria-label="View Detailed WEPP Model Results"
-            title="View Detailed WEPP Model Results"
-            variant="text"
-            onClick={() =>
-              window.open(
-                `https://wepp.cloud/weppcloud/runs/${runId}/disturbed9002_wbt/gl-dashboard`,
-                "_blank",
-                "noopener,noreferrer",
-              )
-            }
-          >
-            View Detailed WEPP Model Results
-          </Button>
+          {/* Long Term Impact */}
+          <Accordion className={classes.accordion} disableGutters>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="long-term-content"
+              id="long-term-header"
+              className={classes.accordionSummary}
+            >
+              <Typography component="span" variant="body2" fontWeight="medium">
+                Long Term Impact
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails className={classes.accordionDetails}>
+            </AccordionDetails>
+          </Accordion>
         </div>
       </div>
     </div>
