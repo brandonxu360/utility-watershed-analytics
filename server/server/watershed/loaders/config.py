@@ -57,17 +57,27 @@ class RetryConfig:
 
 
 @dataclass
+class BatchConfig:
+    """Configuration for a single WEPPcloud data batch."""
+    batch_url: str
+    jwt_token: Optional[str] = None
+
+
+@dataclass
 class ApiConfig:
     """Configuration for external API endpoints."""
     # Base URL for WEPPcloud runs (used for data downloads)
     weppcloud_base_url: str = "https://wepp.cloud/weppcloud"
-    # Batch URL for discovering available watersheds
-    weppcloud_batch_url: str = "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs"
-    # JWT token for authenticated endpoints (e.g. the master watersheds GeoJSON).
-    # Set via WEPPCLOUD_JWT_TOKEN environment variable. The rest of the ingestion
-    # does not require authentication.
-    weppcloud_jwt_token: Optional[str] = None
-    
+    # List of batches to load. Each batch has its own URL and JWT token.
+    # Defaults to both currently supported batches (tokens must be provided
+    # via WEPPCLOUD_JWT_TOKEN / WEPPCLOUD_JWT_TOKEN_2 env vars).
+    batches: list = field(
+        default_factory=lambda: [
+            BatchConfig("https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs"),
+            BatchConfig("https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs"),
+        ]
+    )
+
     @classmethod
     def from_environment(cls) -> "ApiConfig":
         """Create config from environment variables."""
@@ -76,11 +86,22 @@ class ApiConfig:
                 "WEPPCLOUD_BASE_URL",
                 cls.weppcloud_base_url
             ),
-            weppcloud_batch_url=os.environ.get(
-                "WEPPCLOUD_BATCH_URL",
-                cls.weppcloud_batch_url
-            ),
-            weppcloud_jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN"),
+            batches=[
+                BatchConfig(
+                    batch_url=os.environ.get(
+                        "WEPPCLOUD_BATCH_URL",
+                        "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
+                    ),
+                    jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN"),
+                ),
+                BatchConfig(
+                    batch_url=os.environ.get(
+                        "WEPPCLOUD_BATCH_URL_2",
+                        "https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs",
+                    ),
+                    jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN_2"),
+                ),
+            ],
         )
 
 

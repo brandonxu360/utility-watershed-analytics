@@ -11,7 +11,7 @@ Key components:
 - Protocols: DataSourceReader, DataWriter for testability
 """
 
-from .config import LoaderConfig, get_config, reset_config
+from .config import LoaderConfig, BatchConfig, get_config, reset_config
 from .discovery import WatershedDataDiscovery, DataSource, discover_all_runids
 from .loader import WatershedLoader, load_with_discovery
 from .protocols import DataSourceReader, DataWriter, DataSourceProvider

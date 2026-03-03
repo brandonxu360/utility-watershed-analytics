@@ -48,10 +48,17 @@ DJANGO_SUPERUSER_PASSWORD=password
 DJANGO_SECRET_KEY=django-insecure-1#t+05xjtk9endkv$*of#hr(3y@=45=p8i%1f4erojjbc(c7wa
 DEBUG=true
 
-# JWT token for accessing the master watersheds GeoJSON from WEPPcloud.
-# Required for data loading and downloading to work. Contact the project
-# maintainer to obtain a token.
+# Both batches are loaded simultaneously by default. Override the URLs only if
+# targeting a different WEPPcloud environment.
+WEPPCLOUD_BATCH_URL=https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs
+WEPPCLOUD_BATCH_URL_2=https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs
+
+# JWT tokens for each batch's master watersheds GeoJSON (required for data loading
+# and downloading). Contact the project maintainer to obtain tokens.
+# nasa-roses-2026-sbs token scope : nasa-roses-2026-sbs
+# victoria-ca-2026-sbs token scope: victoria-ca-2026-sbs (expires 2026-07-31)
 WEPPCLOUD_JWT_TOKEN=
+WEPPCLOUD_JWT_TOKEN_2=
 ```
 
 6. **pgAdmin Server Definition**: Though not required, a JSON file in the root directory with the following attributes can be used to automatically define the server for pgAdmin for convenience. Please name the file `pgadmin-servers.json`. Notice the username and password correspond with the postgres database username (`POSTGRES_USER`) and password (`POSTGRES_PW`) defined in the `.env` file. Again, be aware that this config could expose sensitive data (database password) if mishandled in production.

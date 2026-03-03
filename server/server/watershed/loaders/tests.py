@@ -17,7 +17,7 @@ from server.watershed.loaders.discovery import (
     WatershedDataDiscovery, DataSource, UrlTemplates,
     normalize_runid,
 )
-from server.watershed.loaders.config import LoaderConfig, RetryConfig, ApiConfig, GeometryConfig
+from server.watershed.loaders.config import LoaderConfig, RetryConfig, ApiConfig, BatchConfig, GeometryConfig
 from server.watershed.loaders.readers import RemoteDataSourceReader
 
 
@@ -161,8 +161,9 @@ class MockDiscovery:
     
     WATERSHEDS_URL = "https://mock.test/watersheds.geojson"
     
-    def __init__(self, runids: list[str] = None):
+    def __init__(self, runids: list[str] = None, jwt_token: str = None):
         self.runids = runids or ["test-runid-1", "test-runid-2"]
+        self.jwt_token = jwt_token
         self.config = self._create_test_config()
     
     def _create_test_config(self):
@@ -170,7 +171,7 @@ class MockDiscovery:
             retry=RetryConfig(max_attempts=1, base_delay_seconds=0.01),
             api=ApiConfig(
                 weppcloud_base_url="https://mock.test",
-                weppcloud_batch_url="https://mock.test/batch/test",
+                batches=[BatchConfig(batch_url="https://mock.test/batch/test")],
             ),
             geometry=GeometryConfig(),
         )
@@ -406,20 +407,20 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
     def test_jwt_token_sends_bearer_header_for_watersheds(self):
         """Test that a JWT token is forwarded as a Bearer header for the watershed fetch."""
         token = "test-jwt-secret"
-        config = LoaderConfig(
-            retry=RetryConfig(max_attempts=1, base_delay_seconds=0.01),
-            api=ApiConfig(
-                weppcloud_base_url="https://mock.test",
-                weppcloud_batch_url="https://mock.test/batch/test",
-                weppcloud_jwt_token=token,
-            ),
-            geometry=GeometryConfig(),
+        # JWT lives on the discovery instance (per-batch), not on the loader config.
+        discovery = MockDiscovery(runids=["ws-1", "ws-2"], jwt_token=token)
+        # Add the same watershed response the default self.discovery uses
+        self.reader.add_geojson_response(
+            MockDiscovery.WATERSHEDS_URL,
+            [
+                {"runid": "ws-1", "pws_id": "123", "pws_name": "Test 1"},
+                {"runid": "ws-2", "pws_id": "456", "pws_name": "Test 2"},
+            ]
         )
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
-            discovery=self.discovery,
-            config=config,
+            discovery=discovery,
         )
         
         loader.load(runids=["ws-1", "ws-2"], verbose=False)
@@ -431,20 +432,11 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
     
     def test_no_jwt_token_sends_no_auth_header(self):
         """Test that without a JWT token, no Authorization header is sent."""
-        config = LoaderConfig(
-            retry=RetryConfig(max_attempts=1, base_delay_seconds=0.01),
-            api=ApiConfig(
-                weppcloud_base_url="https://mock.test",
-                weppcloud_batch_url="https://mock.test/batch/test",
-                weppcloud_jwt_token=None,
-            ),
-            geometry=GeometryConfig(),
-        )
+        # self.discovery has jwt_token=None by default
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
             discovery=self.discovery,
-            config=config,
         )
         
         loader.load(runids=["ws-1", "ws-2"], verbose=False)
@@ -462,7 +454,17 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         self.config = LoaderConfig(
             api=ApiConfig(
                 weppcloud_base_url="https://test.example.com/weppcloud",
-                weppcloud_batch_url="https://test.example.com/weppcloud/batch/nasa-roses-2026-sbs",
+                batches=[BatchConfig(
+                    batch_url="https://test.example.com/weppcloud/batch/nasa-roses-2026-sbs",
+                )],
+            ),
+        )
+        self.victoria_config = LoaderConfig(
+            api=ApiConfig(
+                weppcloud_base_url="https://test.example.com/weppcloud",
+                batches=[BatchConfig(
+                    batch_url="https://test.example.com/weppcloud/batch/victoria-ca-2026-sbs",
+                )],
             ),
         )
     
@@ -507,6 +509,34 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         
         # Should ensure uppercase state code
         self.assertIn("/custom/batch;;nasa-roses-2026-sbs;;OR-10/sub.geojson", urls["subcatchments"])
+
+    def test_watersheds_filename_derived_from_nasa_roses_batch_url(self):
+        """Test that watersheds filename is derived from the nasa-roses batch URL."""
+        discovery = WatershedDataDiscovery(config=self.config)
+        self.assertEqual(discovery.watersheds_filename, "nasa-roses-2026-sbs_completed.geojson")
+
+    def test_watersheds_filename_derived_from_victoria_batch_url(self):
+        """Test that watersheds filename is derived from the victoria batch URL."""
+        discovery = WatershedDataDiscovery(config=self.victoria_config)
+        self.assertEqual(discovery.watersheds_filename, "victoria-ca-2026-sbs_completed.geojson")
+
+    def test_victoria_get_urls_preserves_mixed_case_runid(self):
+        """Test URL generation for victoria batch preserves mixed-case run IDs."""
+        discovery = WatershedDataDiscovery(config=self.victoria_config)
+
+        urls = discovery.get_urls_for_runid("batch;;victoria-ca-2026-sbs;;Leech")
+
+        expected_base = "https://test.example.com/weppcloud/runs/batch;;victoria-ca-2026-sbs;;Leech/disturbed_wbt"
+        self.assertTrue(urls["subcatchments"].startswith(expected_base))
+
+    def test_victoria_sooke_runid_not_uppercased(self):
+        """Test that Sooke## victoria run IDs are not uppercased in generated URLs."""
+        discovery = WatershedDataDiscovery(config=self.victoria_config)
+
+        urls = discovery.get_urls_for_runid("batch;;victoria-ca-2026-sbs;;Sooke01")
+
+        self.assertIn("Sooke01", urls["subcatchments"])
+        self.assertNotIn("SOOKE01", urls["subcatchments"])
 
 
 class TestProtocolConformance(unittest.TestCase):
@@ -576,14 +606,24 @@ class TestRunidConversion(unittest.TestCase):
     """Test runid conversion utilities."""
     
     def test_normalize_runid_from_lowercase(self):
-        """Test defensive uppercase conversion (for backwards compatibility)."""
+        """Test defensive uppercase conversion for nasa-roses batch."""
         normalized = normalize_runid("batch;;nasa-roses-2026-sbs;;or-20")
         self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
     
     def test_normalize_runid_already_uppercase(self):
-        """Test that correctly formatted runids are unchanged."""
+        """Test that correctly formatted nasa-roses runids are unchanged."""
         normalized = normalize_runid("batch;;nasa-roses-2026-sbs;;OR-20")
         self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
+
+    def test_normalize_runid_victoria_preserves_case(self):
+        """Test that victoria mixed-case run IDs are NOT uppercased."""
+        normalized = normalize_runid("batch;;victoria-ca-2026-sbs;;Leech")
+        self.assertEqual(normalized, "batch;;victoria-ca-2026-sbs;;Leech")
+
+    def test_normalize_runid_victoria_sooke_preserves_case(self):
+        """Test that victoria Sooke## run IDs (mixed-case) are preserved."""
+        normalized = normalize_runid("batch;;victoria-ca-2026-sbs;;Sooke01")
+        self.assertEqual(normalized, "batch;;victoria-ca-2026-sbs;;Sooke01")
 
 
 if __name__ == "__main__":
