@@ -51,7 +51,7 @@ const useStyles = tss.create(({ theme }) => ({
   },
   navContainer: {
     display: "flex",
-    gap: theme.spacing(6),
+    gap: theme.spacing(2),
   },
   navButton: {
     height: "40px",
@@ -80,7 +80,7 @@ export default function DataLayersControl() {
 
   const [activeTab, setActiveTab] = useState<string | null>("WEPP");
 
-  const navTabs = ["WEPP", "Watershed Data"];
+  const navTabs = ["WEPP", "RHESSys", "Watershed Data"];
 
   const handleToggle = (id: string, checked: boolean) => {
     if (!ALL_LAYER_IDS.includes(id as LayerId)) return;
