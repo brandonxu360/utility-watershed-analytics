@@ -69,17 +69,16 @@ export function useScenarioData(): UseScenarioDataResult {
   });
 
   // Auto-revert to "None" when the selected scenario has no data.
+  // Deferred one tick so useLayerToasts can observe the blocked effective
+  // state (desired=true, effective=false) and fire its toast before desired
+  // is set back to false.
   useEffect(() => {
-    if (scenarioEnabled && !isLoading && !hasData && selectedScenario) {
+    if (!scenarioEnabled || isLoading || hasData || !selectedScenario) return;
+    const id = setTimeout(() => {
       dispatchLayerAction({ type: "TOGGLE", id: "scenario", on: false });
-    }
-  }, [
-    scenarioEnabled,
-    isLoading,
-    hasData,
-    selectedScenario,
-    dispatchLayerAction,
-  ]);
+    }, 0);
+    return () => clearTimeout(id);
+  }, [scenarioEnabled, isLoading, hasData, selectedScenario, dispatchLayerAction]);
 
   const range = useMemo(() => {
     if (!hasData) return null;
