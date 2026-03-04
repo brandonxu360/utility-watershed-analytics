@@ -73,9 +73,36 @@ function createWrapper() {
 }
 
 const MOCK_SCENARIO_ROWS = [
-  { wepp_id: 1, runoff: 10.5, sediment_yield: 20.3 },
-  { wepp_id: 2, runoff: 5.2, sediment_yield: 8.1 },
-  { wepp_id: 3, runoff: 15.0, sediment_yield: 35.7 },
+  {
+    wepp_id: 1,
+    runoff: 10.5,
+    subrunoff: 3.2,
+    baseflow: 1.1,
+    soil_loss: 0.5,
+    sediment_deposition: 0.3,
+    sediment_yield: 20.3,
+    hillslope_area: 5000,
+  },
+  {
+    wepp_id: 2,
+    runoff: 5.2,
+    subrunoff: 2.0,
+    baseflow: 0.8,
+    soil_loss: 0.2,
+    sediment_deposition: 0.1,
+    sediment_yield: 8.1,
+    hillslope_area: 3000,
+  },
+  {
+    wepp_id: 3,
+    runoff: 15.0,
+    subrunoff: 5.5,
+    baseflow: 2.0,
+    soil_loss: 1.0,
+    sediment_deposition: 0.6,
+    sediment_yield: 35.7,
+    hillslope_area: 7000,
+  },
 ];
 
 describe("useScenarioData", () => {
@@ -305,5 +332,67 @@ describe("useScenarioData", () => {
 
     // Before data loads
     expect(result.current.getScenarioStyle(1)).toBeNull();
+  });
+
+  it("getScenarioRow returns row data for a valid weppid", async () => {
+    mockDesired = desiredWithScenario("undisturbed");
+    mockRuntime.dataAvailability.scenario = true;
+    mockRuntime.dataAvailability.subcatchment = true;
+
+    const { result } = renderHook(() => useScenarioData(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.hasData).toBe(true);
+    });
+
+    const row = result.current.getScenarioRow(1);
+    expect(row).toEqual(MOCK_SCENARIO_ROWS[0]);
+  });
+
+  it("getScenarioRow returns null for unknown weppid", async () => {
+    mockDesired = desiredWithScenario("undisturbed");
+    mockRuntime.dataAvailability.scenario = true;
+    mockRuntime.dataAvailability.subcatchment = true;
+
+    const { result } = renderHook(() => useScenarioData(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.hasData).toBe(true);
+    });
+
+    expect(result.current.getScenarioRow(9999)).toBeNull();
+  });
+
+  it("getScenarioRow returns null when scenario is not effective", async () => {
+    mockDesired = desiredWithScenario("undisturbed");
+    mockRuntime.dataAvailability.scenario = false;
+
+    const { result } = renderHook(() => useScenarioData(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.getScenarioRow(1)).toBeNull();
+    });
+  });
+
+  it("getScenarioRow returns null when weppid is undefined", async () => {
+    mockDesired = desiredWithScenario("undisturbed");
+    mockRuntime.dataAvailability.scenario = true;
+    mockRuntime.dataAvailability.subcatchment = true;
+
+    const { result } = renderHook(() => useScenarioData(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.hasData).toBe(true);
+    });
+
+    expect(result.current.getScenarioRow(undefined)).toBeNull();
   });
 });

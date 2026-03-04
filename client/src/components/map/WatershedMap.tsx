@@ -28,6 +28,7 @@ import LandUseLegend from "./controls/LandUseLegend";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import SubcatchmentLayer from "./SubcatchmentLayer";
+import { buildHillslopeTooltip } from "../../utils/tooltipContent";
 import type { SbsColorMode } from "../../api/types";
 import "leaflet/dist/leaflet.css";
 
@@ -91,6 +92,7 @@ export default function WatershedMap(): JSX.Element {
     hasData: hasScenarioData,
     isLoading: scenarioLoading,
     getScenarioStyle,
+    getScenarioRow,
   } = useScenarioData();
 
   const scenarioEffective = isEffective("scenario");
@@ -195,6 +197,12 @@ export default function WatershedMap(): JSX.Element {
       getChoroplethStyle,
       getScenarioStyle,
     ],
+  );
+
+  const tooltipContent = useCallback(
+    (props: Partial<SubcatchmentProperties>) =>
+      buildHillslopeTooltip(props, getScenarioRow(props.weppid)),
+    [getScenarioRow],
   );
 
   const channelStyle = useCallback(
@@ -330,6 +338,7 @@ export default function WatershedMap(): JSX.Element {
             style={subcatchmentStyle}
             coverageActive={choroplethActive || scenarioEffective}
             coverageKey={coverageKey}
+            tooltipContent={tooltipContent}
           />
         )}
 

@@ -74,7 +74,7 @@ describe("scenarioApi", () => {
       expect(datasets[0].path).toContain("loss_pw0.hill.parquet");
     });
 
-    it("queries wepp_id, runoff, and sediment_yield columns", async () => {
+    it("queries all required columns", async () => {
       await fetchScenarioData({
         runId: TEST_RUN_ID,
         scenario: "undisturbed",
@@ -82,9 +82,15 @@ describe("scenarioApi", () => {
 
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const columns = payload.columns as string[];
-      expect(columns.join(" ")).toContain("wepp_id");
-      expect(columns.join(" ")).toContain("Runoff Volume");
-      expect(columns.join(" ")).toContain("Sediment Yield");
+      const joined = columns.join(" ");
+      expect(joined).toContain("wepp_id");
+      expect(joined).toContain("Runoff Volume");
+      expect(joined).toContain("Subrunoff Volume");
+      expect(joined).toContain("Baseflow Volume");
+      expect(joined).toContain("Soil Loss");
+      expect(joined).toContain("Sediment Deposition");
+      expect(joined).toContain("Sediment Yield");
+      expect(joined).toContain("Hillslope Area");
     });
 
     it("orders by wepp_id", async () => {
@@ -113,10 +119,28 @@ describe("scenarioApi", () => {
   });
 
   describe("fetchScenarioData - response mapping", () => {
-    it("maps rows to ScenarioDataRow with numeric fields", async () => {
+    it("maps rows to ScenarioDataRow with all numeric fields", async () => {
       mockPostQuery.mockResolvedValue([
-        { wepp_id: 1, runoff: 10.5, sediment_yield: 20.3 },
-        { wepp_id: 2, runoff: 5.2, sediment_yield: 8.1 },
+        {
+          wepp_id: 1,
+          runoff: 10.5,
+          subrunoff: 3.2,
+          baseflow: 1.1,
+          soil_loss: 0.5,
+          sediment_deposition: 0.3,
+          sediment_yield: 20.3,
+          hillslope_area: 5000,
+        },
+        {
+          wepp_id: 2,
+          runoff: 5.2,
+          subrunoff: 2.0,
+          baseflow: 0.8,
+          soil_loss: 0.2,
+          sediment_deposition: 0.1,
+          sediment_yield: 8.1,
+          hillslope_area: 3000,
+        },
       ]);
 
       const result = await fetchScenarioData({
@@ -125,27 +149,41 @@ describe("scenarioApi", () => {
       });
 
       expect(result).toEqual([
-        { wepp_id: 1, runoff: 10.5, sediment_yield: 20.3 },
-        { wepp_id: 2, runoff: 5.2, sediment_yield: 8.1 },
+        {
+          wepp_id: 1,
+          runoff: 10.5,
+          subrunoff: 3.2,
+          baseflow: 1.1,
+          soil_loss: 0.5,
+          sediment_deposition: 0.3,
+          sediment_yield: 20.3,
+          hillslope_area: 5000,
+        },
+        {
+          wepp_id: 2,
+          runoff: 5.2,
+          subrunoff: 2.0,
+          baseflow: 0.8,
+          soil_loss: 0.2,
+          sediment_deposition: 0.1,
+          sediment_yield: 8.1,
+          hillslope_area: 3000,
+        },
       ]);
     });
 
     it("uses toFiniteNumber fallback for non-numeric values", async () => {
       mockPostQuery.mockResolvedValue([
-        { wepp_id: "abc", runoff: null, sediment_yield: undefined },
-      ]);
-
-      const result = await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "undisturbed",
-      });
-
-      expect(result).toEqual([{ wepp_id: 0, runoff: 0, sediment_yield: 0 }]);
-    });
-
-    it("handles string-typed numeric values", async () => {
-      mockPostQuery.mockResolvedValue([
-        { wepp_id: "42", runoff: "10.5", sediment_yield: "20.3" },
+        {
+          wepp_id: "abc",
+          runoff: null,
+          subrunoff: null,
+          baseflow: null,
+          soil_loss: null,
+          sediment_deposition: null,
+          sediment_yield: undefined,
+          hillslope_area: undefined,
+        },
       ]);
 
       const result = await fetchScenarioData({
@@ -154,7 +192,49 @@ describe("scenarioApi", () => {
       });
 
       expect(result).toEqual([
-        { wepp_id: 42, runoff: 10.5, sediment_yield: 20.3 },
+        {
+          wepp_id: 0,
+          runoff: 0,
+          subrunoff: 0,
+          baseflow: 0,
+          soil_loss: 0,
+          sediment_deposition: 0,
+          sediment_yield: 0,
+          hillslope_area: 0,
+        },
+      ]);
+    });
+
+    it("handles string-typed numeric values", async () => {
+      mockPostQuery.mockResolvedValue([
+        {
+          wepp_id: "42",
+          runoff: "10.5",
+          subrunoff: "3.2",
+          baseflow: "1.1",
+          soil_loss: "0.5",
+          sediment_deposition: "0.3",
+          sediment_yield: "20.3",
+          hillslope_area: "5000",
+        },
+      ]);
+
+      const result = await fetchScenarioData({
+        runId: TEST_RUN_ID,
+        scenario: "undisturbed",
+      });
+
+      expect(result).toEqual([
+        {
+          wepp_id: 42,
+          runoff: 10.5,
+          subrunoff: 3.2,
+          baseflow: 1.1,
+          soil_loss: 0.5,
+          sediment_deposition: 0.3,
+          sediment_yield: 20.3,
+          hillslope_area: 5000,
+        },
       ]);
     });
 
