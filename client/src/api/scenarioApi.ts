@@ -114,11 +114,25 @@ export async function fetchScenariosSummary(
     }),
   );
 
-  return results
-    .filter(
-      (r): r is PromiseFulfilledResult<ScenarioSummaryRow | null> =>
-        r.status === "fulfilled",
-    )
+  const fulfilledResults = results.filter(
+    (r): r is PromiseFulfilledResult<ScenarioSummaryRow | null> =>
+      r.status === "fulfilled",
+  );
+  const rejectedResults = results.filter(
+    (r): r is PromiseRejectedResult => r.status === "rejected",
+  );
+
+  if (fulfilledResults.length === 0 && rejectedResults.length > 0) {
+    const reasons = rejectedResults
+      .map((r) => r.reason)
+      .filter((reason) => reason != null)
+      .map((reason) => String(reason));
+    throw new Error(
+      `Failed to fetch scenario summaries for runId "${runId}": ${reasons.join("; ")}`,
+    );
+  }
+
+  return fulfilledResults
     .map((r) => r.value)
     .filter((r): r is ScenarioSummaryRow => r !== null);
 }

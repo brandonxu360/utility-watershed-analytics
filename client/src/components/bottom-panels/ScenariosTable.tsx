@@ -17,10 +17,6 @@ const useStyles = tss.create(({ theme }) => ({
   statusMessage: {
     padding: theme.spacing(3),
   },
-  title: {
-    fontWeight: 600,
-    padding: `${theme.spacing(1)} ${theme.spacing(3)} 0 ${theme.spacing(3)}`,
-  },
   headerCell: {
     fontWeight: 600,
   },
