@@ -15,6 +15,7 @@ declare module "@mui/material/styles" {
       dark: string;
       overlay: string;
       border: string;
+      accordion: string;
     };
     muted: {
       main: string;
@@ -28,6 +29,7 @@ declare module "@mui/material/styles" {
       dark: string;
       overlay: string;
       border: string;
+      accordion: string;
     };
     muted?: {
       main: string;
@@ -121,6 +123,7 @@ const darkPalette = {
     dark: "#121212",
     overlay: "rgba(0, 0, 0, 0.8)",
     border: "#000000",
+    accordion: "#333333",
   },
   muted: {
     main: "#666666",
@@ -161,6 +164,7 @@ const lightPalette = {
     dark: "#E0E0E0",
     overlay: "rgba(255, 255, 255, 0.8)",
     border: "#E0E0E0",
+    accordion: "#E4E4E4",
   },
   muted: {
     main: "#9E9E9E",

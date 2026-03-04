@@ -80,7 +80,7 @@ describe("WatershedOverview", () => {
   describe("loading state", () => {
     it("renders skeleton panel while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
 
       renderWithProviders(<WatershedOverview />);
 
@@ -91,7 +91,7 @@ describe("WatershedOverview", () => {
 
     it("renders skeleton buttons while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<WatershedOverview />);
 
@@ -172,20 +172,28 @@ describe("WatershedOverview", () => {
       });
     });
 
-    it("renders watershed model buttons", async () => {
+    it("renders watershed model accordion sections", async () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
+        expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
+        expect(screen.getByText("Long Term Impact")).toBeInTheDocument();
+      });
+    });
+
+    it("renders WEPP model results link", async () => {
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
+      });
+
+      // Expand the Short Term Impact accordion
+      fireEvent.click(screen.getByText("Short Term Impact"));
+
+      await waitFor(() => {
         expect(
-          screen.getByRole("button", { name: /View Calibrated WEPP Results/i }),
-        ).toBeInTheDocument();
-        expect(
-          screen.getByRole("button", {
-            name: /View Calibrated RHESSys Results/i,
-          }),
-        ).toBeInTheDocument();
-        expect(
-          screen.getByRole("button", {
+          screen.getByRole("link", {
             name: /View Detailed WEPP Model Results/i,
           }),
         ).toBeInTheDocument();
@@ -296,25 +304,27 @@ describe("WatershedOverview", () => {
       });
     });
 
-    it("action buttons have proper aria-labels", async () => {
+    it("WEPP model results link has proper aria-label and href", async () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
-        const weppButton = screen.getByRole("button", {
-          name: /View Calibrated WEPP Results/i,
-        });
-        expect(weppButton).toHaveAttribute(
-          "aria-label",
-          "View Calibrated WEPP Results",
-        );
+        expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
+      });
 
-        const rhessysButton = screen.getByRole("button", {
-          name: /View Calibrated RHESSys Results/i,
+      // Expand the Short Term Impact accordion
+      fireEvent.click(screen.getByText("Short Term Impact"));
+
+      await waitFor(() => {
+        const weppLink = screen.getByRole("link", {
+          name: /View Detailed WEPP Model Results/i,
         });
-        expect(rhessysButton).toHaveAttribute(
+        expect(weppLink).toHaveAttribute(
           "aria-label",
-          "View Calibrated RHESSys Results",
+          "View Detailed WEPP Model Results",
         );
+        expect(weppLink).toHaveAttribute("href");
+        expect(weppLink).toHaveAttribute("target", "_blank");
+        expect(weppLink).toHaveAttribute("rel", "noopener noreferrer");
       });
     });
   });
