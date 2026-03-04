@@ -56,18 +56,9 @@ const useStyles = tss.create(({ theme }) => ({
   },
 }));
 
-// Center coordinates [lat, lng]
-const CENTER: [number, number] = [
-  Number(((43.75 + 49.19) / 2).toFixed(2)),
-  Number(((-124.52 + -113.93) / 2).toFixed(2)),
-];
-
-// Bounds
-// Extent: (-124.517612, 41.880540) - (-116.934213, 46.188423)
-const BOUNDS: [[number, number], [number, number]] = [
-  [41.88 - 5, -124.52 - 5], // Southwest corner [lat, lng]
-  [46.19 + 5, -116.93 + 5], // Northeast corner [lat, lng]
-];
+// Fallback center used only for the initial render before watershed data loads.
+// Once data arrives, MapEffect will fitBounds to all watersheds automatically.
+const FALLBACK_CENTER: [number, number] = [0, 0];
 
 /**
  * Handles the map of our application and contains all of its controls
@@ -264,16 +255,13 @@ export default function WatershedMap(): JSX.Element {
   return (
     <div className={classes.mapContainer}>
       <MapContainer
-        center={CENTER}
-        zoom={7}
-        minZoom={7}
+        center={FALLBACK_CENTER}
+        zoom={4}
         maxZoom={tileLayers[selectedLayerId].maxZoom}
         zoomControl={false}
         doubleClickZoom={false}
         scrollWheelZoom
-        maxBounds={BOUNDS}
         maxBoundsViscosity={0.5}
-        bounds={BOUNDS}
         style={{ height: "100%", width: "100%" }}
         preferCanvas
       >
