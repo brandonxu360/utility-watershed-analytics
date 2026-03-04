@@ -15,11 +15,11 @@ export function buildHillslopeTooltip(
 
   if (scenarioRow) {
     lines.push(
-      `<strong>Runoff Volume:</strong> ${scenarioRow.runoff.toFixed(2)} mm`,
-      `<strong>Soil Loss:</strong> ${scenarioRow.soil_loss.toFixed(2)} kg/m²`,
-      `<strong>Sediment Deposition:</strong> ${scenarioRow.sediment_deposition.toFixed(2)} kg/m²`,
-      `<strong>Sediment Yield:</strong> ${scenarioRow.sediment_yield.toFixed(2)} kg/m²`,
-      `<strong>Area:</strong> ${scenarioRow.hillslope_area.toFixed(2)} m²`,
+      `<strong>Runoff Volume:</strong> ${scenarioRow.runoff.toFixed(2)} m³`,
+      `<strong>Soil Loss:</strong> ${scenarioRow.soil_loss.toFixed(2)} kg`,
+      `<strong>Sediment Deposition:</strong> ${scenarioRow.sediment_deposition.toFixed(2)} kg`,
+      `<strong>Sediment Yield:</strong> ${scenarioRow.sediment_yield.toFixed(2)} kg`,
+      `<strong>Area:</strong> ${scenarioRow.hillslope_area.toFixed(2)} ha`,
     );
   } else {
     lines.push(

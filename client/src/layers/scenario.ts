@@ -27,8 +27,8 @@ export const SCENARIO_VARIABLE_CONFIG: Record<
   ScenarioVariableType,
   { label: string; colormap: string; unit: string }
 > = {
-  runoff: { label: "Runoff Volume", colormap: "winter", unit: "mm" },
-  sediment_yield: { label: "Sediment Yield", colormap: "jet2", unit: "kg/ha" },
+  runoff: { label: "Runoff Volume", colormap: "winter", unit: "m³" },
+  sediment_yield: { label: "Sediment Yield", colormap: "jet2", unit: "kg" },
 };
 
 /** Format scenario name for display (e.g., "thinning_40_75" → "Thinning 40-75") */
