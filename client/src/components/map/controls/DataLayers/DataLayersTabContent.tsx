@@ -104,6 +104,15 @@ const useStyles = tss.create(({ theme }) => ({
     flex: 1,
     paddingLeft: theme.spacing(0.5),
   },
+  variableHeading: {
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.primary.dark,
+    flex: 1,
+    paddingLeft: theme.spacing(0.5),
+    fontWeight: 600,
+    paddingTop: theme.spacing(1.5),
+    paddingBottom: theme.spacing(0.5),
+  },
   radio: {
     color: theme.palette.primary.dark,
     "&.Mui-checked": {
@@ -208,8 +217,7 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
             {scenarioEnabled && selectedScenario && (
               <>
                 <Typography
-                  className={classes.variableTitle}
-                  sx={{ fontWeight: 600, pt: 1.5, pb: 0.5 }}
+                  className={classes.variableHeading}
                   id="scenario-variable-label"
                 >
                   Variable
@@ -264,11 +272,8 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
         </>
       )}
 
-      {activeTab === "RHESSys" && (
-        <>
-        </>
-      )}
-      
+      {activeTab === "RHESSys" && <></>}
+
       {activeTab === "Watershed Data" && (
         <>
           <div className={classes.layer}>
