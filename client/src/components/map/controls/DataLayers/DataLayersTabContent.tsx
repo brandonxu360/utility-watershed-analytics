@@ -264,11 +264,8 @@ const DataLayersTabContent: FC<DataLayersTabContentProps> = ({
         </>
       )}
 
-      {activeTab === "RHESSys" && (
-        <>
-        </>
-      )}
-      
+      {activeTab === "RHESSys" && <></>}
+
       {activeTab === "Watershed Data" && (
         <>
           <div className={classes.layer}>

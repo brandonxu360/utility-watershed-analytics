@@ -297,8 +297,9 @@ export default function WatershedOverview() {
                 Long Term Impact
               </Typography>
             </AccordionSummary>
-            <AccordionDetails className={classes.accordionDetails}>
-            </AccordionDetails>
+            <AccordionDetails
+              className={classes.accordionDetails}
+            ></AccordionDetails>
           </Accordion>
         </div>
       </div>
