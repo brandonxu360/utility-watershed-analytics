@@ -54,6 +54,9 @@ const useStyles = tss.create(({ theme }) => ({
     fontSize: theme.typography.body2.fontSize,
     fontWeight: theme.typography.fontWeightMedium,
   },
+  accordionSummaryLabel: {
+    fontWeight: theme.typography.fontWeightMedium,
+  },
   accordionDetails: {
     padding: `${theme.spacing(0.5)} ${theme.spacing(2)} ${theme.spacing(1.5)}`,
     display: "flex",
@@ -262,23 +265,18 @@ export default function WatershedOverview() {
               id="short-term-header"
               className={classes.accordionSummary}
             >
-              <Typography component="span" variant="body2" fontWeight="medium">
+              <Typography component="span" variant="body2" className={classes.accordionSummaryLabel}>
                 Short Term Impact
               </Typography>
             </AccordionSummary>
             <AccordionDetails className={classes.accordionDetails}>
               <Link
-                component="button"
+                href={`https://wepp.cloud/weppcloud/runs/${runId}/disturbed9002_wbt/gl-dashboard`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={classes.actionLink}
                 underline="hover"
                 aria-label="View Detailed WEPP Model Results"
-                onClick={() =>
-                  window.open(
-                    `https://wepp.cloud/weppcloud/runs/${runId}/disturbed9002_wbt/gl-dashboard`,
-                    "_blank",
-                    "noopener,noreferrer",
-                  )
-                }
               >
                 View Detailed WEPP Model Results
               </Link>
@@ -293,7 +291,7 @@ export default function WatershedOverview() {
               id="long-term-header"
               className={classes.accordionSummary}
             >
-              <Typography component="span" variant="body2" fontWeight="medium">
+              <Typography component="span" variant="body2" className={classes.accordionSummaryLabel}>
                 Long Term Impact
               </Typography>
             </AccordionSummary>
