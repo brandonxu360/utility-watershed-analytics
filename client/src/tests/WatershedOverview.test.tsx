@@ -17,6 +17,10 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   });
 });
 
+vi.mock("../components/side-panels/DataLayers", () => ({
+  default: () => <div data-testid="data-layers-side-panel" />,
+}));
+
 const mockFetchWatersheds = vi.fn();
 
 vi.mock("../api/api", () => ({
@@ -80,7 +84,7 @@ describe("WatershedOverview", () => {
   describe("loading state", () => {
     it("renders skeleton panel while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
 
       renderWithProviders(<WatershedOverview />);
 
@@ -91,7 +95,7 @@ describe("WatershedOverview", () => {
 
     it("renders skeleton buttons while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedOverview />);
 
@@ -205,6 +209,16 @@ describe("WatershedOverview", () => {
 
       await waitFor(() => {
         expect(screen.getByText("Watershed Models")).toBeInTheDocument();
+      });
+    });
+
+    it("renders the data layers side panel", async () => {
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("data-layers-side-panel"),
+        ).toBeInTheDocument();
       });
     });
   });

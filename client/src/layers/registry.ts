@@ -6,7 +6,6 @@
  *  1. Add the id to `LayerId` in types.ts
  *  2. Add a descriptor here
  *  3. Build a renderer component (or leave as placeholder)
- *
  */
 
 import type {
@@ -14,6 +13,7 @@ import type {
   LayerDescriptor,
   GroupDescriptor,
   GroupId,
+  DesiredMap,
 } from "./types";
 
 export const LAYER_GROUPS: Record<GroupId, GroupDescriptor> = {
@@ -140,4 +140,13 @@ export function getDependents(id: LayerId): LayerId[] {
   return (Object.values(LAYER_REGISTRY) as LayerDescriptor[])
     .filter((l) => l.requires?.includes(id))
     .map((l) => l.id);
+}
+
+/**
+ * Returns true when any layer that `requires` the given layer is currently
+ * enabled. Used to disable a checkbox so users can't accidentally
+ * cascade-disable a dependency chain.
+ */
+export function hasActiveDependents(id: LayerId, desired: DesiredMap): boolean {
+  return getDependents(id).some((depId) => desired[depId].enabled);
 }

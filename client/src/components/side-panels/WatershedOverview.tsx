@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchWatersheds } from "../../api/api";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { tss } from "../../utils/tss";
+import { useSidePanelAccordionStyles } from "./styles";
 import { toast } from "react-toastify";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -13,6 +14,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Link from "@mui/material/Link";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DataLayers from "./DataLayers";
 
 const useStyles = tss.create(({ theme }) => ({
   closeButton: {
@@ -36,32 +38,6 @@ const useStyles = tss.create(({ theme }) => ({
   paragraph: {
     marginBottom: theme.spacing(2),
     fontSize: theme.typography.body1.fontSize,
-  },
-  accordionGroup: {
-    marginTop: theme.spacing(2),
-    paddingBottom: theme.spacing(1.5),
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(1),
-  },
-  accordion: {
-    backgroundColor: theme.palette.surface.accordion,
-    "&::before": {
-      display: "none",
-    },
-  },
-  accordionSummary: {
-    fontSize: theme.typography.body2.fontSize,
-    fontWeight: theme.typography.fontWeightMedium,
-  },
-  accordionSummaryLabel: {
-    fontWeight: theme.typography.fontWeightMedium,
-  },
-  accordionDetails: {
-    padding: `${theme.spacing(0.5)} ${theme.spacing(2)} ${theme.spacing(1.5)}`,
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(0.75),
   },
   actionLink: {
     fontSize: theme.typography.body2.fontSize,
@@ -179,6 +155,7 @@ function SkeletonWatershedPanel() {
 
 export default function WatershedOverview() {
   const { classes } = useStyles();
+  const { classes: accordionClasses } = useSidePanelAccordionStyles();
   const navigate = useNavigate();
 
   const runId =
@@ -256,20 +233,24 @@ export default function WatershedOverview() {
             <strong>Watershed Models</strong>
           </Typography>
         </div>
-        <div className={classes.accordionGroup} key={runId}>
+        <div className={accordionClasses.accordionGroup} key={runId}>
           {/* Short Term Impact */}
-          <Accordion className={classes.accordion} disableGutters>
+          <Accordion className={accordionClasses.accordion} disableGutters>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="short-term-content"
               id="short-term-header"
-              className={classes.accordionSummary}
+              className={accordionClasses.accordionSummary}
             >
-              <Typography component="span" variant="body2" className={classes.accordionSummaryLabel}>
+              <Typography
+                component="span"
+                variant="body2"
+                className={accordionClasses.accordionSummaryLabel}
+              >
                 Short Term Impact
               </Typography>
             </AccordionSummary>
-            <AccordionDetails className={classes.accordionDetails}>
+            <AccordionDetails className={accordionClasses.accordionDetails}>
               <Link
                 href={`https://wepp.cloud/weppcloud/runs/${runId}/disturbed9002_wbt/gl-dashboard`}
                 target="_blank"
@@ -284,23 +265,32 @@ export default function WatershedOverview() {
           </Accordion>
 
           {/* Long Term Impact */}
-          <Accordion className={classes.accordion} disableGutters>
+          <Accordion className={accordionClasses.accordion} disableGutters>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="long-term-content"
               id="long-term-header"
-              className={classes.accordionSummary}
+              className={accordionClasses.accordionSummary}
             >
-              <Typography component="span" variant="body2" className={classes.accordionSummaryLabel}>
+              <Typography
+                component="span"
+                variant="body2"
+                className={accordionClasses.accordionSummaryLabel}
+              >
                 Long Term Impact
               </Typography>
             </AccordionSummary>
-            <AccordionDetails
-              className={classes.accordionDetails}
-            ></AccordionDetails>
+            <AccordionDetails className={accordionClasses.accordionDetails}>
+              <Typography variant="body2" color="textSecondary">
+                No features available yet.
+              </Typography>
+            </AccordionDetails>
           </Accordion>
         </div>
       </div>
+
+      {/* Data Layers Content */}
+      <DataLayers />
     </div>
   );
 }
