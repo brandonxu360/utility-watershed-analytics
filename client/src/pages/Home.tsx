@@ -3,6 +3,7 @@ import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import { tss } from "../utils/tss";
 import { WatershedProvider, useWatershed } from "../contexts/WatershedContext";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
+import { ScenariosTable } from "../components/bottom-panels/ScenariosTable";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
@@ -73,20 +74,32 @@ export default function Home(): JSX.Element {
           <div className={classes.map}>
             <WatershedMap />
           </div>
-          <ActiveBottomPanel />
+          <ActiveBottomPanel runId={runId} />
         </div>
       </div>
     </WatershedProvider>
   );
 }
 
-function ActiveBottomPanel(): JSX.Element | null {
+function ActiveBottomPanel({
+  runId,
+}: {
+  runId: string | null;
+}): JSX.Element | null {
   const { isEffective } = useWatershed();
 
   if (isEffective("choropleth")) {
     return (
       <BottomPanel isOpen>
         <VegetationCover />
+      </BottomPanel>
+    );
+  }
+
+  if (runId) {
+    return (
+      <BottomPanel isOpen>
+        <ScenariosTable />
       </BottomPanel>
     );
   }

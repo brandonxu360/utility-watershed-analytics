@@ -38,6 +38,10 @@ vi.mock("../components/bottom-panels/VegetationCover", () => ({
   VegetationCover: () => <div data-testid="vegetation-cover" />,
 }));
 
+vi.mock("../components/bottom-panels/ScenariosTable", () => ({
+  ScenariosTable: () => <div data-testid="scenarios-table" />,
+}));
+
 let mockEffectiveLayers: Record<string, boolean> = {};
 
 vi.mock("../contexts/WatershedContext", () => ({
@@ -115,6 +119,24 @@ describe("Home Component Tests", () => {
         screen.getByRole("complementary", { name: /bottom panel/i }),
       ).toBeInTheDocument();
       expect(screen.getByTestId("vegetation-cover")).toBeInTheDocument();
+    });
+
+    it("renders BottomPanel with ScenariosTable when runId is present and choropleth is not effective", () => {
+      mockUseParams.mockReturnValue("test-watershed-123");
+      mockEffectiveLayers = {};
+      render(<Home />);
+      expect(
+        screen.getByRole("complementary", { name: /bottom panel/i }),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("scenarios-table")).toBeInTheDocument();
+    });
+
+    it("renders VegetationCover over ScenariosTable when both runId and choropleth are active", () => {
+      mockUseParams.mockReturnValue("test-watershed-123");
+      mockEffectiveLayers = { choropleth: true };
+      render(<Home />);
+      expect(screen.getByTestId("vegetation-cover")).toBeInTheDocument();
+      expect(screen.queryByTestId("scenarios-table")).not.toBeInTheDocument();
     });
 
     it("shows the small-screen notice when width < 768px", async () => {

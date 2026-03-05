@@ -9,7 +9,9 @@ export const Route = createRootRoute({
       <div>
         <Outlet />
       </div>
-      {import.meta.env.DEV && <TanStackRouterDevtools initialIsOpen={false} />}
+      {import.meta.env.DEV && (
+        <TanStackRouterDevtools initialIsOpen={false} position="bottom-right" />
+      )}
     </>
   ),
   notFoundComponent: () => <div>404: Page Not Found</div>,

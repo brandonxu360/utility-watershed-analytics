@@ -100,8 +100,6 @@ vi.mock("../contexts/WatershedContext", () => ({
   },
 }));
 
-/* ── react-leaflet / component mocks ──────────────────────────────────── */
-
 type GeoJsonOnEachFeature = (
   feature: GeoJSON.Feature,
   layer: { on: (handlers: Record<string, (e: unknown) => void>) => void },
@@ -146,10 +144,6 @@ vi.mock("react-leaflet", () => ({
   },
   ScaleControl: () => <div data-testid="scale-control" />,
   useMap: () => ({}),
-}));
-
-vi.mock("../components/map/controls/DataLayers/DataLayers", () => ({
-  default: () => <div data-testid="data-layers-control" />,
 }));
 
 vi.mock("../components/map/controls/ZoomIn", () => ({
@@ -230,8 +224,6 @@ vi.mock("../utils/map/MapEffectUtil", () => ({
     <div data-testid="map-effect" data-watershed-id={watershedId} />
   ),
 }));
-
-/* ── Test data ──────────────────────────────────────────────────────────── */
 
 const mockWatershedData = {
   features: [
@@ -395,24 +387,6 @@ describe("Map Component", () => {
       renderWithProviders(<WatershedMap />);
       await waitFor(() => {
         expect(screen.getByTestId("watersheds-geojson")).toBeInTheDocument();
-      });
-    });
-
-    it("does not render DataLayersControl when no watershedID", async () => {
-      mockUseParams.mockReturnValue(null);
-      renderWithProviders(<WatershedMap />);
-      await waitFor(() => {
-        expect(
-          screen.queryByTestId("data-layers-control"),
-        ).not.toBeInTheDocument();
-      });
-    });
-
-    it("renders DataLayersControl when watershedID is present", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      renderWithProviders(<WatershedMap />);
-      await waitFor(() => {
-        expect(screen.getByTestId("data-layers-control")).toBeInTheDocument();
       });
     });
 

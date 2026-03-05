@@ -4,6 +4,7 @@ import { highlightedStyle, selectedStyle } from "../components/map/constants";
 import type { PathOptions } from "leaflet";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import SubcatchmentLayer from "../components/map/SubcatchmentLayer";
+import { buildHillslopeTooltip } from "../utils/tooltipContent";
 
 const mockSetSelectedHillslope = vi.fn();
 const mockClearSelectedHillslope = vi.fn();
@@ -73,6 +74,7 @@ type HandlerMap = Partial<Record<HandlerName, (e: LeafletEventLike) => void>>;
 
 type MockLayer = {
   bindTooltip: ReturnType<typeof vi.fn>;
+  setTooltipContent: ReturnType<typeof vi.fn>;
   openTooltip: ReturnType<typeof vi.fn>;
   closeTooltip: ReturnType<typeof vi.fn>;
   setStyle: ReturnType<typeof vi.fn>;
@@ -85,6 +87,7 @@ function createLayer(): MockLayer {
 
   const layer: MockLayer = {
     bindTooltip: vi.fn(),
+    setTooltipContent: vi.fn(),
     openTooltip: vi.fn(),
     closeTooltip: vi.fn(),
     setStyle: vi.fn(),
@@ -112,6 +115,9 @@ describe("SubcatchmentLayer", () => {
     };
   });
 
+  const defaultTooltip = (props: Partial<SubcatchmentProperties>) =>
+    buildHillslopeTooltip(props);
+
   const data = {
     type: "FeatureCollection",
     features: [createFeature("1")],
@@ -132,6 +138,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -159,6 +166,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -180,6 +188,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -214,6 +223,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -246,6 +256,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -266,6 +277,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={true}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -290,6 +302,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={true}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -311,6 +324,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -331,6 +345,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -357,6 +372,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -370,6 +386,7 @@ describe("SubcatchmentLayer", () => {
           style={styleFn}
           coverageActive={false}
           coverageKey="k2"
+          tooltipContent={defaultTooltip}
         />,
       );
     });
@@ -387,6 +404,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -401,6 +419,7 @@ describe("SubcatchmentLayer", () => {
           style={styleFn}
           coverageActive={false}
           coverageKey="k2"
+          tooltipContent={defaultTooltip}
         />,
       );
     });
@@ -415,6 +434,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -444,6 +464,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -470,6 +491,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -495,6 +517,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -536,6 +559,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -581,6 +605,7 @@ describe("SubcatchmentLayer", () => {
         style={styleFn}
         coverageActive={false}
         coverageKey="k1"
+        tooltipContent={defaultTooltip}
       />,
     );
 
@@ -594,6 +619,7 @@ describe("SubcatchmentLayer", () => {
           style={styleFn2}
           coverageActive={true}
           coverageKey="k1"
+          tooltipContent={defaultTooltip}
         />,
       );
     });
@@ -604,5 +630,50 @@ describe("SubcatchmentLayer", () => {
       weight: 3,
       color: "#ffffff",
     });
+  });
+
+  it("calls tooltipContent callback to build tooltip HTML", () => {
+    const customTooltip = vi.fn(
+      (props: Partial<SubcatchmentProperties>) => `<b>${props.topazid}</b>`,
+    );
+
+    render(
+      <SubcatchmentLayer
+        data={data}
+        style={styleFn}
+        coverageActive={false}
+        coverageKey="k1"
+        tooltipContent={customTooltip}
+      />,
+    );
+
+    const feature = createFeature("1");
+    const layer = createLayer();
+    lastGeoJsonProps!.onEachFeature(feature, layer);
+
+    expect(customTooltip).toHaveBeenCalledWith(feature.properties);
+    const [html] = layer.bindTooltip.mock.calls[0];
+    expect(String(html)).toBe("<b>101</b>");
+  });
+
+  it("refreshes tooltip content on mouseover via setTooltipContent", () => {
+    render(
+      <SubcatchmentLayer
+        data={data}
+        style={styleFn}
+        coverageActive={false}
+        coverageKey="k1"
+        tooltipContent={defaultTooltip}
+      />,
+    );
+
+    const feature = createFeature("1");
+    const layer = createLayer();
+    lastGeoJsonProps!.onEachFeature(feature, layer);
+
+    layer.__handlers.mouseover?.({ target: layer });
+
+    expect(layer.setTooltipContent).toHaveBeenCalledTimes(1);
+    expect(layer.openTooltip).toHaveBeenCalledTimes(1);
   });
 });

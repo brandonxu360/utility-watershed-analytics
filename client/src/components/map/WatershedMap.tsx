@@ -18,7 +18,6 @@ import { useLanduseData } from "../../hooks/useLanduseData";
 import { useSubcatchmentData } from "../../hooks/useSubcatchmentData";
 import { useChannelData } from "../../hooks/useChannelData";
 import { useLayerToasts } from "../../hooks/useLayerToasts";
-import DataLayersControl from "./controls/DataLayers/DataLayers";
 import ZoomInControl from "./controls/ZoomIn";
 import ZoomOutControl from "./controls/ZoomOut";
 import LayersControl from "./controls/Layers";
@@ -28,6 +27,7 @@ import LandUseLegend from "./controls/LandUseLegend";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import SubcatchmentLayer from "./SubcatchmentLayer";
+import { buildHillslopeTooltip } from "../../utils/tooltipContent";
 import type { SbsColorMode } from "../../api/types";
 import "leaflet/dist/leaflet.css";
 
@@ -91,6 +91,7 @@ export default function WatershedMap(): JSX.Element {
     hasData: hasScenarioData,
     isLoading: scenarioLoading,
     getScenarioStyle,
+    getScenarioRow,
   } = useScenarioData();
 
   const scenarioEffective = isEffective("scenario");
@@ -195,6 +196,12 @@ export default function WatershedMap(): JSX.Element {
       getChoroplethStyle,
       getScenarioStyle,
     ],
+  );
+
+  const tooltipContent = useCallback(
+    (props: Partial<SubcatchmentProperties>) =>
+      buildHillslopeTooltip(props, getScenarioRow(props.weppid)),
+    [getScenarioRow],
   );
 
   const channelStyle = useCallback(
@@ -330,6 +337,7 @@ export default function WatershedMap(): JSX.Element {
             style={subcatchmentStyle}
             coverageActive={choroplethActive || scenarioEffective}
             coverageKey={coverageKey}
+            tooltipContent={tooltipContent}
           />
         )}
 
@@ -345,12 +353,6 @@ export default function WatershedMap(): JSX.Element {
       <LandUseLegend landuseLegendMap={landuseLegendMap} />
 
       {sbsEffective && <SbsLegend />}
-
-      {runId && (
-        <div style={{ position: "absolute", right: "10px", bottom: "30px" }}>
-          <DataLayersControl />
-        </div>
-      )}
     </div>
   );
 }
