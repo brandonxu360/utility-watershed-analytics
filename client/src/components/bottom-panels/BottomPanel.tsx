@@ -82,6 +82,9 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   const stopDrag = () => {
     document.removeEventListener("mousemove", onDrag);
     document.removeEventListener("mouseup", stopDrag);
+    if (panelRef.current && panelRef.current.offsetHeight <= 24) {
+      setIsExpanded(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -112,9 +115,15 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
           aria-label={isExpanded ? "Collapse panel" : "Expand panel"}
         >
           {isExpanded ? (
-            <KeyboardArrowDownIcon fontSize="small" data-testid="chevron-down-icon" />
+            <KeyboardArrowDownIcon
+              fontSize="small"
+              data-testid="chevron-down-icon"
+            />
           ) : (
-            <KeyboardArrowUpIcon fontSize="small" data-testid="chevron-up-icon" />
+            <KeyboardArrowUpIcon
+              fontSize="small"
+              data-testid="chevron-up-icon"
+            />
           )}
         </button>
       </div>
