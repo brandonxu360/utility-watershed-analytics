@@ -204,11 +204,11 @@ describe("WatershedOverview", () => {
       });
     });
 
-    it("renders watershed models section heading", async () => {
+    it("renders impact assessment section heading", async () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
-        expect(screen.getByText("Watershed Models")).toBeInTheDocument();
+        expect(screen.getByText("Impact Assessment")).toBeInTheDocument();
       });
     });
 

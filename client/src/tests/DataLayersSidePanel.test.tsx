@@ -39,9 +39,9 @@ describe("DataLayers", () => {
     mockDesired = JSON.parse(JSON.stringify(INITIAL_DESIRED));
   });
 
-  it("renders the Data Layers heading", () => {
+  it("renders the Watershed Models & Data heading", () => {
     render(<DataLayers />);
-    expect(screen.getByText("Data Layers")).toBeInTheDocument();
+    expect(screen.getByText("Watershed Models & Data")).toBeInTheDocument();
   });
 
   it("renders all three accordion headers", () => {
