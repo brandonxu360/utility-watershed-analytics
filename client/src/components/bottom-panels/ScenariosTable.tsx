@@ -36,8 +36,8 @@ const useStyles = tss.create(({ theme }) => ({
 
 type MetricKey = {
   [K in keyof ScenarioSummaryRow]: ScenarioSummaryRow[K] extends number | null
-  ? K
-  : never;
+    ? K
+    : never;
 }[keyof ScenarioSummaryRow];
 
 type MetricColumn = {
@@ -169,7 +169,9 @@ export function ScenariosTable() {
                   <TableCell key={col.key} align="center">
                     {formatValue(
                       TONNES_KEYS.has(col.key)
-                        ? row[col.key] != null && row.totalArea
+                        ? row[col.key] != null &&
+                          row.totalArea != null &&
+                          row.totalArea > 0
                           ? row[col.key]! / row.totalArea
                           : null
                         : row[col.key],
