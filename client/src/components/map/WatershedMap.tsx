@@ -35,6 +35,9 @@ const useStyles = tss.create(({ theme }) => ({
   mapContainer: {
     height: "100%",
     width: "100%",
+    "& .leaflet-bottom": {
+      marginBottom: "24px",
+    },
   },
   mapLoadingOverlay: {
     position: "absolute",
@@ -280,13 +283,13 @@ export default function WatershedMap(): JSX.Element {
           choroplethLoading ||
           landuseLoading ||
           scenarioLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}
