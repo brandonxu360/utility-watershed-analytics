@@ -35,6 +35,9 @@ const useStyles = tss.create(({ theme }) => ({
   },
   layerCheckbox: {
     color: theme.palette.primary.contrastText,
+    "&.Mui-checked": {
+      color: theme.palette.primary.contrastText,
+    },
     "&.Mui-disabled": {
       color: theme.palette.muted.main,
       opacity: 0.85,

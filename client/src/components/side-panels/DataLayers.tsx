@@ -31,7 +31,7 @@ export default function DataLayers() {
     <div className={classes.root} data-testid="data-layers-side-panel">
       <div className={classes.heading}>
         <Typography variant="body1">
-          <strong>Data Layers</strong>
+          <strong>Watershed Models & Data</strong>
         </Typography>
       </div>
 

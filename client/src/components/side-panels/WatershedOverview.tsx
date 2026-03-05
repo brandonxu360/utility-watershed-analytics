@@ -230,7 +230,7 @@ export default function WatershedOverview() {
       <div className={classes.modelsBox}>
         <div>
           <Typography variant="body1">
-            <strong>Watershed Models</strong>
+            <strong>Impact Assessment</strong>
           </Typography>
         </div>
         <div className={accordionClasses.accordionGroup} key={runId}>
