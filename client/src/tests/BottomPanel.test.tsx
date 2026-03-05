@@ -99,7 +99,7 @@ describe("BottomPanel", () => {
       expect(panel.style.height).toBe("250px");
     });
 
-    it("clamps height to minimum of 16px", () => {
+    it("clamps height to minimum of 24px", () => {
       render(
         <BottomPanel isOpen={true}>
           <div>Content</div>
@@ -118,7 +118,7 @@ describe("BottomPanel", () => {
 
       fireEvent.mouseMove(document, { clientY: 700 });
 
-      expect(panel.style.height).toBe("16px");
+      expect(panel.style.height).toBe("24px");
     });
 
     it("clamps height to maximum of 450px", () => {
@@ -234,7 +234,7 @@ describe("BottomPanel", () => {
       fireEvent.mouseDown(dragHandle, { clientY: 500 });
       fireEvent.mouseMove(document, { clientY: 450 });
 
-      expect(panel.style.height).toBe("50px");
+      expect(panel.style.height).toBe("74px");
     });
   });
 
