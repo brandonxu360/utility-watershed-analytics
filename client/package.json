@@ -19,6 +19,8 @@
     "@tanstack/react-query": "^5.62.11",
     "@tanstack/react-router": "^1.97.14",
     "@tanstack/react-router-devtools": "^1.162.1",
+    "georaster-layer-for-leaflet": "^3.10.0",
+    "geotiff": "^3.0.4",
     "leaflet": "^1.9.4",
     "react": "^19.0.0-rc.1",
     "react-dom": "^19.0.0-rc.1",

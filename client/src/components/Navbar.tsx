@@ -56,6 +56,9 @@ const Navbar: FC = () => {
           <Link to="/about" className={classes.link}>
             About
           </Link>
+          <Link to="/spatial-inputs-eg" className={classes.link}>
+            Spatial Input (demo)
+          </Link>
           <Link to="/login" className={classes.link}>
             Login
           </Link>

@@ -1,0 +1,324 @@
+{
+  "canopy_cover_1985.tif": {
+    "name": "Canopy Cover 1985",
+    "min": 0.0,
+    "max": 1.0499999523162842,
+    "type": "continuous",
+    "unique_values": null,
+    "group": "canopy_cover",
+    "group_min": 0.0,
+    "group_max": 1.0499999523162842
+  },
+  "canopy_cover_2021.tif": {
+    "name": "Canopy Cover 2021",
+    "min": 0.0,
+    "max": 1.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": "canopy_cover",
+    "group_min": 0.0,
+    "group_max": 1.0499999523162842
+  },
+  "daymet_patch_combination_2021.tif": {
+    "name": "Daymet Patch Combo 2021",
+    "min": 1500948.0,
+    "max": 841702112.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "fillna_surface_texture.tif": {
+    "name": "Fill NA Surface Texture",
+    "min": 3.0,
+    "max": 13.0,
+    "type": "categorical",
+    "unique_values": [3, 6, 8, 9, 10, 12, 13],
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "flip_wbt_impervious_2001.tif": {
+    "name": "Flip WBT Impervious 2001",
+    "min": 0,
+    "max": 1.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": "flip_wbt_impervious",
+    "group_min": 0.0,
+    "group_max": 1.0
+  },
+  "flip_wbt_impervious_2021.tif": {
+    "name": "Flip WBT Impervious 2021",
+    "min": 0.0,
+    "max": 1.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": "flip_wbt_impervious",
+    "group_min": 0.0,
+    "group_max": 1.0
+  },
+  "impervious_2021.tif": {
+    "name": "Impervious 2021",
+    "min": 0.0,
+    "max": 1.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "landuse.tif": {
+    "name": "Land Use",
+    "min": 1.0,
+    "max": 3.0,
+    "type": "categorical",
+    "unique_values": [1, 2, 3],
+    "group": "landuse",
+    "group_min": 1.0,
+    "group_max": 3.0
+  },
+  "landuse_1985.tif": {
+    "name": "Land Use 1985",
+    "min": 1.0,
+    "max": 3.0,
+    "type": "categorical",
+    "unique_values": [1, 2, 3],
+    "group": "landuse",
+    "group_min": 1.0,
+    "group_max": 3.0
+  },
+  "landuse_2021.tif": {
+    "name": "Land Use 2021",
+    "min": 1.0,
+    "max": 3.0,
+    "type": "categorical",
+    "unique_values": [1, 2, 3],
+    "group": "landuse",
+    "group_min": 1.0,
+    "group_max": 3.0
+  },
+  "masked_daymet_patchID_1985.tif": {
+    "name": "Masked Daymet PatchID 1985",
+    "min": 37866.0,
+    "max": 126605.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": "masked_daymet_patchID",
+    "group_min": 10403.0,
+    "group_max": 126605.0
+  },
+  "masked_daymet_patchID_2021.tif": {
+    "name": "Masked Daymet PatchID 2021",
+    "min": 10403.0,
+    "max": 36406.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": "masked_daymet_patchID",
+    "group_min": 10403.0,
+    "group_max": 126605.0
+  },
+  "masked_tol_1000cleaned_hillslop.tif": {
+    "name": "Masked TOL 1000 Cleaned Hillslope",
+    "min": 259.0,
+    "max": 755.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "road_1985.tif": {
+    "name": "Roads 1985",
+    "min": 0.0,
+    "max": 1.0,
+    "type": "categorical",
+    "unique_values": [0, 1],
+    "group": "road",
+    "group_min": 0.0,
+    "group_max": 1.0
+  },
+  "road_2021.tif": {
+    "name": "Roads 2021",
+    "min": 0.0,
+    "max": 1.0,
+    "type": "categorical",
+    "unique_values": [0, 1],
+    "group": "road",
+    "group_min": 0.0,
+    "group_max": 1.0
+  },
+  "smothed_gee_elevation.tif": {
+    "name": "Elevation",
+    "min": 0.0,
+    "max": 1451,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "strata_overcanopy_1985.tif": {
+    "name": "Strata Over Canopy 1985",
+    "min": 1.0,
+    "max": 6.0,
+    "type": "categorical",
+    "unique_values": [1, 2, 3, 4, 5, 6],
+    "group": "strata_overcanopy",
+    "group_min": 1.0,
+    "group_max": 6.0
+  },
+  "strata_overcanopy_2021.tif": {
+    "name": "Strata Over Canopy 2021",
+    "min": 1.0,
+    "max": 6.0,
+    "type": "categorical",
+    "unique_values": [1, 2, 3, 4, 5, 6],
+    "group": "strata_overcanopy",
+    "group_min": 1.0,
+    "group_max": 6.0
+  },
+  "strata_understory_1985.tif": {
+    "name": "Strata Understory 1985",
+    "min": 49.0,
+    "max": 51.0,
+    "type": "categorical",
+    "unique_values": [49, 50, 51],
+    "group": "strata_understory",
+    "group_min": 49.0,
+    "group_max": 51.0
+  },
+  "strata_understory_2021.tif": {
+    "name": "Strata Understory 2021",
+    "min": 49.0,
+    "max": 51.0,
+    "type": "categorical",
+    "unique_values": [49, 50, 51],
+    "group": "strata_understory",
+    "group_min": 49.0,
+    "group_max": 51.0
+  },
+  "tol_1000cleaned_hillslop.tif": {
+    "name": "TOL 1000 Cleaned Hillslope",
+    "min": 1.0,
+    "max": 968.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "tol_1000wbt_stream.tif": {
+    "name": "TOL 1000 WBT Stream",
+    "min": 1.0,
+    "max": 1.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "wbt_TWI.tif": {
+    "name": "WBT TWI",
+    "min": 0.0,
+    "max": 23.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "wbt_aspect.tif": {
+    "name": "WBT Aspect",
+    "min": -1.0,
+    "max": 359.99969482421875,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "wbt_basin.tif": {
+    "name": "WBT Basin",
+    "min": 1.0,
+    "max": 1.0,
+    "type": "categorical",
+    "unique_values": [1],
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "wbt_d8_slope.tif": {
+    "name": "WBT D8 Slope",
+    "min": 0.0,
+    "max": 88.81527067769656,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "wbt_ehorizen.tif": {
+    "name": "WBT E Horizen",
+    "min": -45,
+    "max": 45,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "wbt_impervious_2001.tif": {
+    "name": "WBT Impervious 2001",
+    "min": 0.0,
+    "max": 1.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": "wbt_impervious",
+    "group_min": 0.0,
+    "group_max": 1.0
+  },
+  "wbt_impervious_2021.tif": {
+    "name": "WBT Impervious 2021",
+    "min": 0.0,
+    "max": 1.0,
+    "type": "continuous",
+    "unique_values": null,
+    "group": "wbt_impervious",
+    "group_min": 0.0,
+    "group_max": 1.0
+  },
+  "wbt_landform.tif": {
+    "name": "WBT Landform",
+    "min": 11.0,
+    "max": 42.0,
+    "type": "categorical",
+    "unique_values": [
+      11, 12, 13, 14, 15, 21, 22, 23, 24, 31, 32, 33, 34, 41, 42
+    ],
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "wbt_slope.tif": {
+    "name": "WBT Slope",
+    "min": 0,
+    "max": 88,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  },
+  "wbt_whorizen.tif": {
+    "name": "WBT W Horizen",
+    "min": -45,
+    "max": 45,
+    "type": "continuous",
+    "unique_values": null,
+    "group": null,
+    "group_min": null,
+    "group_max": null
+  }
+}

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeamRouteImport } from './routes/team'
+import { Route as SpatialInputsEgRouteImport } from './routes/spatial-inputs-eg'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AboutRouteImport } from './routes/about'
@@ -26,6 +27,11 @@ import { Route as AboutRhessysRouteImport } from './routes/about/rhessys'
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpatialInputsEgRoute = SpatialInputsEgRouteImport.update({
+  id: '/spatial-inputs-eg',
+  path: '/spatial-inputs-eg',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/spatial-inputs-eg': typeof SpatialInputsEgRoute
   '/team': typeof TeamRoute
   '/about/rhessys': typeof AboutRhessysRoute
   '/about/sbs': typeof AboutSbsRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/spatial-inputs-eg': typeof SpatialInputsEgRoute
   '/team': typeof TeamRoute
   '/about/rhessys': typeof AboutRhessysRoute
   '/about/sbs': typeof AboutSbsRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/spatial-inputs-eg': typeof SpatialInputsEgRoute
   '/team': typeof TeamRoute
   '/about/rhessys': typeof AboutRhessysRoute
   '/about/sbs': typeof AboutSbsRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/register'
+    | '/spatial-inputs-eg'
     | '/team'
     | '/about/rhessys'
     | '/about/sbs'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/spatial-inputs-eg'
     | '/team'
     | '/about/rhessys'
     | '/about/sbs'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/register'
+    | '/spatial-inputs-eg'
     | '/team'
     | '/about/rhessys'
     | '/about/sbs'
@@ -186,6 +198,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  SpatialInputsEgRoute: typeof SpatialInputsEgRoute
   TeamRoute: typeof TeamRoute
   WatershedWebcloudRunIdRoute: typeof WatershedWebcloudRunIdRoute
 }
@@ -197,6 +210,13 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spatial-inputs-eg': {
+      id: '/spatial-inputs-eg'
+      path: '/spatial-inputs-eg'
+      fullPath: '/spatial-inputs-eg'
+      preLoaderRoute: typeof SpatialInputsEgRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -313,6 +333,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  SpatialInputsEgRoute: SpatialInputsEgRoute,
   TeamRoute: TeamRoute,
   WatershedWebcloudRunIdRoute: WatershedWebcloudRunIdRoute,
 }
