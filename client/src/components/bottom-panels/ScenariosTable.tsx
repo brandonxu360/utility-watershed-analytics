@@ -57,11 +57,11 @@ const METRIC_COLUMNS: MetricColumn[] = [
     key: "waterDischarge",
   },
   {
-    header: "Total hillslope soil loss (t/ha)",
+    header: "Hillslope soil loss (t/ha)",
     key: "hillslopeSoilLoss",
   },
   {
-    header: "Total channel soil loss (t/ha)",
+    header: "Channel soil loss (t/ha)",
     key: "channelSoilLoss",
   },
   {
