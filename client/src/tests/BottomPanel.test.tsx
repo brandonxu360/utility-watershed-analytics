@@ -293,4 +293,138 @@ describe("BottomPanel", () => {
       ).toBeInTheDocument();
     });
   });
+
+  describe("toggle functionality", () => {
+    it("renders the toggle button with collapse label by default", () => {
+      render(
+        <BottomPanel isOpen={true}>
+          <div>Content</div>
+        </BottomPanel>,
+      );
+
+      const toggle = screen.getByTestId("bottom-panel-toggle");
+      expect(toggle).toBeInTheDocument();
+      expect(toggle).toHaveAttribute("aria-label", "Collapse panel");
+      expect(screen.getByTestId("chevron-down-icon")).toBeInTheDocument();
+    });
+
+    it("collapses content and shows expand icon when toggle is clicked", () => {
+      render(
+        <BottomPanel isOpen={true}>
+          <div>Content</div>
+        </BottomPanel>,
+      );
+
+      const toggle = screen.getByTestId("bottom-panel-toggle");
+      fireEvent.click(toggle);
+
+      expect(toggle).toHaveAttribute("aria-label", "Expand panel");
+      expect(screen.getByTestId("chevron-up-icon")).toBeInTheDocument();
+
+      const content = screen.getByText("Content").closest("[hidden]");
+      expect(content).not.toBeNull();
+    });
+
+    it("expands content when toggle is clicked again after collapsing", () => {
+      render(
+        <BottomPanel isOpen={true}>
+          <div>Content</div>
+        </BottomPanel>,
+      );
+
+      const toggle = screen.getByTestId("bottom-panel-toggle");
+      fireEvent.click(toggle);
+      fireEvent.click(toggle);
+
+      expect(toggle).toHaveAttribute("aria-label", "Collapse panel");
+      expect(screen.getByTestId("chevron-down-icon")).toBeInTheDocument();
+      expect(screen.getByText("Content")).toBeVisible();
+    });
+
+    it("sets panel height to min when collapsing via toggle", () => {
+      render(
+        <BottomPanel isOpen={true}>
+          <div>Content</div>
+        </BottomPanel>,
+      );
+
+      const panel = screen.getByTestId("bottom-panel") as HTMLDivElement;
+      const toggle = screen.getByTestId("bottom-panel-toggle");
+      fireEvent.click(toggle);
+
+      expect(panel.style.height).toBe("24px");
+    });
+
+    it("clears inline height when expanding via toggle", () => {
+      render(
+        <BottomPanel isOpen={true}>
+          <div>Content</div>
+        </BottomPanel>,
+      );
+
+      const panel = screen.getByTestId("bottom-panel") as HTMLDivElement;
+      const toggle = screen.getByTestId("bottom-panel-toggle");
+      fireEvent.click(toggle);
+      fireEvent.click(toggle);
+
+      expect(panel.style.height).toBe("");
+    });
+
+    it("auto-collapses when dragged to minimum height", () => {
+      render(
+        <BottomPanel isOpen={true}>
+          <div>Content</div>
+        </BottomPanel>,
+      );
+
+      const panel = screen.getByTestId("bottom-panel") as HTMLDivElement;
+      const dragHandle = screen.getByTestId("bottom-panel-drag");
+
+      Object.defineProperty(panel, "offsetHeight", {
+        value: 100,
+        configurable: true,
+      });
+
+      fireEvent.mouseDown(dragHandle, { clientY: 500 });
+      fireEvent.mouseMove(document, { clientY: 700 });
+      fireEvent.mouseUp(document);
+
+      const toggle = screen.getByTestId("bottom-panel-toggle");
+      expect(toggle).toHaveAttribute("aria-label", "Expand panel");
+      expect(screen.getByTestId("chevron-up-icon")).toBeInTheDocument();
+    });
+
+    it("auto-expands when dragging from collapsed state", () => {
+      render(
+        <BottomPanel isOpen={true}>
+          <div>Content</div>
+        </BottomPanel>,
+      );
+
+      const toggle = screen.getByTestId("bottom-panel-toggle");
+      fireEvent.click(toggle);
+
+      expect(toggle).toHaveAttribute("aria-label", "Expand panel");
+
+      const dragHandle = screen.getByTestId("bottom-panel-drag");
+      fireEvent.mouseDown(dragHandle, { clientY: 500 });
+
+      expect(toggle).toHaveAttribute("aria-label", "Collapse panel");
+    });
+
+    it("hides content from screen readers when collapsed", () => {
+      render(
+        <BottomPanel isOpen={true}>
+          <div>Content</div>
+        </BottomPanel>,
+      );
+
+      const toggle = screen.getByTestId("bottom-panel-toggle");
+      fireEvent.click(toggle);
+
+      const contentWrapper = screen.getByText("Content").parentElement;
+      expect(contentWrapper).toHaveAttribute("aria-hidden", "true");
+      expect(contentWrapper).toHaveAttribute("hidden");
+    });
+  });
 });

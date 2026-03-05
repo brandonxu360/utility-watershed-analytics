@@ -4,6 +4,9 @@ import DragHandleIcon from "@mui/icons-material/DragHandle";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
+const MIN_HEIGHT_PX = 24;
+const MAX_HEIGHT_PX = 450;
+
 type BottomPanelProps = {
   isOpen: boolean;
   children: React.ReactNode;
@@ -15,7 +18,7 @@ const useStyles = tss.create(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    maxHeight: "450px",
+    maxHeight: `${MAX_HEIGHT_PX}px`,
     background: theme.palette.background.default,
     color: theme.palette.primary.contrastText,
     borderTop: `0.5px solid ${theme.palette.primary.dark}`,
@@ -43,7 +46,7 @@ const useStyles = tss.create(({ theme }) => ({
   },
   bottomPanelDrag: {
     flex: 1,
-    height: "24px",
+    height: `${MIN_HEIGHT_PX}px`,
     cursor: "ns-resize",
     display: "flex",
     alignItems: "center",
@@ -63,26 +66,34 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const startY = useRef<number>(0);
   const startHeight = useRef<number>(0);
+  const dragHeight = useRef<number>(0);
 
   const handleDrag = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isExpanded) setIsExpanded(true);
     startY.current = e.clientY;
-    startHeight.current = panelRef.current?.offsetHeight || 24;
+    startHeight.current = panelRef.current?.offsetHeight || MIN_HEIGHT_PX;
     document.addEventListener("mousemove", onDrag);
     document.addEventListener("mouseup", stopDrag);
   };
 
   const onDrag = (e: MouseEvent) => {
     if (panelRef.current) {
-      const newHeight = startHeight.current - (e.clientY - startY.current);
-      panelRef.current.style.height = `${Math.max(24, Math.min(450, newHeight))}px`;
+      const newHeight = Math.max(
+        MIN_HEIGHT_PX,
+        Math.min(
+          MAX_HEIGHT_PX,
+          startHeight.current - (e.clientY - startY.current),
+        ),
+      );
+      dragHeight.current = newHeight;
+      panelRef.current.style.height = `${newHeight}px`;
     }
   };
 
   const stopDrag = () => {
     document.removeEventListener("mousemove", onDrag);
     document.removeEventListener("mouseup", stopDrag);
-    if (panelRef.current && panelRef.current.offsetHeight <= 24) {
+    if (dragHeight.current <= MIN_HEIGHT_PX) {
       setIsExpanded(false);
     }
   };
@@ -104,10 +115,13 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
           <DragHandleIcon data-testid="drag-handle-icon" />
         </div>
         <button
+          type="button"
           className={classes.notch}
           onClick={() => {
             if (panelRef.current) {
-              panelRef.current.style.height = isExpanded ? "24px" : "";
+              panelRef.current.style.height = isExpanded
+                ? `${MIN_HEIGHT_PX}px`
+                : "";
             }
             setIsExpanded((prev) => !prev);
           }}
@@ -127,7 +141,13 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
           )}
         </button>
       </div>
-      <div className={classes.bottomPanelContent}>{children}</div>
+      <div
+        className={classes.bottomPanelContent}
+        hidden={!isExpanded}
+        aria-hidden={!isExpanded}
+      >
+        {children}
+      </div>
     </div>
   );
 }
