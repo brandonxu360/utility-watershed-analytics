@@ -1,6 +1,8 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { tss } from "../../utils/tss";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
 type BottomPanelProps = {
   isOpen: boolean;
@@ -13,7 +15,6 @@ const useStyles = tss.create(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    minHeight: "16px",
     maxHeight: "450px",
     background: theme.palette.background.default,
     color: theme.palette.primary.contrastText,
@@ -21,12 +22,29 @@ const useStyles = tss.create(({ theme }) => ({
     boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.2)",
     display: "flex",
     flexDirection: "column",
+    overflow: "hidden",
     zIndex: 10000,
   },
-  bottomPanelDrag: {
-    height: "16px",
-    cursor: "ns-resize",
+  topBar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     background: theme.palette.primary.main,
+  },
+  notch: {
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    color: theme.palette.primary.contrastText,
+    padding: "0 4px",
+    display: "flex",
+    alignItems: "center",
+    lineHeight: 0,
+  },
+  bottomPanelDrag: {
+    flex: 1,
+    height: "24px",
+    cursor: "ns-resize",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -40,14 +58,16 @@ const useStyles = tss.create(({ theme }) => ({
 
 export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   const { classes } = useStyles();
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const startY = useRef<number>(0);
   const startHeight = useRef<number>(0);
 
   const handleDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isExpanded) setIsExpanded(true);
     startY.current = e.clientY;
-    startHeight.current = panelRef.current?.offsetHeight || 0;
+    startHeight.current = panelRef.current?.offsetHeight || 24;
     document.addEventListener("mousemove", onDrag);
     document.addEventListener("mouseup", stopDrag);
   };
@@ -55,7 +75,7 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   const onDrag = (e: MouseEvent) => {
     if (panelRef.current) {
       const newHeight = startHeight.current - (e.clientY - startY.current);
-      panelRef.current.style.height = `${Math.max(16, Math.min(450, newHeight))}px`;
+      panelRef.current.style.height = `${Math.max(24, Math.min(450, newHeight))}px`;
     }
   };
 
@@ -72,12 +92,31 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
       ref={panelRef}
       data-testid="bottom-panel"
     >
-      <div
-        className={classes.bottomPanelDrag}
-        onMouseDown={handleDrag}
-        data-testid="bottom-panel-drag"
-      >
-        <DragHandleIcon data-testid="drag-handle-icon" />
+      <div className={classes.topBar}>
+        <div
+          className={classes.bottomPanelDrag}
+          onMouseDown={handleDrag}
+          data-testid="bottom-panel-drag"
+        >
+          <DragHandleIcon data-testid="drag-handle-icon" />
+        </div>
+        <button
+          className={classes.notch}
+          onClick={() => {
+            if (panelRef.current) {
+              panelRef.current.style.height = isExpanded ? "24px" : "";
+            }
+            setIsExpanded((prev) => !prev);
+          }}
+          data-testid="bottom-panel-toggle"
+          aria-label={isExpanded ? "Collapse panel" : "Expand panel"}
+        >
+          {isExpanded ? (
+            <KeyboardArrowDownIcon fontSize="small" data-testid="chevron-down-icon" />
+          ) : (
+            <KeyboardArrowUpIcon fontSize="small" data-testid="chevron-up-icon" />
+          )}
+        </button>
       </div>
       <div className={classes.bottomPanelContent}>{children}</div>
     </div>
