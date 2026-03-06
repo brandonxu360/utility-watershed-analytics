@@ -94,7 +94,7 @@ describe("HomeSidePanelContent", () => {
       const h3Elements = screen.getAllByRole("heading", { level: 3 });
 
       expect(h2Elements).toHaveLength(1);
-      expect(h3Elements).toHaveLength(2);
+      expect(h3Elements).toHaveLength(3);
     });
 
     it("renders tier headings as h3 elements", () => {
@@ -103,6 +103,7 @@ describe("HomeSidePanelContent", () => {
 
       expect(h3Elements[0]).toHaveTextContent("Tier 1 Watersheds");
       expect(h3Elements[1]).toHaveTextContent("Tier 2 Watersheds");
+      expect(h3Elements[2]).toHaveTextContent("Quick links");
     });
   });
 });

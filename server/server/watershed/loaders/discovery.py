@@ -111,7 +111,6 @@ class WatershedDataDiscovery:
         config: Optional[LoaderConfig] = None,
         batch_config: Optional[BatchConfig] = None,
         templates: Optional[UrlTemplates] = None,
-        batch_config: Optional[BatchConfig] = None,
     ):
         """
         Initialize discovery with configuration.

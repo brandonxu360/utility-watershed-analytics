@@ -381,7 +381,6 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
     def test_jwt_token_sends_bearer_header_for_watersheds(self):
         """JWT token on the discovery is forwarded as a Bearer header."""
         token = "test-jwt-secret"
-<<<<<<< HEAD
         # JWT lives on the discovery instance (per-batch), not on the loader config.
         discovery = MockDiscovery(runids=["ws-1", "ws-2"], jwt_token=token)
 
@@ -548,12 +547,6 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;or-10")
         
         self.assertIn("/custom/batch;;nasa-roses-2026-sbs;;OR-10/sub.geojson", urls["subcatchments"])
-
-<<<<<<< HEAD
-    def test_watersheds_filename_derived_from_nasa_roses_batch_url(self):
-        """Test that watersheds filename is derived from the nasa-roses batch URL."""
-        discovery = WatershedDataDiscovery(config=self.config)
-        self.assertEqual(discovery.watersheds_filename, "nasa-roses-2026-sbs_completed.geojson")
 
     def test_watersheds_filename_derived_from_nasa_roses_batch_url(self):
         """Watersheds filename is derived from the nasa-roses batch URL."""
@@ -768,16 +761,6 @@ class TestRunidConversion(unittest.TestCase):
 
     def test_normalize_runid_victoria_sooke_preserves_case(self):
         """Victoria Sooke## run IDs (mixed-case) are preserved."""
-        normalized = normalize_runid("batch;;victoria-ca-2026-sbs;;Sooke01")
-        self.assertEqual(normalized, "batch;;victoria-ca-2026-sbs;;Sooke01")
-
-    def test_normalize_runid_victoria_preserves_case(self):
-        """Test that victoria mixed-case run IDs are NOT uppercased."""
-        normalized = normalize_runid("batch;;victoria-ca-2026-sbs;;Leech")
-        self.assertEqual(normalized, "batch;;victoria-ca-2026-sbs;;Leech")
-
-    def test_normalize_runid_victoria_sooke_preserves_case(self):
-        """Test that victoria Sooke## run IDs (mixed-case) are preserved."""
         normalized = normalize_runid("batch;;victoria-ca-2026-sbs;;Sooke01")
         self.assertEqual(normalized, "batch;;victoria-ca-2026-sbs;;Sooke01")
 
