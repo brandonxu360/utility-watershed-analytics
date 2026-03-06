@@ -17,6 +17,7 @@ Usage:
 """
 
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 from django.core.management.base import BaseCommand, CommandError
@@ -117,7 +118,15 @@ class Command(BaseCommand):
     ) -> None:
         """Process a single data source - download if not cached."""
         if source.data_type == "watersheds":
-            target = output_dir / "watersheds" / f"{source.name}.geojson"
+            # For the master watersheds GeoJSON, use a batch-specific
+            # filename so multiple batches can coexist in the cache
+            # directory without overwriting each other.
+            if source.local_path is not None:
+                filename = source.local_path.name
+            else:
+                parsed = urlparse(source.url)
+                filename = Path(parsed.path).name or "WWS_Watersheds_HUC10_Merged.geojson"
+            target = output_dir / "watersheds" / filename
         elif source.data_type in ("subcatchments", "channels"):
             target = output_dir / source.data_type / f"{source.name}.geojson"
         else:
