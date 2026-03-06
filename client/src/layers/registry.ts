@@ -120,6 +120,16 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
       params: { scenario: null, variable: "sediment_yield" },
     },
   },
+
+  rhessysSpatial: {
+    id: "rhessysSpatial",
+    label: "RHESSys Spatial Input",
+    group: "coverageStyle",
+    kind: "raster",
+    pane: "rasterPane",
+    zIndex: 510,
+    defaults: { opacity: 0.7, params: { filename: null } },
+  },
 };
 
 export function getDescriptor(id: LayerId): LayerDescriptor {

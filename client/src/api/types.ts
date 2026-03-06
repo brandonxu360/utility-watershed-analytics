@@ -85,6 +85,29 @@ export type SbsColormapResponse = {
   entries: SbsColormapEntry[];
 };
 
+// ── RHESSys Spatial Inputs ───────────────────────────────────────────────────
+
+export type RhessysSpatialLegendStop = {
+  value: number;
+  hex: string;
+};
+
+export type RhessysSpatialFile = {
+  filename: string;
+  name: string;
+  type: "continuous" | "categorical" | "stream";
+  min: number | null;
+  max: number | null;
+  unique_values: number[] | null;
+  group: string | null;
+  reversed: boolean;
+  legend: RhessysSpatialLegendStop[] | null;
+};
+
+export type RhessysSpatialListResponse = {
+  files: RhessysSpatialFile[];
+};
+
 export type FetchLanduseOptions = {
   runId: string;
   include_schema?: boolean;
