@@ -52,9 +52,15 @@ class BatchConfig:
 
     Each batch has its own URL for discovering watersheds and an optional
     JWT token for authenticated access to the master GeoJSON.
+
+    If ``watersheds_filename`` is provided it overrides the default filename
+    derived from the batch URL (``{batch_name}_completed.geojson``). Use this
+    when the master GeoJSON has been published under a custom name (e.g. a
+    file that has utility metadata merged in).
     """
     batch_url: str
     jwt_token: Optional[str] = None
+    watersheds_filename: Optional[str] = None
 
 
 @dataclass
@@ -106,6 +112,13 @@ def _default_batches() -> list[BatchConfig]:
                 "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
             ),
             jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN"),
+            # Drop-in replacement GeoJSON with utility metadata merged in
+            # (OwnerType, PopGroup, TreatType, ConnGroup + HUC10 aggregates).
+            # Must contain current nasa-roses-2026-sbs runids.
+            watersheds_filename=os.environ.get(
+                "WEPPCLOUD_BATCH_WATERSHEDS_FILENAME",
+                "WWS_Watersheds_HUC10_psbs_030426.geojson",
+            ),
         ),
         BatchConfig(
             batch_url=os.environ.get(
@@ -153,6 +166,10 @@ class ApiConfig:
                         "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
                     ),
                     jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN"),
+                    watersheds_filename=os.environ.get(
+                        "WEPPCLOUD_BATCH_WATERSHEDS_FILENAME",
+                        "WWS_Watersheds_HUC10_psbs_030426.geojson",
+                    ),
                 ),
                 BatchConfig(
                     batch_url=os.environ.get(

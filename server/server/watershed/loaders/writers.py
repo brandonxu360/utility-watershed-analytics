@@ -105,6 +105,16 @@ WATERSHED_FIELD_SOURCES = {
     'shape_leng': ('Shape_Leng',),
     'shape_area': ('Shape_Area',),
     'area_km2':   ('area_km2',),         # victoria only
+    # Utility metadata fields (present in the merged nasa-roses file)
+    'owner_type':          ('OwnerType',),
+    'pop_group':           ('PopGroup',),
+    'treat_type':          ('TreatType',),
+    'conn_group':          ('ConnGroup',),
+    'huc10_pws_names':     ('HUC10_PWS_Names',),
+    'huc10_owner_types':   ('HUC10_OwnerTypes',),
+    'huc10_pop_groups':    ('HUC10_PopGroups',),
+    'huc10_treat_types':   ('HUC10_TreatTypes',),
+    'huc10_utility_count': ('HUC10_UtilityCount',),
     'runid':      ('runid',),
     'geom':       ('UNKNOWN',),          # sentinel; handled separately
 }
