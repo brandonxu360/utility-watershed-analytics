@@ -14,10 +14,13 @@ import pandas as pd
 from server.watershed.loaders.protocols import DataSourceReader, DataWriter
 from server.watershed.loaders.loader import WatershedLoader
 from server.watershed.loaders.discovery import (
-    WatershedDataDiscovery, DataSource, UrlTemplates,
+    WatershedDataDiscovery, StandaloneRunDiscovery, DataSource, UrlTemplates,
     normalize_runid,
 )
-from server.watershed.loaders.config import LoaderConfig, RetryConfig, ApiConfig, BatchConfig, GeometryConfig
+from server.watershed.loaders.config import (
+    LoaderConfig, RetryConfig, ApiConfig, GeometryConfig,
+    BatchConfig, StandaloneRunConfig,
+)
 from server.watershed.loaders.readers import RemoteDataSourceReader
 
 
@@ -26,11 +29,7 @@ from server.watershed.loaders.readers import RemoteDataSourceReader
 # =============================================================================
 
 class MockDataSourceReader:
-    """
-    Mock implementation of DataSourceReader for testing.
-    
-    Allows pre-configuring responses and tracking calls.
-    """
+    """Mock implementation of DataSourceReader for testing."""
     
     def __init__(self):
         self.geojson_responses: dict[str, Mock] = {}
@@ -57,7 +56,6 @@ class MockDataSourceReader:
             mock_feature = Mock()
             mock_feature.get = Mock(side_effect=lambda k, f=feature: f.get(k))
             
-            # Mock geometry
             mock_geom = Mock()
             mock_geos = Mock()
             mock_geos.__class__.__name__ = 'Polygon'
@@ -88,20 +86,16 @@ class MockDataSourceReader:
 
 
 class MockDataWriter:
-    """
-    Mock implementation of DataWriter for testing.
-    
-    Tracks all write operations without touching the database.
-    """
+    """Mock implementation of DataWriter for testing."""
     
     def __init__(self):
         self.saved_watersheds: list = []
         self.saved_subcatchments: dict[str, list] = {}
         self.saved_channels: dict[str, list] = {}
         self.updated_subcatchments: dict[str, dict] = {}
+        self.saved_standalone_watersheds: list[dict] = []
     
     def save_watersheds(self, layer) -> int:
-        """Track watershed saves."""
         count = 0
         for feature in layer:
             self.saved_watersheds.append(feature)
@@ -109,7 +103,6 @@ class MockDataWriter:
         return count
     
     def save_watersheds_filtered(self, layer, runids: set[str]) -> int:
-        """Track filtered watershed saves."""
         count = 0
         for feature in layer:
             runid = feature.get('runid')
@@ -118,14 +111,23 @@ class MockDataWriter:
                 count += 1
         return count
     
+    def save_standalone_watershed(self, layer, runid: str, display_name: str) -> int:
+        count = 0
+        for feature in layer:
+            self.saved_standalone_watersheds.append({
+                'feature': feature,
+                'runid': runid,
+                'display_name': display_name,
+            })
+            count += 1
+        return count
+    
     def save_subcatchments(self, runid: str, layer) -> int:
-        """Track subcatchment saves."""
         features = list(layer)
         self.saved_subcatchments[runid] = features
         return len(features)
     
     def save_channels(self, runid: str, layer) -> int:
-        """Track channel saves."""
         features = list(layer)
         self.saved_channels[runid] = features
         return len(features)
@@ -137,13 +139,11 @@ class MockDataWriter:
         soils: Optional[pd.DataFrame],
         landuse: Optional[pd.DataFrame],
     ) -> int:
-        """Track parquet updates."""
         self.updated_subcatchments[runid] = {
             'hillslopes': hillslopes,
             'soils': soils,
             'landuse': landuse,
         }
-        # Return mock update count
         count = 0
         if hillslopes is not None:
             count = max(count, len(hillslopes))
@@ -155,13 +155,11 @@ class MockDataWriter:
 
 
 class MockDiscovery:
-    """
-    Mock implementation of WatershedDataDiscovery for testing.
-    """
+    """Mock implementation of WatershedDataDiscovery for testing."""
     
     WATERSHEDS_URL = "https://mock.test/watersheds.geojson"
     
-    def __init__(self, runids: list[str] = None, jwt_token: str = None):
+    def __init__(self, runids: list[str] = None, jwt_token: Optional[str] = None):
         self.runids = runids or ["test-runid-1", "test-runid-2"]
         self.jwt_token = jwt_token
         self.config = self._create_test_config()
@@ -225,29 +223,25 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
     """Test WatershedLoader using mock dependencies."""
     
     def setUp(self):
-        """Set up test fixtures."""
         self.reader = MockDataSourceReader()
         self.writer = MockDataWriter()
         self.discovery = MockDiscovery(runids=["ws-1", "ws-2"])
         
-        # Configure mock responses
         self._configure_watershed_response()
         self._configure_subcatchment_responses()
         self._configure_channel_responses()
         self._configure_parquet_responses()
     
     def _configure_watershed_response(self):
-        """Configure mock watershed GeoJSON response."""
         self.reader.add_geojson_response(
             MockDiscovery.WATERSHEDS_URL,
             [
-                {"runid": "ws-1", "pws_id": "123", "pws_name": "Test 1"},
-                {"runid": "ws-2", "pws_id": "456", "pws_name": "Test 2"},
+                {"runid": "ws-1", "PWS_ID": "123", "PWS_Name": "Test 1"},
+                {"runid": "ws-2", "PWS_ID": "456", "PWS_Name": "Test 2"},
             ]
         )
     
     def _configure_subcatchment_responses(self):
-        """Configure mock subcatchment responses."""
         for runid in ["ws-1", "ws-2"]:
             self.reader.add_geojson_response(
                 f"https://mock.test/runs/{runid}/subcatchments.geojson",
@@ -258,7 +252,6 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
             )
     
     def _configure_channel_responses(self):
-        """Configure mock channel responses."""
         for runid in ["ws-1", "ws-2"]:
             self.reader.add_geojson_response(
                 f"https://mock.test/runs/{runid}/channels.geojson",
@@ -268,9 +261,7 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
             )
     
     def _configure_parquet_responses(self):
-        """Configure mock parquet responses."""
         for runid in ["ws-1", "ws-2"]:
-            # Hillslopes
             self.reader.add_parquet_response(
                 f"https://mock.test/runs/{runid}/hillslopes.parquet",
                 pd.DataFrame({
@@ -279,7 +270,6 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
                     "length": [100.0, 200.0],
                 })
             )
-            # Soils
             self.reader.add_parquet_response(
                 f"https://mock.test/runs/{runid}/soils.parquet",
                 pd.DataFrame({
@@ -288,7 +278,6 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
                     "clay": [10.0, 15.0],
                 })
             )
-            # Landuse
             self.reader.add_parquet_response(
                 f"https://mock.test/runs/{runid}/landuse.parquet",
                 pd.DataFrame({
@@ -299,7 +288,6 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
             )
     
     def test_load_calls_reader_for_watersheds(self):
-        """Test that load() reads watershed data."""
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
@@ -308,12 +296,10 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
         
         loader.load(runids=["ws-1", "ws-2"], verbose=False)
         
-        # Should have called read_geojson for watersheds
         watershed_calls = [c for c in self.reader.geojson_calls if "watersheds" in c[0]]
         self.assertEqual(len(watershed_calls), 1)
     
     def test_load_calls_reader_for_subcatchments(self):
-        """Test that load() reads subcatchment data for each runid."""
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
@@ -322,12 +308,10 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
         
         loader.load(runids=["ws-1", "ws-2"], verbose=False)
         
-        # Should have called read_geojson for each runid's subcatchments
         subcatchment_calls = [c for c in self.reader.geojson_calls if "subcatchments" in c[0]]
         self.assertEqual(len(subcatchment_calls), 2)
     
     def test_load_calls_writer_for_watersheds(self):
-        """Test that load() writes watershed data."""
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
@@ -336,11 +320,9 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
         
         loader.load(runids=["ws-1", "ws-2"], verbose=False)
         
-        # Writer should have received watersheds
         self.assertEqual(len(self.writer.saved_watersheds), 2)
     
     def test_load_calls_writer_for_subcatchments(self):
-        """Test that load() writes subcatchment data."""
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
@@ -349,12 +331,10 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
         
         loader.load(runids=["ws-1", "ws-2"], verbose=False)
         
-        # Writer should have received subcatchments for each runid
         self.assertIn("ws-1", self.writer.saved_subcatchments)
         self.assertIn("ws-2", self.writer.saved_subcatchments)
     
     def test_load_updates_from_parquet(self):
-        """Test that load() updates subcatchments with parquet data."""
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
@@ -363,18 +343,15 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
         
         loader.load(runids=["ws-1", "ws-2"], verbose=False)
         
-        # Writer should have received parquet updates
         self.assertIn("ws-1", self.writer.updated_subcatchments)
         self.assertIn("ws-2", self.writer.updated_subcatchments)
         
-        # Check that dataframes were passed
         ws1_updates = self.writer.updated_subcatchments["ws-1"]
         self.assertIsNotNone(ws1_updates["hillslopes"])
         self.assertIsNotNone(ws1_updates["soils"])
         self.assertIsNotNone(ws1_updates["landuse"])
     
     def test_load_returns_statistics(self):
-        """Test that load() returns correct statistics."""
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
@@ -389,34 +366,25 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
         self.assertIn("subcatchments_updated", result)
     
     def test_load_filters_by_runids(self):
-        """Test that load() respects runid filter."""
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
             discovery=self.discovery,
         )
         
-        # Only load ws-1
         loader.load(runids=["ws-1"], verbose=False)
         
-        # Should only have subcatchment data for ws-1
         subcatchment_calls = [c for c in self.reader.geojson_calls if "subcatchments" in c[0]]
         self.assertEqual(len(subcatchment_calls), 1)
         self.assertIn("ws-1", subcatchment_calls[0][0])
     
     def test_jwt_token_sends_bearer_header_for_watersheds(self):
-        """Test that a JWT token is forwarded as a Bearer header for the watershed fetch."""
+        """JWT token on the discovery is forwarded as a Bearer header."""
         token = "test-jwt-secret"
+<<<<<<< HEAD
         # JWT lives on the discovery instance (per-batch), not on the loader config.
         discovery = MockDiscovery(runids=["ws-1", "ws-2"], jwt_token=token)
-        # Add the same watershed response the default self.discovery uses
-        self.reader.add_geojson_response(
-            MockDiscovery.WATERSHEDS_URL,
-            [
-                {"runid": "ws-1", "pws_id": "123", "pws_name": "Test 1"},
-                {"runid": "ws-2", "pws_id": "456", "pws_name": "Test 2"},
-            ]
-        )
+
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
@@ -431,12 +399,13 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
         self.assertEqual(headers, {"Authorization": f"Bearer {token}"})
     
     def test_no_jwt_token_sends_no_auth_header(self):
-        """Test that without a JWT token, no Authorization header is sent."""
-        # self.discovery has jwt_token=None by default
+        """Without a JWT token, no Authorization header is sent."""
+        discovery = MockDiscovery(runids=["ws-1", "ws-2"], jwt_token=None)
+
         loader = WatershedLoader(
             reader=self.reader,
             writer=self.writer,
-            discovery=self.discovery,
+            discovery=discovery,
         )
         
         loader.load(runids=["ws-1", "ws-2"], verbose=False)
@@ -447,30 +416,103 @@ class TestWatershedLoaderWithMocks(unittest.TestCase):
         self.assertIsNone(headers)
 
 
+class TestStandaloneLoader(unittest.TestCase):
+    """Test WatershedLoader with standalone run configuration."""
+
+    def setUp(self):
+        self.reader = MockDataSourceReader()
+        self.writer = MockDataWriter()
+        self.standalone_config = StandaloneRunConfig(
+            runid="standalone;;test-run;;test-watershed",
+            display_name="Test Watershed",
+            run_base_url="https://mock.test/runs/test-run/config_wbt",
+            boundary_url="https://mock.test/runs/test-run/config_wbt/download/dem/wbt/bound.geojson",
+        )
+        self.discovery = MockDiscovery(
+            runids=["standalone;;test-run;;test-watershed"]
+        )
+        self.discovery.WATERSHEDS_URL = self.standalone_config.boundary_url
+
+        self.reader.add_geojson_response(
+            self.standalone_config.boundary_url,
+            [{"ID": 0}],
+        )
+        runid = self.standalone_config.runid
+        self.reader.add_geojson_response(
+            f"https://mock.test/runs/{runid}/subcatchments.geojson",
+            [{"TopazID": 1, "WeppID": 101}],
+        )
+        self.reader.add_geojson_response(
+            f"https://mock.test/runs/{runid}/channels.geojson",
+            [{"TopazID": 1, "WeppID": 101, "Order": 1}],
+        )
+        for dt in ["hillslopes", "soils", "landuse"]:
+            self.reader.add_parquet_response(
+                f"https://mock.test/runs/{runid}/{dt}.parquet",
+                pd.DataFrame({"TopazID": [1]}),
+            )
+
+    def test_standalone_load_calls_save_standalone_watershed(self):
+        loader = WatershedLoader(
+            reader=self.reader,
+            writer=self.writer,
+            discovery=self.discovery,
+            standalone_config=self.standalone_config,
+        )
+
+        loader.load(
+            runids=[self.standalone_config.runid],
+            verbose=False,
+        )
+
+        self.assertEqual(len(self.writer.saved_standalone_watersheds), 1)
+        saved = self.writer.saved_standalone_watersheds[0]
+        self.assertEqual(saved['runid'], self.standalone_config.runid)
+        self.assertEqual(saved['display_name'], "Test Watershed")
+
+    def test_standalone_load_does_not_call_batch_save(self):
+        loader = WatershedLoader(
+            reader=self.reader,
+            writer=self.writer,
+            discovery=self.discovery,
+            standalone_config=self.standalone_config,
+        )
+
+        loader.load(
+            runids=[self.standalone_config.runid],
+            verbose=False,
+        )
+
+        self.assertEqual(len(self.writer.saved_watersheds), 0)
+
+
 class TestDiscoveryUrlGeneration(unittest.TestCase):
     """Test WatershedDataDiscovery URL generation."""
     
     def setUp(self):
+        self.batch_config = BatchConfig(
+            batch_url="https://test.example.com/weppcloud/batch/nasa-roses-2026-sbs",
+        )
         self.config = LoaderConfig(
             api=ApiConfig(
                 weppcloud_base_url="https://test.example.com/weppcloud",
-                batches=[BatchConfig(
-                    batch_url="https://test.example.com/weppcloud/batch/nasa-roses-2026-sbs",
-                )],
+                batches=[self.batch_config],
             ),
+        )
+        self.victoria_batch_config = BatchConfig(
+            batch_url="https://test.example.com/weppcloud/batch/victoria-ca-2026-sbs",
         )
         self.victoria_config = LoaderConfig(
             api=ApiConfig(
                 weppcloud_base_url="https://test.example.com/weppcloud",
-                batches=[BatchConfig(
-                    batch_url="https://test.example.com/weppcloud/batch/victoria-ca-2026-sbs",
-                )],
+                batches=[self.victoria_batch_config],
             ),
         )
     
     def test_get_urls_for_runid_short_format(self):
-        """Test URL generation for a full runid."""
-        discovery = WatershedDataDiscovery(config=self.config)
+        discovery = WatershedDataDiscovery(
+            config=self.config, batch_config=self.batch_config
+        )
         
         urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;OR-20")
         
@@ -480,49 +522,58 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         self.assertIn("soils", urls)
         self.assertIn("landuse", urls)
         
-        # Check URL uses full runid with uppercase state code and disturbed_wbt config
         expected_base = "https://test.example.com/weppcloud/runs/batch;;nasa-roses-2026-sbs;;OR-20/disturbed_wbt"
         self.assertTrue(urls["subcatchments"].startswith(expected_base))
     
     def test_get_urls_for_runid_full_format(self):
-        """Test URL generation for a full batch runid."""
-        discovery = WatershedDataDiscovery(config=self.config)
+        discovery = WatershedDataDiscovery(
+            config=self.config, batch_config=self.batch_config
+        )
         
-        # Test with lowercase (for defensive handling)
         urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;or-20")
         
-        # Should ensure uppercase state code
         expected_base = "https://test.example.com/weppcloud/runs/batch;;nasa-roses-2026-sbs;;OR-20/disturbed_wbt"
         self.assertTrue(urls["subcatchments"].startswith(expected_base))
     
     def test_custom_url_templates(self):
-        """Test that custom URL templates are used."""
         custom_templates = UrlTemplates(
             subcatchments="{weppcloud_base}/custom/{runid}/sub.geojson",
         )
         discovery = WatershedDataDiscovery(
             config=self.config,
+            batch_config=self.batch_config,
             templates=custom_templates,
         )
         
         urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;or-10")
         
-        # Should ensure uppercase state code
         self.assertIn("/custom/batch;;nasa-roses-2026-sbs;;OR-10/sub.geojson", urls["subcatchments"])
 
+<<<<<<< HEAD
     def test_watersheds_filename_derived_from_nasa_roses_batch_url(self):
         """Test that watersheds filename is derived from the nasa-roses batch URL."""
         discovery = WatershedDataDiscovery(config=self.config)
         self.assertEqual(discovery.watersheds_filename, "nasa-roses-2026-sbs_completed.geojson")
 
+    def test_watersheds_filename_derived_from_nasa_roses_batch_url(self):
+        """Watersheds filename is derived from the nasa-roses batch URL."""
+        discovery = WatershedDataDiscovery(
+            config=self.config, batch_config=self.batch_config
+        )
+        self.assertEqual(discovery.watersheds_filename, "nasa-roses-2026-sbs_completed.geojson")
+
     def test_watersheds_filename_derived_from_victoria_batch_url(self):
-        """Test that watersheds filename is derived from the victoria batch URL."""
-        discovery = WatershedDataDiscovery(config=self.victoria_config)
+        """Watersheds filename is derived from the victoria batch URL."""
+        discovery = WatershedDataDiscovery(
+            config=self.victoria_config, batch_config=self.victoria_batch_config
+        )
         self.assertEqual(discovery.watersheds_filename, "victoria-ca-2026-sbs_completed.geojson")
 
     def test_victoria_get_urls_preserves_mixed_case_runid(self):
-        """Test URL generation for victoria batch preserves mixed-case run IDs."""
-        discovery = WatershedDataDiscovery(config=self.victoria_config)
+        """URL generation for victoria batch preserves mixed-case run IDs."""
+        discovery = WatershedDataDiscovery(
+            config=self.victoria_config, batch_config=self.victoria_batch_config
+        )
 
         urls = discovery.get_urls_for_runid("batch;;victoria-ca-2026-sbs;;Leech")
 
@@ -530,8 +581,10 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         self.assertTrue(urls["subcatchments"].startswith(expected_base))
 
     def test_victoria_sooke_runid_not_uppercased(self):
-        """Test that Sooke## victoria run IDs are not uppercased in generated URLs."""
-        discovery = WatershedDataDiscovery(config=self.victoria_config)
+        """Victoria Sooke## run IDs are not uppercased in generated URLs."""
+        discovery = WatershedDataDiscovery(
+            config=self.victoria_config, batch_config=self.victoria_batch_config
+        )
 
         urls = discovery.get_urls_for_runid("batch;;victoria-ca-2026-sbs;;Sooke01")
 
@@ -539,21 +592,119 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         self.assertNotIn("SOOKE01", urls["subcatchments"])
 
 
+class TestStandaloneRunDiscovery(unittest.TestCase):
+    """Test StandaloneRunDiscovery URL generation."""
+
+    def setUp(self):
+        self.standalone_config = StandaloneRunConfig(
+            runid="aversive-forestry",
+            display_name="Gate Creek",
+            run_base_url="https://wepp.cloud/weppcloud/runs/aversive-forestry/disturbed9002_wbt",
+            boundary_url="https://wepp.cloud/weppcloud/runs/aversive-forestry/disturbed9002_wbt/download/dem/wbt/bound.geojson",
+        )
+        self.config = LoaderConfig(
+            api=ApiConfig(
+                weppcloud_base_url="https://wepp.cloud/weppcloud",
+                batches=[],
+                standalone_runs=[self.standalone_config],
+            ),
+        )
+        self.discovery = StandaloneRunDiscovery(self.standalone_config, self.config)
+
+    def test_discover_runids_returns_single_runid(self):
+        runids = self.discovery.discover_runids()
+        self.assertEqual(runids, ["aversive-forestry"])
+
+    def test_get_watersheds_url_returns_boundary(self):
+        self.assertEqual(
+            self.discovery.get_watersheds_url(),
+            self.standalone_config.boundary_url,
+        )
+
+    def test_get_urls_for_runid(self):
+        urls = self.discovery.get_urls_for_runid(self.standalone_config.runid)
+        base = "https://wepp.cloud/weppcloud/runs/aversive-forestry/disturbed9002_wbt/download"
+        self.assertEqual(urls["subcatchments"], f"{base}/dem/wbt/subcatchments.WGS.geojson")
+        self.assertEqual(urls["channels"], f"{base}/dem/wbt/channels.WGS.geojson")
+        self.assertEqual(urls["hillslopes"], f"{base}/watershed/hillslopes.parquet")
+        self.assertEqual(urls["soils"], f"{base}/soils/soils.parquet")
+        self.assertEqual(urls["landuse"], f"{base}/landuse/landuse.parquet")
+
+    def test_iter_subcatchments_yields_correct_source(self):
+        sources = list(self.discovery.iter_subcatchments())
+        self.assertEqual(len(sources), 1)
+        self.assertEqual(sources[0].name, self.standalone_config.runid)
+        self.assertIn("subcatchments.WGS.geojson", sources[0].url)
+
+    def test_iter_sources_filters_by_runid(self):
+        sources = list(self.discovery.iter_sources(
+            "subcatchments", runids=["nonexistent-runid"]
+        ))
+        self.assertEqual(len(sources), 0)
+
+
+class TestStandaloneRunConfig(unittest.TestCase):
+    """Test StandaloneRunConfig URL generation."""
+
+    def test_get_data_urls(self):
+        config = StandaloneRunConfig(
+            runid="standalone;;test;;watershed",
+            display_name="Test",
+            run_base_url="https://example.com/runs/test/config_wbt",
+            boundary_url="https://example.com/runs/test/config_wbt/download/dem/wbt/bound.geojson",
+        )
+        urls = config.get_data_urls()
+        self.assertEqual(urls["boundary"], config.boundary_url)
+        self.assertEqual(
+            urls["subcatchments"],
+            "https://example.com/runs/test/config_wbt/download/dem/wbt/subcatchments.WGS.geojson",
+        )
+        self.assertEqual(
+            urls["soils"],
+            "https://example.com/runs/test/config_wbt/download/soils/soils.parquet",
+        )
+
+
+class TestRunidNormalization(unittest.TestCase):
+    """Test runid normalization across batch types."""
+
+    def test_nasa_roses_uppercased(self):
+        self.assertEqual(
+            normalize_runid("batch;;nasa-roses-2026-sbs;;or-20"),
+            "batch;;nasa-roses-2026-sbs;;OR-20",
+        )
+
+    def test_nasa_roses_already_uppercase(self):
+        self.assertEqual(
+            normalize_runid("batch;;nasa-roses-2026-sbs;;OR-20"),
+            "batch;;nasa-roses-2026-sbs;;OR-20",
+        )
+
+    def test_standalone_preserved(self):
+        self.assertEqual(
+            normalize_runid("aversive-forestry"),
+            "aversive-forestry",
+        )
+
+    def test_non_nasa_roses_batch_preserved(self):
+        self.assertEqual(
+            normalize_runid("batch;;victoria-ca-2026-sbs;;Leech"),
+            "batch;;victoria-ca-2026-sbs;;Leech",
+        )
+
+
 class TestProtocolConformance(unittest.TestCase):
     """Test that implementations conform to protocols."""
     
     def test_mock_reader_is_data_source_reader(self):
-        """MockDataSourceReader should implement DataSourceReader protocol."""
         reader = MockDataSourceReader()
         self.assertTrue(isinstance(reader, DataSourceReader))
     
     def test_mock_writer_is_data_writer(self):
-        """MockDataWriter should implement DataWriter protocol."""
         writer = MockDataWriter()
         self.assertTrue(isinstance(writer, DataWriter))
     
     def test_remote_reader_is_data_source_reader(self):
-        """RemoteDataSourceReader should implement DataSourceReader protocol."""
         reader = RemoteDataSourceReader()
         self.assertTrue(isinstance(reader, DataSourceReader))
 
@@ -562,14 +713,12 @@ class TestReaderLocalCachePreference(unittest.TestCase):
     """Test that readers prefer local cache over remote."""
     
     def test_mock_reader_tracks_local_path(self):
-        """Reader should receive local_path when provided."""
         reader = MockDataSourceReader()
         reader.add_geojson_response("https://test.com/data.geojson", [])
         
         local_path = Path("/cache/data.geojson")
         reader.read_geojson("https://test.com/data.geojson", local_path)
         
-        # Verify local_path was passed
         self.assertEqual(reader.geojson_calls[0][1], local_path)
 
 
@@ -577,25 +726,22 @@ class TestParquetFieldMapping(unittest.TestCase):
     """Test parquet field mapping logic."""
     
     def test_hillslopes_columns_mapped(self):
-        """Test that hillslope DataFrame columns are correctly named."""
         df = pd.DataFrame({
             "TopazID": [1, 2],
             "slope_scalar": [0.5, 0.6],
             "length": [100.0, 200.0],
             "width": [50.0, 60.0],
-            "area": [5000, 12000],  # Note: maps to hillslope_area
+            "area": [5000, 12000],
         })
         
-        # Verify expected columns exist
         self.assertIn("slope_scalar", df.columns)
-        self.assertIn("area", df.columns)  # parquet column name
+        self.assertIn("area", df.columns)
     
     def test_soils_columns_mapped(self):
-        """Test that soils DataFrame columns are correctly named."""
         df = pd.DataFrame({
             "TopazID": [1],
             "mukey": ["123"],
-            "fname": ["soil.sol"],  # Note: maps to soil_fname
+            "fname": ["soil.sol"],
             "clay": [10.0],
         })
         
@@ -603,17 +749,27 @@ class TestParquetFieldMapping(unittest.TestCase):
 
 
 class TestRunidConversion(unittest.TestCase):
-    """Test runid conversion utilities."""
-    
+    """Test runid conversion utilities (legacy class, see also TestRunidNormalization)."""
+
     def test_normalize_runid_from_lowercase(self):
-        """Test defensive uppercase conversion for nasa-roses batch."""
+        """Defensive uppercase conversion for nasa-roses batch."""
         normalized = normalize_runid("batch;;nasa-roses-2026-sbs;;or-20")
         self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
-    
+
     def test_normalize_runid_already_uppercase(self):
-        """Test that correctly formatted nasa-roses runids are unchanged."""
+        """Correctly formatted nasa-roses runids are unchanged."""
         normalized = normalize_runid("batch;;nasa-roses-2026-sbs;;OR-20")
         self.assertEqual(normalized, "batch;;nasa-roses-2026-sbs;;OR-20")
+
+    def test_normalize_runid_victoria_preserves_case(self):
+        """Victoria mixed-case run IDs are NOT uppercased."""
+        normalized = normalize_runid("batch;;victoria-ca-2026-sbs;;Leech")
+        self.assertEqual(normalized, "batch;;victoria-ca-2026-sbs;;Leech")
+
+    def test_normalize_runid_victoria_sooke_preserves_case(self):
+        """Victoria Sooke## run IDs (mixed-case) are preserved."""
+        normalized = normalize_runid("batch;;victoria-ca-2026-sbs;;Sooke01")
+        self.assertEqual(normalized, "batch;;victoria-ca-2026-sbs;;Sooke01")
 
     def test_normalize_runid_victoria_preserves_case(self):
         """Test that victoria mixed-case run IDs are NOT uppercased."""
