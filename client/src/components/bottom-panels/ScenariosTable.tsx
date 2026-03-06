@@ -28,9 +28,12 @@ const useStyles = tss.create(({ theme }) => ({
   scenarioCell: {
     fontWeight: 600,
   },
+  title: {
+    marginBottom: theme.spacing(2),
+    fontWeight: "bold",
+  },
 }));
 
-/** Keys of ScenarioSummaryRow that hold numeric metric values. */
 type MetricKey = {
   [K in keyof ScenarioSummaryRow]: ScenarioSummaryRow[K] extends number | null
     ? K
@@ -42,22 +45,27 @@ type MetricColumn = {
   key: MetricKey;
 };
 
+const TONNES_KEYS = new Set<MetricKey>([
+  "hillslopeSoilLoss",
+  "channelSoilLoss",
+  "sedimentDischarge",
+]);
+
 const METRIC_COLUMNS: MetricColumn[] = [
-  { header: "Total contributing area to outlet (ha)", key: "totalArea" },
   {
-    header: "Avg. Ann. water discharge from outlet (mm)",
+    header: "Water discharge from outlet (mm)",
     key: "waterDischarge",
   },
   {
-    header: "Avg. Ann. total hillslope soil loss (tonnes)",
+    header: "Hillslope soil loss (t/ha)",
     key: "hillslopeSoilLoss",
   },
   {
-    header: "Avg. Ann. total channel soil loss (tonnes)",
+    header: "Channel soil loss (t/ha)",
     key: "channelSoilLoss",
   },
   {
-    header: "Avg. Ann. sediment discharge from outlet (tonnes)",
+    header: "Sediment discharge from outlet (t/ha)",
     key: "sedimentDischarge",
   },
 ];
@@ -123,46 +131,59 @@ export function ScenariosTable() {
   }
 
   return (
-    <TableContainer>
-      <Table
-        size="small"
-        aria-label="watershed scenarios"
-        data-testid="scenarios-table"
-      >
-        <TableHead>
-          <TableRow>
-            <TableCell className={classes.headerCell}>Scenario</TableCell>
-            {METRIC_COLUMNS.map((col) => (
-              <TableCell
-                key={col.key}
-                align="right"
-                className={classes.headerCell}
-              >
-                {col.header}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map((row: ScenarioSummaryRow) => (
-            <TableRow key={row.scenario} hover className={classes.lastRow}>
-              <TableCell
-                component="th"
-                scope="row"
-                className={classes.scenarioCell}
-              >
-                {row.label}
-              </TableCell>
+    <>
+      <Typography align="center" variant="h4" className={classes.title}>
+        Annual Averages
+      </Typography>
+      <TableContainer>
+        <Table
+          size="small"
+          aria-label="watershed scenarios"
+          data-testid="scenarios-table"
+        >
+          <TableHead>
+            <TableRow>
+              <TableCell className={classes.headerCell}>Scenario</TableCell>
               {METRIC_COLUMNS.map((col) => (
-                <TableCell key={col.key} align="right">
-                  {formatValue(row[col.key])}
+                <TableCell
+                  key={col.key}
+                  align="center"
+                  className={classes.headerCell}
+                >
+                  {col.header}
                 </TableCell>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {data.map((row: ScenarioSummaryRow) => (
+              <TableRow key={row.scenario} hover className={classes.lastRow}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  className={classes.scenarioCell}
+                >
+                  {row.label}
+                </TableCell>
+                {METRIC_COLUMNS.map((col) => (
+                  <TableCell key={col.key} align="center">
+                    {formatValue(
+                      TONNES_KEYS.has(col.key)
+                        ? row[col.key] != null &&
+                          row.totalArea != null &&
+                          row.totalArea > 0
+                          ? row[col.key]! / row.totalArea
+                          : null
+                        : row[col.key],
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }
 
