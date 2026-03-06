@@ -17,39 +17,41 @@ import logging
 from dataclasses import dataclass
 from typing import Iterator, Optional
 from pathlib import Path
-from .config import LoaderConfig, get_config
+from .config import BatchConfig, LoaderConfig, get_config
 from .exceptions import DataSourceError
 
 logger = logging.getLogger("watershed.loader")
 
 
 # Runid conversion utilities
-# Canonical runid format: "batch;;nasa-roses-2026-sbs;;OR-10" (uppercase state code)
-# Note: Watersheds file now contains correct uppercase state codes.
-# Normalization is kept for defensive programming.
-
-BATCH_NAME = "nasa-roses-2026-sbs"  # Used in URL templates
+# Canonical runid format examples:
+#   NASA ROSES: "batch;;nasa-roses-2026-sbs;;OR-10" (uppercase state code)
+#   Victoria:   "batch;;victoria-ca-2026-sbs;;Leech" (mixed-case proper noun, preserved as-is)
 
 
 def normalize_runid(runid: str) -> str:
     """
-    Ensure runid has uppercase state code.
-    
-    Defensive normalization since the data source now correctly provides
-    uppercase state codes. Kept to handle any edge cases gracefully.
-    
+    Normalize a runid to its canonical form.
+
+    For the nasa-roses batch, the last segment is a US state code that was
+    historically sometimes provided in lowercase; it is uppercased here for
+    consistency.  For all other batches (e.g. victoria-ca-2026-sbs) the last
+    segment is a mixed-case proper noun and must be left unchanged.
+
     Args:
         runid: Full runid format (e.g., "batch;;nasa-roses-2026-sbs;;or-10")
-    
+
     Returns:
-        Runid with uppercase state code
-        
+        Normalized runid
+
     Examples:
-        "batch;;nasa-roses-2026-sbs;;OR-10" -> "batch;;nasa-roses-2026-sbs;;OR-10"
-        "batch;;nasa-roses-2026-sbs;;or-10" -> "batch;;nasa-roses-2026-sbs;;OR-10"
+        "batch;;nasa-roses-2026-sbs;;or-10"  -> "batch;;nasa-roses-2026-sbs;;OR-10"
+        "batch;;nasa-roses-2026-sbs;;OR-10"  -> "batch;;nasa-roses-2026-sbs;;OR-10"
+        "batch;;victoria-ca-2026-sbs;;Leech" -> "batch;;victoria-ca-2026-sbs;;Leech"
     """
     parts = runid.split(";;")
-    parts[-1] = parts[-1].upper()
+    if len(parts) >= 2 and "nasa-roses" in parts[-2]:
+        parts[-1] = parts[-1].upper()
     return ";;".join(parts)
 
 
@@ -122,29 +124,43 @@ class WatershedDataDiscovery:
             process(source)
     """
     
-    # Filename for the master watersheds (NASA ROSES 2026)
-    WATERSHEDS_FILENAME = "nasa-roses-2026-sbs_completed.geojson"
-    
     def __init__(
         self,
         config: Optional[LoaderConfig] = None,
         templates: Optional[UrlTemplates] = None,
+        batch_config: Optional[BatchConfig] = None,
     ):
         """
         Initialize discovery with configuration.
-        
+
+        The watersheds filename and URL are derived automatically from the
+        batch URL (last path segment), so no code changes are needed when
+        switching between batches.
+
         Args:
             config: Loader configuration (uses default if not provided)
             templates: URL templates (uses default if not provided)
+            batch_config: Explicit batch to target. If not provided, the first
+                batch in ``config.api.batches`` is used.
         """
         self.config = config or get_config()
         self.templates = templates or UrlTemplates()
         self._cached_runids: Optional[list[str]] = None
         self._cached_watersheds_data: Optional[dict] = None
 
-        # Construct the watersheds URL from the configured batch base URL
-        base = self.config.api.weppcloud_batch_url.rstrip("/")
-        self.watersheds_url = f"{base}/download/resources/{self.WATERSHEDS_FILENAME}"
+        # Resolve which batch this discovery instance targets.
+        bc = batch_config or self.config.api.batches[0]
+        # JWT token used only for the authenticated master GeoJSON fetch.
+        self.jwt_token: Optional[str] = bc.jwt_token
+
+        # Derive the batch name and watersheds filename from the batch URL
+        # (last path segment), e.g.:
+        #   .../batch/nasa-roses-2026-sbs  -> nasa-roses-2026-sbs_completed.geojson
+        #   .../batch/victoria-ca-2026-sbs -> victoria-ca-2026-sbs_completed.geojson
+        base = bc.batch_url.rstrip("/")
+        batch_name = base.split("/")[-1]
+        self.watersheds_filename = f"{batch_name}_completed.geojson"
+        self.watersheds_url = f"{base}/download/resources/{self.watersheds_filename}"
     
     def discover_runids(self, force_refresh: bool = False) -> list[str]:
         """
@@ -167,9 +183,8 @@ class WatershedDataDiscovery:
         logger.info(f"Discovering runids from {self.watersheds_url}")
         
         headers = {}
-        jwt_token = self.config.api.weppcloud_jwt_token
-        if jwt_token:
-            headers["Authorization"] = f"Bearer {jwt_token}"
+        if self.jwt_token:
+            headers["Authorization"] = f"Bearer {self.jwt_token}"
         
         try:
             response = requests.get(self.watersheds_url, headers=headers, timeout=30)
@@ -187,7 +202,7 @@ class WatershedDataDiscovery:
         for feature in data.get("features", []):
             runid = feature.get("properties", {}).get("runid")
             if runid:
-                # Normalize (defensive - data should already be uppercase)
+                # Normalize: uppercases state code for nasa-roses; preserves case for other batches
                 runids.append(normalize_runid(runid))
         
         self._cached_runids = runids
@@ -197,7 +212,7 @@ class WatershedDataDiscovery:
     
     def get_watersheds_source(self) -> DataSource:
         """Get the data source for the master watersheds file."""
-        local_path = self.config.local_data_dir / "watersheds" / self.WATERSHEDS_FILENAME
+        local_path = self.config.local_data_dir / "watersheds" / self.watersheds_filename
         return DataSource(
             name="watersheds",
             url=self.watersheds_url,
@@ -225,7 +240,7 @@ class WatershedDataDiscovery:
         weppcloud_base = self.config.api.weppcloud_base_url.rstrip("/")
         # Normalize runid (defensive uppercase conversion)
         normalized = normalize_runid(runid)
-        
+
         return {
             "subcatchments": self.templates.subcatchments.format(
                 weppcloud_base=weppcloud_base, runid=normalized
@@ -327,7 +342,7 @@ class WatershedDataDiscovery:
     
     def get_watersheds_local_path(self) -> Optional[Path]:
         """Get the local cache path for watersheds, if available."""
-        local_path = self.config.local_data_dir / "watersheds" / self.WATERSHEDS_FILENAME
+        local_path = self.config.local_data_dir / "watersheds" / self.watersheds_filename
         return local_path if local_path.exists() else None
     
     def iter_subcatchments_as_tuples(

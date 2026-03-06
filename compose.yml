@@ -38,6 +38,10 @@ services:
       # Data directory for watershed GeoJSON/Parquet caching (created in Dockerfile with proper permissions)
       - LOADER_DATA_DIR=/data
       - WEPPCLOUD_JWT_TOKEN=${WEPPCLOUD_JWT_TOKEN}
+      - WEPPCLOUD_JWT_TOKEN_2=${WEPPCLOUD_JWT_TOKEN_2}
+      - WEPPCLOUD_BASE_URL=${WEPPCLOUD_BASE_URL}
+      - WEPPCLOUD_BATCH_URL=${WEPPCLOUD_BATCH_URL}
+      - WEPPCLOUD_BATCH_URL_2=${WEPPCLOUD_BATCH_URL_2}
     # Volume mount
     volumes:
       - .:/app

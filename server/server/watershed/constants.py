@@ -10,4 +10,7 @@ DEV_RUNIDS = [
     'batch;;nasa-roses-2026-sbs;;WA-174',
     'batch;;nasa-roses-2026-sbs;;OR-6',
     'batch;;nasa-roses-2026-sbs;;OR-202',
+    # Victoria, BC utility watersheds
+    'batch;;victoria-ca-2026-sbs;;Leech',
+    'batch;;victoria-ca-2026-sbs;;Deception',
 ]

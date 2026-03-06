@@ -30,7 +30,12 @@ When code is pushed to the `main` branch:
 2. **Deploy job starts** - Runs on the self-hosted runner on the production VM
 3. **Environment setup** - Creates `.env` from GitHub secrets (`PRODUCTION_ENV`)
 
-> **Note:** The `PRODUCTION_ENV` secret must include `WEPPCLOUD_JWT_TOKEN`. This token is required to fetch the master watersheds GeoJSON from WEPPcloud during data loading. Contact the project maintainer to obtain a valid token and add it as a GitHub Actions secret.
+> **Note:** The `PRODUCTION_ENV` secret must include:
+> - `WEPPCLOUD_JWT_TOKEN` – JWT for the nasa-roses-2026-sbs batch (required).
+> - `WEPPCLOUD_JWT_TOKEN_2` – JWT for the victoria-ca-2026-sbs batch (required). Expires 2026-07-31.
+> - `WEPPCLOUD_BATCH_URL` / `WEPPCLOUD_BATCH_URL_2` – override only if targeting a different WEPPcloud environment; the defaults are the two production batch URLs.
+>
+> Both batches are loaded in a single `load_watershed_data` or `download_data` run. Contact the project maintainer to obtain tokens.
 4. **Frontend rebuild** - Builds React static files into shared volume
 5. **Services restart** - Rebuilds server container and restarts Caddy
 6. **Health check** - Verifies services are running

@@ -17,6 +17,7 @@ Usage:
 """
 
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 from django.core.management.base import BaseCommand, CommandError
@@ -138,7 +139,15 @@ class Command(BaseCommand):
         """
         # Generate target path based on data type and runid
         if source.data_type == "watersheds":
-            target = output_dir / "watersheds" / "WWS_Watersheds_HUC10_Merged.geojson"
+            # For the master watersheds GeoJSON, use a batch-specific
+            # filename so multiple batches can coexist in the cache
+            # directory without overwriting each other.
+            if source.local_path is not None:
+                filename = source.local_path.name
+            else:
+                parsed = urlparse(source.url)
+                filename = Path(parsed.path).name or "WWS_Watersheds_HUC10_Merged.geojson"
+            target = output_dir / "watersheds" / filename
         elif source.data_type in ("subcatchments", "channels"):
             target = output_dir / source.data_type / f"{source.name}.geojson"
         else:  # parquet files: hillslopes, soils, landuse
@@ -193,69 +202,83 @@ class Command(BaseCommand):
         output_dir: Path | None = None
     ):
         """
-        Download watershed data files using discovery to output directory.
-        
+        Download watershed data files for all configured batches.
+
         Args:
             runids_filter: Optional list of runids to download. If None, downloads all.
             output_dir: Output directory. Defaults to the loader's configured data directory.
         """
-        # Initialize config and discovery
+        # Initialize config
         config = LoaderConfig.from_environment()
-        discovery = WatershedDataDiscovery(config=config)
-        
+
         # Get output directory - use loader's configured data dir as default
         if output_dir is None:
             output_dir = config.local_data_dir
-        
+
         self.stdout.write(f"==> Starting data download to: {output_dir}")
-        
+
         if runids_filter:
             self.stdout.write(f"==> Filtering by runids: {len(runids_filter)} watershed(s)")
             for runid in sorted(runids_filter):
                 self.stdout.write(f"    - {runid}")
         else:
             self.stdout.write("==> Downloading ALL data (discovering from API)")
-        
-        # Discover runids if not filtered
-        if runids_filter is None:
-            self.stdout.write("\n==> Discovering available runids from API...")
-            runids_filter = discovery.discover_runids()
-            self.stdout.write(f"    Found {len(runids_filter)} watersheds")
-        
-        # Stats tracking
+
+        # Stats tracking (accumulated across all batches)
         stats = {
             "download_count": 0,
             "skip_count": 0,
             "total_downloaded_bytes": 0,
             "total_skipped_bytes": 0,
         }
-        
-        # Create session for connection pooling
-        with requests.Session() as session:
-            # The master watersheds GeoJSON requires JWT auth; other endpoints do not.
-            jwt_token = config.api.weppcloud_jwt_token
-            auth_headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else None
 
-            # Download master watersheds file
-            self.stdout.write("\n==> Section: Watersheds")
-            watershed_source = discovery.get_watersheds_source()
-            self._process_source(watershed_source, output_dir, session, stats, headers=auth_headers)
-            
-            # Download subcatchments
-            self.stdout.write("\n==> Section: Subcatchments")
-            for source in discovery.iter_subcatchments(runids_filter):
-                self._process_source(source, output_dir, session, stats)
-            
-            # Download channels
-            self.stdout.write("\n==> Section: Channels")
-            for source in discovery.iter_channels(runids_filter):
-                self._process_source(source, output_dir, session, stats)
-            
-            # Download parquet files
-            for data_type in ["hillslopes", "soils", "landuse"]:
-                self.stdout.write(f"\n==> Section: {data_type.capitalize()}")
-                for source in discovery.iter_sources(data_type, runids_filter):
+        with requests.Session() as session:
+            for batch_cfg in config.api.batches:
+                discovery = WatershedDataDiscovery(config=config, batch_config=batch_cfg)
+                batch_name = discovery.watersheds_filename.replace("_completed.geojson", "")
+                self.stdout.write(f"\n{'=' * 60}")
+                self.stdout.write(f"==> Batch: {batch_name}")
+                self.stdout.write(f"{'=' * 60}")
+
+                # When a runid filter is provided, restrict to runids that
+                # belong to this batch (identified by the middle segment of the
+                # runid, e.g. "batch;;nasa-roses-2026-sbs;;OR-20").  Skip the
+                # batch entirely if no runids match.
+                if runids_filter is not None:
+                    batch_runids = [r for r in runids_filter if f";;{batch_name};;" in r]
+                    if not batch_runids:
+                        self.stdout.write("    No matching runids for this batch — skipping")
+                        continue
+                else:
+                    self.stdout.write("==> Discovering available runids from API...")
+                    batch_runids = discovery.discover_runids()
+                    self.stdout.write(f"    Found {len(batch_runids)} watersheds")
+
+                auth_headers = (
+                    {"Authorization": f"Bearer {discovery.jwt_token}"}
+                    if discovery.jwt_token else None
+                )
+
+                # Download master watersheds file
+                self.stdout.write("\n==> Section: Watersheds")
+                watershed_source = discovery.get_watersheds_source()
+                self._process_source(watershed_source, output_dir, session, stats, headers=auth_headers)
+
+                # Download subcatchments
+                self.stdout.write("\n==> Section: Subcatchments")
+                for source in discovery.iter_subcatchments(batch_runids):
                     self._process_source(source, output_dir, session, stats)
+
+                # Download channels
+                self.stdout.write("\n==> Section: Channels")
+                for source in discovery.iter_channels(batch_runids):
+                    self._process_source(source, output_dir, session, stats)
+
+                # Download parquet files
+                for data_type in ["hillslopes", "soils", "landuse"]:
+                    self.stdout.write(f"\n==> Section: {data_type.capitalize()}")
+                    for source in discovery.iter_sources(data_type, batch_runids):
+                        self._process_source(source, output_dir, session, stats)
         
         # Print summary
         self.stdout.write("\n" + "=" * 60)

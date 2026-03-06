@@ -13,8 +13,21 @@ from collections import defaultdict
 from django.contrib.gis.geos import Polygon, MultiPolygon
 
 from server.watershed.models import Watershed, Subcatchment, Channel
+
 from .config import LoaderConfig, get_config
 from .protocols import DataWriter
+
+def _get_feature_field(feature, *field_names):
+    """Safely get a field value from a GDAL feature, trying each name in order.
+
+    Returns the value of the first matching field, or None if none of the given
+    names exist in the feature.  Passing multiple names supports batches with
+    different schemas (e.g. nasa-roses uses 'SrcName'; victoria uses 'name').
+    """
+    for field_name in field_names:
+        if field_name in feature.fields:
+            return feature.get(field_name)
+    return None
 
 logger = logging.getLogger("watershed.loader")
 
@@ -71,21 +84,27 @@ LANDUSE_FIELD_MAP = [
 ]
 
 
-# OGR field mappings
-WATERSHED_MAPPING = {
-    'pws_id': 'PWS_ID',
-    'srcname': 'SrcName',
-    'pws_name': 'PWS_Name',
-    'county_nam': 'County_Nam',
-    'state': 'State',
-    'huc10_id': 'HUC10_ID',
-    'huc10_name': 'HUC10_Name',
-    'wws_code': 'WWS_Code',
-    'srctype': 'SrcType',
-    'shape_leng': 'Shape_Leng',
-    'shape_area': 'Shape_Area',
-    'runid': 'runid',
-    'geom': 'UNKNOWN'
+# OGR field-source mappings.
+# Each value is a tuple of candidate OGR field names tried in order;
+# the first one present in the feature wins.  This lets a single mapping
+# cover batches with different schemas:
+#   nasa-roses: PWS_ID, SrcName, Shape_Leng, Shape_Area, …
+#   victoria-ca: name, area_km2 (no PWS_ID, no Shape_* etc.)
+WATERSHED_FIELD_SOURCES = {
+    'pws_id':     ('PWS_ID',),
+    'srcname':    ('SrcName', 'name'),   # nasa-roses: SrcName; victoria: name
+    'pws_name':   ('PWS_Name',),
+    'county_nam': ('County_Nam',),
+    'state':      ('State',),
+    'huc10_id':   ('HUC10_ID',),
+    'huc10_name': ('HUC10_Name',),
+    'wws_code':   ('WWS_Code',),
+    'srctype':    ('SrcType',),
+    'shape_leng': ('Shape_Leng',),
+    'shape_area': ('Shape_Area',),
+    'area_km2':   ('area_km2',),         # victoria only
+    'runid':      ('runid',),
+    'geom':       ('UNKNOWN',),          # sentinel; handled separately
 }
 
 SUBCATCHMENT_MAPPING = {
@@ -123,8 +142,8 @@ class DjangoDataWriter:
         instances = []
         for feature in layer:
             kwargs = {
-                key: feature.get(value)
-                for key, value in WATERSHED_MAPPING.items()
+                key: _get_feature_field(feature, *sources)
+                for key, sources in WATERSHED_FIELD_SOURCES.items()
                 if key != 'geom'
             }
             geom = feature.geom.geos
@@ -150,8 +169,8 @@ class DjangoDataWriter:
             feature_runid = feature.get('runid')
             if feature_runid in runids:
                 kwargs = {
-                    key: feature.get(value)
-                    for key, value in WATERSHED_MAPPING.items()
+                    key: _get_feature_field(feature, *sources)
+                    for key, sources in WATERSHED_FIELD_SOURCES.items()
                     if key != 'geom'
                 }
                 geom = feature.geom.geos

@@ -115,7 +115,7 @@ class WatershedLoader:
             local_path = self.discovery.get_watersheds_local_path()
             
             # The master watersheds GeoJSON requires JWT auth; other endpoints do not.
-            jwt_token = self.config.api.weppcloud_jwt_token
+            jwt_token = self.discovery.jwt_token
             headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else None
             
             ds = self.reader.read_geojson(url, local_path, headers=headers)
@@ -224,22 +224,53 @@ def load_with_discovery(
     config: Optional[LoaderConfig] = None,
 ) -> dict:
     """
-    Load watershed data with automatic discovery.
-    
-    This is the main entry point for loading watershed data. It automatically
-    discovers available watersheds from the API and loads them into the database.
-    
+    Load watershed data from all configured batches.
+
+    Iterates over every ``BatchConfig`` in ``config.api.batches``, creates a
+    dedicated ``WatershedDataDiscovery`` for each, runs the full loading
+    pipeline, and returns combined statistics.
+
     Args:
         verbose: Whether to print verbose output during loading
-        runids: Optional list of runids to load. If None, all are discovered.
+        runids: Optional list of runids to load. If None, all are discovered
+            for each batch.
         config: Optional loader configuration
-    
+
     Returns:
-        Dictionary with loading statistics:
-        - watersheds_saved: Number of watersheds loaded
-        - subcatchments_saved: Number of subcatchments loaded
-        - channels_saved: Number of channels loaded
-        - subcatchments_updated: Number updated with parquet data
+        Dictionary with combined loading statistics across all batches:
+        - watersheds_saved
+        - subcatchments_saved
+        - channels_saved
+        - subcatchments_updated
     """
-    loader = WatershedLoader(config=config)
-    return loader.load(runids=runids, verbose=verbose)
+    from .discovery import WatershedDataDiscovery
+
+    cfg = config or get_config()
+    combined: dict[str, int] = {
+        "watersheds_saved": 0,
+        "subcatchments_saved": 0,
+        "channels_saved": 0,
+        "subcatchments_updated": 0,
+    }
+
+    for batch_cfg in cfg.api.batches:
+        discovery = WatershedDataDiscovery(config=cfg, batch_config=batch_cfg)
+        batch_name = discovery.watersheds_filename.replace("_completed.geojson", "")
+
+        # When explicit runids are provided, only pass those that belong to
+        # this batch (the batch name is the middle segment of the runid, e.g.
+        # "batch;;nasa-roses-2026-sbs;;OR-20").  This prevents one batch from
+        # re-processing the other batch's runids.
+        if runids is not None:
+            batch_runids = [r for r in runids if f";;{batch_name};;" in r]
+            if not batch_runids:
+                continue  # nothing for this batch — skip entirely
+        else:
+            batch_runids = None
+
+        loader = WatershedLoader(config=cfg, discovery=discovery)
+        stats = loader.load(runids=batch_runids, verbose=verbose)
+        for key in combined:
+            combined[key] += stats[key]
+
+    return combined
