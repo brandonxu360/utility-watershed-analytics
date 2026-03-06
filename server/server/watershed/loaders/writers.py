@@ -14,6 +14,8 @@ from django.contrib.gis.geos import Polygon, MultiPolygon
 
 from server.watershed.models import Watershed, Subcatchment, Channel
 
+from .config import LoaderConfig, get_config
+from .protocols import DataWriter
 
 def _get_feature_field(feature, *field_names):
     """Safely get a field value from a GDAL feature, trying each name in order.
@@ -26,8 +28,6 @@ def _get_feature_field(feature, *field_names):
         if field_name in feature.fields:
             return feature.get(field_name)
     return None
-from .config import LoaderConfig, get_config
-from .protocols import DataWriter
 
 logger = logging.getLogger("watershed.loader")
 
