@@ -26,9 +26,13 @@ import SearchControl from "./controls/Search";
 import LandUseLegend from "./controls/LandUseLegend";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
+import RhessysSpatialLayer from "./RhessysSpatialLayer";
+import RhessysSpatialLegend from "./controls/RhessysSpatialLegend";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import { buildHillslopeTooltip } from "../../utils/tooltipContent";
 import type { SbsColorMode } from "../../api/types";
+import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
+import { getLayerParams } from "../../layers/types";
 import "leaflet/dist/leaflet.css";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -96,6 +100,10 @@ export default function WatershedMap(): JSX.Element {
   const sbsColorMode =
     (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
 
+  const rhessysSpatialEffective = isEffective("rhessysSpatial");
+  const rhessysSpatialParams = getLayerParams(layerDesired, "rhessysSpatial");
+  const rhessysSpatialFilename = rhessysSpatialParams.filename;
+
   const runId =
     useParams({
       from: "/watershed/$webcloudRunId",
@@ -111,6 +119,11 @@ export default function WatershedMap(): JSX.Element {
     queryKey: ["watersheds"],
     queryFn: fetchWatersheds,
   });
+
+  const { files: rhessysSpatialFiles } = useRhessysSpatialInputs(runId);
+  const selectedRhessysFile =
+    rhessysSpatialFiles.find((f) => f.filename === rhessysSpatialFilename) ??
+    null;
 
   const { subcatchments, subLoading } = useSubcatchmentData(runId);
   const { channelData, channelLoading } = useChannelData(runId);
@@ -339,11 +352,23 @@ export default function WatershedMap(): JSX.Element {
         {sbsEffective && runId && (
           <SbsLayer runId={runId} mode={sbsColorMode} bounds={sbsBounds} />
         )}
+
+        {rhessysSpatialEffective && runId && rhessysSpatialFilename && (
+          <RhessysSpatialLayer
+            runId={runId}
+            filename={rhessysSpatialFilename}
+            bounds={sbsBounds}
+          />
+        )}
       </MapContainer>
 
       <LandUseLegend landuseLegendMap={landuseLegendMap} />
 
       {sbsEffective && <SbsLegend />}
+
+      {rhessysSpatialEffective && selectedRhessysFile && (
+        <RhessysSpatialLegend file={selectedRhessysFile} />
+      )}
     </div>
   );
 }
