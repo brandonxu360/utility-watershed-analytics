@@ -126,12 +126,17 @@ def _get_feature_field(feature, *field_names):
     Try multiple OGR field names in order, returning the first match.
     
     This bridges schema differences between batches (e.g. 'SrcName' in
-    NASA ROSES vs 'name' in other batches).
+    NASA ROSES vs 'name' in other batches). Fields absent from the layer
+    schema raise IndexError in Django's GDAL bindings; we catch that and
+    move on to the next candidate.
     """
     for name in field_names:
-        value = feature.get(name)
-        if value is not None:
-            return value
+        try:
+            value = feature.get(name)
+            if value is not None:
+                return value
+        except (IndexError, KeyError):
+            continue
     return None
 
 
