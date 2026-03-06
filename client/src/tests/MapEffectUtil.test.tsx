@@ -3,7 +3,11 @@ import { renderHook } from "@testing-library/react";
 import { MapEffect } from "../utils/map/MapEffectUtil";
 import { WatershedProperties } from "../types/WatershedProperties";
 
-const mockMap = { flyToBounds: vi.fn() };
+const mockMap = {
+  flyToBounds: vi.fn(),
+  fitBounds: vi.fn(),
+  setMaxBounds: vi.fn(),
+};
 vi.mock("react-leaflet", () => ({
   useMap: () => mockMap,
 }));
@@ -13,7 +17,12 @@ vi.mock("../utils/map/MapUtil", () => ({
   zoomToFeature: (...args: unknown[]) => mockZoomToFeature(...args),
 }));
 
-const mockTempLayer = { getBounds: vi.fn() };
+const mockBounds = {
+  isValid: vi.fn().mockReturnValue(true),
+  pad: vi.fn().mockImplementation(() => mockBounds),
+};
+
+const mockTempLayer = { getBounds: vi.fn().mockReturnValue(mockBounds) };
 const mockGeoJSON = vi.fn().mockReturnValue(mockTempLayer);
 vi.mock("leaflet", () => ({
   default: {
@@ -148,6 +157,49 @@ describe("MapEffectUtil", () => {
       renderMapEffect({ watershedId: "ws-1", watersheds });
 
       expect(mockZoomToFeature).not.toHaveBeenCalled();
+    });
+
+    it("fits and locks bounds to all watersheds on initial load", () => {
+      const watersheds = createWatershedData([{ id: "ws-1" }, { id: "ws-2" }]);
+
+      renderMapEffect({ watershedId: null, watersheds });
+
+      expect(mockGeoJSON).toHaveBeenCalledWith(watersheds);
+      expect(mockTempLayer.getBounds).toHaveBeenCalled();
+      expect(mockBounds.isValid).toHaveBeenCalled();
+      expect(mockMap.fitBounds).toHaveBeenCalledWith(mockBounds, {
+        padding: [30, 30],
+      });
+      expect(mockBounds.pad).toHaveBeenCalledWith(0.5);
+      expect(mockMap.setMaxBounds).toHaveBeenCalledWith(mockBounds);
+    });
+
+    it("does not re-run initial fit on subsequent renders", () => {
+      const watersheds = createWatershedData([{ id: "ws-1" }]);
+
+      const { rerender } = renderHook(
+        (props: {
+          watershedId: string | null;
+          watersheds: GeoJSON.FeatureCollection<
+            GeoJSON.Geometry,
+            WatershedProperties
+          >;
+        }) => MapEffect(props),
+        {
+          initialProps: {
+            watershedId: null,
+            watersheds,
+          },
+        },
+      );
+
+      expect(mockMap.fitBounds).toHaveBeenCalledTimes(1);
+      expect(mockMap.setMaxBounds).toHaveBeenCalledTimes(1);
+
+      rerender({ watershedId: null, watersheds });
+
+      expect(mockMap.fitBounds).toHaveBeenCalledTimes(1);
+      expect(mockMap.setMaxBounds).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -71,7 +71,7 @@ class ApiConfig:
     # List of batches to load. Each batch has its own URL and JWT token.
     # Defaults to both currently supported batches (tokens must be provided
     # via WEPPCLOUD_JWT_TOKEN / WEPPCLOUD_JWT_TOKEN_2 env vars).
-    batches: list = field(
+    batches: list[BatchConfig] = field(
         default_factory=lambda: [
             BatchConfig("https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs"),
             BatchConfig("https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs"),
