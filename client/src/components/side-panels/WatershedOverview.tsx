@@ -35,6 +35,10 @@ const useStyles = tss.create(({ theme }) => ({
     marginBottom: theme.spacing(1.5),
     fontSize: theme.typography.h3.fontSize,
   },
+  titleMulti: {
+    marginBottom: theme.spacing(1),
+    fontSize: `calc((${theme.typography.h3.fontSize} + ${theme.typography.h4.fontSize}) / 2)`,
+  },
   paragraph: {
     marginBottom: theme.spacing(2),
     fontSize: theme.typography.body1.fontSize,
@@ -209,7 +213,7 @@ export default function WatershedOverview() {
           ? (watershed?.properties?.huc10_pws_names ?? "")
               .split(";")
               .map((name, i) => (
-                <Typography key={i} variant="h6" className={classes.title}>
+                <Typography key={i} variant="h6" className={classes.titleMulti}>
                   <strong>{name.trim()}</strong>
                 </Typography>
               ))
