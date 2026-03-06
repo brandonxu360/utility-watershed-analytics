@@ -133,7 +133,7 @@ export function ScenariosTable() {
   return (
     <>
       <Typography align="center" variant="h4" className={classes.title}>
-        Average Annual
+        Annual Averages
       </Typography>
       <TableContainer>
         <Table
