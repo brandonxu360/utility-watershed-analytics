@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
 
-ALLOWED_HOSTS = [] if DEBUG else ['unstable.wepp.cloud']
+ALLOWED_HOSTS = [] if DEBUG else ['unstable.wepp.cloud', 'firewisewatersheds.org']
 
 # Application definition
 
@@ -140,6 +140,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173', # Vite development server
     'http://127.0.0.1:5173',
     'https://unstable.wepp.cloud',
+    'https://firewisewatersheds.org',
 ]
 
 REST_FRAMEWORK = {
