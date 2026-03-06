@@ -15,7 +15,7 @@ urlpatterns = [
     path('<str:runid>/channels', WatershedChannelListView.as_view(), name='watershed-channels'),
     path('sbs/colormap', SbsColormapView.as_view(), name='sbs-colormap'),
     path('<str:runid>/sbs/tiles/<int:z>/<int:x>/<int:y>.png', SbsRasterTileView.as_view(), name='sbs-tile'),
-    path('<str:runid>/rhessys/spatial-inputs/', RhessysSpatialListView.as_view(), name='rhessys-spatial-list'),
+    path('<str:runid>/rhessys/spatial-inputs', RhessysSpatialListView.as_view(), name='rhessys-spatial-list'),
     path(
         '<str:runid>/rhessys/spatial-inputs/<str:filename>/tiles/<int:z>/<int:x>/<int:y>.png',
         RhessysSpatialTileView.as_view(),

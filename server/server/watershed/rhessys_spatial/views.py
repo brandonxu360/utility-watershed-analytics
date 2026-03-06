@@ -62,7 +62,8 @@ class RhessysSpatialTileView(APIView):
 
     URL params:
         runid: Watershed run identifier.
-        filename: GeoTIFF filename (e.g. ``wbt_slope.tif``).
+        filename: GeoTIFF filename (e.g. ``wbt_slope.tif``). Must be present
+            in the static registry; unknown filenames return 404.
         z, x, y: Web Mercator tile coordinates.
     """
 
@@ -71,17 +72,19 @@ class RhessysSpatialTileView(APIView):
         tif_url = get_download_url(runid, filename)
 
         meta = get_meta(filename)
-        if meta:
-            lo, hi = get_render_range(meta)
-            kwargs = dict(
-                data_type=meta.data_type,
-                min_val=lo,
-                max_val=hi,
-                unique_values=meta.unique_values,
-                reversed_colormap=meta.reversed_colormap,
+        if not meta:
+            raise NotFound(
+                "RHESSys spatial input is not registered in the legend registry."
             )
-        else:
-            kwargs = dict(data_type="continuous", min_val=0.0, max_val=1.0)
+
+        lo, hi = get_render_range(meta)
+        kwargs = dict(
+            data_type=meta.data_type,
+            min_val=lo,
+            max_val=hi,
+            unique_values=meta.unique_values,
+            reversed_colormap=meta.reversed_colormap,
+        )
 
         try:
             png_bytes = get_tile_png(tif_url, z, x, y, **kwargs)

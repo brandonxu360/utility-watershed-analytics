@@ -128,7 +128,7 @@ export default function RhessysSpatialLegend({
           <Box className={classes.gradientContainer}>
             <Box
               className={classes.gradientBar}
-              sx={{ background: gradientCss }}
+              style={{ background: gradientCss }}
             />
             <Box className={classes.labelsCol}>
               <Typography className={classes.label}>
