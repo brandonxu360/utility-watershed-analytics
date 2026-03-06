@@ -59,6 +59,9 @@ WEPPCLOUD_BATCH_URL_2=https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs
 # victoria-ca-2026-sbs token scope: victoria-ca-2026-sbs (expires 2026-07-31)
 WEPPCLOUD_JWT_TOKEN=
 WEPPCLOUD_JWT_TOKEN_2=
+
+# Standalone runs (e.g. Gate Creek / aversive-forestry) are configured
+# in server/server/watershed/loaders/config.py and do not require JWT tokens.
 ```
 
 6. **pgAdmin Server Definition**: Though not required, a JSON file in the root directory with the following attributes can be used to automatically define the server for pgAdmin for convenience. Please name the file `pgadmin-servers.json`. Notice the username and password correspond with the postgres database username (`POSTGRES_USER`) and password (`POSTGRES_PW`) defined in the `.env` file. Again, be aware that this config could expose sensitive data (database password) if mishandled in production.

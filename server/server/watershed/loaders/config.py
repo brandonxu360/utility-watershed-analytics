@@ -3,6 +3,10 @@ Centralized configuration for the data loading pipeline.
 
 All configurable values that were previously hardcoded are consolidated here.
 Values can be overridden via environment variables.
+
+Supports two types of data sources:
+- Batch-based: Multiple watersheds discovered from a master GeoJSON (e.g. NASA ROSES)
+- Standalone runs: Individual WEPPcloud runs with fixed URLs (e.g. Gate Creek)
 """
 
 import os
@@ -42,11 +46,49 @@ def _get_env_float(key: str, default: float) -> float:
 
 
 @dataclass
+class BatchConfig:
+    """
+    Configuration for a single WEPPcloud batch.
+
+    Each batch has its own URL for discovering watersheds and an optional
+    JWT token for authenticated access to the master GeoJSON.
+    """
+    batch_url: str
+    jwt_token: Optional[str] = None
+
+
+@dataclass
+class StandaloneRunConfig:
+    """
+    Configuration for a standalone WEPPcloud run (not part of a batch).
+
+    Standalone runs have a fixed runid and URLs derived from a known base URL
+    rather than being discovered from a batch API.
+    """
+    runid: str
+    display_name: str
+    run_base_url: str
+    boundary_url: str
+
+    def get_data_urls(self) -> dict[str, str]:
+        """Generate all data URLs from the run base URL."""
+        base = self.run_base_url.rstrip("/")
+        return {
+            "boundary": self.boundary_url,
+            "subcatchments": f"{base}/download/dem/wbt/subcatchments.WGS.geojson",
+            "channels": f"{base}/download/dem/wbt/channels.WGS.geojson",
+            "hillslopes": f"{base}/download/watershed/hillslopes.parquet",
+            "soils": f"{base}/download/soils/soils.parquet",
+            "landuse": f"{base}/download/landuse/landuse.parquet",
+        }
+
+
+@dataclass
 class RetryConfig:
     """Configuration for retry behavior."""
     max_attempts: int = 6
     base_delay_seconds: float = 0.2
-    
+
     @classmethod
     def from_environment(cls) -> "RetryConfig":
         """Create config from environment variables."""
@@ -56,27 +98,45 @@ class RetryConfig:
         )
 
 
-@dataclass
-class BatchConfig:
-    """Configuration for a single WEPPcloud data batch."""
-    batch_url: str
-    jwt_token: Optional[str] = None
+def _default_batches() -> list[BatchConfig]:
+    return [
+        BatchConfig(
+            batch_url=os.environ.get(
+                "WEPPCLOUD_BATCH_URL",
+                "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
+            ),
+            jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN"),
+        ),
+        BatchConfig(
+            batch_url=os.environ.get(
+                "WEPPCLOUD_BATCH_URL_2",
+                "https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs",
+            ),
+            jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN_2"),
+        ),
+    ]
+
+
+def _default_standalone_runs() -> list[StandaloneRunConfig]:
+    return [
+        StandaloneRunConfig(
+            runid="aversive-forestry",
+            display_name="Gate Creek",
+            run_base_url="https://wepp.cloud/weppcloud/runs/aversive-forestry/disturbed9002_wbt",
+            boundary_url="https://wepp.cloud/weppcloud/runs/aversive-forestry/disturbed9002_wbt/download/dem/wbt/bound.geojson",
+        ),
+    ]
 
 
 @dataclass
 class ApiConfig:
     """Configuration for external API endpoints."""
-    # Base URL for WEPPcloud runs (used for data downloads)
     weppcloud_base_url: str = "https://wepp.cloud/weppcloud"
     # List of batches to load. Each batch has its own URL and JWT token.
     # Defaults to both currently supported batches (tokens must be provided
     # via WEPPCLOUD_JWT_TOKEN / WEPPCLOUD_JWT_TOKEN_2 env vars).
-    batches: list = field(
-        default_factory=lambda: [
-            BatchConfig("https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs"),
-            BatchConfig("https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs"),
-        ]
-    )
+    batches: list[BatchConfig] = field(default_factory=_default_batches)
+    standalone_runs: list[StandaloneRunConfig] = field(default_factory=_default_standalone_runs)
 
     @classmethod
     def from_environment(cls) -> "ApiConfig":
@@ -102,15 +162,16 @@ class ApiConfig:
                     jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN_2"),
                 ),
             ],
+            standalone_runs=_default_standalone_runs(),
         )
 
 
-@dataclass 
+@dataclass
 class GeometryConfig:
     """Configuration for geometry processing."""
     simplify_tolerance: float = 0.00025
     bulk_update_batch_size: int = 500
-    
+
     @classmethod
     def from_environment(cls) -> "GeometryConfig":
         """Create config from environment variables."""
@@ -124,9 +185,9 @@ class GeometryConfig:
 class LoaderConfig:
     """
     Master configuration for the data loading pipeline.
-    
+
     Consolidates all configuration from environment variables.
-    
+
     Usage:
         config = LoaderConfig.from_environment()
         # or
@@ -135,10 +196,10 @@ class LoaderConfig:
     retry: RetryConfig = field(default_factory=RetryConfig)
     api: ApiConfig = field(default_factory=ApiConfig)
     geometry: GeometryConfig = field(default_factory=GeometryConfig)
-    
+
     # Paths
     local_data_dir: Path = field(default_factory=lambda: Path(__file__).resolve().parent.parent / "data")
-    
+
     @classmethod
     def from_environment(cls) -> "LoaderConfig":
         """
@@ -149,12 +210,12 @@ class LoaderConfig:
             api=ApiConfig.from_environment(),
             geometry=GeometryConfig.from_environment(),
         )
-        
+
         # Override local data dir from environment if provided
         data_dir = os.environ.get("LOADER_DATA_DIR")
         if data_dir:
             config.local_data_dir = Path(data_dir)
-        
+
         return config
 
 
@@ -165,7 +226,7 @@ _default_config: Optional[LoaderConfig] = None
 def get_config() -> LoaderConfig:
     """
     Get the default loader configuration.
-    
+
     Lazily initializes from environment on first call.
     """
     global _default_config
@@ -175,6 +236,6 @@ def get_config() -> LoaderConfig:
 
 
 def reset_config() -> None:
-    """Reset the default configuration (useful for testing)."""
+    """Reset the default configuration singleton (useful for testing)."""
     global _default_config
     _default_config = None

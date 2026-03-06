@@ -11,8 +11,8 @@ Key components:
 - Protocols: DataSourceReader, DataWriter for testability
 """
 
-from .config import LoaderConfig, BatchConfig, get_config, reset_config
-from .discovery import WatershedDataDiscovery, DataSource, discover_all_runids
+from .config import LoaderConfig, BatchConfig, StandaloneRunConfig, get_config, reset_config
+from .discovery import WatershedDataDiscovery, StandaloneRunDiscovery, DataSource, discover_all_runids
 from .loader import WatershedLoader, load_with_discovery
 from .protocols import DataSourceReader, DataWriter, DataSourceProvider
 from .readers import RemoteDataSourceReader
@@ -25,10 +25,13 @@ __all__ = [
     "load_with_discovery",
     # Configuration
     "LoaderConfig",
+    "BatchConfig",
+    "StandaloneRunConfig",
     "get_config",
     "reset_config",
     # Discovery
     "WatershedDataDiscovery",
+    "StandaloneRunDiscovery",
     "DataSource",
     "discover_all_runids",
     # Protocols (for testing/extension)

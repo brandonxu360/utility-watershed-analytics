@@ -89,6 +89,25 @@ class DataWriter(Protocol):
         """
         ...
     
+    def save_standalone_watershed(
+        self,
+        layer: Any,
+        runid: str,
+        display_name: str,
+    ) -> int:
+        """
+        Save a watershed from a standalone boundary GeoJSON.
+        
+        Args:
+            layer: GDAL Layer containing boundary geometry
+            runid: Synthetic runid for this standalone watershed
+            display_name: Human-readable name for the watershed
+        
+        Returns:
+            Number of watersheds saved
+        """
+        ...
+    
     def save_subcatchments(self, runid: str, layer: Any) -> int:
         """
         Save subcatchment features for a watershed.
