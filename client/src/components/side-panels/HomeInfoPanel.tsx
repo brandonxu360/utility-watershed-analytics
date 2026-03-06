@@ -72,7 +72,12 @@ export default function HomeSidePanelContent(): JSX.Element {
           variant="outlined"
           size="small"
           className={classes.quickLinkButton}
-          onClick={() => navigate({ to: "/watershed/aversive-forestry" })}
+          onClick={() =>
+            navigate({
+              to: "/watershed/$webcloudRunId",
+              params: { webcloudRunId: "aversive-forestry" },
+            })
+          }
         >
           Gate Creek (RHESSys inputs)
         </Button>
