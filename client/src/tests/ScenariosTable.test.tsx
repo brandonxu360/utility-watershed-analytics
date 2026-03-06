@@ -115,9 +115,9 @@ describe("ScenariosTable", () => {
       });
     });
 
-    it("renders the 'Average Annual' title", () => {
+    it("renders the 'Annual Average' title", () => {
       render(<ScenariosTable />);
-      expect(screen.getByText("Average Annual")).toBeInTheDocument();
+      expect(screen.getByText("Annual Average")).toBeInTheDocument();
     });
 
     it("renders the Scenario column header", () => {
