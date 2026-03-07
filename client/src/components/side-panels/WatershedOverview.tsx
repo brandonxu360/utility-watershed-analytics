@@ -186,6 +186,18 @@ export default function WatershedOverview() {
     );
   }, [watersheds?.features, runId]);
 
+  const hasMultipleUtilities =
+    (watershed?.properties?.huc10_utility_count ?? 0) > 1;
+
+  const utilityDisplayNames = useMemo(() => {
+    const names = (watershed?.properties?.huc10_pws_names ?? "")
+      .split(";")
+      .map((name: string) => name.trim())
+      .filter((name: string) => name.length > 0);
+
+    return names.length > 0 ? names : [watershed?.properties?.pws_name ?? ""];
+  }, [watershed?.properties?.huc10_pws_names, watershed?.properties?.pws_name]);
+
   if (isLoading) return <SkeletonWatershedPanel />;
   if (error) return <div>Error: {(error as Error).message}</div>;
   if (!watersheds?.features) return <div>No watershed data found.</div>;
@@ -209,22 +221,12 @@ export default function WatershedOverview() {
         BACK
       </Button>
       <div className={classes.contentBox}>
-        {(watershed?.properties?.huc10_utility_count ?? 0) > 1 ? (
-          (() => {
-            const names = (watershed?.properties?.huc10_pws_names ?? "")
-              .split(";")
-              .map((n: string) => n.trim())
-              .filter((n: string) => n.length > 0);
-            const display =
-              names.length > 0
-                ? names
-                : [watershed?.properties?.pws_name ?? ""];
-            return display.map((name: string, i: number) => (
-              <Typography key={i} variant="h6" className={classes.titleMulti}>
-                <strong>{name}</strong>
-              </Typography>
-            ));
-          })()
+        {hasMultipleUtilities ? (
+          utilityDisplayNames.map((name: string, i: number) => (
+            <Typography key={i} variant="h6" className={classes.titleMulti}>
+              <strong>{name}</strong>
+            </Typography>
+          ))
         ) : (
           <Typography variant="h6" className={classes.title}>
             <strong>{watershed?.properties?.pws_name}</strong>
