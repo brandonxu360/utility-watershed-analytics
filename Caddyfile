@@ -2,7 +2,7 @@
     email brandon.xu@wsu.edu
 }
 
-unstable.wepp.cloud {
+firewisewatersheds.org, unstable.wepp.cloud {
     root * /app/client/build
 
     route {

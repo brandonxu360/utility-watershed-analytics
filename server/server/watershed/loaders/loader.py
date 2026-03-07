@@ -9,7 +9,6 @@ This module provides the main loader implementation that:
 """
 
 import logging
-from collections import defaultdict
 from typing import Optional, Union
 
 from .config import LoaderConfig, StandaloneRunConfig, get_config

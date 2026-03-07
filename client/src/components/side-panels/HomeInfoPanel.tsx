@@ -40,8 +40,9 @@ export default function HomeSidePanelContent(): JSX.Element {
       </Typography>
       <Typography variant="body1">
         Visualize and analyze hydrologic and environmental data for watersheds
-        across the western United States. Gain insights into observed and
-        modeled data to understand water and environmental conditions.
+        across the western United States and Canada. Gain insights into
+        observed and modeled data to understand water and environmental
+        conditions.
       </Typography>
       <Typography variant="h3">
         <strong>Tier 1 Watersheds</strong>
@@ -72,7 +73,12 @@ export default function HomeSidePanelContent(): JSX.Element {
           variant="outlined"
           size="small"
           className={classes.quickLinkButton}
-          onClick={() => navigate({ to: "/watershed/aversive-forestry" })}
+          onClick={() =>
+            navigate({
+              to: "/watershed/$webcloudRunId",
+              params: { webcloudRunId: "aversive-forestry" },
+            })
+          }
         >
           Gate Creek (RHESSys inputs)
         </Button>

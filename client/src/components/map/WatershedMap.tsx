@@ -350,7 +350,21 @@ export default function WatershedMap(): JSX.Element {
         )}
 
         {sbsEffective && runId && (
-          <SbsLayer runId={runId} mode={sbsColorMode} bounds={sbsBounds} />
+          <SbsLayer
+            runId={runId}
+            mode={sbsColorMode}
+            opacity={effective.sbs.opacity}
+            bounds={sbsBounds}
+          />
+        )}
+
+        {rhessysSpatialEffective && runId && rhessysSpatialFilename && (
+          <RhessysSpatialLayer
+            runId={runId}
+            filename={rhessysSpatialFilename}
+            opacity={effective.rhessysSpatial.opacity}
+            bounds={sbsBounds}
+          />
         )}
 
         {rhessysSpatialEffective && runId && rhessysSpatialFilename && (

@@ -6,8 +6,9 @@ and optional group membership.  These values come from analysis of the Gate
 Creek dataset (the first watershed with RHESSys data) but the structure is
 the same across all watersheds.
 
-For files not in this registry, the tile endpoint falls back to computing
-stats from the raster on the fly.
+Only files present in this registry are currently renderable via the tile
+endpoint; requests for unknown filenames return 404 so new rasters must be
+explicitly registered here.
 """
 
 from __future__ import annotations

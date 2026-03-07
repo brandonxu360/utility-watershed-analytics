@@ -15,18 +15,6 @@ from django.contrib.gis.geos import Polygon, MultiPolygon
 
 from server.watershed.models import Watershed, Subcatchment, Channel
 
-
-def _get_feature_field(feature, *field_names):
-    """Safely get a field value from a GDAL feature, trying each name in order.
-
-    Returns the value of the first matching field, or None if none of the given
-    names exist in the feature.  Passing multiple names supports batches with
-    different schemas (e.g. nasa-roses uses 'SrcName'; victoria uses 'name').
-    """
-    for field_name in field_names:
-        if field_name in feature.fields:
-            return feature.get(field_name)
-    return None
 from .config import LoaderConfig, get_config
 from .protocols import DataWriter
 

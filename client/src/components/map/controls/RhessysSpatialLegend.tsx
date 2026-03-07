@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { tss } from "../../../utils/tss";
 import type { RhessysSpatialFile } from "../../../api/types";
@@ -125,12 +124,12 @@ export default function RhessysSpatialLegend({
         )}
 
         {file.type === "continuous" && legend.length >= 2 && (
-          <Box className={classes.gradientContainer}>
-            <Box
+          <div className={classes.gradientContainer}>
+            <div
               className={classes.gradientBar}
-              sx={{ background: gradientCss }}
+              style={{ background: gradientCss }}
             />
-            <Box className={classes.labelsCol}>
+            <div className={classes.labelsCol}>
               <Typography className={classes.label}>
                 {formatNum(legend[legend.length - 1].value)}
               </Typography>
@@ -142,8 +141,8 @@ export default function RhessysSpatialLegend({
               <Typography className={classes.label}>
                 {formatNum(legend[0].value)}
               </Typography>
-            </Box>
-          </Box>
+            </div>
+          </div>
         )}
       </Paper>
     </div>

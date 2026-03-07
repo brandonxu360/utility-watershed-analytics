@@ -39,6 +39,7 @@ services:
       - LOADER_DATA_DIR=/data
       - WEPPCLOUD_JWT_TOKEN=${WEPPCLOUD_JWT_TOKEN}
       - WEPPCLOUD_JWT_TOKEN_2=${WEPPCLOUD_JWT_TOKEN_2}
+
     # Volume mount
     volumes:
       - .:/app
