@@ -25,10 +25,10 @@ export interface WatershedProperties {
   shape_area: number;
 
   // Utility metadata (nasa-roses batch, from merged utility data)
-  owner_type: string | null;   // Water Utility Type
-  pop_group: string | null;    // Customers Served range
-  treat_type: string | null;   // Treatment Processes
-  conn_group: string | null;   // Connection Group range
+  owner_type: string | null; // Water Utility Type
+  pop_group: string | null; // Customers Served range
+  treat_type: string | null; // Treatment Processes
+  conn_group: string | null; // Connection Group range
 
   // HUC10-level aggregates (all utilities sharing this watershed boundary)
   huc10_pws_names: string | null;

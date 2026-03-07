@@ -344,7 +344,10 @@ describe("WatershedOverview", () => {
   });
 
   describe("multi-utility title rendering (huc10_utility_count > 1)", () => {
-    const setupMulti = (huc10_pws_names: string | null, pws_name = "Fallback Watershed") => {
+    const setupMulti = (
+      huc10_pws_names: string | null,
+      pws_name = "Fallback Watershed",
+    ) => {
       mockUseParams.mockReturnValue("multi-ws");
       mockFetchWatersheds.mockResolvedValue({
         features: [
@@ -394,7 +397,9 @@ describe("WatershedOverview", () => {
 
       // Only the two real names should appear as title rows — no blank element
       const allStrong = document.querySelectorAll("strong");
-      const titleTexts = Array.from(allStrong).map((el) => el.textContent?.trim());
+      const titleTexts = Array.from(allStrong).map((el) =>
+        el.textContent?.trim(),
+      );
       expect(titleTexts.filter((t) => t === "")).toHaveLength(0);
     });
 
@@ -470,7 +475,11 @@ describe("WatershedOverview", () => {
     });
 
     it("renders the section with N/A placeholders when some fields are null", async () => {
-      setupWithMeta({ owner_type: "Local Government", pop_group: null, treat_type: null });
+      setupWithMeta({
+        owner_type: "Local Government",
+        pop_group: null,
+        treat_type: null,
+      });
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
@@ -487,14 +496,22 @@ describe("WatershedOverview", () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
-        expect(screen.queryByText(/Water Utility Type:/)).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/Water Utility Type:/),
+        ).not.toBeInTheDocument();
         expect(screen.queryByText(/Customers Served:/)).not.toBeInTheDocument();
-        expect(screen.queryByText(/Treatment Processes:/)).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/Treatment Processes:/),
+        ).not.toBeInTheDocument();
       });
     });
 
     it("renders the section when only one of the three fields is present", async () => {
-      setupWithMeta({ owner_type: undefined as unknown as null, pop_group: undefined as unknown as null, treat_type: "Filtration" });
+      setupWithMeta({
+        owner_type: undefined as unknown as null,
+        pop_group: undefined as unknown as null,
+        treat_type: "Filtration",
+      });
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
