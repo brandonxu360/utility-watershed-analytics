@@ -48,10 +48,8 @@ DJANGO_SUPERUSER_PASSWORD=password
 DJANGO_SECRET_KEY=django-insecure-1#t+05xjtk9endkv$*of#hr(3y@=45=p8i%1f4erojjbc(c7wa
 DEBUG=true
 
-# Both batches are loaded simultaneously by default. Override the URLs only if
-# targeting a different WEPPcloud environment.
-WEPPCLOUD_BATCH_URL=https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs
-WEPPCLOUD_BATCH_URL_2=https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs
+# Both batches are loaded simultaneously by default.
+# Batch URLs are configured in server/server/watershed/loaders/config.py.
 
 # JWT tokens for each batch's master watersheds GeoJSON (required for data loading
 # and downloading). Contact the project maintainer to obtain tokens.

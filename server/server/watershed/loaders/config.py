@@ -2,7 +2,7 @@
 Centralized configuration for the data loading pipeline.
 
 All configurable values that were previously hardcoded are consolidated here.
-Values can be overridden via environment variables.
+Some runtime settings can be overridden via environment variables.
 
 Supports two types of data sources:
 - Batch-based: Multiple watersheds discovered from a master GeoJSON (e.g. NASA ROSES)
@@ -60,9 +60,15 @@ class BatchConfig:
 
     Each batch has its own URL for discovering watersheds and an optional
     JWT token for authenticated access to the master GeoJSON.
+
+    If ``watersheds_filename`` is provided it overrides the default filename
+    derived from the batch URL (``{batch_name}_completed.geojson``). Use this
+    when the master GeoJSON has been published under a custom name (e.g. a
+    file that has utility metadata merged in).
     """
     batch_url: str
     jwt_token: Optional[str] = None
+    watersheds_filename: Optional[str] = None
 
 
 @dataclass
@@ -109,18 +115,16 @@ class RetryConfig:
 def _default_batches() -> list[BatchConfig]:
     return [
         BatchConfig(
-            batch_url=_get_env_str(
-                "WEPPCLOUD_BATCH_URL",
-                "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
-            ),
-            jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN") or None,
+            batch_url="https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
+            jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN"),
+            # Drop-in replacement GeoJSON with utility metadata merged in
+            # (OwnerType, PopGroup, TreatType, ConnGroup + HUC10 aggregates).
+            # Must contain current nasa-roses-2026-sbs runids.
+            watersheds_filename="WWS_Watersheds_HUC10_psbs_030426.geojson",
         ),
         BatchConfig(
-            batch_url=_get_env_str(
-                "WEPPCLOUD_BATCH_URL_2",
-                "https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs",
-            ),
-            jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN_2") or None,
+            batch_url="https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs",
+            jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN_2"),
         ),
     ]
 
@@ -140,9 +144,8 @@ def _default_standalone_runs() -> list[StandaloneRunConfig]:
 class ApiConfig:
     """Configuration for external API endpoints."""
     weppcloud_base_url: str = "https://wepp.cloud/weppcloud"
-    # List of batches to load. Each batch has its own URL and JWT token.
-    # Defaults to both currently supported batches (tokens must be provided
-    # via WEPPCLOUD_JWT_TOKEN / WEPPCLOUD_JWT_TOKEN_2 env vars).
+    # List of batches to load. Batch URLs are defined in _default_batches().
+    # Tokens are provided via WEPPCLOUD_JWT_TOKEN / WEPPCLOUD_JWT_TOKEN_2.
     batches: list[BatchConfig] = field(default_factory=_default_batches)
     standalone_runs: list[StandaloneRunConfig] = field(default_factory=_default_standalone_runs)
 
@@ -154,22 +157,7 @@ class ApiConfig:
                 "WEPPCLOUD_BASE_URL",
                 cls.weppcloud_base_url,
             ),
-            batches=[
-                BatchConfig(
-                    batch_url=_get_env_str(
-                        "WEPPCLOUD_BATCH_URL",
-                        "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
-                    ),
-                    jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN") or None,
-                ),
-                BatchConfig(
-                    batch_url=_get_env_str(
-                        "WEPPCLOUD_BATCH_URL_2",
-                        "https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs",
-                    ),
-                    jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN_2") or None,
-                ),
-            ],
+            batches=_default_batches(),
             standalone_runs=_default_standalone_runs(),
         )
 

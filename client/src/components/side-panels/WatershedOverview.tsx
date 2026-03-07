@@ -35,6 +35,10 @@ const useStyles = tss.create(({ theme }) => ({
     marginBottom: theme.spacing(1.5),
     fontSize: theme.typography.h3.fontSize,
   },
+  titleMulti: {
+    marginBottom: theme.spacing(1),
+    fontSize: `calc((${theme.typography.h3.fontSize} + ${theme.typography.h4.fontSize}) / 2)`,
+  },
   paragraph: {
     marginBottom: theme.spacing(2),
     fontSize: theme.typography.body1.fontSize,
@@ -205,9 +209,24 @@ export default function WatershedOverview() {
         BACK
       </Button>
       <div className={classes.contentBox}>
-        <Typography variant="h6" className={classes.title}>
-          <strong>{watershed?.properties?.pws_name}</strong>
-        </Typography>
+        {(watershed?.properties?.huc10_utility_count ?? 0) > 1
+          ? (() => {
+              const names = (watershed?.properties?.huc10_pws_names ?? "")
+                .split(";")
+                .map((n: string) => n.trim())
+                .filter((n: string) => n.length > 0);
+              const display = names.length > 0 ? names : [watershed?.properties?.pws_name ?? ""];
+              return display.map((name: string, i: number) => (
+                <Typography key={i} variant="h6" className={classes.titleMulti}>
+                  <strong>{name}</strong>
+                </Typography>
+              ));
+            })()
+          : (
+            <Typography variant="h6" className={classes.title}>
+              <strong>{watershed?.properties?.pws_name}</strong>
+            </Typography>
+          )}
         <Typography variant="body1" className={classes.paragraph}>
           <strong>County:</strong> {watershed?.properties?.county_nam ?? "N/A"}
         </Typography>
@@ -225,6 +244,24 @@ export default function WatershedOverview() {
           <strong>Source Type:</strong>{" "}
           {watershed?.properties?.srctype ?? "N/A"}
         </Typography>
+        {(watershed?.properties?.owner_type ||
+          watershed?.properties?.pop_group ||
+          watershed?.properties?.treat_type) && (
+          <>
+            <Typography variant="body1" className={classes.paragraph}>
+              <strong>Water Utility Type:</strong>{" "}
+              {watershed?.properties?.owner_type ?? "N/A"}
+            </Typography>
+            <Typography variant="body1" className={classes.paragraph}>
+              <strong>Customers Served:</strong>{" "}
+              {watershed?.properties?.pop_group ?? "N/A"}
+            </Typography>
+            <Typography variant="body1" className={classes.paragraph}>
+              <strong>Treatment Processes:</strong>{" "}
+              {watershed?.properties?.treat_type ?? "N/A"}
+            </Typography>
+          </>
+        )}
       </div>
 
       <div className={classes.modelsBox}>

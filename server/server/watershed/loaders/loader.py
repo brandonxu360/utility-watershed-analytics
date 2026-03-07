@@ -259,7 +259,11 @@ def load_with_discovery(
     # 1. Load batch-based watersheds
     for batch_cfg in cfg.api.batches:
         discovery = WatershedDataDiscovery(config=cfg, batch_config=batch_cfg)
-        batch_name = discovery.watersheds_filename.replace("_completed.geojson", "")
+        # The batch name is the last path segment of the batch URL — this is
+        # what appears in runids (e.g. "batch;;nasa-roses-2026-sbs;;OR-20").
+        # Do NOT derive it from watersheds_filename, which may be an override
+        # with an unrelated name (e.g. "WWS_Watersheds_HUC10_psbs_030426.geojson").
+        batch_name = batch_cfg.batch_url.rstrip("/").split("/")[-1]
 
         # When explicit runids are provided, only pass those that belong to
         # this batch (the batch name is the middle segment of the runid, e.g.

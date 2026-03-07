@@ -366,6 +366,7 @@ export default function WatershedMap(): JSX.Element {
             bounds={sbsBounds}
           />
         )}
+
       </MapContainer>
 
       <LandUseLegend landuseLegendMap={landuseLegendMap} />

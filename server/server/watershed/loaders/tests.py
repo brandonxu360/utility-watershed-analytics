@@ -562,6 +562,27 @@ class TestDiscoveryUrlGeneration(unittest.TestCase):
         )
         self.assertEqual(discovery.watersheds_filename, "victoria-ca-2026-sbs_completed.geojson")
 
+    def test_watersheds_filename_override_used_for_filename_and_url(self):
+        """BatchConfig.watersheds_filename override takes precedence over the derived name."""
+        custom_filename = "WWS_Watersheds_HUC10_psbs_030426.geojson"
+        batch_config = BatchConfig(
+            batch_url="https://test.example.com/weppcloud/batch/nasa-roses-2026-sbs",
+            watersheds_filename=custom_filename,
+        )
+        config = LoaderConfig(
+            api=ApiConfig(
+                weppcloud_base_url="https://test.example.com/weppcloud",
+                batches=[batch_config],
+            ),
+        )
+        discovery = WatershedDataDiscovery(config=config, batch_config=batch_config)
+
+        self.assertEqual(discovery.watersheds_filename, custom_filename)
+        self.assertEqual(
+            discovery.watersheds_url,
+            f"https://test.example.com/weppcloud/batch/nasa-roses-2026-sbs/download/resources/{custom_filename}",
+        )
+
     def test_victoria_get_urls_preserves_mixed_case_runid(self):
         """URL generation for victoria batch preserves mixed-case run IDs."""
         discovery = WatershedDataDiscovery(

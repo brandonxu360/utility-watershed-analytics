@@ -342,4 +342,165 @@ describe("WatershedOverview", () => {
       });
     });
   });
+
+  describe("multi-utility title rendering (huc10_utility_count > 1)", () => {
+    const setupMulti = (huc10_pws_names: string | null, pws_name = "Fallback Watershed") => {
+      mockUseParams.mockReturnValue("multi-ws");
+      mockFetchWatersheds.mockResolvedValue({
+        features: [
+          {
+            id: "multi-ws",
+            properties: {
+              pws_name,
+              huc10_utility_count: 2,
+              huc10_pws_names,
+              county_nam: "Test County",
+              shape_area: 1000,
+              srctype: "Surface Water",
+            },
+          },
+        ],
+      });
+    };
+
+    it("renders each name as a separate title row when huc10_pws_names is well-formed", async () => {
+      setupMulti("Alpha Water;Beta Water");
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Alpha Water")).toBeInTheDocument();
+        expect(screen.getByText("Beta Water")).toBeInTheDocument();
+      });
+    });
+
+    it("trims whitespace from each name", async () => {
+      setupMulti("  Alpha Water ; Beta Water  ");
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Alpha Water")).toBeInTheDocument();
+        expect(screen.getByText("Beta Water")).toBeInTheDocument();
+      });
+    });
+
+    it("filters out empty entries produced by a trailing semicolon", async () => {
+      setupMulti("Alpha Water;Beta Water;");
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Alpha Water")).toBeInTheDocument();
+        expect(screen.getByText("Beta Water")).toBeInTheDocument();
+      });
+
+      // Only the two real names should appear as title rows — no blank element
+      const allStrong = document.querySelectorAll("strong");
+      const titleTexts = Array.from(allStrong).map((el) => el.textContent?.trim());
+      expect(titleTexts.filter((t) => t === "")).toHaveLength(0);
+    });
+
+    it("falls back to pws_name when huc10_pws_names is null", async () => {
+      setupMulti(null, "Fallback Watershed");
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Fallback Watershed")).toBeInTheDocument();
+      });
+    });
+
+    it("falls back to pws_name when huc10_pws_names is an empty string", async () => {
+      setupMulti("", "Fallback Watershed");
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Fallback Watershed")).toBeInTheDocument();
+      });
+    });
+
+    it("falls back to pws_name when huc10_pws_names contains only semicolons", async () => {
+      setupMulti(";;;", "Fallback Watershed");
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Fallback Watershed")).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("utility metadata section (owner_type / pop_group / treat_type)", () => {
+    const setupWithMeta = (
+      overrides: Partial<{
+        owner_type: string | null;
+        pop_group: string | null;
+        treat_type: string | null;
+      }>,
+    ) => {
+      mockUseParams.mockReturnValue("meta-ws");
+      mockFetchWatersheds.mockResolvedValue({
+        features: [
+          {
+            id: "meta-ws",
+            properties: {
+              pws_name: "Meta Watershed",
+              county_nam: "Meta County",
+              shape_area: 5000,
+              srctype: "Surface Water",
+              ...overrides,
+            },
+          },
+        ],
+      });
+    };
+
+    it("renders all three utility metadata fields when all are present", async () => {
+      setupWithMeta({
+        owner_type: "Local Government",
+        pop_group: "100,001 to 500,000",
+        treat_type: "Filtration",
+      });
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Water Utility Type:/)).toBeInTheDocument();
+        expect(screen.getByText(/Local Government/)).toBeInTheDocument();
+        expect(screen.getByText(/Customers Served:/)).toBeInTheDocument();
+        expect(screen.getByText(/100,001 to 500,000/)).toBeInTheDocument();
+        expect(screen.getByText(/Treatment Processes:/)).toBeInTheDocument();
+        expect(screen.getByText(/Filtration/)).toBeInTheDocument();
+      });
+    });
+
+    it("renders the section with N/A placeholders when some fields are null", async () => {
+      setupWithMeta({ owner_type: "Local Government", pop_group: null, treat_type: null });
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Water Utility Type:/)).toBeInTheDocument();
+        expect(screen.getByText(/Local Government/)).toBeInTheDocument();
+        // The two null fields should display N/A
+        const naElements = screen.getAllByText("N/A");
+        expect(naElements.length).toBeGreaterThanOrEqual(2);
+      });
+    });
+
+    it("does not render the utility metadata section when all three fields are absent", async () => {
+      setupWithMeta({ owner_type: undefined as unknown as null });
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Water Utility Type:/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Customers Served:/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Treatment Processes:/)).not.toBeInTheDocument();
+      });
+    });
+
+    it("renders the section when only one of the three fields is present", async () => {
+      setupWithMeta({ owner_type: undefined as unknown as null, pop_group: undefined as unknown as null, treat_type: "Filtration" });
+      renderWithProviders(<WatershedOverview />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Treatment Processes:/)).toBeInTheDocument();
+        expect(screen.getByText(/Filtration/)).toBeInTheDocument();
+      });
+    });
+  });
 });
