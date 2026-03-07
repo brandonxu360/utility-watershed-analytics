@@ -139,9 +139,12 @@ class WatershedDataDiscovery:
         # (last path segment), e.g.:
         #   .../batch/nasa-roses-2026-sbs  -> nasa-roses-2026-sbs_completed.geojson
         #   .../batch/victoria-ca-2026-sbs -> victoria-ca-2026-sbs_completed.geojson
+        # A BatchConfig.watersheds_filename override takes precedence so that
+        # teams can publish the master GeoJSON under a custom name without
+        # changing the batch URL.
         base = bc.batch_url.rstrip("/")
         batch_name = base.split("/")[-1]
-        self.watersheds_filename = f"{batch_name}_completed.geojson"
+        self.watersheds_filename = bc.watersheds_filename or f"{batch_name}_completed.geojson"
         self.watersheds_url = f"{base}/download/resources/{self.watersheds_filename}"
     
     def discover_runids(self, force_refresh: bool = False) -> list[str]:

@@ -35,6 +35,10 @@ const useStyles = tss.create(({ theme }) => ({
     marginBottom: theme.spacing(1.5),
     fontSize: theme.typography.h3.fontSize,
   },
+  titleMulti: {
+    marginBottom: theme.spacing(1),
+    fontSize: `calc((${theme.typography.h3.fontSize} + ${theme.typography.h4.fontSize}) / 2)`,
+  },
   paragraph: {
     marginBottom: theme.spacing(2),
     fontSize: theme.typography.body1.fontSize,
@@ -182,6 +186,18 @@ export default function WatershedOverview() {
     );
   }, [watersheds?.features, runId]);
 
+  const hasMultipleUtilities =
+    (watershed?.properties?.huc10_utility_count ?? 0) > 1;
+
+  const utilityDisplayNames = useMemo(() => {
+    const names = (watershed?.properties?.huc10_pws_names ?? "")
+      .split(";")
+      .map((name: string) => name.trim())
+      .filter((name: string) => name.length > 0);
+
+    return names.length > 0 ? names : [watershed?.properties?.pws_name ?? ""];
+  }, [watershed?.properties?.huc10_pws_names, watershed?.properties?.pws_name]);
+
   if (isLoading) return <SkeletonWatershedPanel />;
   if (error) return <div>Error: {(error as Error).message}</div>;
   if (!watersheds?.features) return <div>No watershed data found.</div>;
@@ -205,26 +221,53 @@ export default function WatershedOverview() {
         BACK
       </Button>
       <div className={classes.contentBox}>
-        <Typography variant="h6" className={classes.title}>
-          <strong>{watershed?.properties?.pws_name}</strong>
+        {hasMultipleUtilities ? (
+          utilityDisplayNames.map((name: string, i: number) => (
+            <Typography key={i} variant="h6" className={classes.titleMulti}>
+              <strong>{name}</strong>
+            </Typography>
+          ))
+        ) : (
+          <Typography variant="h6" className={classes.title}>
+            <strong>{watershed?.properties?.pws_name}</strong>
+          </Typography>
+        )}
+        <Typography variant="body1" className={classes.paragraph}>
+          <strong>County: </strong>
+          {watershed?.properties?.county_nam ?? "N/A"}
         </Typography>
         <Typography variant="body1" className={classes.paragraph}>
-          <strong>County:</strong> {watershed?.properties?.county_nam ?? "N/A"}
-        </Typography>
-        <Typography variant="body1" className={classes.paragraph}>
-          <strong>Area:</strong>{" "}
+          <strong>Area: </strong>
           {watershed?.properties?.shape_area
             ? `${watershed?.properties?.shape_area.toFixed(2)}`
             : "N/A"}
         </Typography>
         <Typography variant="body1" className={classes.paragraph}>
-          <strong>Source Name:</strong>{" "}
+          <strong>Source Name: </strong>
           {watershed?.properties?.srcname ?? "N/A"}
         </Typography>
         <Typography variant="body1" className={classes.paragraph}>
-          <strong>Source Type:</strong>{" "}
+          <strong>Source Type: </strong>
           {watershed?.properties?.srctype ?? "N/A"}
         </Typography>
+        {(watershed?.properties?.owner_type ||
+          watershed?.properties?.pop_group ||
+          watershed?.properties?.treat_type) && (
+          <>
+            <Typography variant="body1" className={classes.paragraph}>
+              <strong>Water Utility Type: </strong>
+              {watershed?.properties?.owner_type ?? "N/A"}
+            </Typography>
+            <Typography variant="body1" className={classes.paragraph}>
+              <strong>Customers Served: </strong>
+              {watershed?.properties?.pop_group ?? "N/A"}
+            </Typography>
+            <Typography variant="body1" className={classes.paragraph}>
+              <strong>Treatment Processes: </strong>
+              {watershed?.properties?.treat_type ?? "N/A"}
+            </Typography>
+          </>
+        )}
       </div>
 
       <div className={classes.modelsBox}>
