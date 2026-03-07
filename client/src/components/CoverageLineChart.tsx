@@ -12,10 +12,7 @@ import {
   LineChart,
 } from "recharts";
 
-type ChartData = {
-  name: string;
-  coverage: number;
-}[];
+type ChartData = ({ name: string } & Record<string, number | string>)[];
 
 export type CoverageLineChartProps = {
   data: ChartData;
@@ -86,8 +83,16 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
                 data-stroke={theme.palette.surface.light.toLowerCase()}
               />
               <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip labelStyle={{ color: theme.palette.secondary.dark }} />
+              <YAxis tickFormatter={(v: number) => v.toFixed(1)} />
+              <Tooltip
+                labelStyle={{ color: theme.palette.secondary.dark }}
+                formatter={(value) =>
+                  typeof value === "number" ? value.toFixed(1) : value
+                }
+                itemSorter={(item) =>
+                  lineKeys.findIndex((k) => k.key === item.dataKey)
+                }
+              />
               <Legend />
               {lineKeys.map((line) => (
                 <Line

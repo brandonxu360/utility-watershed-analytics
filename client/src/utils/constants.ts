@@ -26,7 +26,7 @@ export const VEGETATION_OPTIONS: {
   label: string;
   chartKeys: ChartKey[];
 }[] = [
-  { value: "all", label: "All", chartKeys: [SHRUB_KEY, TREE_KEY] },
+  { value: "all", label: "All", chartKeys: [TREE_KEY, SHRUB_KEY] },
   { value: "shrub", label: "Shrub", chartKeys: [SHRUB_KEY] },
   { value: "tree", label: "Tree", chartKeys: [TREE_KEY] },
 ];

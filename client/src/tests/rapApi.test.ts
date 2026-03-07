@@ -65,9 +65,13 @@ describe("rapApi validation", () => {
         column: string;
         value: unknown;
       }>;
-      // Should only have topazId filter, not year
-      expect(filters.length).toBe(1);
+      // Should have topazId + band filters, but not year
+      expect(filters.length).toBe(2);
       expect(filters[0].column).toBe("rap.topaz_id");
+      const bandFilter = filters.find((f) => f.column === "rap.band");
+      expect(bandFilter).toBeDefined();
+      const yearFilter = filters.find((f) => f.column === "rap.year");
+      expect(yearFilter).toBeUndefined();
     });
 
     it("includes valid year in filters", async () => {
@@ -82,9 +86,11 @@ describe("rapApi validation", () => {
         column: string;
         value: unknown;
       }>;
-      expect(filters.length).toBe(2);
-      expect(filters[1].column).toBe("rap.year");
-      expect(filters[1].value).toBe(2020);
+      // topazId + band + year
+      expect(filters.length).toBe(3);
+      const yearFilter = filters.find((f) => f.column === "rap.year");
+      expect(yearFilter).toBeDefined();
+      expect(yearFilter?.value).toBe(2020);
     });
   });
 

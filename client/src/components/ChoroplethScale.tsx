@@ -28,16 +28,7 @@ const useStyles = tss.create(({ theme }) => ({
   },
 }));
 
-const formatValue = (value: number): string => {
-  if (Math.abs(value) >= 1000) {
-    return value.toFixed(0);
-  } else if (Math.abs(value) >= 100) {
-    return value.toFixed(1);
-  } else if (Math.abs(value) >= 10) {
-    return value.toFixed(2);
-  }
-  return value.toFixed(3);
-};
+const formatValue = (value: number): string => value.toFixed(1);
 
 export const ChoroplethScale: React.FC<ChoroplethScaleProps> = ({
   colormap,

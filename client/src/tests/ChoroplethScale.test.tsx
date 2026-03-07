@@ -39,8 +39,8 @@ describe("ChoroplethScale", () => {
       render(
         <ChoroplethScale {...defaultProps} range={{ min: 0, max: 100 }} />,
       );
-      expect(screen.getByText("0.000")).toBeInTheDocument();
-      expect(screen.getByText("50.00")).toBeInTheDocument();
+      expect(screen.getByText("0.0")).toBeInTheDocument();
+      expect(screen.getByText("50.0")).toBeInTheDocument();
       expect(screen.getByText("100.0")).toBeInTheDocument();
     });
 
@@ -62,13 +62,13 @@ describe("ChoroplethScale", () => {
   });
 
   describe("formatValue function", () => {
-    it("formats values >= 1000 with 0 decimal places", () => {
+    it("formats values >= 1000 with 1 decimal place", () => {
       render(
         <ChoroplethScale {...defaultProps} range={{ min: 1000, max: 5000 }} />,
       );
-      expect(screen.getByText("1000")).toBeInTheDocument();
-      expect(screen.getByText("3000")).toBeInTheDocument();
-      expect(screen.getByText("5000")).toBeInTheDocument();
+      expect(screen.getByText("1000.0")).toBeInTheDocument();
+      expect(screen.getByText("3000.0")).toBeInTheDocument();
+      expect(screen.getByText("5000.0")).toBeInTheDocument();
     });
 
     it("formats values >= 100 with 1 decimal place", () => {
@@ -80,20 +80,20 @@ describe("ChoroplethScale", () => {
       expect(screen.getByText("500.0")).toBeInTheDocument();
     });
 
-    it("formats values >= 10 with 2 decimal places", () => {
+    it("formats values >= 10 with 1 decimal place", () => {
       render(
         <ChoroplethScale {...defaultProps} range={{ min: 10, max: 50 }} />,
       );
-      expect(screen.getByText("10.00")).toBeInTheDocument();
-      expect(screen.getByText("30.00")).toBeInTheDocument();
-      expect(screen.getByText("50.00")).toBeInTheDocument();
+      expect(screen.getByText("10.0")).toBeInTheDocument();
+      expect(screen.getByText("30.0")).toBeInTheDocument();
+      expect(screen.getByText("50.0")).toBeInTheDocument();
     });
 
-    it("formats values < 10 with 3 decimal places", () => {
+    it("formats values < 10 with 1 decimal place", () => {
       render(<ChoroplethScale {...defaultProps} range={{ min: 0, max: 5 }} />);
-      expect(screen.getByText("0.000")).toBeInTheDocument();
-      expect(screen.getByText("2.500")).toBeInTheDocument();
-      expect(screen.getByText("5.000")).toBeInTheDocument();
+      expect(screen.getByText("0.0")).toBeInTheDocument();
+      expect(screen.getByText("2.5")).toBeInTheDocument();
+      expect(screen.getByText("5.0")).toBeInTheDocument();
     });
 
     it("handles negative values correctly", () => {
@@ -101,7 +101,7 @@ describe("ChoroplethScale", () => {
         <ChoroplethScale {...defaultProps} range={{ min: -100, max: 100 }} />,
       );
       expect(screen.getByText("-100.0")).toBeInTheDocument();
-      expect(screen.getByText("0.000")).toBeInTheDocument();
+      expect(screen.getByText("0.0")).toBeInTheDocument();
       expect(screen.getByText("100.0")).toBeInTheDocument();
     });
 
@@ -112,9 +112,9 @@ describe("ChoroplethScale", () => {
           range={{ min: -5000, max: -1000 }}
         />,
       );
-      expect(screen.getByText("-5000")).toBeInTheDocument();
-      expect(screen.getByText("-3000")).toBeInTheDocument();
-      expect(screen.getByText("-1000")).toBeInTheDocument();
+      expect(screen.getByText("-5000.0")).toBeInTheDocument();
+      expect(screen.getByText("-3000.0")).toBeInTheDocument();
+      expect(screen.getByText("-1000.0")).toBeInTheDocument();
     });
   });
 
@@ -136,7 +136,7 @@ describe("ChoroplethScale", () => {
         <ChoroplethScale {...defaultProps} range={{ min: 50, max: 50 }} />,
       );
       // All three labels should show the same value
-      const labels = screen.getAllByText("50.00");
+      const labels = screen.getAllByText("50.0");
       expect(labels).toHaveLength(3);
     });
 
@@ -147,9 +147,9 @@ describe("ChoroplethScale", () => {
           range={{ min: 0.001, max: 0.009 }}
         />,
       );
-      expect(screen.getByText("0.001")).toBeInTheDocument();
-      expect(screen.getByText("0.005")).toBeInTheDocument();
-      expect(screen.getByText("0.009")).toBeInTheDocument();
+      // All three values round to 0.0 at 1 decimal place
+      const labels = screen.getAllByText("0.0");
+      expect(labels).toHaveLength(3);
     });
 
     it("handles very large values", () => {
@@ -159,9 +159,9 @@ describe("ChoroplethScale", () => {
           range={{ min: 10000, max: 50000 }}
         />,
       );
-      expect(screen.getByText("10000")).toBeInTheDocument();
-      expect(screen.getByText("30000")).toBeInTheDocument();
-      expect(screen.getByText("50000")).toBeInTheDocument();
+      expect(screen.getByText("10000.0")).toBeInTheDocument();
+      expect(screen.getByText("30000.0")).toBeInTheDocument();
+      expect(screen.getByText("50000.0")).toBeInTheDocument();
     });
 
     it("handles empty unit string", () => {

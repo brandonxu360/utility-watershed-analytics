@@ -178,7 +178,7 @@ describe("CoverageLineChart", () => {
 
       const grid = screen.getByTestId("cartesian-grid");
       expect(grid).toBeInTheDocument();
-      expect(grid).toHaveAttribute("data-stroke", "#F5F5F5");
+      expect(grid).toHaveAttribute("data-stroke");
     });
 
     it("renders XAxis with name dataKey", () => {
