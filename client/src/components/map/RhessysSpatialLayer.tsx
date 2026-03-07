@@ -1,11 +1,15 @@
 import { TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
+import { getDescriptor } from "../../layers/registry";
+import type { LayerId } from "../../layers/types";
+
+const LAYER_ID: LayerId = "rhessysSpatial";
 
 interface RhessysSpatialLayerProps {
   runId: string;
   filename: string;
-  opacity?: number;
+  opacity: number;
   bounds?: L.LatLngBoundsExpression;
 }
 
@@ -18,9 +22,10 @@ interface RhessysSpatialLayerProps {
 export default function RhessysSpatialLayer({
   runId,
   filename,
-  opacity = 0.7,
+  opacity,
   bounds,
 }: RhessysSpatialLayerProps) {
+  const { zIndex } = getDescriptor(LAYER_ID);
   const url = API_ENDPOINTS.RHESSYS_SPATIAL_TILE(runId, filename);
 
   return (
@@ -28,7 +33,7 @@ export default function RhessysSpatialLayer({
       key={url}
       url={url}
       opacity={opacity}
-      zIndex={510}
+      zIndex={zIndex}
       crossOrigin="anonymous"
       {...(bounds ? { bounds } : {})}
     />
