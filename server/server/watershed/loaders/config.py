@@ -153,24 +153,15 @@ class RetryConfig:
 def _default_batches() -> list[BatchConfig]:
     return [
         BatchConfig(
-            batch_url=os.environ.get(
-                "WEPPCLOUD_BATCH_URL",
-                "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
-            ),
+            batch_url="https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
             jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN"),
             # Drop-in replacement GeoJSON with utility metadata merged in
             # (OwnerType, PopGroup, TreatType, ConnGroup + HUC10 aggregates).
             # Must contain current nasa-roses-2026-sbs runids.
-            watersheds_filename=os.environ.get(
-                "WEPPCLOUD_BATCH_WATERSHEDS_FILENAME",
-                "WWS_Watersheds_HUC10_psbs_030426.geojson",
-            ),
+            watersheds_filename="WWS_Watersheds_HUC10_psbs_030426.geojson",
         ),
         BatchConfig(
-            batch_url=os.environ.get(
-                "WEPPCLOUD_BATCH_URL_2",
-                "https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs",
-            ),
+            batch_url="https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs",
             jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN_2"),
         ),
     ]
@@ -205,26 +196,7 @@ class ApiConfig:
                 "WEPPCLOUD_BASE_URL",
                 cls.weppcloud_base_url,
             ),
-            batches=[
-                BatchConfig(
-                    batch_url=_get_env_str(
-                        "WEPPCLOUD_BATCH_URL",
-                        "https://wepp.cloud/weppcloud/batch/nasa-roses-2026-sbs",
-                    ),
-                    jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN"),
-                    watersheds_filename=os.environ.get(
-                        "WEPPCLOUD_BATCH_WATERSHEDS_FILENAME",
-                        "WWS_Watersheds_HUC10_psbs_030426.geojson",
-                    ),
-                ),
-                BatchConfig(
-                    batch_url=_get_env_str(
-                        "WEPPCLOUD_BATCH_URL_2",
-                        "https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs",
-                    ),
-                    jwt_token=os.environ.get("WEPPCLOUD_JWT_TOKEN_2") or None,
-                ),
-            ],
+            batches=_default_batches(),
             standalone_runs=_default_standalone_runs(),
         )
 
