@@ -2,14 +2,13 @@
 Automatic data source discovery for watershed loading.
 
 This module discovers available watershed data dynamically by:
-1. Fetching the master watersheds GeoJSON to get all runids
-2. Generating data URLs from templates based on runid patterns
+1. Fetching the master watersheds GeoJSON to get all runids (batch-based)
+2. Using fixed URLs for standalone runs (non-batch)
+3. Generating data URLs from templates based on runid patterns
 
-Key benefits:
-- No manual manifest maintenance required
-- Automatically picks up new watersheds as they become available
-- Centralizes URL pattern definitions
-- Enables runtime validation of data availability
+Supports two source types:
+- WatershedDataDiscovery: Batch-based discovery from a master GeoJSON
+- StandaloneRunDiscovery: Fixed URLs for individual WEPPcloud runs
 """
 
 import requests
@@ -17,7 +16,7 @@ import logging
 from dataclasses import dataclass
 from typing import Iterator, Optional
 from pathlib import Path
-from .config import BatchConfig, LoaderConfig, get_config
+from .config import LoaderConfig, BatchConfig, StandaloneRunConfig, get_config
 from .exceptions import DataSourceError
 
 logger = logging.getLogger("watershed.loader")
@@ -27,6 +26,7 @@ logger = logging.getLogger("watershed.loader")
 # Canonical runid format examples:
 #   NASA ROSES: "batch;;nasa-roses-2026-sbs;;OR-10" (uppercase state code)
 #   Victoria:   "batch;;victoria-ca-2026-sbs;;Leech" (mixed-case proper noun, preserved as-is)
+#   Standalone: "aversive-forestry" (single segment, never uppercased)
 
 
 def normalize_runid(runid: str) -> str:
@@ -37,6 +37,7 @@ def normalize_runid(runid: str) -> str:
     historically sometimes provided in lowercase; it is uppercased here for
     consistency.  For all other batches (e.g. victoria-ca-2026-sbs) the last
     segment is a mixed-case proper noun and must be left unchanged.
+    Standalone runids (single segment) are always returned unchanged.
 
     Args:
         runid: Full runid format (e.g., "batch;;nasa-roses-2026-sbs;;or-10")
@@ -48,6 +49,7 @@ def normalize_runid(runid: str) -> str:
         "batch;;nasa-roses-2026-sbs;;or-10"  -> "batch;;nasa-roses-2026-sbs;;OR-10"
         "batch;;nasa-roses-2026-sbs;;OR-10"  -> "batch;;nasa-roses-2026-sbs;;OR-10"
         "batch;;victoria-ca-2026-sbs;;Leech" -> "batch;;victoria-ca-2026-sbs;;Leech"
+        "aversive-forestry"                  -> "aversive-forestry"
     """
     parts = runid.split(";;")
     if len(parts) >= 2 and "nasa-roses" in parts[-2]:
@@ -83,16 +85,6 @@ class UrlTemplates:
     
     Uses {weppcloud_base} and {runid} placeholders that get substituted
     with actual values at runtime.
-    
-    NASA ROSES 2026 URL patterns using the disturbed_wbt config:
-    - Base: https://wepp.cloud/weppcloud/runs/{runid}/disturbed_wbt/download/...
-    - Subcatchments: /download/dem/wbt/subcatchments.WGS.geojson
-    - Channels: /download/dem/wbt/channels.WGS.geojson
-    - Hillslopes: /download/watershed/hillslopes.parquet
-    - Soils: /download/soils/soils.parquet
-    - Landuse: /download/landuse/landuse.parquet
-    
-    Where {runid} is the full normalized runid: batch;;nasa-roses-2026-sbs;;OR-10
     """
     subcatchments: str = "{weppcloud_base}/runs/{runid}/disturbed_wbt/download/dem/wbt/subcatchments.WGS.geojson"
     channels: str = "{weppcloud_base}/runs/{runid}/disturbed_wbt/download/dem/wbt/channels.WGS.geojson"
@@ -103,32 +95,22 @@ class UrlTemplates:
 
 class WatershedDataDiscovery:
     """
-    Discovers available watershed data from source APIs.
+    Discovers available watershed data from a batch API.
     
     This class automatically:
     1. Fetches the master watersheds GeoJSON
     2. Extracts all available runids
     3. Generates data URLs from configurable templates
     
-    Example:
-        discovery = WatershedDataDiscovery()
-        
-        # Get all available runids
-        runids = discovery.discover_runids()
-        
-        # Generate URLs for a specific runid
-        urls = discovery.get_urls_for_runid("batch;;nasa-roses-2026-sbs;;OR-20")
-        
-        # Iterate through all subcatchment sources
-        for source in discovery.iter_subcatchments():
-            process(source)
+    The watersheds filename is derived from the batch URL, making it
+    generic across different batches (e.g. nasa-roses, victoria).
     """
     
     def __init__(
         self,
         config: Optional[LoaderConfig] = None,
-        templates: Optional[UrlTemplates] = None,
         batch_config: Optional[BatchConfig] = None,
+        templates: Optional[UrlTemplates] = None,
     ):
         """
         Initialize discovery with configuration.
@@ -166,16 +148,7 @@ class WatershedDataDiscovery:
         """
         Fetch watersheds GeoJSON and extract all runids.
         
-        Runids are in canonical format (uppercase state codes).
-        
-        Args:
-            force_refresh: If True, ignore cache and fetch fresh data
-        
-        Returns:
-            List of all available runids in canonical format
-        
-        Raises:
-            DataSourceError: If watersheds data cannot be fetched
+        Runids are normalized to canonical format.
         """
         if self._cached_runids is not None and not force_refresh:
             return self._cached_runids
@@ -221,24 +194,8 @@ class WatershedDataDiscovery:
         )
     
     def get_urls_for_runid(self, runid: str) -> dict[str, str]:
-        """
-        Generate all data URLs for a given runid.
-        
-        Args:
-            runid: The watershed runid (any format - will be normalized)
-        
-        Returns:
-            Dictionary mapping data type to URL
-            
-        Example:
-            For runid "batch;;nasa-roses-2026-sbs;;or-10":
-            {
-                "subcatchments": "https://wepp.cloud/weppcloud/runs/batch;;nasa-roses-2026-sbs;;OR-10/disturbed_wbt/download/dem/wbt/subcatchments.WGS.geojson",
-                ...
-            }
-        """
+        """Generate all data URLs for a given runid."""
         weppcloud_base = self.config.api.weppcloud_base_url.rstrip("/")
-        # Normalize runid (defensive uppercase conversion)
         normalized = normalize_runid(runid)
 
         return {
@@ -274,9 +231,6 @@ class WatershedDataDiscovery:
         Args:
             data_type: One of 'subcatchments', 'channels', 'hillslopes', 'soils', 'landuse'
             runids: Optional filter - only yield sources for these runids
-        
-        Yields:
-            DataSource objects for each available data file
         """
         available_runids = runids if runids is not None else self.discover_runids()
         
@@ -315,19 +269,9 @@ class WatershedDataDiscovery:
         yield from self.iter_sources("landuse", runids)
     
     def check_availability(self, source: DataSource, timeout: float = 5.0) -> bool:
-        """
-        Check if a data source is available (HEAD request).
-        
-        Args:
-            source: The data source to check
-            timeout: Request timeout in seconds
-        
-        Returns:
-            True if the source is available, False otherwise
-        """
+        """Check if a data source is available (HEAD request)."""
         if source.has_local_cache():
             return True
-        
         try:
             response = requests.head(source.url, timeout=timeout)
             return response.status_code == 200
@@ -348,28 +292,12 @@ class WatershedDataDiscovery:
     def iter_subcatchments_as_tuples(
         self, runids: Optional[list[str]] = None
     ) -> Iterator[tuple[str, str, Optional[Path]]]:
-        """
-        Iterate through subcatchment data sources as tuples.
-        
-        This method implements the DataSourceProvider protocol.
-        
-        Yields:
-            Tuples of (runid, url, local_path)
-        """
         for source in self.iter_subcatchments(runids):
             yield (source.name, source.url, source.local_path)
     
     def iter_channels_as_tuples(
         self, runids: Optional[list[str]] = None
     ) -> Iterator[tuple[str, str, Optional[Path]]]:
-        """
-        Iterate through channel data sources as tuples.
-        
-        This method implements the DataSourceProvider protocol.
-        
-        Yields:
-            Tuples of (runid, url, local_path)
-        """
         for source in self.iter_channels(runids):
             yield (source.name, source.url, source.local_path)
     
@@ -378,27 +306,99 @@ class WatershedDataDiscovery:
         data_type: str,
         runids: Optional[list[str]] = None,
     ) -> Iterator[tuple[str, str, Optional[Path]]]:
-        """
-        Iterate through parquet data sources as tuples.
-        
-        Args:
-            data_type: One of 'hillslopes', 'soils', 'landuse'
-            runids: Optional filter for specific runids
-        
-        Yields:
-            Tuples of (runid, url, local_path)
-        """
         for source in self.iter_sources(data_type, runids):
             yield (source.name, source.url, source.local_path)
 
 
-# Convenience function for simple usage
+class StandaloneRunDiscovery:
+    """
+    Discovery for standalone WEPPcloud runs (not part of a batch).
+    
+    Unlike WatershedDataDiscovery, this class doesn't fetch a master GeoJSON
+    to discover runids. Instead, it uses fixed URLs from a StandaloneRunConfig.
+    
+    It implements the same interface as WatershedDataDiscovery so the loader
+    can work with both interchangeably.
+    """
+    
+    def __init__(
+        self,
+        standalone_config: StandaloneRunConfig,
+        config: Optional[LoaderConfig] = None,
+    ):
+        self.standalone_config = standalone_config
+        self.config = config or get_config()
+        self.jwt_token = None
+        self._urls = standalone_config.get_data_urls()
+    
+    def discover_runids(self, force_refresh: bool = False) -> list[str]:
+        return [self.standalone_config.runid]
+    
+    def get_watersheds_url(self) -> str:
+        return self.standalone_config.boundary_url
+    
+    def get_watersheds_local_path(self) -> Optional[Path]:
+        local_path = (
+            self.config.local_data_dir
+            / "watersheds"
+            / f"{self.standalone_config.runid}.geojson"
+        )
+        return local_path if local_path.exists() else None
+    
+    def get_watersheds_source(self) -> DataSource:
+        local_path = self.get_watersheds_local_path()
+        return DataSource(
+            name="watersheds",
+            url=self.standalone_config.boundary_url,
+            local_path=local_path,
+            data_type="watersheds",
+        )
+    
+    def get_urls_for_runid(self, runid: str) -> dict[str, str]:
+        return {k: v for k, v in self._urls.items() if k != "boundary"}
+    
+    def _get_local_path(self, runid: str, data_type: str, extension: str) -> Path:
+        return self.config.local_data_dir / data_type / f"{runid}.{extension}"
+    
+    def iter_sources(
+        self,
+        data_type: str,
+        runids: Optional[list[str]] = None,
+    ) -> Iterator[DataSource]:
+        target_runid = self.standalone_config.runid
+        if runids is not None and target_runid not in runids:
+            return
+        
+        url = self._urls.get(data_type)
+        if url:
+            extension = "parquet" if data_type in ("hillslopes", "soils", "landuse") else "geojson"
+            local_path = self._get_local_path(target_runid, data_type, extension)
+            yield DataSource(
+                name=target_runid,
+                url=url,
+                local_path=local_path if local_path.exists() else None,
+                data_type=data_type,
+            )
+    
+    def iter_subcatchments(self, runids: Optional[list[str]] = None) -> Iterator[DataSource]:
+        yield from self.iter_sources("subcatchments", runids)
+    
+    def iter_channels(self, runids: Optional[list[str]] = None) -> Iterator[DataSource]:
+        yield from self.iter_sources("channels", runids)
+
+
 def discover_all_runids(config: Optional[LoaderConfig] = None) -> list[str]:
     """
-    Discover all available runids.
-    
-    This is a convenience function for simple usage patterns.
-    For more control, use the WatershedDataDiscovery class directly.
+    Discover all available runids across all batches and standalone runs.
     """
-    discovery = WatershedDataDiscovery(config=config)
-    return discovery.discover_runids()
+    cfg = config or get_config()
+    all_runids = []
+    
+    for batch_config in cfg.api.batches:
+        discovery = WatershedDataDiscovery(config=cfg, batch_config=batch_config)
+        all_runids.extend(discovery.discover_runids())
+    
+    for standalone in cfg.api.standalone_runs:
+        all_runids.append(standalone.runid)
+    
+    return all_runids

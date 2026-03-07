@@ -10,24 +10,13 @@ import pandas as pd
 from typing import Optional
 from collections import defaultdict
 
+from django.contrib.gis.gdal import SpatialReference, CoordTransform
 from django.contrib.gis.geos import Polygon, MultiPolygon
 
 from server.watershed.models import Watershed, Subcatchment, Channel
 
 from .config import LoaderConfig, get_config
 from .protocols import DataWriter
-
-def _get_feature_field(feature, *field_names):
-    """Safely get a field value from a GDAL feature, trying each name in order.
-
-    Returns the value of the first matching field, or None if none of the given
-    names exist in the feature.  Passing multiple names supports batches with
-    different schemas (e.g. nasa-roses uses 'SrcName'; victoria uses 'name').
-    """
-    for field_name in field_names:
-        if field_name in feature.fields:
-            return feature.get(field_name)
-    return None
 
 logger = logging.getLogger("watershed.loader")
 
@@ -90,6 +79,7 @@ LANDUSE_FIELD_MAP = [
 # cover batches with different schemas:
 #   nasa-roses: PWS_ID, SrcName, Shape_Leng, Shape_Area, …
 #   victoria-ca: name, area_km2 (no PWS_ID, no Shape_* etc.)
+#   standalone:  boundary GeoJSON may only carry geometry
 WATERSHED_FIELD_SOURCES = {
     'pws_id':     ('PWS_ID',),
     'srcname':    ('SrcName', 'name'),   # nasa-roses: SrcName; victoria: name
@@ -119,6 +109,45 @@ CHANNEL_MAPPING = {
 }
 
 
+def _get_feature_field(feature, *field_names):
+    """
+    Try multiple OGR field names in order, returning the first match.
+    
+    This bridges schema differences between batches (e.g. 'SrcName' in
+    NASA ROSES vs 'name' in other batches). Fields absent from the layer
+    schema raise IndexError in Django's GDAL bindings; we catch that and
+    move on to the next candidate.
+    """
+    for name in field_names:
+        try:
+            value = feature.get(name)
+            if value is not None:
+                return value
+        except (IndexError, KeyError):
+            continue
+    return None
+
+
+def _extract_geometry(feature, target_srid: int = 4326):
+    """
+    Extract and normalize geometry from an OGR feature.
+    
+    Transforms to target SRID if necessary and ensures MultiPolygon type.
+    """
+    ogr_geom = feature.geom
+
+    if ogr_geom.srs and ogr_geom.srs.srid != target_srid:
+        target_srs = SpatialReference(target_srid)
+        ct = CoordTransform(ogr_geom.srs, target_srs)
+        ogr_geom = ogr_geom.clone()
+        ogr_geom.transform(ct)
+
+    geom = ogr_geom.geos
+    if isinstance(geom, Polygon):
+        geom = MultiPolygon(geom)
+    return geom
+
+
 class DjangoDataWriter:
     """
     Production implementation of DataWriter using Django ORM.
@@ -130,15 +159,7 @@ class DjangoDataWriter:
         self.config = config or get_config()
     
     def save_watersheds(self, layer) -> int:
-        """
-        Save watershed features from a GDAL layer.
-        
-        Args:
-            layer: GDAL Layer containing watershed features
-        
-        Returns:
-            Number of watersheds saved
-        """
+        """Save watershed features from a GDAL layer."""
         instances = []
         for feature in layer:
             kwargs = {
@@ -146,51 +167,56 @@ class DjangoDataWriter:
                 for key, sources in WATERSHED_FIELD_SOURCES.items()
                 if key != 'geom'
             }
-            geom = feature.geom.geos
-            kwargs['geom'] = MultiPolygon(geom) if isinstance(geom, Polygon) else geom
+            kwargs['geom'] = _extract_geometry(feature)
             instances.append(Watershed(**kwargs))
         
         Watershed.objects.bulk_create(instances)
         return len(instances)
     
     def save_watersheds_filtered(self, layer, runids: set[str]) -> int:
-        """
-        Save only watersheds matching the given runids.
-        
-        Args:
-            layer: GDAL Layer containing watershed features
-            runids: Set of runids to filter by
-        
-        Returns:
-            Number of watersheds saved
-        """
+        """Save only watersheds matching the given runids."""
         instances = []
         for feature in layer:
-            feature_runid = feature.get('runid')
+            feature_runid = _get_feature_field(feature, 'runid')
             if feature_runid in runids:
                 kwargs = {
                     key: _get_feature_field(feature, *sources)
                     for key, sources in WATERSHED_FIELD_SOURCES.items()
                     if key != 'geom'
                 }
-                geom = feature.geom.geos
-                kwargs['geom'] = MultiPolygon(geom) if isinstance(geom, Polygon) else geom
+                kwargs['geom'] = _extract_geometry(feature)
                 instances.append(Watershed(**kwargs))
         
         Watershed.objects.bulk_create(instances)
         return len(instances)
     
+    def save_standalone_watershed(
+        self,
+        layer,
+        runid: str,
+        display_name: str,
+    ) -> int:
+        """
+        Save a watershed from a standalone boundary GeoJSON.
+        
+        Standalone boundary files (e.g. bound.geojson) typically have no
+        attribute fields. The runid and display_name are provided externally,
+        and geometry is transformed to EPSG:4326 if needed.
+        """
+        instances = []
+        for feature in layer:
+            geom = _extract_geometry(feature)
+            instances.append(Watershed(
+                runid=runid,
+                srcname=display_name,
+                geom=geom,
+            ))
+        
+        Watershed.objects.bulk_create(instances)
+        return len(instances)
+    
     def save_subcatchments(self, runid: str, layer) -> int:
-        """
-        Save subcatchment features for a watershed.
-        
-        Args:
-            runid: The parent watershed runid
-            layer: GDAL Layer containing subcatchment features
-        
-        Returns:
-            Number of subcatchments saved
-        """
+        """Save subcatchment features for a watershed."""
         return self._save_associated_layer(
             layer=layer,
             mapping=SUBCATCHMENT_MAPPING,
@@ -199,16 +225,7 @@ class DjangoDataWriter:
         )
     
     def save_channels(self, runid: str, layer) -> int:
-        """
-        Save channel features for a watershed.
-        
-        Args:
-            runid: The parent watershed runid
-            layer: GDAL Layer containing channel features
-        
-        Returns:
-            Number of channels saved
-        """
+        """Save channel features for a watershed."""
         return self._save_associated_layer(
             layer=layer,
             mapping=CHANNEL_MAPPING,
@@ -227,7 +244,6 @@ class DjangoDataWriter:
         for feature in layer:
             attributes = {key: feature.get(value) for key, value in mapping.items()}
             
-            # Create unique identifier based on model type
             if model_class == Channel:
                 entity_key = (attributes['topazid'], attributes['weppid'], attributes['order'])
             else:
@@ -260,19 +276,7 @@ class DjangoDataWriter:
         soils: Optional[pd.DataFrame],
         landuse: Optional[pd.DataFrame],
     ) -> int:
-        """
-        Update subcatchment records with parquet data.
-        
-        Args:
-            runid: The watershed runid
-            hillslopes: DataFrame with hillslope data (may be None)
-            soils: DataFrame with soils data (may be None)
-            landuse: DataFrame with landuse data (may be None)
-        
-        Returns:
-            Number of subcatchments updated
-        """
-        # Prepare dataframes indexed by TopazID
+        """Update subcatchment records with parquet data."""
         dataframes = {}
         field_maps = {}
         
@@ -297,7 +301,6 @@ class DjangoDataWriter:
         if not dataframes:
             return 0
         
-        # Get subcatchments and apply updates
         subcatchments = list(Subcatchment.objects.filter(watershed_id=runid))
         updated_subcatchments = []
         
@@ -314,7 +317,6 @@ class DjangoDataWriter:
             if was_updated:
                 updated_subcatchments.append(subcatchment)
         
-        # Bulk update
         if updated_subcatchments:
             all_fields = []
             for field_map in field_maps.values():
@@ -349,7 +351,6 @@ class DjangoDataWriter:
         return updated
 
 
-# Verify protocol conformance
 def _check_protocol_conformance() -> DataWriter:
     """Type check to ensure DjangoDataWriter conforms to protocol."""
     return DjangoDataWriter()

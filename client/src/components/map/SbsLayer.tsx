@@ -2,11 +2,15 @@ import { TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { SbsColorMode } from "../../api/types";
+import { getDescriptor } from "../../layers/registry";
+import type { LayerId } from "../../layers/types";
+
+const LAYER_ID: LayerId = "sbs";
 
 interface SbsLayerProps {
   runId: string;
-  mode?: SbsColorMode;
-  opacity?: number;
+  mode: SbsColorMode;
+  opacity: number;
   /** Leaflet LatLngBounds — tiles outside this rect will not be requested. */
   bounds?: L.LatLngBoundsExpression;
 }
@@ -20,10 +24,11 @@ interface SbsLayerProps {
  */
 export default function SbsLayer({
   runId,
-  mode = "legacy",
-  opacity = 0.8,
+  mode,
+  opacity,
   bounds,
 }: SbsLayerProps) {
+  const { zIndex } = getDescriptor(LAYER_ID);
   const baseUrl = API_ENDPOINTS.SBS_TILE(runId);
   const url = `${baseUrl}?mode=${mode}`;
 
@@ -32,7 +37,7 @@ export default function SbsLayer({
       key={url}
       url={url}
       opacity={opacity}
-      zIndex={500}
+      zIndex={zIndex}
       crossOrigin="anonymous"
       {...(bounds ? { bounds } : {})}
     />

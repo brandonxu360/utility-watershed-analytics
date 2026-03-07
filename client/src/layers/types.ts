@@ -21,6 +21,7 @@ export const ALL_LAYER_IDS = [
   "sbs",
   "fireSeverity",
   "scenario",
+  "rhessysSpatial",
 ] as const;
 
 export type LayerId = (typeof ALL_LAYER_IDS)[number];
@@ -74,6 +75,10 @@ export interface SbsParams {
   mode: "legacy" | "shift";
 }
 
+export interface RhessysSpatialParams {
+  filename: string | null;
+}
+
 type EmptyParams = Record<string, never>;
 
 export type LayerParamsMap = {
@@ -85,6 +90,7 @@ export type LayerParamsMap = {
   sbs: SbsParams;
   fireSeverity: EmptyParams;
   scenario: ScenarioParams;
+  rhessysSpatial: RhessysSpatialParams;
 };
 
 export interface LayerDesiredState {

@@ -33,6 +33,17 @@ vi.mock("@tanstack/react-query", () => ({
   }),
 }));
 
+vi.mock("@tanstack/react-router", () => ({
+  useParams: () => ({ webcloudRunId: "test-run" }),
+}));
+
+vi.mock("../hooks/useRhessysSpatialInputs", () => ({
+  useRhessysSpatialInputs: () => ({
+    files: [],
+    isLoading: false,
+  }),
+}));
+
 describe("DataLayers", () => {
   beforeEach(() => {
     vi.clearAllMocks();

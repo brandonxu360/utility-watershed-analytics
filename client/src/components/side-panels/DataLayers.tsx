@@ -7,6 +7,9 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import WeppSection from "./sections/WeppSection";
 import WatershedDataSection from "./sections/WatershedDataSection";
+import RhessysSection from "./sections/RhessysSection";
+import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
+import { useParams } from "@tanstack/react-router";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
@@ -26,6 +29,15 @@ const useStyles = tss.create(({ theme }) => ({
 export default function DataLayers() {
   const { classes } = useStyles();
   const { classes: accordionClasses } = useSidePanelAccordionStyles();
+
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
+
+  const { files, isLoading } = useRhessysSpatialInputs(runId);
 
   return (
     <div className={classes.root} data-testid="data-layers-side-panel">
@@ -73,10 +85,11 @@ export default function DataLayers() {
               RHESSys
             </Typography>
           </AccordionSummary>
-          <AccordionDetails className={accordionClasses.accordionDetails}>
-            <Typography variant="body2" color="textSecondary">
-              No features available yet.
-            </Typography>
+          <AccordionDetails className={classes.accordionDetailsCompact}>
+            <RhessysSection
+              files={files}
+              isLoading={isLoading}
+            />
           </AccordionDetails>
         </Accordion>
 

@@ -24,4 +24,10 @@ export const API_ENDPOINTS = {
   // Replace {runId} with the watershed run ID before passing to TileLayer.
   SBS_TILE: (runId: string) =>
     `${API_BASE_URL}/watershed/${runId}/sbs/tiles/{z}/{x}/{y}.png`,
+  // RHESSys spatial inputs — discover available GeoTIFFs for a watershed.
+  RHESSYS_SPATIAL_LIST: (runId: string) =>
+    `${API_BASE_URL}/watershed/${runId}/rhessys/spatial-inputs`,
+  // RHESSys spatial input tile URL template for use as a Leaflet TileLayer.
+  RHESSYS_SPATIAL_TILE: (runId: string, filename: string) =>
+    `${API_BASE_URL}/watershed/${runId}/rhessys/spatial-inputs/${filename}/tiles/{z}/{x}/{y}.png`,
 };

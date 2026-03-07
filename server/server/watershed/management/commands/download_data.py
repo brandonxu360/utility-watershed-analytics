@@ -1,16 +1,16 @@
 """
 Django management command for downloading watershed data.
 
-This command uses WatershedDataDiscovery to automatically discover available
-data sources and download them to a configurable output directory, typically
-used within a Docker container with shared volumes.
+This command uses WatershedDataDiscovery and StandaloneRunDiscovery to
+automatically discover available data sources and download them to a
+configurable output directory.
 
 Usage:
     # Download development subset (recommended for developers)
     python manage.py download_data --dev
     
     # Download specific watersheds by runid
-    python manage.py download_data --runids 'batch;;nasa-roses-2026-sbs;;or-20' 'batch;;nasa-roses-2026-sbs;;wa-174'
+    python manage.py download_data --runids 'batch;;nasa-roses-2026-sbs;;or-20' 'aversive-forestry'
     
     # Download ALL data (production only - very large!)
     python manage.py download_data --all
@@ -22,7 +22,11 @@ from urllib.parse import urlparse
 import requests
 from django.core.management.base import BaseCommand, CommandError
 
-from server.watershed.loaders.discovery import WatershedDataDiscovery, DataSource
+from server.watershed.loaders.discovery import (
+    WatershedDataDiscovery,
+    StandaloneRunDiscovery,
+    DataSource,
+)
 from server.watershed.loaders.config import LoaderConfig
 from server.watershed.constants import DEV_RUNIDS
 
@@ -93,25 +97,10 @@ class Command(BaseCommand):
         session: requests.Session,
         headers: dict | None = None,
     ) -> int:
-        """
-        Download a file from URL to target path.
-        
-        Args:
-            url: URL to download from
-            target: Local path to save to
-            session: Requests session for connection pooling
-            headers: Optional HTTP headers to include in the request (e.g. Authorization)
-        
-        Returns:
-            Size of downloaded file in bytes
-        
-        Raises:
-            requests.RequestException: If download fails
-        """
+        """Download a file from URL to target path."""
         response = session.get(url, headers=headers, timeout=60, stream=True)
         response.raise_for_status()
         
-        # Write file in chunks to handle large files
         with open(target, "wb") as file:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
@@ -127,17 +116,7 @@ class Command(BaseCommand):
         stats: dict,
         headers: dict | None = None,
     ) -> None:
-        """
-        Process a single data source - download if not cached.
-        
-        Args:
-            source: DataSource with url and metadata
-            output_dir: Base output directory
-            session: Requests session
-            stats: Dictionary to update with download statistics
-            headers: Optional HTTP headers to include in the request (e.g. Authorization)
-        """
-        # Generate target path based on data type and runid
+        """Process a single data source - download if not cached."""
         if source.data_type == "watersheds":
             # For the master watersheds GeoJSON, use a batch-specific
             # filename so multiple batches can coexist in the cache
@@ -150,15 +129,13 @@ class Command(BaseCommand):
             target = output_dir / "watersheds" / filename
         elif source.data_type in ("subcatchments", "channels"):
             target = output_dir / source.data_type / f"{source.name}.geojson"
-        else:  # parquet files: hillslopes, soils, landuse
+        else:
             target = output_dir / source.data_type / f"{source.name}.parquet"
         
         self.stdout.write(f"\n    Processing: {source.data_type}/{source.name}")
         
-        # Create directory if needed
         target.parent.mkdir(parents=True, exist_ok=True)
         
-        # Skip if already exists
         if target.exists():
             existing_size = target.stat().st_size
             self.stdout.write(f"    Skipping (already exists): {target}")
@@ -170,7 +147,6 @@ class Command(BaseCommand):
             stats["total_skipped_bytes"] += existing_size
             return
         
-        # Download the file
         try:
             self.stdout.write(f"    Downloading from: {source.url}")
             file_size = self._download_file(source.url, target, session, headers=headers)
@@ -202,7 +178,7 @@ class Command(BaseCommand):
         output_dir: Path | None = None
     ):
         """
-        Download watershed data files for all configured batches.
+        Download watershed data files for all configured batches and standalone runs.
 
         Args:
             runids_filter: Optional list of runids to download. If None, downloads all.
@@ -224,7 +200,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write("==> Downloading ALL data (discovering from API)")
 
-        # Stats tracking (accumulated across all batches)
+        # Stats tracking (accumulated across all batches and standalone runs)
         stats = {
             "download_count": 0,
             "skip_count": 0,
@@ -233,11 +209,12 @@ class Command(BaseCommand):
         }
 
         with requests.Session() as session:
+            # Process each configured batch
             for batch_cfg in config.api.batches:
                 discovery = WatershedDataDiscovery(config=config, batch_config=batch_cfg)
                 batch_name = discovery.watersheds_filename.replace("_completed.geojson", "")
                 self.stdout.write(f"\n{'=' * 60}")
-                self.stdout.write(f"==> Batch: {batch_name}")
+                self.stdout.write(self.style.WARNING(f"==> Batch: {batch_name}"))
                 self.stdout.write(f"{'=' * 60}")
 
                 # When a runid filter is provided, restrict to runids that
@@ -278,6 +255,39 @@ class Command(BaseCommand):
                 for data_type in ["hillslopes", "soils", "landuse"]:
                     self.stdout.write(f"\n==> Section: {data_type.capitalize()}")
                     for source in discovery.iter_sources(data_type, batch_runids):
+                        self._process_source(source, output_dir, session, stats)
+
+            # Process standalone runs
+            for standalone_config in config.api.standalone_runs:
+                if runids_filter is not None and standalone_config.runid not in runids_filter:
+                    continue
+
+                self.stdout.write(f"\n{'=' * 60}")
+                self.stdout.write(self.style.WARNING(
+                    f"==> Standalone: {standalone_config.display_name} "
+                    f"({standalone_config.runid})"
+                ))
+                self.stdout.write("=" * 60)
+
+                discovery = StandaloneRunDiscovery(standalone_config, config=config)
+
+                self.stdout.write("\n==> Section: Boundary")
+                boundary_source = discovery.get_watersheds_source()
+                self._process_source(boundary_source, output_dir, session, stats)
+
+                runid_list = [standalone_config.runid]
+
+                self.stdout.write("\n==> Section: Subcatchments")
+                for source in discovery.iter_subcatchments(runid_list):
+                    self._process_source(source, output_dir, session, stats)
+
+                self.stdout.write("\n==> Section: Channels")
+                for source in discovery.iter_channels(runid_list):
+                    self._process_source(source, output_dir, session, stats)
+
+                for data_type in ["hillslopes", "soils", "landuse"]:
+                    self.stdout.write(f"\n==> Section: {data_type.capitalize()}")
+                    for source in discovery.iter_sources(data_type, runid_list):
                         self._process_source(source, output_dir, session, stats)
         
         # Print summary

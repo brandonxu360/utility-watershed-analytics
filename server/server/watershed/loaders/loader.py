@@ -3,61 +3,46 @@ Watershed data loader with dependency injection.
 
 This module provides the main loader implementation that:
 - Automatically discovers available watershed data from the API
+- Supports both batch-based and standalone run loading
 - Accepts injected dependencies for easy testing
 - Separates concerns between reading, writing, and orchestration
 """
 
-from typing import Optional
+import logging
+from typing import Optional, Union
 
-from .config import LoaderConfig, get_config
-from .discovery import WatershedDataDiscovery
+from .config import LoaderConfig, StandaloneRunConfig, get_config
+from .discovery import WatershedDataDiscovery, StandaloneRunDiscovery
 from .protocols import DataSourceReader, DataWriter
 from .readers import RemoteDataSourceReader
 from .writers import DjangoDataWriter
 from server.watershed.utils.logging import LoaderLogger, LoadPhase, configure_logging
+
+logger = logging.getLogger("watershed.loader")
 
 
 class WatershedLoader:
     """
     Orchestrates watershed data loading with dependency injection.
     
-    This class coordinates reading from data sources and writing to the
-    database, with all I/O operations delegated to injected dependencies.
-    This enables easy testing by injecting mock implementations.
-    
-    Example (production):
-        loader = WatershedLoader()
-        result = loader.load()
-    
-    Example (testing):
-        loader = WatershedLoader(
-            reader=MockDataSourceReader(),
-            writer=MockDataWriter(),
-            discovery=MockDiscovery(),
-        )
-        result = loader.load()
+    Supports two modes:
+    - Batch mode (default): loads from a batch discovery source
+    - Standalone mode: loads a single watershed from a standalone run config
     """
     
     def __init__(
         self,
         reader: Optional[DataSourceReader] = None,
         writer: Optional[DataWriter] = None,
-        discovery: Optional[WatershedDataDiscovery] = None,
+        discovery: Optional[Union[WatershedDataDiscovery, StandaloneRunDiscovery]] = None,
         config: Optional[LoaderConfig] = None,
+        standalone_config: Optional[StandaloneRunConfig] = None,
     ):
-        """
-        Initialize the loader with dependencies.
-        
-        Args:
-            reader: Data source reader (defaults to RemoteDataSourceReader)
-            writer: Database writer (defaults to DjangoDataWriter)
-            discovery: Data discovery provider (defaults to WatershedDataDiscovery)
-            config: Loader configuration (defaults to environment-based config)
-        """
         self.config = config or get_config()
         self.reader = reader or RemoteDataSourceReader(self.config)
         self.writer = writer or DjangoDataWriter(self.config)
         self.discovery = discovery or WatershedDataDiscovery(self.config)
+        self.standalone_config = standalone_config
         self.logger = LoaderLogger()
     
     def load(
@@ -68,16 +53,11 @@ class WatershedLoader:
         """
         Load watershed data using discovery-based resolution.
         
-        Args:
-            runids: Optional list of runids to load. If None, discovers all.
-            verbose: Whether to enable verbose logging
-        
-        Returns:
-            Dictionary with loading statistics
+        For standalone runs, the watershed boundary is loaded separately
+        from a boundary GeoJSON (with CRS transformation as needed).
         """
         configure_logging(verbose=verbose)
         
-        # Discover runids if not provided
         if runids is None:
             available_runids = self.discovery.discover_runids()
         else:
@@ -85,16 +65,15 @@ class WatershedLoader:
         
         runids_set = set(available_runids) if available_runids else None
         
-        # Load watersheds
-        watersheds_saved = self._load_watersheds(runids_set)
+        # Load watersheds (batch vs standalone)
+        if self.standalone_config:
+            watersheds_saved = self._load_standalone_watershed()
+        else:
+            watersheds_saved = self._load_watersheds(runids_set)
         
-        # Load subcatchments
+        # Subcatchments, channels, and parquet are loaded identically
         subcatchments_saved = self._load_subcatchments(available_runids)
-        
-        # Load channels
         channels_saved = self._load_channels(available_runids)
-        
-        # Load parquet data
         subcatchments_updated = self._load_parquet_data(available_runids)
         
         self.logger.summary()
@@ -106,6 +85,32 @@ class WatershedLoader:
             "subcatchments_updated": subcatchments_updated,
         }
     
+    def _load_standalone_watershed(self) -> int:
+        """Load a watershed from a standalone boundary GeoJSON."""
+        self.logger.start_phase(LoadPhase.LOADING_WATERSHEDS, total_items=1)
+        
+        try:
+            url = self.discovery.get_watersheds_url()
+            local_path = self.discovery.get_watersheds_local_path()
+            
+            ds = self.reader.read_geojson(url, local_path)
+            count = self.writer.save_standalone_watershed(
+                ds[0],
+                runid=self.standalone_config.runid,
+                display_name=self.standalone_config.display_name,
+            )
+            self.logger.item_complete(
+                self.standalone_config.display_name,
+                records_saved=count,
+                extra_info="standalone",
+            )
+            self.logger.end_phase(records_saved=count)
+            return count
+        except Exception as e:
+            self.logger.item_error(self.standalone_config.display_name, e)
+            self.logger.end_phase(records_saved=0)
+            raise
+    
     def _load_watersheds(self, runids: Optional[set[str]] = None) -> int:
         """Load watershed data from the master GeoJSON file."""
         self.logger.start_phase(LoadPhase.LOADING_WATERSHEDS, total_items=1)
@@ -114,8 +119,8 @@ class WatershedLoader:
             url = self.discovery.get_watersheds_url()
             local_path = self.discovery.get_watersheds_local_path()
             
-            # The master watersheds GeoJSON requires JWT auth; other endpoints do not.
-            jwt_token = self.discovery.jwt_token
+            # Use getattr so this works for both WatershedDataDiscovery and StandaloneRunDiscovery.
+            jwt_token = getattr(self.discovery, 'jwt_token', None)
             headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else None
             
             ds = self.reader.read_geojson(url, local_path, headers=headers)
@@ -173,7 +178,6 @@ class WatershedLoader:
     
     def _load_parquet_data(self, runids: Optional[list[str]] = None) -> int:
         """Load hillslope, soil, and landuse parquet data."""
-        # Get unique runids from any parquet source
         runids_to_process = set()
         for data_type in ['hillslopes', 'soils', 'landuse']:
             for source in self.discovery.iter_sources(data_type, runids):
@@ -186,7 +190,6 @@ class WatershedLoader:
             try:
                 self.logger.item_start(runid)
                 
-                # Load each parquet type for this runid
                 hillslopes = self._load_parquet_for_runid(runid, 'hillslopes')
                 soils = self._load_parquet_for_runid(runid, 'soils')
                 landuse = self._load_parquet_for_runid(runid, 'landuse')
@@ -224,35 +227,36 @@ def load_with_discovery(
     config: Optional[LoaderConfig] = None,
 ) -> dict:
     """
-    Load watershed data from all configured batches.
+    Load watershed data with automatic discovery across all configured sources.
 
-    Iterates over every ``BatchConfig`` in ``config.api.batches``, creates a
-    dedicated ``WatershedDataDiscovery`` for each, runs the full loading
-    pipeline, and returns combined statistics.
+    Iterates over all configured batches and standalone runs, loading each
+    with its own discovery instance. Runids are filtered to the appropriate
+    batch/standalone based on their format.
 
     Args:
         verbose: Whether to print verbose output during loading
         runids: Optional list of runids to load. If None, all are discovered
-            for each batch.
+            for each batch/standalone run.
         config: Optional loader configuration
 
     Returns:
-        Dictionary with combined loading statistics across all batches:
+        Dictionary with combined loading statistics:
         - watersheds_saved
         - subcatchments_saved
         - channels_saved
         - subcatchments_updated
     """
-    from .discovery import WatershedDataDiscovery
+    from .discovery import WatershedDataDiscovery, StandaloneRunDiscovery
 
     cfg = config or get_config()
-    combined: dict[str, int] = {
+    total_stats: dict[str, int] = {
         "watersheds_saved": 0,
         "subcatchments_saved": 0,
         "channels_saved": 0,
         "subcatchments_updated": 0,
     }
 
+    # 1. Load batch-based watersheds
     for batch_cfg in cfg.api.batches:
         discovery = WatershedDataDiscovery(config=cfg, batch_config=batch_cfg)
         batch_name = discovery.watersheds_filename.replace("_completed.geojson", "")
@@ -269,8 +273,27 @@ def load_with_discovery(
             batch_runids = None
 
         loader = WatershedLoader(config=cfg, discovery=discovery)
-        stats = loader.load(runids=batch_runids, verbose=verbose)
-        for key in combined:
-            combined[key] += stats[key]
+        result = loader.load(runids=batch_runids, verbose=verbose)
+        for key in total_stats:
+            total_stats[key] += result[key]
 
-    return combined
+    # 2. Load standalone runs
+    for standalone_config in cfg.api.standalone_runs:
+        if runids is not None and standalone_config.runid not in runids:
+            continue
+
+        logger.info(f"Loading standalone run: {standalone_config.display_name}")
+        discovery = StandaloneRunDiscovery(standalone_config, config=cfg)
+        loader = WatershedLoader(
+            config=cfg,
+            discovery=discovery,
+            standalone_config=standalone_config,
+        )
+        result = loader.load(
+            runids=[standalone_config.runid],
+            verbose=verbose,
+        )
+        for key in total_stats:
+            total_stats[key] += result[key]
+
+    return total_stats
