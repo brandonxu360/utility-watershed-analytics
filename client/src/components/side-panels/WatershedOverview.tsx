@@ -210,13 +210,18 @@ export default function WatershedOverview() {
       </Button>
       <div className={classes.contentBox}>
         {(watershed?.properties?.huc10_utility_count ?? 0) > 1
-          ? (watershed?.properties?.huc10_pws_names ?? "")
-              .split(";")
-              .map((name, i) => (
+          ? (() => {
+              const names = (watershed?.properties?.huc10_pws_names ?? "")
+                .split(";")
+                .map((n) => n.trim())
+                .filter((n) => n.length > 0);
+              const display = names.length > 0 ? names : [watershed?.properties?.pws_name ?? ""];
+              return display.map((name, i) => (
                 <Typography key={i} variant="h6" className={classes.titleMulti}>
-                  <strong>{name.trim()}</strong>
+                  <strong>{name}</strong>
                 </Typography>
-              ))
+              ));
+            })()
           : (
             <Typography variant="h6" className={classes.title}>
               <strong>{watershed?.properties?.pws_name}</strong>
