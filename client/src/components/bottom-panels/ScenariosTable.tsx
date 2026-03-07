@@ -73,14 +73,10 @@ const METRIC_COLUMNS: MetricColumn[] = [
 function formatValue(val: number | null): string {
   if (val == null) return "—";
   if (val === 0) return "0";
-  const abs = Math.abs(val);
-  if (abs >= 0.01 && abs < 1e6) {
-    return val.toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
-  }
-  return val.toExponential(3);
+  return val.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export function ScenariosTable() {
