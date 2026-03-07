@@ -41,7 +41,6 @@ vi.mock("../hooks/useRhessysSpatialInputs", () => ({
   useRhessysSpatialInputs: () => ({
     files: [],
     isLoading: false,
-    hasData: false,
   }),
 }));
 

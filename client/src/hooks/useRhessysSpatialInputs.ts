@@ -28,5 +28,5 @@ export function useRhessysSpatialInputs(runId: string | null) {
     hasData,
   });
 
-  return { files, isLoading, hasData };
+  return { files, isLoading };
 }

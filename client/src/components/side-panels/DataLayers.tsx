@@ -37,7 +37,7 @@ export default function DataLayers() {
       shouldThrow: false,
     }) ?? null;
 
-  const { files, isLoading, hasData } = useRhessysSpatialInputs(runId);
+  const { files, isLoading } = useRhessysSpatialInputs(runId);
 
   return (
     <div className={classes.root} data-testid="data-layers-side-panel">
@@ -89,7 +89,6 @@ export default function DataLayers() {
             <RhessysSection
               files={files}
               isLoading={isLoading}
-              hasData={hasData}
             />
           </AccordionDetails>
         </Accordion>

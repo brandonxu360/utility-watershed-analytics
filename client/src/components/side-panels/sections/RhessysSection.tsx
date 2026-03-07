@@ -26,6 +26,19 @@ const useStyles = tss.create(({ theme }) => ({
       color: theme.palette.primary.contrastText,
     },
   },
+  selectPaper: {
+    maxHeight: 300,
+  },
+  formControl: {
+    marginTop: theme.spacing(0.5),
+  },
+  loadingRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+  },
   label: {
     color: theme.palette.primary.contrastText,
     "&.Mui-focused": {
@@ -37,13 +50,11 @@ const useStyles = tss.create(({ theme }) => ({
 interface RhessysSectionProps {
   files: RhessysSpatialFile[];
   isLoading: boolean;
-  hasData: boolean;
 }
 
 export default function RhessysSection({
   files,
   isLoading,
-  hasData,
 }: RhessysSectionProps) {
   const { classes } = useStyles();
   const {
@@ -75,7 +86,7 @@ export default function RhessysSection({
 
   if (isLoading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 8, paddingBottom: 8 }}>
+      <div className={classes.loadingRow}>
         <CircularProgress size={16} />
         <Typography variant="body2" color="textSecondary">
           Checking for spatial data...
@@ -84,7 +95,7 @@ export default function RhessysSection({
     );
   }
 
-  if (!hasData) {
+  if (files.length === 0) {
     return (
       <Typography variant="body2" color="textSecondary">
         No features available yet.
@@ -93,7 +104,7 @@ export default function RhessysSection({
   }
 
   return (
-    <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+    <FormControl fullWidth size="small" className={classes.formControl}>
       <InputLabel id="rhessys-spatial-select-label" className={classes.label}>
         Spatial Input
       </InputLabel>
@@ -104,6 +115,9 @@ export default function RhessysSection({
         label="Spatial Input"
         onChange={handleChange}
         className={classes.select}
+        MenuProps={{
+          PaperProps: { className: classes.selectPaper },
+        }}
       >
         <MenuItem value="none">None</MenuItem>
         {files.map((f) => (
