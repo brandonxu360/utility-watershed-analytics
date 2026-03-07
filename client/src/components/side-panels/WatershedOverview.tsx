@@ -213,10 +213,10 @@ export default function WatershedOverview() {
           ? (() => {
               const names = (watershed?.properties?.huc10_pws_names ?? "")
                 .split(";")
-                .map((n) => n.trim())
-                .filter((n) => n.length > 0);
+                .map((n: string) => n.trim())
+                .filter((n: string) => n.length > 0);
               const display = names.length > 0 ? names : [watershed?.properties?.pws_name ?? ""];
-              return display.map((name, i) => (
+              return display.map((name: string, i: number) => (
                 <Typography key={i} variant="h6" className={classes.titleMulti}>
                   <strong>{name}</strong>
                 </Typography>

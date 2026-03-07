@@ -60,44 +60,6 @@ class BatchConfig:
 
     Each batch has its own URL for discovering watersheds and an optional
     JWT token for authenticated access to the master GeoJSON.
-    """
-    batch_url: str
-    jwt_token: Optional[str] = None
-
-
-@dataclass
-class StandaloneRunConfig:
-    """
-    Configuration for a standalone WEPPcloud run (not part of a batch).
-
-    Standalone runs have a fixed runid and URLs derived from a known base URL
-    rather than being discovered from a batch API.
-    """
-    runid: str
-    display_name: str
-    run_base_url: str
-    boundary_url: str
-
-    def get_data_urls(self) -> dict[str, str]:
-        """Generate all data URLs from the run base URL."""
-        base = self.run_base_url.rstrip("/")
-        return {
-            "boundary": self.boundary_url,
-            "subcatchments": f"{base}/download/dem/wbt/subcatchments.WGS.geojson",
-            "channels": f"{base}/download/dem/wbt/channels.WGS.geojson",
-            "hillslopes": f"{base}/download/watershed/hillslopes.parquet",
-            "soils": f"{base}/download/soils/soils.parquet",
-            "landuse": f"{base}/download/landuse/landuse.parquet",
-        }
-
-
-@dataclass
-class BatchConfig:
-    """
-    Configuration for a single WEPPcloud batch.
-
-    Each batch has its own URL for discovering watersheds and an optional
-    JWT token for authenticated access to the master GeoJSON.
 
     If ``watersheds_filename`` is provided it overrides the default filename
     derived from the batch URL (``{batch_name}_completed.geojson``). Use this
