@@ -15,6 +15,17 @@ class Watershed(models.Model):
     shape_leng = models.FloatField(null=True, blank=True)
     shape_area = models.FloatField(null=True, blank=True)
     area_km2 = models.FloatField(null=True, blank=True)  # victoria-ca batch
+    # Utility metadata (nasa-roses batch, from merged utility data)
+    owner_type = models.CharField(max_length=64, null=True, blank=True)   # OwnerType
+    pop_group = models.CharField(max_length=64, null=True, blank=True)    # PopGroup – customers served range
+    treat_type = models.CharField(max_length=255, null=True, blank=True)  # TreatType – treatment processes
+    conn_group = models.CharField(max_length=64, null=True, blank=True)   # ConnGroup – connection group range
+    # HUC10-level aggregates: all utilities sharing the same HUC10 boundary
+    huc10_pws_names = models.TextField(null=True, blank=True)    # semicolon-delimited names
+    huc10_owner_types = models.TextField(null=True, blank=True)
+    huc10_pop_groups = models.TextField(null=True, blank=True)
+    huc10_treat_types = models.TextField(null=True, blank=True)
+    huc10_utility_count = models.IntegerField(null=True, blank=True)
     runid = models.CharField(primary_key=True, max_length=255)
     geom = models.MultiPolygonField(srid=4326)
     simplified_geom = models.MultiPolygonField(srid=4326, null=True, blank=True)

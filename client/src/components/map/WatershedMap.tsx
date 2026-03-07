@@ -366,6 +366,14 @@ export default function WatershedMap(): JSX.Element {
             bounds={sbsBounds}
           />
         )}
+
+        {rhessysSpatialEffective && runId && rhessysSpatialFilename && (
+          <RhessysSpatialLayer
+            runId={runId}
+            filename={rhessysSpatialFilename}
+            bounds={sbsBounds}
+          />
+        )}
       </MapContainer>
 
       <LandUseLegend landuseLegendMap={landuseLegendMap} />
