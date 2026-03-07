@@ -5,7 +5,6 @@ import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { getLayerParams } from "../../../layers/types";
 import { tss } from "../../../utils/tss";
@@ -76,12 +75,12 @@ export default function RhessysSection({
 
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 1 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 8, paddingBottom: 8 }}>
         <CircularProgress size={16} />
         <Typography variant="body2" color="textSecondary">
           Checking for spatial data...
         </Typography>
-      </Box>
+      </div>
     );
   }
 
