@@ -32,6 +32,7 @@ const useStyles = tss.create(({ theme }) => ({
   container: {
     width: "100%",
     height: 300,
+    minWidth: 0,
   },
   emptyState: {
     height: "calc(100% - 32px)",
@@ -79,13 +80,14 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
               }}
             >
               <CartesianGrid
-                stroke={theme.palette.surface.light}
+                stroke={theme.palette.secondary.dark}
+                strokeDasharray="5 5"
                 data-testid="cartesian-grid"
                 data-stroke={theme.palette.surface.light.toLowerCase()}
               />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+              <Tooltip labelStyle={{ color: theme.palette.secondary.dark }} />
               <Legend />
               {lineKeys.map((line) => (
                 <Line
