@@ -2,7 +2,7 @@
 Centralized configuration for the data loading pipeline.
 
 All configurable values that were previously hardcoded are consolidated here.
-Values can be overridden via environment variables.
+Some runtime settings can be overridden via environment variables.
 
 Supports two types of data sources:
 - Batch-based: Multiple watersheds discovered from a master GeoJSON (e.g. NASA ROSES)
@@ -144,9 +144,8 @@ def _default_standalone_runs() -> list[StandaloneRunConfig]:
 class ApiConfig:
     """Configuration for external API endpoints."""
     weppcloud_base_url: str = "https://wepp.cloud/weppcloud"
-    # List of batches to load. Each batch has its own URL and JWT token.
-    # Defaults to both currently supported batches (tokens must be provided
-    # via WEPPCLOUD_JWT_TOKEN / WEPPCLOUD_JWT_TOKEN_2 env vars).
+    # List of batches to load. Batch URLs are defined in _default_batches().
+    # Tokens are provided via WEPPCLOUD_JWT_TOKEN / WEPPCLOUD_JWT_TOKEN_2.
     batches: list[BatchConfig] = field(default_factory=_default_batches)
     standalone_runs: list[StandaloneRunConfig] = field(default_factory=_default_standalone_runs)
 
