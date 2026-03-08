@@ -204,15 +204,15 @@ export default function ChoroplethLegend({
                                 />
                                 <div className={classes.labelsCol}>
                                     <div className={classes.labelGroup}>
-                                        <Typography className={classes.percentileLabel}>95th</Typography>
+                                        <Typography className={classes.percentileLabel}>P95</Typography>
                                         <Typography className={classes.label}>{formatNum(scaled.max)}</Typography>
                                     </div>
                                     <div className={classes.labelGroup}>
-                                        <Typography className={classes.percentileLabel}>50th</Typography>
+                                        <Typography className={classes.percentileLabel}>P50</Typography>
                                         <Typography className={classes.label}>{formatNum((scaled.min + scaled.max) / 2)}</Typography>
                                     </div>
                                     <div className={classes.labelGroup}>
-                                        <Typography className={classes.percentileLabel}>5th</Typography>
+                                        <Typography className={classes.percentileLabel}>P5</Typography>
                                         <Typography className={classes.label}>{formatNum(scaled.min)}</Typography>
                                     </div>
                                 </div>
@@ -220,9 +220,6 @@ export default function ChoroplethLegend({
                             {scaledUnit && (
                                 <Typography className={classes.unit}>{scaledUnit}</Typography>
                             )}
-                            <Typography className={classes.percentileNote}>
-                                5th / 50th / 95th percentile
-                            </Typography>
                         </>
                     );
                 })()}
@@ -237,11 +234,9 @@ export default function ChoroplethLegend({
                             />
                             <div className={classes.labelsCol}>
                                 <div className={classes.labelGroup}>
-                                    <Typography className={classes.percentileLabel}>95th</Typography>
                                     <Typography className={classes.label}>{formatNum(data.stops[data.stops.length - 1].value)}</Typography>
                                 </div>
                                 <div className={classes.labelGroup}>
-                                    <Typography className={classes.percentileLabel}>50th</Typography>
                                     <Typography className={classes.label}>
                                         {formatNum(
                                             (data.stops[0].value +
@@ -251,14 +246,10 @@ export default function ChoroplethLegend({
                                     </Typography>
                                 </div>
                                 <div className={classes.labelGroup}>
-                                    <Typography className={classes.percentileLabel}>5th</Typography>
                                     <Typography className={classes.label}>{formatNum(data.stops[0].value)}</Typography>
                                 </div>
                             </div>
                         </div>
-                        <Typography className={classes.percentileNote}>
-                            5th / 50th / 95th percentile
-                        </Typography>
                     </>
                 )}
             </Paper>
