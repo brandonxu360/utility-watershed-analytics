@@ -8,7 +8,19 @@ class WatershedSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Watershed
         geo_field = 'geom'
-        exclude = ('simplified_geom',)
+        fields = (
+            'runid',
+            'pws_name',
+            'county_nam',
+            'shape_area',
+            'srcname',
+            'srctype',
+            'owner_type',
+            'pop_group',
+            'treat_type',
+            'huc10_utility_count',
+            'huc10_pws_names',
+        )
 
 class WatershedSimplifiedSerializer(GeoFeatureModelSerializer):
     """
@@ -18,7 +30,19 @@ class WatershedSimplifiedSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Watershed
         geo_field = 'simplified_geom'
-        exclude = ('geom',)
+        fields = (
+            'runid',
+            'pws_name',
+            'county_nam',
+            'shape_area',
+            'srcname',
+            'srctype',
+            'owner_type',
+            'pop_group',
+            'treat_type',
+            'huc10_utility_count',
+            'huc10_pws_names',
+        )
         description = "Basic serializer for Watershed Border with limited fields and a details URL."
 
 class SubcatchmentSerializer(GeoFeatureModelSerializer):
@@ -29,7 +53,16 @@ class SubcatchmentSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Subcatchment
         geo_field = 'geom'
-        fields = '__all__'
+        fields = (
+            'topazid',
+            'weppid',
+            'slope_scalar',
+            'length',
+            'width',
+            'aspect',
+            'hillslope_area',
+            'simple_texture',
+        )
     
 class ChannelSerializer(GeoFeatureModelSerializer):
     """
@@ -39,4 +72,8 @@ class ChannelSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Channel
         geo_field = 'geom'
-        fields = '__all__'
+        fields = (
+            'topazid',
+            'weppid',
+            'order',
+        )

@@ -7,7 +7,24 @@ class WatershedViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Provides read-only access to watersheds.
     """
-    queryset = Watershed.objects.defer('geom', 'simplified_geom')
+    def get_queryset(self):
+        base_fields = (
+            'runid',
+            'pws_name',
+            'county_nam',
+            'shape_area',
+            'srcname',
+            'srctype',
+            'owner_type',
+            'pop_group',
+            'treat_type',
+            'huc10_utility_count',
+            'huc10_pws_names',
+        )
+        simplified = self.request.query_params.get('simplified_geom', '').lower() == 'true'
+        if simplified:
+            return Watershed.objects.only(*base_fields, 'simplified_geom')
+        return Watershed.objects.only(*base_fields, 'geom')
 
     # No logic changes, only decorating for documentation
     @extend_schema(
@@ -45,7 +62,18 @@ class WatershedSubcatchmentListView(generics.ListAPIView):
         runid = self.kwargs['runid']
         # Subcatchment model references Watershed via the 'watershed' FK.
         # Watershed has the 'runid' primary key, so filter through the relation.
-        return Subcatchment.objects.filter(watershed__runid=runid)
+        return Subcatchment.objects.filter(watershed__runid=runid).only(
+            'id',
+            'geom',
+            'topazid',
+            'weppid',
+            'slope_scalar',
+            'length',
+            'width',
+            'aspect',
+            'hillslope_area',
+            'simple_texture',
+        )
     
 class WatershedChannelListView(generics.ListAPIView):
     """
@@ -58,4 +86,10 @@ class WatershedChannelListView(generics.ListAPIView):
         runid = self.kwargs['runid']
         # Channel model references Watershed via the 'watershed' FK.
         # Watershed has the 'runid' primary key, so filter through the relation.
-        return Channel.objects.filter(watershed__runid=runid)
+        return Channel.objects.filter(watershed__runid=runid).only(
+            'id',
+            'geom',
+            'topazid',
+            'weppid',
+            'order',
+        )
