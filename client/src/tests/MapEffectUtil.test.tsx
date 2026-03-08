@@ -1,12 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { MapEffect } from "../utils/map/MapEffectUtil";
+import { MapEffect, resetSavedMapView } from "../utils/map/MapEffectUtil";
 import { WatershedProperties } from "../types/WatershedProperties";
+
+type MoveendHandler = () => void;
+let moveendListeners: MoveendHandler[] = [];
 
 const mockMap = {
   flyToBounds: vi.fn(),
   fitBounds: vi.fn(),
   setMaxBounds: vi.fn(),
+  on: vi.fn((event: string, handler: MoveendHandler) => {
+    if (event === "moveend") moveendListeners.push(handler);
+  }),
+  off: vi.fn((event: string, handler: MoveendHandler) => {
+    if (event === "moveend")
+      moveendListeners = moveendListeners.filter((h) => h !== handler);
+  }),
+  getCenter: vi.fn(() => ({ lat: 40, lng: -100 })),
+  getZoom: vi.fn(() => 10),
 };
 vi.mock("react-leaflet", () => ({
   useMap: () => mockMap,
@@ -70,6 +82,8 @@ const renderMapEffect = (props: {
 describe("MapEffectUtil", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetSavedMapView();
+    moveendListeners = [];
   });
 
   describe("MapEffect component", () => {
@@ -115,21 +129,28 @@ describe("MapEffectUtil", () => {
       expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
 
-    it("zooms to matching feature when found", () => {
+    it("zooms to matching feature instantly on first render (no flyToBounds)", () => {
       const watersheds = createWatershedData([{ id: "ws-1" }, { id: "ws-2" }]);
       renderMapEffect({ watershedId: "ws-2", watersheds });
 
       expect(mockGeoJSON).toHaveBeenCalledWith(
         expect.objectContaining({ id: "ws-2" }),
       );
-      expect(mockZoomToFeature).toHaveBeenCalledWith(mockMap, mockTempLayer);
+      // First-ever render: fitBounds (instant) not zoomToFeature (animated)
+      expect(mockZoomToFeature).not.toHaveBeenCalled();
+      expect(mockMap.fitBounds).toHaveBeenCalledWith(mockBounds, {
+        maxZoom: 16,
+      });
     });
 
     it("matches feature id as string when id is numeric", () => {
       const watersheds = createWatershedData([{ id: 123 }]);
       renderMapEffect({ watershedId: "123", watersheds });
 
-      expect(mockZoomToFeature).toHaveBeenCalled();
+      // First render uses instant fitBounds
+      expect(mockMap.fitBounds).toHaveBeenCalledWith(mockBounds, {
+        maxZoom: 16,
+      });
     });
 
     it("does not match feature when feature.id is undefined", () => {
@@ -200,6 +221,125 @@ describe("MapEffectUtil", () => {
 
       expect(mockMap.fitBounds).toHaveBeenCalledTimes(1);
       expect(mockMap.setMaxBounds).toHaveBeenCalledTimes(1);
+    });
+
+    it("animates to watershed on subsequent selection (not first render)", () => {
+      const watersheds = createWatershedData([{ id: "ws-1" }, { id: "ws-2" }]);
+
+      const { rerender } = renderHook(
+        (props: {
+          watershedId: string | null;
+          watersheds: GeoJSON.FeatureCollection<
+            GeoJSON.Geometry,
+            WatershedProperties
+          >;
+        }) => MapEffect(props),
+        {
+          initialProps: {
+            watershedId: null,
+            watersheds,
+          },
+        },
+      );
+
+      // Initial fit happened
+      expect(mockMap.fitBounds).toHaveBeenCalledTimes(1);
+
+      // Now select a watershed
+      rerender({ watershedId: "ws-2", watersheds });
+
+      // Should animate via zoomToFeature (hasPositioned is true within this mount)
+      expect(mockZoomToFeature).toHaveBeenCalledWith(mockMap, mockTempLayer);
+    });
+
+    it("animates to watershed after remount when savedCenter exists", () => {
+      const watersheds = createWatershedData([{ id: "ws-1" }, { id: "ws-2" }]);
+
+      // First mount — initial fit
+      const { unmount } = renderHook(
+        (props: {
+          watershedId: string | null;
+          watersheds: GeoJSON.FeatureCollection<
+            GeoJSON.Geometry,
+            WatershedProperties
+          >;
+        }) => MapEffect(props),
+        { initialProps: { watershedId: null, watersheds } },
+      );
+
+      // Simulate user interaction that triggers moveend (saves position)
+      moveendListeners.forEach((fn) => fn());
+      unmount();
+
+      vi.clearAllMocks();
+
+      // Second mount — navigated to a watershed
+      renderMapEffect({ watershedId: "ws-1", watersheds });
+
+      // Should animate (savedCenter exists) instead of instant fitBounds
+      expect(mockZoomToFeature).toHaveBeenCalledWith(mockMap, mockTempLayer);
+      expect(mockMap.fitBounds).not.toHaveBeenCalled();
+    });
+
+    it("does not re-zoom on back navigation (watershed to home)", () => {
+      const watersheds = createWatershedData([{ id: "ws-1" }, { id: "ws-2" }]);
+
+      const { rerender } = renderHook(
+        (props: {
+          watershedId: string | null;
+          watersheds: GeoJSON.FeatureCollection<
+            GeoJSON.Geometry,
+            WatershedProperties
+          >;
+        }) => MapEffect(props),
+        {
+          initialProps: {
+            watershedId: null,
+            watersheds,
+          },
+        },
+      );
+
+      // Initial fit
+      expect(mockMap.fitBounds).toHaveBeenCalledTimes(1);
+
+      // Select a watershed
+      rerender({ watershedId: "ws-1", watersheds });
+
+      // Navigate back — should NOT re-fit to all watersheds
+      vi.clearAllMocks();
+      rerender({ watershedId: null, watersheds });
+
+      expect(mockMap.fitBounds).not.toHaveBeenCalled();
+      expect(mockZoomToFeature).not.toHaveBeenCalled();
+    });
+
+    it("does not re-zoom on back navigation after remount", () => {
+      const watersheds = createWatershedData([{ id: "ws-1" }, { id: "ws-2" }]);
+
+      // First mount with a watershed selected
+      const { unmount } = renderHook(
+        (props: {
+          watershedId: string | null;
+          watersheds: GeoJSON.FeatureCollection<
+            GeoJSON.Geometry,
+            WatershedProperties
+          >;
+        }) => MapEffect(props),
+        { initialProps: { watershedId: "ws-1", watersheds } },
+      );
+
+      // Simulate moveend to save position
+      moveendListeners.forEach((fn) => fn());
+      unmount();
+
+      vi.clearAllMocks();
+
+      // Remount at home (back-nav) — should stay put
+      renderMapEffect({ watershedId: null, watersheds });
+
+      expect(mockMap.fitBounds).not.toHaveBeenCalled();
+      expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
   });
 });

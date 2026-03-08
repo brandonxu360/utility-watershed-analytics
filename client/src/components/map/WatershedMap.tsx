@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { MapEffect } from "../../utils/map/MapEffectUtil";
+import { MapEffect, getSavedMapView } from "../../utils/map/MapEffectUtil";
 import { fetchWatersheds } from "../../api/api";
 import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
 import { WatershedProperties } from "../../types/WatershedProperties";
@@ -58,8 +58,7 @@ const useStyles = tss.create(({ theme }) => ({
   },
 }));
 
-// Fallback center used only for the initial render before watershed data loads.
-// Once data arrives, MapEffect will fitBounds to all watersheds automatically.
+// Fallback center used only for the very first render before any data loads.
 const FALLBACK_CENTER: [number, number] = [0, 0];
 
 /**
@@ -72,6 +71,7 @@ const FALLBACK_CENTER: [number, number] = [0, 0];
 export default function WatershedMap(): JSX.Element {
   const { classes } = useStyles();
   const navigate = useNavigate();
+  const savedView = getSavedMapView();
 
   const { layerDesired, effective, isEffective } = useWatershed();
 
@@ -263,8 +263,8 @@ export default function WatershedMap(): JSX.Element {
   return (
     <div className={classes.mapContainer}>
       <MapContainer
-        center={FALLBACK_CENTER}
-        zoom={4}
+        center={savedView?.center ?? FALLBACK_CENTER}
+        zoom={savedView?.zoom ?? 4}
         maxZoom={tileLayers[selectedLayerId].maxZoom}
         zoomControl={false}
         doubleClickZoom={false}

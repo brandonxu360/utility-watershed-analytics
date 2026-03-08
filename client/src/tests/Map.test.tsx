@@ -217,6 +217,7 @@ vi.mock("../utils/map/MapEffectUtil", () => ({
   MapEffect: ({ watershedId }: { watershedId: string | null }) => (
     <div data-testid="map-effect" data-watershed-id={watershedId} />
   ),
+  getSavedMapView: () => null,
 }));
 
 const mockWatershedData = {
