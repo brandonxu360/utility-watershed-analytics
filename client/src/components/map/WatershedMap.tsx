@@ -299,12 +299,6 @@ export default function WatershedMap(): JSX.Element {
 
         <ScaleControl metric={true} imperial={true} />
 
-        {/* TOP LEFT CONTROLS */}
-        <div className="leaflet-top leaflet-left">
-          {/* <LegendControl /> */}
-          {choroplethLegendProps && <ChoroplethLegend {...choroplethLegendProps} />}
-        </div>
-
         {/* TOP RIGHT CONTROLS */}
         <div className="leaflet-top leaflet-right">
           <SearchControl />
@@ -364,6 +358,7 @@ export default function WatershedMap(): JSX.Element {
         )}
       </MapContainer>
 
+      {choroplethLegendProps && <ChoroplethLegend {...choroplethLegendProps} />}
       {sbsEffective && <SbsLegend />}
     </div>
   );

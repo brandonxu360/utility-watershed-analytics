@@ -6,6 +6,10 @@ import { createColormap } from "../../../utils/colormap";
 
 const useStyles = tss.create(({ theme }) => ({
     wrapper: {
+        position: "absolute",
+        top: 10,
+        left: 10,
+        zIndex: 1000,
         maxWidth: 240,
     },
     panel: {
@@ -64,7 +68,7 @@ const useStyles = tss.create(({ theme }) => ({
     },
     unit: {
         fontSize: theme.typography.caption.fontSize,
-        color: theme.palette.muted.main,
+        color: theme.palette.text.primary,
         textAlign: "center",
         marginTop: theme.spacing(0.75),
     },
@@ -107,7 +111,7 @@ function formatNum(n: number): string {
     if (Math.abs(n) >= 1e6) return n.toExponential(2);
     if (Number.isInteger(n) || Math.abs(n) >= 100)
         return n.toLocaleString(undefined, { maximumFractionDigits: 1 });
-    return n.toLocaleString(undefined, { maximumFractionDigits: 4 });
+    return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
 /** Scale a range + unit so large values are more readable (e.g. kg → t). */
@@ -147,7 +151,7 @@ export default function ChoroplethLegend({
 
     return (
         <div
-            className={`leaflet-control ${classes.wrapper}`}
+            className={classes.wrapper}
             role="region"
             aria-label="Choropleth legend"
             data-testid="choropleth-legend"

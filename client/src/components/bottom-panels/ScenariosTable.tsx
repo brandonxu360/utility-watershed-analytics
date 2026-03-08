@@ -38,8 +38,8 @@ const useStyles = tss.create(({ theme }) => ({
 
 type MetricKey = {
   [K in keyof ScenarioSummaryRow]: ScenarioSummaryRow[K] extends number | null
-    ? K
-    : never;
+  ? K
+  : never;
 }[keyof ScenarioSummaryRow];
 
 type MetricColumn = {
@@ -70,7 +70,6 @@ function formatValue(val: number | null): string {
   if (val == null) return "—";
   if (val === 0) return "0";
   return val.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
