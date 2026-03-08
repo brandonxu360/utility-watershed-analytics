@@ -1,6 +1,10 @@
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from server.watershed.models import Watershed, Subcatchment, Channel
 
+
+# 6 decimals is sub-meter precision in WGS84 and significantly trims payload size.
+GEOJSON_COORD_PRECISION = 6
+
 class WatershedSerializer(GeoFeatureModelSerializer):
     """
     Serializes the Watershed model with the original (unsimplified) geometry.
@@ -8,6 +12,9 @@ class WatershedSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Watershed
         geo_field = 'geom'
+        extra_kwargs = {
+            'geom': {'precision': GEOJSON_COORD_PRECISION},
+        }
         fields = (
             'runid',
             'pws_name',
@@ -30,6 +37,9 @@ class WatershedSimplifiedSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Watershed
         geo_field = 'simplified_geom'
+        extra_kwargs = {
+            'simplified_geom': {'precision': GEOJSON_COORD_PRECISION},
+        }
         fields = (
             'runid',
             'pws_name',
@@ -53,6 +63,9 @@ class SubcatchmentSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Subcatchment
         geo_field = 'geom'
+        extra_kwargs = {
+            'geom': {'precision': GEOJSON_COORD_PRECISION},
+        }
         fields = (
             'topazid',
             'weppid',
@@ -72,6 +85,9 @@ class ChannelSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Channel
         geo_field = 'geom'
+        extra_kwargs = {
+            'geom': {'precision': GEOJSON_COORD_PRECISION},
+        }
         fields = (
             'topazid',
             'weppid',
