@@ -17,124 +17,124 @@ import type { ChoroplethLegendProps } from "../components/map/controls/Choroplet
  * `<ChoroplethLegend>`, or `null` when no legend should be shown.
  */
 export function useChoroplethLegend(): ChoroplethLegendProps | null {
-    const { isEffective, layerDesired } = useWatershed();
+  const { isEffective, layerDesired } = useWatershed();
 
-    const runId =
-        useParams({
-            from: "/watershed/$webcloudRunId",
-            select: (params) => params?.webcloudRunId,
-            shouldThrow: false,
-        }) ?? null;
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
 
-    // Vegetation cover choropleth
-    const {
-        isActive: choroplethActive,
-        isLoading: choroplethLoading,
-        config: choroplethConfig,
-        range: choroplethRange,
-    } = useChoropleth();
+  // Vegetation cover choropleth
+  const {
+    isActive: choroplethActive,
+    isLoading: choroplethLoading,
+    config: choroplethConfig,
+    range: choroplethRange,
+  } = useChoropleth();
+
+  // WEPP scenario
+  const {
+    hasData: hasScenarioData,
+    range: scenarioRange,
+    variableConfig: scenarioVarConfig,
+  } = useScenarioData();
+  const scenarioEffective = isEffective("scenario");
+
+  // RHESSys spatial
+  const rhessysSpatialEffective = isEffective("rhessysSpatial");
+  const rhessysSpatialParams = getLayerParams(layerDesired, "rhessysSpatial");
+  const { files: rhessysSpatialFiles } = useRhessysSpatialInputs(runId);
+  const selectedRhessysFile = useMemo(
+    () =>
+      rhessysSpatialFiles.find(
+        (f) => f.filename === rhessysSpatialParams.filename,
+      ) ?? null,
+    [rhessysSpatialFiles, rhessysSpatialParams.filename],
+  );
+
+  // Land use
+  const { landuseLegendMap } = useLanduseData(runId);
+  const landuseEffective = isEffective("landuse");
+
+  return useMemo((): ChoroplethLegendProps | null => {
+    // Vegetation cover
+    if (
+      choroplethActive &&
+      !choroplethLoading &&
+      choroplethConfig &&
+      choroplethRange
+    ) {
+      return {
+        title: choroplethConfig.title,
+        data: {
+          mode: "colormap",
+          colormap: choroplethConfig.colormap,
+          range: choroplethRange,
+          unit: choroplethConfig.unit,
+          percentile: false,
+        },
+      };
+    }
 
     // WEPP scenario
-    const {
-        hasData: hasScenarioData,
-        range: scenarioRange,
-        variableConfig: scenarioVarConfig,
-    } = useScenarioData();
-    const scenarioEffective = isEffective("scenario");
+    if (scenarioEffective && hasScenarioData && scenarioRange) {
+      return {
+        title: scenarioVarConfig.label,
+        data: {
+          mode: "colormap",
+          colormap: scenarioVarConfig.colormap,
+          range: scenarioRange,
+          unit: scenarioVarConfig.unit,
+          percentile: true,
+        },
+      };
+    }
 
-    // RHESSys spatial
-    const rhessysSpatialEffective = isEffective("rhessysSpatial");
-    const rhessysSpatialParams = getLayerParams(layerDesired, "rhessysSpatial");
-    const { files: rhessysSpatialFiles } = useRhessysSpatialInputs(runId);
-    const selectedRhessysFile = useMemo(
-        () =>
-            rhessysSpatialFiles.find(
-                (f) => f.filename === rhessysSpatialParams.filename,
-            ) ?? null,
-        [rhessysSpatialFiles, rhessysSpatialParams.filename],
-    );
+    // RHESSys spatial input
+    if (
+      rhessysSpatialEffective &&
+      selectedRhessysFile?.legend &&
+      selectedRhessysFile.legend.length > 0
+    ) {
+      const file = selectedRhessysFile;
+      return {
+        title: file.name,
+        data:
+          file.type === "categorical" || file.type === "stream"
+            ? { mode: "categorical", entries: file.legend! }
+            : { mode: "stops", stops: file.legend! },
+      };
+    }
 
     // Land use
-    const { landuseLegendMap } = useLanduseData(runId);
-    const landuseEffective = isEffective("landuse");
+    if (landuseEffective && Object.keys(landuseLegendMap).length > 0) {
+      return {
+        title: "Land Use",
+        data: {
+          mode: "categorical",
+          entries: Object.entries(landuseLegendMap).map(([color, desc]) => ({
+            hex: color,
+            value: desc,
+          })),
+        },
+      };
+    }
 
-    return useMemo((): ChoroplethLegendProps | null => {
-        // Vegetation cover
-        if (
-            choroplethActive &&
-            !choroplethLoading &&
-            choroplethConfig &&
-            choroplethRange
-        ) {
-            return {
-                title: choroplethConfig.title,
-                data: {
-                    mode: "colormap",
-                    colormap: choroplethConfig.colormap,
-                    range: choroplethRange,
-                    unit: choroplethConfig.unit,
-                    percentile: false,
-                },
-            };
-        }
-
-        // WEPP scenario
-        if (scenarioEffective && hasScenarioData && scenarioRange) {
-            return {
-                title: scenarioVarConfig.label,
-                data: {
-                    mode: "colormap",
-                    colormap: scenarioVarConfig.colormap,
-                    range: scenarioRange,
-                    unit: scenarioVarConfig.unit,
-                    percentile: true,
-                },
-            };
-        }
-
-        // RHESSys spatial input
-        if (
-            rhessysSpatialEffective &&
-            selectedRhessysFile?.legend &&
-            selectedRhessysFile.legend.length > 0
-        ) {
-            const file = selectedRhessysFile;
-            return {
-                title: file.name,
-                data:
-                    file.type === "categorical" || file.type === "stream"
-                        ? { mode: "categorical", entries: file.legend! }
-                        : { mode: "stops", stops: file.legend! },
-            };
-        }
-
-        // Land use
-        if (landuseEffective && Object.keys(landuseLegendMap).length > 0) {
-            return {
-                title: "Land Use",
-                data: {
-                    mode: "categorical",
-                    entries: Object.entries(landuseLegendMap).map(([color, desc]) => ({
-                        hex: color,
-                        value: desc,
-                    })),
-                },
-            };
-        }
-
-        return null;
-    }, [
-        choroplethActive,
-        choroplethLoading,
-        choroplethConfig,
-        choroplethRange,
-        scenarioEffective,
-        hasScenarioData,
-        scenarioRange,
-        scenarioVarConfig,
-        rhessysSpatialEffective,
-        selectedRhessysFile,
-        landuseEffective,
-        landuseLegendMap,
-    ]);
+    return null;
+  }, [
+    choroplethActive,
+    choroplethLoading,
+    choroplethConfig,
+    choroplethRange,
+    scenarioEffective,
+    hasScenarioData,
+    scenarioRange,
+    scenarioVarConfig,
+    rhessysSpatialEffective,
+    selectedRhessysFile,
+    landuseEffective,
+    landuseLegendMap,
+  ]);
 }

@@ -191,7 +191,10 @@ describe("rapApi validation", () => {
     it("uses simple aggregation for a single band", async () => {
       await fetchRapChoropleth({ band: 6, runId: TEST_RUN_PATH });
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-      const aggs = payload.aggregations as Array<{ alias: string; expression: string }>;
+      const aggs = payload.aggregations as Array<{
+        alias: string;
+        expression: string;
+      }>;
       expect(aggs[0].expression).toBe(
         "SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0)",
       );
@@ -200,7 +203,10 @@ describe("rapApi validation", () => {
     it("uses CASE-based summed aggregation for multiple bands", async () => {
       await fetchRapChoropleth({ band: [5, 6], runId: TEST_RUN_PATH });
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
-      const aggs = payload.aggregations as Array<{ alias: string; expression: string }>;
+      const aggs = payload.aggregations as Array<{
+        alias: string;
+        expression: string;
+      }>;
       // Should sum per-band weighted averages, not average across bands
       expect(aggs[0].expression).toContain("CASE WHEN rap.band = 5");
       expect(aggs[0].expression).toContain("CASE WHEN rap.band = 6");

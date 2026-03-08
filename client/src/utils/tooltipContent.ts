@@ -2,7 +2,8 @@ import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import type { ScenarioDataRow } from "../layers/scenario";
 
 function formatMass(kg: number): string {
-  if (Math.abs(kg) >= 1000) return `${(kg / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })} t`;
+  if (Math.abs(kg) >= 1000)
+    return `${(kg / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })} t`;
   return `${kg.toLocaleString(undefined, { maximumFractionDigits: 2 })} kg`;
 }
 

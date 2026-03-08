@@ -171,8 +171,8 @@ export default function WeppSection() {
             id="scenario-select"
             value={
               scenarioEnabled &&
-                selectedScenario &&
-                availableScenarios.some((s) => s.scenario === selectedScenario)
+              selectedScenario &&
+              availableScenarios.some((s) => s.scenario === selectedScenario)
                 ? selectedScenario
                 : "none"
             }

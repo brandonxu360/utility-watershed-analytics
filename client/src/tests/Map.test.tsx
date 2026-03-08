@@ -186,8 +186,6 @@ vi.mock("../components/map/controls/Settings", () => ({
   default: () => <div data-testid="settings-control" />,
 }));
 
-
-
 type SubcatchmentStyleFn = (feature: GeoJSON.Feature | undefined) => unknown;
 let lastSubcatchmentStyleFn: SubcatchmentStyleFn | null = null;
 
@@ -408,7 +406,7 @@ describe("Map Component", () => {
 
   describe("loading states", () => {
     it("shows loading overlay when watersheds are loading", async () => {
-      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<WatershedMap />);
 

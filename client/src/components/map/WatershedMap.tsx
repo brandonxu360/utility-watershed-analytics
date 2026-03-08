@@ -122,8 +122,7 @@ export default function WatershedMap(): JSX.Element {
 
   const { subcatchments, subLoading } = useSubcatchmentData(runId);
   const { channelData, channelLoading } = useChannelData(runId);
-  const { landuseData, landuseLoading } =
-    useLanduseData(runId);
+  const { landuseData, landuseLoading } = useLanduseData(runId);
 
   // Simple key that changes when any coverage styling input changes,
   // forcing SubcatchmentLayer to re-apply styles.
@@ -279,13 +278,13 @@ export default function WatershedMap(): JSX.Element {
           choroplethLoading ||
           landuseLoading ||
           scenarioLoading) && (
-            <div
-              className={classes.mapLoadingOverlay}
-              data-testid="map-loading-overlay"
-            >
-              <CircularProgress size={50} color="inherit" />
-            </div>
-          )}
+          <div
+            className={classes.mapLoadingOverlay}
+            data-testid="map-loading-overlay"
+          >
+            <CircularProgress size={50} color="inherit" />
+          </div>
+        )}
 
         <TileLayer
           key={selectedLayerId}

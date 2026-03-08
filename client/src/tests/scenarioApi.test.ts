@@ -327,7 +327,10 @@ describe("fetchScenariosSummary", () => {
     it("omits scenario from payload for wildfire", async () => {
       await fetchScenariosSummary(TEST_RUN_ID);
       // wildfire is the 5th scenario (index 4)
-      const wildfirePayload = mockPostQuery.mock.calls[4][1] as Record<string, unknown>;
+      const wildfirePayload = mockPostQuery.mock.calls[4][1] as Record<
+        string,
+        unknown
+      >;
       expect(wildfirePayload.scenario).toBeUndefined();
     });
   });

@@ -159,11 +159,11 @@ export const VegetationCover: React.FC = () => {
       try {
         const rows = selectedHillslopeId
           ? await fetchRap({
-            mode: "hillslope",
-            topazId: selectedHillslopeId,
-            runId,
-            year: yearParam,
-          })
+              mode: "hillslope",
+              topazId: selectedHillslopeId,
+              runId,
+              year: yearParam,
+            })
           : await fetchRap({ mode: "watershed", runId, year: yearParam });
 
         if (!mounted) return;

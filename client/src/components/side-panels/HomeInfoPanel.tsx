@@ -40,8 +40,8 @@ export default function HomeSidePanelContent(): JSX.Element {
       </Typography>
       <Typography variant="body1">
         This tool helps watershed and water utility managers explore how
-        different fire and management scenarios affect short- and long-term water
-        quality in source watersheds.
+        different fire and management scenarios affect short- and long-term
+        water quality in source watersheds.
       </Typography>
       <Typography variant="body1">
         <strong>Get Started: Select a watershed to explore its data.</strong>
