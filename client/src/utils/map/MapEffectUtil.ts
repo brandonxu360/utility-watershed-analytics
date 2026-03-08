@@ -45,14 +45,6 @@ interface MapEffectProps {
  * @param watersheds  - Fetched watershed FeatureCollection from @see {@link fetchWatersheds}
  * @returns {null}
  */
-/** Eagerly persist the target viewport so it's available even if
- *  the component unmounts before Leaflet's moveend fires. */
-function saveViewFromBounds(bounds: L.LatLngBounds, zoom: number): void {
-  const c = bounds.getCenter();
-  savedCenter = [c.lat, c.lng];
-  savedZoom = zoom;
-}
-
 export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
   const map = useMap();
   const hasPositioned = useRef(false);
@@ -83,21 +75,21 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
           feature.id && feature.id.toString() === watershedId,
       );
       if (matchingFeature) {
-        const featureBounds = L.geoJSON(matchingFeature).getBounds();
+        const layer = L.geoJSON(matchingFeature);
+        const featureBounds = layer.getBounds();
         if (hasPositioned.current || savedCenter) {
           // Map already has a reasonable position — animate.
-          zoomToFeature(map, L.geoJSON(matchingFeature));
+          zoomToFeature(map, layer);
         } else if (featureBounds.isValid()) {
           // Direct URL, first-ever load — jump instantly so the user
           // doesn't see the fallback center.
           map.fitBounds(featureBounds, { maxZoom: 16 });
-          saveViewFromBounds(
-            featureBounds,
-            map.getBoundsZoom(featureBounds, false),
-          );
+          const c = map.getCenter();
+          savedCenter = [c.lat, c.lng];
+          savedZoom = map.getZoom();
         }
+        hasPositioned.current = true;
       }
-      hasPositioned.current = true;
       return;
     }
 
@@ -114,7 +106,9 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
         // constrained area at that zoom level (super zoomed out).
         map.fitBounds(bounds, { padding: [30, 30] });
         map.setMaxBounds(bounds.pad(0.5));
-        saveViewFromBounds(bounds, map.getBoundsZoom(bounds, false));
+        const c = map.getCenter();
+        savedCenter = [c.lat, c.lng];
+        savedZoom = map.getZoom();
         hasPositioned.current = true;
       }
     } catch {

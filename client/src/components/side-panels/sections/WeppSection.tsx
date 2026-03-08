@@ -170,7 +170,11 @@ export default function WeppSection() {
             labelId="scenario-select-label"
             id="scenario-select"
             value={
-              scenarioEnabled && selectedScenario ? selectedScenario : "none"
+              scenarioEnabled &&
+                selectedScenario &&
+                availableScenarios.some((s) => s.scenario === selectedScenario)
+                ? selectedScenario
+                : "none"
             }
             label="Scenario"
             onChange={handleScenarioSelect}

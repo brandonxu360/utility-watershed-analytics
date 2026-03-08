@@ -80,7 +80,7 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
                 stroke={theme.palette.secondary.dark}
                 strokeDasharray="5 5"
                 data-testid="cartesian-grid"
-                data-stroke={theme.palette.surface.light.toLowerCase()}
+                data-stroke={theme.palette.secondary.dark}
               />
               <XAxis dataKey="name" />
               <YAxis tickFormatter={(v: number) => v.toFixed(1)} />
