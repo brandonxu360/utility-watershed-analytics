@@ -27,9 +27,23 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
   const map = useMap();
   const initialFitDone = useRef(false);
 
-  // ── Initial fit: fill the viewport with all watersheds (fires once) ──────
   useEffect(() => {
-    if (initialFitDone.current || !watersheds?.features?.length) return;
+    if (!watersheds?.features?.length) return;
+
+    if (watershedId) {
+      const matchingFeature = watersheds.features.find(
+        (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>) =>
+          feature.id && feature.id.toString() === watershedId,
+      );
+      if (matchingFeature) {
+        const tempLayer = L.geoJSON(matchingFeature);
+        zoomToFeature(map, tempLayer);
+      }
+      return;
+    }
+
+    // Initial fit: fill the viewport with all watersheds (fires once)
+    if (initialFitDone.current) return;
     try {
       const bounds = L.geoJSON(watersheds).getBounds();
       if (bounds.isValid()) {
@@ -39,21 +53,6 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
       }
     } catch {
       // ignore invalid geometries
-    }
-  }, [watersheds, map]);
-
-  // ── Per-watershed zoom: fires whenever the selected watershed changes ─────
-  useEffect(() => {
-    if (watershedId && watersheds && Array.isArray(watersheds.features)) {
-      const matchingFeature = watersheds.features.find(
-        (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>) =>
-          feature.id && feature.id.toString() === watershedId,
-      );
-
-      if (matchingFeature) {
-        const tempLayer = L.geoJSON(matchingFeature);
-        zoomToFeature(map, tempLayer);
-      }
     }
   }, [watershedId, watersheds, map]);
 
