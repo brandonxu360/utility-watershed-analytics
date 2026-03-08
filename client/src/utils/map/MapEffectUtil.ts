@@ -92,7 +92,10 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
     }
 
     // Home view — only reposition on the very first load.
-    if (hasPositioned.current || savedCenter) return;
+    if (hasPositioned.current || savedCenter) {
+      hasPositioned.current = true;
+      return;
+    }
     try {
       const bounds = L.geoJSON(watersheds).getBounds();
       if (bounds.isValid()) {
