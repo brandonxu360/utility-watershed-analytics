@@ -111,6 +111,8 @@ export type ChoroplethLegendData =
         colormap: string;
         range: { min: number; max: number };
         unit: string;
+        /** When true, show P95/P50/P5 percentile labels (e.g. WEPP scenarios). */
+        percentile?: boolean;
     }
     | {
         mode: "categorical";
@@ -197,6 +199,7 @@ export default function ChoroplethLegend({
 
                 {data.mode === "colormap" && (() => {
                     const { range: scaled, unit: scaledUnit } = autoScale(data.range, data.unit);
+                    const showPercentile = data.percentile ?? false;
                     return (
                         <>
                             <div className={classes.gradientContainer}>
@@ -207,15 +210,15 @@ export default function ChoroplethLegend({
                                 />
                                 <div className={classes.labelsCol}>
                                     <div className={classes.labelGroup}>
-                                        <Typography className={classes.percentileLabel}>P95</Typography>
+                                        {showPercentile && <Typography className={classes.percentileLabel}>P95</Typography>}
                                         <Typography className={classes.label}>{formatNum(scaled.max)}</Typography>
                                     </div>
                                     <div className={classes.labelGroup}>
-                                        <Typography className={classes.percentileLabel}>P50</Typography>
+                                        {showPercentile && <Typography className={classes.percentileLabel}>P50</Typography>}
                                         <Typography className={classes.label}>{formatNum((scaled.min + scaled.max) / 2)}</Typography>
                                     </div>
                                     <div className={classes.labelGroup}>
-                                        <Typography className={classes.percentileLabel}>P5</Typography>
+                                        {showPercentile && <Typography className={classes.percentileLabel}>P5</Typography>}
                                         <Typography className={classes.label}>{formatNum(scaled.min)}</Typography>
                                     </div>
                                 </div>

@@ -195,14 +195,32 @@ export async function fetchRapChoropleth(
 ): Promise<RapChoroplethRow[]> {
   const { runId, band, year, include_schema, include_sql } = opts;
 
-  // Build parameterized filters array using shared helpers
-  const filters: QueryFilter[] = [createBandFilter(band)];
+  // Validate bands using the shared helper (also builds the filter)
+  const bandFilter = createBandFilter(band);
+  const validBands = Array.isArray(bandFilter.value)
+    ? (bandFilter.value as number[])
+    : [bandFilter.value as number];
+
+  const filters: QueryFilter[] = [bandFilter];
 
   // Add year filter if valid
   const yearFilter = createYearFilter(year);
   if (yearFilter) {
     filters.push(yearFilter);
   }
+
+  // For multiple bands, sum each band's area-weighted average so that
+  // e.g. "all" = shrub + tree rather than (shrub + tree) / 2.
+  // For a single band the simple expression is equivalent and faster.
+  const aggregationExpr =
+    validBands.length > 1
+      ? validBands
+        .map(
+          (b) =>
+            `SUM(CASE WHEN rap.band = ${b} THEN rap.value * hillslopes.area ELSE 0 END) / NULLIF(SUM(CASE WHEN rap.band = ${b} THEN hillslopes.area ELSE 0 END), 0)`,
+        )
+        .join(" + ")
+      : "SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0)";
 
   const payload: Record<string, unknown> = {
     datasets: [
@@ -215,8 +233,7 @@ export async function fetchRapChoropleth(
     aggregations: [
       {
         alias: "value",
-        expression:
-          "SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0)",
+        expression: aggregationExpr,
       },
     ],
     group_by: ["hillslopes.wepp_id"],

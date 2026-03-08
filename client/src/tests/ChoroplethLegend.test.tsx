@@ -41,6 +41,31 @@ describe("ChoroplethLegend", () => {
             expect(screen.getByText("100")).toBeInTheDocument();
         });
 
+        it("does not render percentile labels by default", () => {
+            render(<ChoroplethLegend {...defaultProps} />);
+            expect(screen.queryByText("P95")).not.toBeInTheDocument();
+            expect(screen.queryByText("P50")).not.toBeInTheDocument();
+            expect(screen.queryByText("P5")).not.toBeInTheDocument();
+        });
+
+        it("renders percentile labels when percentile is true", () => {
+            render(
+                <ChoroplethLegend
+                    title="Sediment Yield"
+                    data={{
+                        mode: "colormap",
+                        colormap: "viridis",
+                        range: { min: 0, max: 100 },
+                        unit: "kg",
+                        percentile: true,
+                    }}
+                />,
+            );
+            expect(screen.getByText("P95")).toBeInTheDocument();
+            expect(screen.getByText("P50")).toBeInTheDocument();
+            expect(screen.getByText("P5")).toBeInTheDocument();
+        });
+
         it("renders the unit label", () => {
             render(<ChoroplethLegend {...defaultProps} />);
             expect(screen.getByText("% cover")).toBeInTheDocument();

@@ -73,6 +73,7 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
                     colormap: choroplethConfig.colormap,
                     range: choroplethRange,
                     unit: choroplethConfig.unit,
+                    percentile: false,
                 },
             };
         }
@@ -86,6 +87,7 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
                     colormap: scenarioVarConfig.colormap,
                     range: scenarioRange,
                     unit: scenarioVarConfig.unit,
+                    percentile: true,
                 },
             };
         }
