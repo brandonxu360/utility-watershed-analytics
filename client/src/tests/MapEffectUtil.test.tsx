@@ -10,6 +10,7 @@ const mockMap = {
   flyToBounds: vi.fn(),
   fitBounds: vi.fn(),
   setMaxBounds: vi.fn(),
+  getBoundsZoom: vi.fn(() => 12),
   on: vi.fn((event: string, handler: MoveendHandler) => {
     if (event === "moveend") moveendListeners.push(handler);
   }),
@@ -32,6 +33,7 @@ vi.mock("../utils/map/MapUtil", () => ({
 const mockBounds = {
   isValid: vi.fn().mockReturnValue(true),
   pad: vi.fn().mockImplementation(() => mockBounds),
+  getCenter: vi.fn().mockReturnValue({ lat: 42, lng: -105 }),
 };
 
 const mockTempLayer = { getBounds: vi.fn().mockReturnValue(mockBounds) };
