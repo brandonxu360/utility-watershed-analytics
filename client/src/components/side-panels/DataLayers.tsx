@@ -86,10 +86,7 @@ export default function DataLayers() {
             </Typography>
           </AccordionSummary>
           <AccordionDetails className={classes.accordionDetailsCompact}>
-            <RhessysSection
-              files={files}
-              isLoading={isLoading}
-            />
+            <RhessysSection files={files} isLoading={isLoading} />
           </AccordionDetails>
         </Accordion>
 
