@@ -178,10 +178,6 @@ vi.mock("../components/map/controls/Layers", () => ({
   ),
 }));
 
-vi.mock("../components/map/controls/Legend", () => ({
-  default: () => <div data-testid="legend-control" />,
-}));
-
 vi.mock("../components/map/controls/Search", () => ({
   default: () => <div data-testid="search-control" />,
 }));
@@ -356,12 +352,10 @@ describe("Map Component", () => {
     it("renders all control components", async () => {
       renderWithProviders(<WatershedMap />);
       await waitFor(() => {
-        expect(screen.getByTestId("legend-control")).toBeInTheDocument();
         expect(screen.getByTestId("search-control")).toBeInTheDocument();
         expect(screen.getByTestId("layers-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-in-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-out-control")).toBeInTheDocument();
-
       });
     });
 

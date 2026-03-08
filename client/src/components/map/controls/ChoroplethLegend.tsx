@@ -47,6 +47,9 @@ const useStyles = tss.create(({ theme }) => ({
     label: {
         fontSize: theme.typography.subtitle1.fontSize,
         color: theme.palette.primary.contrastText,
+        wordBreak: "break-word",
+        overflowWrap: "anywhere",
+        minWidth: 0,
     },
     gradientContainer: {
         display: "flex",
