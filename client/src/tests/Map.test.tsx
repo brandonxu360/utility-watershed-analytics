@@ -190,9 +190,7 @@ vi.mock("../components/map/controls/Settings", () => ({
   default: () => <div data-testid="settings-control" />,
 }));
 
-vi.mock("../components/map/controls/LandUseLegend", () => ({
-  default: () => <div data-testid="landuse-legend" />,
-}));
+
 
 type SubcatchmentStyleFn = (feature: GeoJSON.Feature | undefined) => unknown;
 let lastSubcatchmentStyleFn: SubcatchmentStyleFn | null = null;
@@ -363,7 +361,7 @@ describe("Map Component", () => {
         expect(screen.getByTestId("layers-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-in-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-out-control")).toBeInTheDocument();
-        expect(screen.getByTestId("landuse-legend")).toBeInTheDocument();
+
       });
     });
 
@@ -415,7 +413,7 @@ describe("Map Component", () => {
 
   describe("loading states", () => {
     it("shows loading overlay when watersheds are loading", async () => {
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<WatershedMap />);
 

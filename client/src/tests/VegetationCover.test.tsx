@@ -36,38 +36,6 @@ vi.mock("../api/rapApi", () => ({
   fetchRap: mockFetchRap,
 }));
 
-const mockUseChoropleth = vi.fn(
-  (): {
-    config: { colormap: string; unit: string } | null;
-    range: { min: number; max: number } | null;
-    isLoading: boolean;
-  } => ({
-    config: null,
-    range: null,
-    isLoading: false,
-  }),
-);
-
-vi.mock("../hooks/useChoropleth", () => ({
-  useChoropleth: () => mockUseChoropleth(),
-}));
-
-vi.mock("../components/ChoroplethScale", () => ({
-  ChoroplethScale: ({
-    colormap,
-    range,
-    unit,
-  }: {
-    colormap: string;
-    range: { min: number; max: number };
-    unit: string;
-  }) => (
-    <div data-testid="choropleth-scale">
-      {colormap} {range.min}-{range.max} {unit}
-    </div>
-  ),
-}));
-
 vi.mock("../components/CoverageLineChart", () => ({
   CoverageLineChart: ({
     data,
@@ -133,11 +101,6 @@ beforeEach(() => {
     ]),
   );
   mockUseParams.mockReturnValue("batch;;test-batch;;test-run");
-  mockUseChoropleth.mockReturnValue({
-    config: null,
-    range: null,
-    isLoading: false,
-  });
   mockDesired = desiredWith("choropleth");
   mockSelectedHillslopeId = null;
 });
@@ -242,77 +205,6 @@ describe("VegetationCover", () => {
           screen.queryByText("Loading vegetation data…"),
         ).not.toBeInTheDocument();
       });
-    });
-
-    it("renders ChoroplethScale when config and range are available", async () => {
-      mockUseChoropleth.mockReturnValue({
-        config: { colormap: "viridis", unit: "% cover" },
-        range: { min: 0, max: 100 },
-        isLoading: false,
-      });
-
-      await act(async () => {
-        render(<VegetationCover />);
-      });
-
-      await waitFor(() => {
-        expect(mockFetchRap).toHaveBeenCalled();
-      });
-
-      expect(screen.getByTestId("choropleth-scale")).toBeInTheDocument();
-      expect(screen.getByTestId("choropleth-scale")).toHaveTextContent(
-        "viridis 0-100 % cover",
-      );
-    });
-
-    it("does not render ChoroplethScale when loading", async () => {
-      mockUseChoropleth.mockReturnValue({
-        config: { colormap: "viridis", unit: "% cover" },
-        range: { min: 0, max: 100 },
-        isLoading: true,
-      });
-
-      await act(async () => {
-        render(<VegetationCover />);
-      });
-
-      expect(screen.queryByTestId("choropleth-scale")).not.toBeInTheDocument();
-    });
-
-    it("does not render ChoroplethScale when range is null", async () => {
-      mockUseChoropleth.mockReturnValue({
-        config: { colormap: "viridis", unit: "% cover" },
-        range: null,
-        isLoading: false,
-      });
-
-      await act(async () => {
-        render(<VegetationCover />);
-      });
-
-      await waitFor(() => {
-        expect(mockFetchRap).toHaveBeenCalled();
-      });
-
-      expect(screen.queryByTestId("choropleth-scale")).not.toBeInTheDocument();
-    });
-
-    it("does not render ChoroplethScale when config is null", async () => {
-      mockUseChoropleth.mockReturnValue({
-        config: null,
-        range: { min: 0, max: 100 },
-        isLoading: false,
-      });
-
-      await act(async () => {
-        render(<VegetationCover />);
-      });
-
-      await waitFor(() => {
-        expect(mockFetchRap).toHaveBeenCalled();
-      });
-
-      expect(screen.queryByTestId("choropleth-scale")).not.toBeInTheDocument();
     });
   });
 

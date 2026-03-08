@@ -21,17 +21,15 @@ import { useLayerToasts } from "../../hooks/useLayerToasts";
 import ZoomInControl from "./controls/ZoomIn";
 import ZoomOutControl from "./controls/ZoomOut";
 import LayersControl from "./controls/Layers";
-import LegendControl from "./controls/Legend";
 import SearchControl from "./controls/Search";
-import LandUseLegend from "./controls/LandUseLegend";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import RhessysSpatialLayer from "./RhessysSpatialLayer";
-import RhessysSpatialLegend from "./controls/RhessysSpatialLegend";
+import ChoroplethLegend from "./controls/ChoroplethLegend";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import { buildHillslopeTooltip } from "../../utils/tooltipContent";
 import type { SbsColorMode } from "../../api/types";
-import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
+import { useChoroplethLegend } from "../../hooks/useChoroplethLegend";
 import { getLayerParams } from "../../layers/types";
 import "leaflet/dist/leaflet.css";
 
@@ -92,6 +90,8 @@ export default function WatershedMap(): JSX.Element {
     getScenarioRow,
   } = useScenarioData();
 
+  const choroplethLegendProps = useChoroplethLegend();
+
   const scenarioEffective = isEffective("scenario");
   const subcatchmentEffective = isEffective("subcatchment");
   const channelsEffective = isEffective("channels");
@@ -120,14 +120,9 @@ export default function WatershedMap(): JSX.Element {
     queryFn: fetchWatersheds,
   });
 
-  const { files: rhessysSpatialFiles } = useRhessysSpatialInputs(runId);
-  const selectedRhessysFile =
-    rhessysSpatialFiles.find((f) => f.filename === rhessysSpatialFilename) ??
-    null;
-
   const { subcatchments, subLoading } = useSubcatchmentData(runId);
   const { channelData, channelLoading } = useChannelData(runId);
-  const { landuseData, landuseLoading, landuseLegendMap } =
+  const { landuseData, landuseLoading } =
     useLanduseData(runId);
 
   // Simple key that changes when any coverage styling input changes,
@@ -284,13 +279,13 @@ export default function WatershedMap(): JSX.Element {
           choroplethLoading ||
           landuseLoading ||
           scenarioLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}
@@ -306,7 +301,8 @@ export default function WatershedMap(): JSX.Element {
 
         {/* TOP LEFT CONTROLS */}
         <div className="leaflet-top leaflet-left">
-          <LegendControl />
+          {/* <LegendControl /> */}
+          {choroplethLegendProps && <ChoroplethLegend {...choroplethLegendProps} />}
         </div>
 
         {/* TOP RIGHT CONTROLS */}
@@ -369,13 +365,7 @@ export default function WatershedMap(): JSX.Element {
 
       </MapContainer>
 
-      <LandUseLegend landuseLegendMap={landuseLegendMap} />
-
       {sbsEffective && <SbsLegend />}
-
-      {rhessysSpatialEffective && selectedRhessysFile && (
-        <RhessysSpatialLegend file={selectedRhessysFile} />
-      )}
     </div>
   );
 }

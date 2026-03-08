@@ -1,6 +1,15 @@
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import type { ScenarioDataRow } from "../layers/scenario";
 
+function formatMass(kg: number): string {
+  if (Math.abs(kg) >= 1000) return `${(kg / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })} t`;
+  return `${kg.toLocaleString(undefined, { maximumFractionDigits: 2 })} kg`;
+}
+
+function formatVolume(m3: number): string {
+  return `${m3.toLocaleString(undefined, { maximumFractionDigits: 2 })} m³`;
+}
+
 /**
  * Build the HTML tooltip for a subcatchment hillslope.
  */
@@ -15,10 +24,10 @@ export function buildHillslopeTooltip(
 
   if (scenarioRow) {
     lines.push(
-      `<strong>Runoff Volume:</strong> ${scenarioRow.runoff.toFixed(2)} m³`,
-      `<strong>Soil Loss:</strong> ${scenarioRow.soil_loss.toFixed(2)} kg`,
-      `<strong>Sediment Deposition:</strong> ${scenarioRow.sediment_deposition.toFixed(2)} kg`,
-      `<strong>Sediment Yield:</strong> ${scenarioRow.sediment_yield.toFixed(2)} kg`,
+      `<strong>Runoff Volume:</strong> ${formatVolume(scenarioRow.runoff)}`,
+      `<strong>Soil Loss:</strong> ${formatMass(scenarioRow.soil_loss)}`,
+      `<strong>Sediment Deposition:</strong> ${formatMass(scenarioRow.sediment_deposition)}`,
+      `<strong>Sediment Yield:</strong> ${formatMass(scenarioRow.sediment_yield)}`,
       `<strong>Area:</strong> ${scenarioRow.hillslope_area.toFixed(2)} ha`,
     );
   } else {
