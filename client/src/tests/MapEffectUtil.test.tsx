@@ -238,7 +238,7 @@ describe("MapEffectUtil", () => {
         }) => MapEffect(props),
         {
           initialProps: {
-            watershedId: null,
+            watershedId: null as string | null,
             watersheds,
           },
         },
@@ -296,7 +296,7 @@ describe("MapEffectUtil", () => {
         }) => MapEffect(props),
         {
           initialProps: {
-            watershedId: null,
+            watershedId: null as string | null,
             watersheds,
           },
         },
