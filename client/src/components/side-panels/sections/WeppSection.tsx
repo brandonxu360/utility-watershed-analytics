@@ -1,14 +1,15 @@
 import { ChangeEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { useLayerToggle } from "../../../hooks/useLayerToggle";
 import { hasActiveDependents } from "../../../layers/registry";
 import { getLayerParams } from "../../../layers/types";
+import { fetchScenariosSummary } from "../../../api/scenarioApi";
 
 import {
-  AVAILABLE_SCENARIOS,
   SCENARIO_VARIABLES,
   SCENARIO_VARIABLE_CONFIG,
-  formatScenarioLabel,
   type ScenarioType,
   type ScenarioVariableType,
 } from "../../../layers/scenario";
@@ -100,12 +101,29 @@ export default function WeppSection() {
   const { classes } = useStyles();
   const toggle = useLayerToggle();
 
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
+
   const {
     layerDesired,
     dispatchLayerAction,
     enableLayerWithParams,
     effective,
   } = useWatershed();
+
+  const { data: scenariosSummary } = useQuery({
+    queryKey: ["scenariosSummary", runId],
+    queryFn: () => fetchScenariosSummary(runId!),
+    enabled: !!runId,
+    staleTime: 5 * 60_000,
+    retry: 1,
+  });
+
+  const availableScenarios = scenariosSummary ?? [];
 
   const subcatchmentChecked = layerDesired.subcatchment.enabled;
   const channelsChecked = layerDesired.channels.enabled;
@@ -159,9 +177,9 @@ export default function WeppSection() {
             className={classes.scenarioSelect}
           >
             <MenuItem value="none">None</MenuItem>
-            {AVAILABLE_SCENARIOS.map((scenario) => (
-              <MenuItem key={scenario} value={scenario}>
-                {formatScenarioLabel(scenario)}
+            {availableScenarios.map((s) => (
+              <MenuItem key={s.scenario} value={s.scenario}>
+                {s.label}
               </MenuItem>
             ))}
           </Select>

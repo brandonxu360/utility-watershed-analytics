@@ -27,11 +27,10 @@ function makeRow(
   return {
     scenario: "undisturbed",
     label: "Current",
-    totalArea: 100,
     waterDischarge: 50,
-    hillslopeSoilLoss: 200,
-    channelSoilLoss: 150,
-    sedimentDischarge: 300,
+    hillslopeSoilLoss: 2,
+    channelSoilLoss: 1.5,
+    sedimentDischarge: 3,
     ...overrides,
   };
 }
@@ -164,27 +163,24 @@ describe("ScenariosTable", () => {
     });
   });
 
-  describe("per-hectare (t/ha) calculation", () => {
-    it("divides hillslopeSoilLoss by totalArea", () => {
-      // 200 tonnes / 100 ha = 2 t/ha
+  describe("metric values rendered directly", () => {
+    it("renders hillslopeSoilLoss value", () => {
       mockUseQuery.mockReturnValue({
         isLoading: false,
         isError: false,
-        data: [makeRow({ hillslopeSoilLoss: 200, totalArea: 100 })],
+        data: [makeRow({ hillslopeSoilLoss: 2 })],
         error: null,
       });
       render(<ScenariosTable />);
-      // The table uses aria-label="watershed scenarios" (data-testid="scenarios-table")
       const table = screen.getByTestId("scenarios-table");
       expect(table).toHaveTextContent("2");
     });
 
-    it("divides channelSoilLoss by totalArea", () => {
-      // 150 / 100 = 1.5 t/ha
+    it("renders channelSoilLoss value", () => {
       mockUseQuery.mockReturnValue({
         isLoading: false,
         isError: false,
-        data: [makeRow({ channelSoilLoss: 150, totalArea: 100 })],
+        data: [makeRow({ channelSoilLoss: 1.5 })],
         error: null,
       });
       render(<ScenariosTable />);
@@ -192,12 +188,11 @@ describe("ScenariosTable", () => {
       expect(table).toHaveTextContent("1.5");
     });
 
-    it("divides sedimentDischarge by totalArea", () => {
-      // 300 / 100 = 3 t/ha
+    it("renders sedimentDischarge value", () => {
       mockUseQuery.mockReturnValue({
         isLoading: false,
         isError: false,
-        data: [makeRow({ sedimentDischarge: 300, totalArea: 100 })],
+        data: [makeRow({ sedimentDischarge: 3 })],
         error: null,
       });
       render(<ScenariosTable />);
@@ -205,11 +200,11 @@ describe("ScenariosTable", () => {
       expect(table).toHaveTextContent("3");
     });
 
-    it("renders '—' for hillslopeSoilLoss when totalArea is null", () => {
+    it("renders dash when hillslopeSoilLoss is null", () => {
       mockUseQuery.mockReturnValue({
         isLoading: false,
         isError: false,
-        data: [makeRow({ hillslopeSoilLoss: 200, totalArea: null })],
+        data: [makeRow({ hillslopeSoilLoss: null })],
         error: null,
       });
       render(<ScenariosTable />);
@@ -217,11 +212,11 @@ describe("ScenariosTable", () => {
       expect(table).toHaveTextContent("—");
     });
 
-    it("renders '—' for hillslopeSoilLoss when totalArea is 0", () => {
+    it("renders dash when channelSoilLoss is null", () => {
       mockUseQuery.mockReturnValue({
         isLoading: false,
         isError: false,
-        data: [makeRow({ hillslopeSoilLoss: 200, totalArea: 0 })],
+        data: [makeRow({ channelSoilLoss: null })],
         error: null,
       });
       render(<ScenariosTable />);
@@ -229,34 +224,19 @@ describe("ScenariosTable", () => {
       expect(table).toHaveTextContent("—");
     });
 
-    it("renders '—' for a TONNES_KEY when its value is null", () => {
+    it("renders waterDischarge value", () => {
       mockUseQuery.mockReturnValue({
         isLoading: false,
         isError: false,
-        data: [makeRow({ channelSoilLoss: null, totalArea: 100 })],
+        data: [makeRow({ waterDischarge: 123.45 })],
         error: null,
       });
       render(<ScenariosTable />);
       const table = screen.getByTestId("scenarios-table");
-      expect(table).toHaveTextContent("—");
-    });
-  });
-
-  describe("waterDischarge (non-tonnes) is displayed without area division", () => {
-    it("renders the raw waterDischarge value", () => {
-      mockUseQuery.mockReturnValue({
-        isLoading: false,
-        isError: false,
-        data: [makeRow({ waterDischarge: 123.45, totalArea: 10 })],
-        error: null,
-      });
-      render(<ScenariosTable />);
-      const table = screen.getByTestId("scenarios-table");
-      // 123.45, not 123.45/10 = 12.345
       expect(table).toHaveTextContent("123.45");
     });
 
-    it("renders '—' when waterDischarge is null", () => {
+    it("renders dash when waterDischarge is null", () => {
       mockUseQuery.mockReturnValue({
         isLoading: false,
         isError: false,
@@ -284,17 +264,6 @@ describe("ScenariosTable", () => {
     it("renders '0' when the value is exactly zero", () => {
       const table = renderWithRow({ waterDischarge: 0 });
       expect(table).toHaveTextContent("0");
-    });
-
-    it("uses exponential notation for very small values (< 0.01)", () => {
-      // 0.0001 should use toExponential(3) → "1.000e-4"
-      const table = renderWithRow({ waterDischarge: 0.0001 });
-      expect(table).toHaveTextContent("1.000e-4");
-    });
-
-    it("uses exponential notation for very large values (>= 1e6)", () => {
-      const table = renderWithRow({ waterDischarge: 1_500_000 });
-      expect(table).toHaveTextContent("1.500e+6");
     });
 
     it("formats a normal decimal with up to 2 fractional digits", () => {

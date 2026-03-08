@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
+
 import {
   fetchScenariosSummary,
   type ScenarioSummaryRow,
 } from "../../api/scenarioApi";
+
 import { tss } from "../../utils/tss";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -44,12 +46,6 @@ type MetricColumn = {
   header: string;
   key: MetricKey;
 };
-
-const TONNES_KEYS = new Set<MetricKey>([
-  "hillslopeSoilLoss",
-  "channelSoilLoss",
-  "sedimentDischarge",
-]);
 
 const METRIC_COLUMNS: MetricColumn[] = [
   {
@@ -163,15 +159,7 @@ export function ScenariosTable() {
                 </TableCell>
                 {METRIC_COLUMNS.map((col) => (
                   <TableCell key={col.key} align="center">
-                    {formatValue(
-                      TONNES_KEYS.has(col.key)
-                        ? row[col.key] != null &&
-                          row.totalArea != null &&
-                          row.totalArea > 0
-                          ? row[col.key]! / row.totalArea
-                          : null
-                        : row[col.key],
-                    )}
+                    {formatValue(row[col.key])}
                   </TableCell>
                 ))}
               </TableRow>
