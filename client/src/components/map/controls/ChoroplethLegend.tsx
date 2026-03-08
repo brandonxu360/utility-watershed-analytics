@@ -72,6 +72,22 @@ const useStyles = tss.create(({ theme }) => ({
         textAlign: "center",
         marginTop: theme.spacing(0.75),
     },
+    percentileLabel: {
+        fontSize: theme.typography.caption.fontSize,
+        color: theme.palette.text.secondary,
+        lineHeight: 1.2,
+    },
+    labelGroup: {
+        display: "flex",
+        flexDirection: "column",
+    },
+    percentileNote: {
+        fontSize: theme.typography.caption.fontSize,
+        color: theme.palette.text.secondary,
+        fontStyle: "italic",
+        textAlign: "center",
+        marginTop: theme.spacing(0.5),
+    },
 }));
 
 /** Categorical entry with a discrete color swatch */
@@ -187,47 +203,63 @@ export default function ChoroplethLegend({
                                     data-testid="choropleth-gradient"
                                 />
                                 <div className={classes.labelsCol}>
-                                    <Typography className={classes.label}>
-                                        {formatNum(scaled.max)}
-                                    </Typography>
-                                    <Typography className={classes.label}>
-                                        {formatNum((scaled.min + scaled.max) / 2)}
-                                    </Typography>
-                                    <Typography className={classes.label}>
-                                        {formatNum(scaled.min)}
-                                    </Typography>
+                                    <div className={classes.labelGroup}>
+                                        <Typography className={classes.percentileLabel}>95th</Typography>
+                                        <Typography className={classes.label}>{formatNum(scaled.max)}</Typography>
+                                    </div>
+                                    <div className={classes.labelGroup}>
+                                        <Typography className={classes.percentileLabel}>50th</Typography>
+                                        <Typography className={classes.label}>{formatNum((scaled.min + scaled.max) / 2)}</Typography>
+                                    </div>
+                                    <div className={classes.labelGroup}>
+                                        <Typography className={classes.percentileLabel}>5th</Typography>
+                                        <Typography className={classes.label}>{formatNum(scaled.min)}</Typography>
+                                    </div>
                                 </div>
                             </div>
                             {scaledUnit && (
                                 <Typography className={classes.unit}>{scaledUnit}</Typography>
                             )}
+                            <Typography className={classes.percentileNote}>
+                                5th / 50th / 95th percentile
+                            </Typography>
                         </>
                     );
                 })()}
 
                 {data.mode === "stops" && data.stops.length >= 2 && (
-                    <div className={classes.gradientContainer}>
-                        <div
-                            className={classes.gradientBar}
-                            style={{ background: gradientCss }}
-                            data-testid="choropleth-gradient"
-                        />
-                        <div className={classes.labelsCol}>
-                            <Typography className={classes.label}>
-                                {formatNum(data.stops[data.stops.length - 1].value)}
-                            </Typography>
-                            <Typography className={classes.label}>
-                                {formatNum(
-                                    (data.stops[0].value +
-                                        data.stops[data.stops.length - 1].value) /
-                                    2,
-                                )}
-                            </Typography>
-                            <Typography className={classes.label}>
-                                {formatNum(data.stops[0].value)}
-                            </Typography>
+                    <>
+                        <div className={classes.gradientContainer}>
+                            <div
+                                className={classes.gradientBar}
+                                style={{ background: gradientCss }}
+                                data-testid="choropleth-gradient"
+                            />
+                            <div className={classes.labelsCol}>
+                                <div className={classes.labelGroup}>
+                                    <Typography className={classes.percentileLabel}>95th</Typography>
+                                    <Typography className={classes.label}>{formatNum(data.stops[data.stops.length - 1].value)}</Typography>
+                                </div>
+                                <div className={classes.labelGroup}>
+                                    <Typography className={classes.percentileLabel}>50th</Typography>
+                                    <Typography className={classes.label}>
+                                        {formatNum(
+                                            (data.stops[0].value +
+                                                data.stops[data.stops.length - 1].value) /
+                                            2,
+                                        )}
+                                    </Typography>
+                                </div>
+                                <div className={classes.labelGroup}>
+                                    <Typography className={classes.percentileLabel}>5th</Typography>
+                                    <Typography className={classes.label}>{formatNum(data.stops[0].value)}</Typography>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                        <Typography className={classes.percentileNote}>
+                            5th / 50th / 95th percentile
+                        </Typography>
+                    </>
                 )}
             </Paper>
         </div>
