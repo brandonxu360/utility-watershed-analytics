@@ -1,3 +1,5 @@
+import json
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.gis.geos import GEOSGeometry
@@ -74,11 +76,12 @@ class SubcatchmentTests(APITestCase):
             args=[self.watershed_with_multiple_subcatchments.runid]
             )
         response = self.client.get(url)
+        payload = json.loads(response.content)
 
         # Assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['features']), 2)
-        response_topazids = [subcatchment['properties']['topazid'] for subcatchment in response.data['features']]
+        self.assertEqual(len(payload['features']), 2)
+        response_topazids = [subcatchment['properties']['topazid'] for subcatchment in payload['features']]
         self.assertIn(1, response_topazids)
         self.assertIn(2, response_topazids)
         self.assertNotIn(3, response_topazids)
@@ -94,22 +97,60 @@ class SubcatchmentTests(APITestCase):
             args=[self.watershed_without_subcatchments.runid]
         )
         response = self.client.get(url)
+        payload = json.loads(response.content)
 
         # Assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['features']), 0)
+        self.assertEqual(len(payload['features']), 0)
 
     def test_nonexistant_watershed_linked_subcatchments(self):
         """
         An empty successful 200 response is expected when subcatchments for a nonexistant watershed are requested.
         """
-        # Act 
+        # Act
         url = reverse(
             'watershed-subcatchments',
             args=['unrecognized-webcloud-run-id']
         )
         response = self.client.get(url)
+        payload = json.loads(response.content)
 
         # Assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['features']), 0)
+        self.assertEqual(len(payload['features']), 0)
+
+
+class WatershedTests(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.watershed = create_watershed('WS-DETAIL-1')
+
+    def test_retrieve_returns_single_feature(self):
+        """Detail endpoint should return one GeoJSON Feature object, not a collection."""
+        url = reverse('watershed-detail', args=[self.watershed.runid])
+        response = self.client.get(url)
+        payload = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(payload['type'], 'Feature')
+        self.assertEqual(payload['id'], self.watershed.runid)
+        self.assertIn('properties', payload)
+        self.assertIn('geometry', payload)
+
+    def test_retrieve_missing_watershed_returns_404(self):
+        """Detail endpoint should return 404 for an unknown watershed id."""
+        url = reverse('watershed-detail', args=['DOES-NOT-EXIST'])
+        response = self.client.get(url)
+        payload = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(payload.get('detail'), 'Not found.')
+
+    def test_retrieve_simplified_geom_null_is_json_null(self):
+        """Nullable simplified geometry must serialize as JSON null, not invalid token None."""
+        url = reverse('watershed-detail', args=[self.watershed.runid])
+        response = self.client.get(url, {'simplified_geom': 'true'})
+        payload = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(payload.get('geometry'))

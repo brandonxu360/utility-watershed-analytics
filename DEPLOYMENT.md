@@ -58,6 +58,17 @@ The production deployment consists of four main services orchestrated with Docke
 
 The frontend React application is built in a dedicated container that outputs static files to a shared Docker volume. Caddy serves these static files directly while proxying API routes (`/api/*`, `/admin/*`, `/silk/*`) to the Django backend.
 
+The backend runs with configurable Gunicorn process/thread concurrency via environment variables in `compose.prod.yml`:
+
+- `GUNICORN_WORKERS` (default `8`)
+- `GUNICORN_THREADS` (default `2`)
+- `GUNICORN_TIMEOUT` (default `180`)
+- `GUNICORN_KEEPALIVE` (default `5`)
+- `GUNICORN_MAX_REQUESTS` (default `2000`)
+- `GUNICORN_MAX_REQUESTS_JITTER` (default `200`)
+
+Set these in the production `.env` (GitHub secret `PRODUCTION_ENV`) to tune per host capacity.
+
 To ensure the Docker Compose stack autostarts on VM reboot, a [systemd service](utility-watershed-analytics.service) is configured on the host VM.
 
 ## Server Access & Manual Operations

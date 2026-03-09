@@ -35,8 +35,27 @@ services:
       - LOADER_DATA_DIR=/data
       - WEPPCLOUD_JWT_TOKEN=${WEPPCLOUD_JWT_TOKEN}
       - WEPPCLOUD_JWT_TOKEN_2=${WEPPCLOUD_JWT_TOKEN_2}
+      # Gunicorn tuning (override in .env as needed)
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-8}
+      - GUNICORN_THREADS=${GUNICORN_THREADS:-2}
+      - GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-180}
+      - GUNICORN_KEEPALIVE=${GUNICORN_KEEPALIVE:-5}
+      - GUNICORN_MAX_REQUESTS=${GUNICORN_MAX_REQUESTS:-2000}
+      - GUNICORN_MAX_REQUESTS_JITTER=${GUNICORN_MAX_REQUESTS_JITTER:-200}
     entrypoint: ["/entrypoint.sh"]
-    command: gunicorn server.wsgi:application --bind 0.0.0.0:8000
+    command:
+      - sh
+      - -c
+      - >
+        gunicorn server.wsgi:application
+        --bind 0.0.0.0:8000
+        --workers $${GUNICORN_WORKERS:-8}
+        --worker-class gthread
+        --threads $${GUNICORN_THREADS:-2}
+        --timeout $${GUNICORN_TIMEOUT:-180}
+        --keep-alive $${GUNICORN_KEEPALIVE:-5}
+        --max-requests $${GUNICORN_MAX_REQUESTS:-2000}
+        --max-requests-jitter $${GUNICORN_MAX_REQUESTS_JITTER:-200}
     depends_on:
       db:
         condition: service_healthy
@@ -73,4 +92,4 @@ volumes:
   caddy_data: {}
   frontend-build: {}
   watershed_data: {}
-
+  
