@@ -96,7 +96,7 @@ export default function HomeSidePanelContent(): JSX.Element {
             })
           }
         >
-          Gate Creek (RHESSys inputs)
+          Gate Creek
         </Button>
         <Button
           variant="outlined"
