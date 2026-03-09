@@ -1,3 +1,5 @@
+import json
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.gis.geos import GEOSGeometry
@@ -74,11 +76,12 @@ class SubcatchmentTests(APITestCase):
             args=[self.watershed_with_multiple_subcatchments.runid]
             )
         response = self.client.get(url)
+        payload = json.loads(response.content)
 
         # Assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['features']), 2)
-        response_topazids = [subcatchment['properties']['topazid'] for subcatchment in response.data['features']]
+        self.assertEqual(len(payload['features']), 2)
+        response_topazids = [subcatchment['properties']['topazid'] for subcatchment in payload['features']]
         self.assertIn(1, response_topazids)
         self.assertIn(2, response_topazids)
         self.assertNotIn(3, response_topazids)
@@ -94,10 +97,11 @@ class SubcatchmentTests(APITestCase):
             args=[self.watershed_without_subcatchments.runid]
         )
         response = self.client.get(url)
+        payload = json.loads(response.content)
 
         # Assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['features']), 0)
+        self.assertEqual(len(payload['features']), 0)
 
     def test_nonexistant_watershed_linked_subcatchments(self):
         """
@@ -109,7 +113,8 @@ class SubcatchmentTests(APITestCase):
             args=['unrecognized-webcloud-run-id']
         )
         response = self.client.get(url)
+        payload = json.loads(response.content)
 
         # Assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['features']), 0)
+        self.assertEqual(len(payload['features']), 0)
