@@ -107,7 +107,7 @@ class SubcatchmentTests(APITestCase):
         """
         An empty successful 200 response is expected when subcatchments for a nonexistant watershed are requested.
         """
-        # Act 
+        # Act
         url = reverse(
             'watershed-subcatchments',
             args=['unrecognized-webcloud-run-id']
@@ -118,3 +118,39 @@ class SubcatchmentTests(APITestCase):
         # Assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(payload['features']), 0)
+
+
+class WatershedTests(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.watershed = create_watershed('WS-DETAIL-1')
+
+    def test_retrieve_returns_single_feature(self):
+        """Detail endpoint should return one GeoJSON Feature object, not a collection."""
+        url = reverse('watershed-detail', args=[self.watershed.runid])
+        response = self.client.get(url)
+        payload = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(payload['type'], 'Feature')
+        self.assertEqual(payload['id'], self.watershed.runid)
+        self.assertIn('properties', payload)
+        self.assertIn('geometry', payload)
+
+    def test_retrieve_missing_watershed_returns_404(self):
+        """Detail endpoint should return 404 for an unknown watershed id."""
+        url = reverse('watershed-detail', args=['DOES-NOT-EXIST'])
+        response = self.client.get(url)
+        payload = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(payload.get('detail'), 'Not found.')
+
+    def test_retrieve_simplified_geom_null_is_json_null(self):
+        """Nullable simplified geometry must serialize as JSON null, not invalid token None."""
+        url = reverse('watershed-detail', args=[self.watershed.runid])
+        response = self.client.get(url, {'simplified_geom': 'true'})
+        payload = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(payload.get('geometry'))

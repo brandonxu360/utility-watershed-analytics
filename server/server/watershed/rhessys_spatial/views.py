@@ -16,10 +16,12 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.types import OpenApiTypes
 from rio_tiler.errors import TileOutsideBounds
 
 from .discovery import discover_spatial_inputs, get_download_url
+from .schema_serializers import RhessysSpatialListResponseSerializer
 from .registry import get_meta, get_render_range
 from .tile import get_tile_png
 from .colormap import (
@@ -36,7 +38,13 @@ class RhessysSpatialListView(APIView):
     the watershed has no RHESSys data.
     """
 
-    @extend_schema(responses={200: None})
+    @extend_schema(
+        operation_id='watershed_rhessys_spatial_inputs_retrieve',
+        summary='List RHESSys spatial inputs',
+        responses={
+            200: OpenApiResponse(response=RhessysSpatialListResponseSerializer, description='List of available RHESSys spatial input layers'),
+        },
+    )
     def get(self, request, runid: str):
         files = discover_spatial_inputs(runid)
         if files is None:
@@ -67,7 +75,13 @@ class RhessysSpatialTileView(APIView):
         z, x, y: Web Mercator tile coordinates.
     """
 
-    @extend_schema(responses={200: bytes})
+    @extend_schema(
+        operation_id='watershed_rhessys_spatial_inputs_tiles_png_retrieve',
+        summary='Get RHESSys spatial input tile PNG',
+        responses={
+            (200, 'image/png'): OpenApiResponse(response=OpenApiTypes.BINARY, description='256x256 PNG tile'),
+        },
+    )
     def get(self, request, runid: str, filename: str, z: int, x: int, y: int):
         tif_url = get_download_url(runid, filename)
 
