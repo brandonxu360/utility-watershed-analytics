@@ -215,12 +215,12 @@ export async function fetchRapChoropleth(
   const aggregationExpr =
     validBands.length > 1
       ? validBands
-          .map(
-            (b) =>
-              `SUM(CASE WHEN rap.band = ${b} THEN rap.value * hillslopes.area ELSE 0 END) / NULLIF(SUM(CASE WHEN rap.band = ${b} THEN hillslopes.area ELSE 0 END), 0)`,
-          )
-          .join(" + ")
-      : "SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0)";
+        .map(
+          (b) =>
+            `COALESCE(SUM(CASE WHEN rap.band = ${b} THEN rap.value * hillslopes.area ELSE 0 END) / NULLIF(SUM(CASE WHEN rap.band = ${b} THEN hillslopes.area ELSE 0 END), 0), 0)`,
+        )
+        .join(" + ")
+      : "COALESCE(SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0), 0)";
 
   const payload: Record<string, unknown> = {
     datasets: [

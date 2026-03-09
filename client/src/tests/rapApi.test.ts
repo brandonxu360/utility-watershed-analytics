@@ -196,7 +196,7 @@ describe("rapApi validation", () => {
         expression: string;
       }>;
       expect(aggs[0].expression).toBe(
-        "SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0)",
+        "COALESCE(SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0), 0)",
       );
     });
 
