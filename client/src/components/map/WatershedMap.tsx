@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { MapEffect } from "../../utils/map/MapEffectUtil";
+import { MapEffect, getSavedMapView } from "../../utils/map/MapEffectUtil";
 import { fetchWatersheds } from "../../api/api";
 import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
 import { WatershedProperties } from "../../types/WatershedProperties";
@@ -21,17 +21,15 @@ import { useLayerToasts } from "../../hooks/useLayerToasts";
 import ZoomInControl from "./controls/ZoomIn";
 import ZoomOutControl from "./controls/ZoomOut";
 import LayersControl from "./controls/Layers";
-import LegendControl from "./controls/Legend";
 import SearchControl from "./controls/Search";
-import LandUseLegend from "./controls/LandUseLegend";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import RhessysSpatialLayer from "./RhessysSpatialLayer";
-import RhessysSpatialLegend from "./controls/RhessysSpatialLegend";
+import ChoroplethLegend from "./controls/ChoroplethLegend";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import { buildHillslopeTooltip } from "../../utils/tooltipContent";
 import type { SbsColorMode } from "../../api/types";
-import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
+import { useChoroplethLegend } from "../../hooks/useChoroplethLegend";
 import { getLayerParams } from "../../layers/types";
 import "leaflet/dist/leaflet.css";
 
@@ -60,8 +58,7 @@ const useStyles = tss.create(({ theme }) => ({
   },
 }));
 
-// Fallback center used only for the initial render before watershed data loads.
-// Once data arrives, MapEffect will fitBounds to all watersheds automatically.
+// Fallback center used only for the very first render before any data loads.
 const FALLBACK_CENTER: [number, number] = [0, 0];
 
 /**
@@ -74,6 +71,7 @@ const FALLBACK_CENTER: [number, number] = [0, 0];
 export default function WatershedMap(): JSX.Element {
   const { classes } = useStyles();
   const navigate = useNavigate();
+  const savedView = getSavedMapView();
 
   const { layerDesired, effective, isEffective } = useWatershed();
 
@@ -91,6 +89,8 @@ export default function WatershedMap(): JSX.Element {
     getScenarioStyle,
     getScenarioRow,
   } = useScenarioData();
+
+  const choroplethLegendProps = useChoroplethLegend();
 
   const scenarioEffective = isEffective("scenario");
   const subcatchmentEffective = isEffective("subcatchment");
@@ -120,15 +120,9 @@ export default function WatershedMap(): JSX.Element {
     queryFn: fetchWatersheds,
   });
 
-  const { files: rhessysSpatialFiles } = useRhessysSpatialInputs(runId);
-  const selectedRhessysFile =
-    rhessysSpatialFiles.find((f) => f.filename === rhessysSpatialFilename) ??
-    null;
-
   const { subcatchments, subLoading } = useSubcatchmentData(runId);
   const { channelData, channelLoading } = useChannelData(runId);
-  const { landuseData, landuseLoading, landuseLegendMap } =
-    useLanduseData(runId);
+  const { landuseData, landuseLoading } = useLanduseData(runId);
 
   // Simple key that changes when any coverage styling input changes,
   // forcing SubcatchmentLayer to re-apply styles.
@@ -268,8 +262,8 @@ export default function WatershedMap(): JSX.Element {
   return (
     <div className={classes.mapContainer}>
       <MapContainer
-        center={FALLBACK_CENTER}
-        zoom={4}
+        center={savedView?.center ?? FALLBACK_CENTER}
+        zoom={savedView?.zoom ?? 4}
         maxZoom={tileLayers[selectedLayerId].maxZoom}
         zoomControl={false}
         doubleClickZoom={false}
@@ -303,11 +297,6 @@ export default function WatershedMap(): JSX.Element {
         />
 
         <ScaleControl metric={true} imperial={true} />
-
-        {/* TOP LEFT CONTROLS */}
-        <div className="leaflet-top leaflet-left">
-          <LegendControl />
-        </div>
 
         {/* TOP RIGHT CONTROLS */}
         <div className="leaflet-top leaflet-right">
@@ -368,13 +357,8 @@ export default function WatershedMap(): JSX.Element {
         )}
       </MapContainer>
 
-      <LandUseLegend landuseLegendMap={landuseLegendMap} />
-
+      {choroplethLegendProps && <ChoroplethLegend {...choroplethLegendProps} />}
       {sbsEffective && <SbsLegend />}
-
-      {rhessysSpatialEffective && selectedRhessysFile && (
-        <RhessysSpatialLegend file={selectedRhessysFile} />
-      )}
     </div>
   );
 }

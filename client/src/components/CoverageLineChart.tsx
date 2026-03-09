@@ -12,10 +12,7 @@ import {
   LineChart,
 } from "recharts";
 
-type ChartData = {
-  name: string;
-  coverage: number;
-}[];
+type ChartData = ({ name: string } & Record<string, number | string>)[];
 
 export type CoverageLineChartProps = {
   data: ChartData;
@@ -32,6 +29,7 @@ const useStyles = tss.create(({ theme }) => ({
   container: {
     width: "100%",
     height: 300,
+    minWidth: 0,
   },
   emptyState: {
     height: "calc(100% - 32px)",
@@ -79,13 +77,22 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
               }}
             >
               <CartesianGrid
-                stroke={theme.palette.surface.light}
+                stroke={theme.palette.secondary.dark}
+                strokeDasharray="5 5"
                 data-testid="cartesian-grid"
-                data-stroke={theme.palette.surface.light.toLowerCase()}
+                data-stroke={theme.palette.secondary.dark}
               />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+              <Tooltip
+                labelStyle={{ color: theme.palette.secondary.dark }}
+                formatter={(value) =>
+                  typeof value === "number" ? value.toFixed(1) : value
+                }
+                itemSorter={(item) =>
+                  lineKeys.findIndex((k) => k.key === item.dataKey)
+                }
+              />
               <Legend />
               {lineKeys.map((line) => (
                 <Line

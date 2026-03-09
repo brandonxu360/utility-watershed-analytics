@@ -1,6 +1,6 @@
 import { postQuery, toFiniteNumber } from "./queryUtils";
-import type { ScenarioType, ScenarioDataRow } from "../layers/scenario";
 import { AVAILABLE_SCENARIOS, formatScenarioLabel } from "../layers/scenario";
+import type { ScenarioType, ScenarioDataRow } from "../layers/scenario";
 
 const SCENARIO_LOSS_PATH = "wepp/output/interchange/loss_pw0.hill.parquet";
 const SCENARIO_SUMMARY_PATH = "wepp/output/interchange/loss_pw0.out.parquet";
@@ -22,8 +22,7 @@ export async function fetchScenarioData(
   if (!runId?.trim()) throw new Error("Invalid runId");
   if (!scenario) throw new Error("Scenario required");
 
-  const payload = {
-    scenario,
+  const payload: Record<string, unknown> = {
     datasets: [{ alias: "loss", path: SCENARIO_LOSS_PATH }],
     columns: [
       "loss.wepp_id AS wepp_id",
@@ -37,6 +36,11 @@ export async function fetchScenarioData(
     ],
     order_by: ["loss.wepp_id"],
   };
+
+  // Wildfire data lives at the base run directory, not in a scenario subdirectory
+  if (scenario !== "wildfire") {
+    payload.scenario = scenario;
+  }
 
   const rows = await postQuery(runId, payload, `Scenario (${scenario})`);
 
@@ -58,7 +62,6 @@ export async function fetchScenarioData(
 export type ScenarioSummaryRow = {
   scenario: ScenarioType;
   label: string;
-  totalArea: number | null;
   waterDischarge: number | null;
   hillslopeSoilLoss: number | null;
   channelSoilLoss: number | null;
@@ -67,6 +70,8 @@ export type ScenarioSummaryRow = {
 
 /**
  * Fetch watershed-level summary data for every scenario in parallel.
+ * Only scenarios that return data are included in the result,
+ * so the result doubles as a list of available scenarios.
  */
 export async function fetchScenariosSummary(
   runId: string,
@@ -75,11 +80,15 @@ export async function fetchScenariosSummary(
 
   const results = await Promise.allSettled(
     AVAILABLE_SCENARIOS.map(async (scenario) => {
-      const payload = {
-        scenario,
+      const payload: Record<string, unknown> = {
         datasets: [{ alias: "loss", path: SCENARIO_SUMMARY_PATH }],
         columns: ["loss.key AS key", "loss.value AS value"],
       };
+
+      // Wildfire data lives at the base run directory
+      if (scenario !== "wildfire") {
+        payload.scenario = scenario;
+      }
 
       const rows = await postQuery(
         runId,
@@ -109,17 +118,24 @@ export async function fetchScenariosSummary(
         waterDischarge = (dischargeM3 / (totalArea * 10_000)) * 1_000;
       }
 
+      const toPerHa = (val: number | null): number | null =>
+        val != null && totalArea != null && totalArea > 0
+          ? val / totalArea
+          : null;
+
       return {
         scenario,
         label: formatScenarioLabel(scenario),
-        totalArea,
         waterDischarge,
-        hillslopeSoilLoss:
+        hillslopeSoilLoss: toPerHa(
           metrics.get("Avg. Ann. total hillslope soil loss") ?? null,
-        channelSoilLoss:
+        ),
+        channelSoilLoss: toPerHa(
           metrics.get("Avg. Ann. total channel soil loss") ?? null,
-        sedimentDischarge:
+        ),
+        sedimentDischarge: toPerHa(
           metrics.get("Avg. Ann. sediment discharge from outlet") ?? null,
+        ),
       };
     }),
   );

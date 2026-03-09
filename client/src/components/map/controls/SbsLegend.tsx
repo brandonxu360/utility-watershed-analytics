@@ -9,7 +9,7 @@ const useStyles = tss.create(({ theme }) => ({
   wrapper: {
     position: "absolute",
     left: 10,
-    top: 60,
+    top: 10,
     zIndex: 1200,
     maxWidth: 240,
   },

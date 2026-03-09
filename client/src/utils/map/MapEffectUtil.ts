@@ -4,6 +4,21 @@ import { zoomToFeature } from "./MapUtil";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import L from "leaflet";
 
+// Persists the map viewport at module scope so it survives component
+// remounts caused by route changes (/ ↔ /watershed/:id).
+let savedCenter: [number, number] | null = null;
+let savedZoom: number | null = null;
+
+/** Returns the last-known map viewport, or null on first-ever load. */
+export function getSavedMapView(): {
+  center: [number, number];
+  zoom: number;
+} | null {
+  return savedCenter && savedZoom != null
+    ? { center: savedCenter, zoom: savedZoom }
+    : null;
+}
+
 interface MapEffectProps {
   watershedId: string | null;
   watersheds: GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>;
@@ -11,13 +26,14 @@ interface MapEffectProps {
 
 /**
  * Handles map positioning:
- *  1. On initial load (once), fits the map to the bounds of all watersheds so
- *     the view is always correct regardless of how many watersheds exist or
- *     where they are located.
- *  2. When a watershed is selected, zooms to that watershed's feature.
+ *  1. Very first load, no watershed → fits to all watersheds.
+ *  2. Very first load via direct URL → instantly fits to that watershed.
+ *  3. Subsequent navigation (click a watershed) → animates from current
+ *     position (restored via getSavedMapView in MapContainer).
+ *  4. Back-navigation (watershed → home) → stays at the user's current
+ *     viewport instead of snapping back.
  *
- * State reset is handled automatically by WatershedProvider's runId effect —
- * this component only handles the map zoom transitions.
+ * Position is saved at module scope so it survives route-change remounts.
  *
  * @param watershedId - The parsed watershed id taken from the url (null on home view)
  * @param watersheds  - Fetched watershed FeatureCollection from @see {@link fetchWatersheds}
@@ -25,35 +41,69 @@ interface MapEffectProps {
  */
 export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
   const map = useMap();
-  const initialFitDone = useRef(false);
+  const hasPositioned = useRef(false);
 
-  // ── Initial fit: fill the viewport with all watersheds (fires once) ──────
+  // Persist viewport on every move so it survives remounts.
+  // Only start saving after the map has been meaningfully positioned,
+  // otherwise the (0,0) fallback center gets cached and blocks fitBounds.
   useEffect(() => {
-    if (initialFitDone.current || !watersheds?.features?.length) return;
+    const save = () => {
+      if (!hasPositioned.current) return;
+      const c = map.getCenter();
+      savedCenter = [c.lat, c.lng];
+      savedZoom = map.getZoom();
+    };
+    map.on("moveend", save);
+    return () => {
+      map.off("moveend", save);
+    };
+  }, [map]);
+
+  useEffect(() => {
+    if (!Array.isArray(watersheds?.features) || !watersheds.features.length)
+      return;
+
+    if (watershedId) {
+      const matchingFeature = watersheds.features.find(
+        (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>) =>
+          feature.id && feature.id.toString() === watershedId,
+      );
+      if (matchingFeature) {
+        const layer = L.geoJSON(matchingFeature);
+        const featureBounds = layer.getBounds();
+        if (hasPositioned.current || savedCenter) {
+          // Map already has a reasonable position — animate.
+          zoomToFeature(map, layer);
+        } else if (featureBounds.isValid()) {
+          // Direct URL, first-ever load — jump instantly so the user
+          // doesn't see the fallback center.
+          map.fitBounds(featureBounds, { maxZoom: 16 });
+          const c = map.getCenter();
+          savedCenter = [c.lat, c.lng];
+          savedZoom = map.getZoom();
+        }
+        hasPositioned.current = true;
+      }
+      return;
+    }
+
+    // Home view — only reposition on the very first load.
+    if (hasPositioned.current || savedCenter) {
+      hasPositioned.current = true;
+      return;
+    }
     try {
       const bounds = L.geoJSON(watersheds).getBounds();
       if (bounds.isValid()) {
         map.fitBounds(bounds, { padding: [30, 30] });
         map.setMaxBounds(bounds.pad(0.5));
-        initialFitDone.current = true;
+        const c = map.getCenter();
+        savedCenter = [c.lat, c.lng];
+        savedZoom = map.getZoom();
+        hasPositioned.current = true;
       }
     } catch {
       // ignore invalid geometries
-    }
-  }, [watersheds, map]);
-
-  // ── Per-watershed zoom: fires whenever the selected watershed changes ─────
-  useEffect(() => {
-    if (watershedId && watersheds && Array.isArray(watersheds.features)) {
-      const matchingFeature = watersheds.features.find(
-        (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>) =>
-          feature.id && feature.id.toString() === watershedId,
-      );
-
-      if (matchingFeature) {
-        const tempLayer = L.geoJSON(matchingFeature);
-        zoomToFeature(map, tempLayer);
-      }
     }
   }, [watershedId, watersheds, map]);
 

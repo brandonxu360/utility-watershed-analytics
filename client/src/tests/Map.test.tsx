@@ -178,20 +178,12 @@ vi.mock("../components/map/controls/Layers", () => ({
   ),
 }));
 
-vi.mock("../components/map/controls/Legend", () => ({
-  default: () => <div data-testid="legend-control" />,
-}));
-
 vi.mock("../components/map/controls/Search", () => ({
   default: () => <div data-testid="search-control" />,
 }));
 
 vi.mock("../components/map/controls/Settings", () => ({
   default: () => <div data-testid="settings-control" />,
-}));
-
-vi.mock("../components/map/controls/LandUseLegend", () => ({
-  default: () => <div data-testid="landuse-legend" />,
 }));
 
 type SubcatchmentStyleFn = (feature: GeoJSON.Feature | undefined) => unknown;
@@ -223,6 +215,7 @@ vi.mock("../utils/map/MapEffectUtil", () => ({
   MapEffect: ({ watershedId }: { watershedId: string | null }) => (
     <div data-testid="map-effect" data-watershed-id={watershedId} />
   ),
+  getSavedMapView: () => null,
 }));
 
 const mockWatershedData = {
@@ -358,12 +351,10 @@ describe("Map Component", () => {
     it("renders all control components", async () => {
       renderWithProviders(<WatershedMap />);
       await waitFor(() => {
-        expect(screen.getByTestId("legend-control")).toBeInTheDocument();
         expect(screen.getByTestId("search-control")).toBeInTheDocument();
         expect(screen.getByTestId("layers-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-in-control")).toBeInTheDocument();
         expect(screen.getByTestId("zoom-out-control")).toBeInTheDocument();
-        expect(screen.getByTestId("landuse-legend")).toBeInTheDocument();
       });
     });
 

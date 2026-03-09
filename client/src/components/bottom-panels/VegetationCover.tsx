@@ -4,9 +4,6 @@ import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
 import { useParams } from "@tanstack/react-router";
 import { CoverageLineChart } from "../CoverageLineChart";
-import { AggregatedRapRow } from "../../api/types";
-import { useChoropleth } from "../../hooks/useChoropleth";
-import { ChoroplethScale } from "../ChoroplethScale";
 
 import {
   endYear,
@@ -15,6 +12,7 @@ import {
   type VegetationBandType,
 } from "../../utils/constants";
 
+import { AggregatedRapRow } from "../../api/types";
 import fetchRap from "../../api/rapApi";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -95,12 +93,6 @@ export const VegetationCover: React.FC = () => {
     selectedHillslopeId,
     clearSelectedHillslope,
   } = useWatershed();
-
-  const {
-    config,
-    range: choroplethRange,
-    isLoading: choroplethLoading,
-  } = useChoropleth();
 
   const choroplethParams = getLayerParams(layerDesired, "choropleth");
   const bands = (choroplethParams.bands as VegetationBandType) ?? "all";
@@ -310,17 +302,6 @@ export const VegetationCover: React.FC = () => {
         title={chartTitle}
         lineKeys={vegOption.chartKeys}
       />
-
-      {config && !choroplethLoading && choroplethRange && (
-        <div style={{ marginTop: "32px" }}>
-          <ChoroplethScale
-            colormap={config.colormap}
-            range={choroplethRange}
-            unit={config.unit}
-            style={{ padding: "0 1rem", marginBottom: "0.5rem" }}
-          />
-        </div>
-      )}
     </div>
   );
 };

@@ -63,6 +63,16 @@ describe("scenarioApi", () => {
       expect(payload.scenario).toBe("thinning_40_75");
     });
 
+    it("omits scenario from payload for wildfire", async () => {
+      await fetchScenarioData({
+        runId: TEST_RUN_ID,
+        scenario: "wildfire",
+      });
+
+      const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
+      expect(payload.scenario).toBeUndefined();
+    });
+
     it("uses loss_pw0.hill.parquet dataset path", async () => {
       await fetchScenarioData({
         runId: TEST_RUN_ID,
@@ -284,8 +294,8 @@ describe("fetchScenariosSummary", () => {
   describe("payload construction", () => {
     it("sends one postQuery call per available scenario", async () => {
       await fetchScenariosSummary(TEST_RUN_ID);
-      // 4 scenarios: undisturbed, thinning_40_75, thinning_65_93, prescribed_fire
-      expect(mockPostQuery).toHaveBeenCalledTimes(4);
+      // 5 scenarios: undisturbed, thinning_40_75, thinning_65_93, prescribed_fire, wildfire
+      expect(mockPostQuery).toHaveBeenCalledTimes(5);
     });
 
     it("uses loss_pw0.out.parquet dataset path", async () => {
@@ -303,7 +313,7 @@ describe("fetchScenariosSummary", () => {
       expect(columns.join(" ")).toContain("value");
     });
 
-    it("passes scenario in payload", async () => {
+    it("passes scenario in payload for non-wildfire scenarios", async () => {
       await fetchScenariosSummary(TEST_RUN_ID);
       const scenarios = mockPostQuery.mock.calls.map(
         (call) => (call[1] as Record<string, unknown>).scenario,
@@ -312,6 +322,16 @@ describe("fetchScenariosSummary", () => {
       expect(scenarios).toContain("thinning_40_75");
       expect(scenarios).toContain("thinning_65_93");
       expect(scenarios).toContain("prescribed_fire");
+    });
+
+    it("omits scenario from payload for wildfire", async () => {
+      await fetchScenariosSummary(TEST_RUN_ID);
+      // wildfire is the 5th scenario (index 4)
+      const wildfirePayload = mockPostQuery.mock.calls[4][1] as Record<
+        string,
+        unknown
+      >;
+      expect(wildfirePayload.scenario).toBeUndefined();
     });
   });
 
@@ -328,17 +348,19 @@ describe("fetchScenariosSummary", () => {
       return Object.entries(defaults).map(([key, value]) => ({ key, value }));
     };
 
-    it("maps metrics to ScenarioSummaryRow fields", async () => {
+    it("maps metrics to ScenarioSummaryRow fields with per-hectare conversion", async () => {
       mockPostQuery.mockResolvedValue(makeSummaryRows());
 
       const result = await fetchScenariosSummary(TEST_RUN_ID);
 
-      expect(result.length).toBe(4);
+      expect(result.length).toBe(5);
       const row = result[0];
-      expect(row.totalArea).toBe(100);
-      expect(row.hillslopeSoilLoss).toBe(1.5);
-      expect(row.channelSoilLoss).toBe(0.8);
-      expect(row.sedimentDischarge).toBe(2.3);
+      // 1.5 / 100 = 0.015 t/ha
+      expect(row.hillslopeSoilLoss).toBeCloseTo(0.015);
+      // 0.8 / 100 = 0.008 t/ha
+      expect(row.channelSoilLoss).toBeCloseTo(0.008);
+      // 2.3 / 100 = 0.023 t/ha
+      expect(row.sedimentDischarge).toBeCloseTo(0.023);
     });
 
     it("converts water discharge from m³ to mm (discharge / (area * 10000) * 1000)", async () => {
@@ -355,7 +377,7 @@ describe("fetchScenariosSummary", () => {
       expect(row.waterDischarge).toBeCloseTo(20);
     });
 
-    it("sets waterDischarge to null when totalArea is zero", async () => {
+    it("sets soil-loss fields to null when totalArea is zero", async () => {
       mockPostQuery.mockResolvedValue(
         makeSummaryRows({
           "Total contributing area to outlet": 0,
@@ -365,6 +387,9 @@ describe("fetchScenariosSummary", () => {
 
       const result = await fetchScenariosSummary(TEST_RUN_ID);
       expect(result[0].waterDischarge).toBeNull();
+      expect(result[0].hillslopeSoilLoss).toBeNull();
+      expect(result[0].channelSoilLoss).toBeNull();
+      expect(result[0].sedimentDischarge).toBeNull();
     });
 
     it("sets waterDischarge to null when discharge metric is missing", async () => {
@@ -378,7 +403,7 @@ describe("fetchScenariosSummary", () => {
       expect(result[0].waterDischarge).toBeNull();
     });
 
-    it("formats scenario label correctly", async () => {
+    it("formats scenario label correctly including wildfire", async () => {
       mockPostQuery.mockResolvedValue(makeSummaryRows());
 
       const result = await fetchScenariosSummary(TEST_RUN_ID);
@@ -386,10 +411,10 @@ describe("fetchScenariosSummary", () => {
       expect(labels).toContain("Undisturbed");
       expect(labels).toContain("Thinning 40-75");
       expect(labels).toContain("Prescribed Fire");
+      expect(labels).toContain("Wildfire");
     });
 
     it("skips scenarios with no metrics (empty rows)", async () => {
-      // First two scenarios return data, last two return empty
       let callCount = 0;
       mockPostQuery.mockImplementation(async () => {
         callCount++;
@@ -416,7 +441,6 @@ describe("fetchScenariosSummary", () => {
 
       const result = await fetchScenariosSummary(TEST_RUN_ID);
       const row = result[0];
-      expect(row.totalArea).toBe(100);
       expect(row.hillslopeSoilLoss).toBeNull();
       expect(row.channelSoilLoss).toBeNull();
     });
@@ -435,8 +459,8 @@ describe("fetchScenariosSummary", () => {
       });
 
       const result = await fetchScenariosSummary(TEST_RUN_ID);
-      // 3 out of 4 succeed
-      expect(result.length).toBe(3);
+      // 4 out of 5 succeed
+      expect(result.length).toBe(4);
     });
 
     it("throws when all scenarios fail", async () => {

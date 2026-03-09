@@ -40,6 +40,7 @@ function buildRapTimeseriesPayload(
 
   const filters: RapTimeseriesPayload["filters"] = [
     { column: "rap.topaz_id", operator: "=", value: validTopazId },
+    { column: "rap.band", operator: "IN", value: [5, 6] },
   ];
 
   // Add year filter if valid
@@ -83,26 +84,31 @@ export async function fetchRap(
   } else {
     // Build parameterized filters array
     const filters: QueryFilter[] = [
-      { column: "rap.band", operator: "IN", value: [1, 4, 5, 6] },
+      { column: "rap.band", operator: "IN", value: [5, 6] },
     ];
 
     const yearFilter = createYearFilter(year);
     if (yearFilter) filters.push(yearFilter);
 
     payload = {
-      datasets: [{ path: "rap/rap_ts.parquet", alias: "rap" }],
+      datasets: [
+        { path: "rap/rap_ts.parquet", alias: "rap" },
+        { path: "watershed/hillslopes.parquet", alias: "hillslopes" },
+      ],
+      joins: [{ left: "rap", right: "hillslopes", on: ["topaz_id"] }],
       columns: ["rap.year AS year"],
       filters,
       aggregations: [
         {
           alias: "shrub",
-          expression: "SUM(CASE WHEN rap.band = 5 THEN rap.value ELSE 0 END)",
+          expression:
+            "SUM(CASE WHEN rap.band = 5 THEN rap.value * hillslopes.area ELSE 0 END) / NULLIF(SUM(CASE WHEN rap.band = 5 THEN hillslopes.area ELSE 0 END), 0)",
         },
         {
           alias: "tree",
-          expression: "SUM(CASE WHEN rap.band = 6 THEN rap.value ELSE 0 END)",
+          expression:
+            "SUM(CASE WHEN rap.band = 6 THEN rap.value * hillslopes.area ELSE 0 END) / NULLIF(SUM(CASE WHEN rap.band = 6 THEN hillslopes.area ELSE 0 END), 0)",
         },
-        { alias: "coverage", expression: "SUM(rap.value)" },
       ],
       group_by: ["rap.year"],
       order_by: ["rap.year"],
@@ -117,11 +123,13 @@ export async function fetchRap(
     const rows = rawRows
       .map((r) => {
         const row = r as Record<string, unknown>;
+        const shrub = toFiniteNumber(row.shrub);
+        const tree = toFiniteNumber(row.tree);
         return {
           year: toFiniteNumber(row.year),
-          shrub: toFiniteNumber(row.shrub),
-          tree: toFiniteNumber(row.tree),
-          coverage: toFiniteNumber(row.coverage ?? row.cover),
+          shrub,
+          tree,
+          coverage: shrub + tree,
         };
       })
       .filter((r) => Number.isFinite(r.year));
@@ -157,9 +165,14 @@ export async function fetchRap(
   for (const row of bandRows) {
     const entry = map.get(row.year);
     if (!entry) continue;
-    if ([1, 4, 5, 6].includes(row.band)) entry.coverage += row.value;
-    if (row.band === 5) entry.shrub += row.value;
-    if (row.band === 6) entry.tree += row.value;
+    if (row.band === 5) {
+      entry.shrub += row.value;
+      entry.coverage += row.value;
+    }
+    if (row.band === 6) {
+      entry.tree += row.value;
+      entry.coverage += row.value;
+    }
   }
 
   return Array.from(map.entries()).map(([yr, v]) => ({
@@ -182,14 +195,32 @@ export async function fetchRapChoropleth(
 ): Promise<RapChoroplethRow[]> {
   const { runId, band, year, include_schema, include_sql } = opts;
 
-  // Build parameterized filters array using shared helpers
-  const filters: QueryFilter[] = [createBandFilter(band)];
+  // Validate bands using the shared helper (also builds the filter)
+  const bandFilter = createBandFilter(band);
+  const validBands = Array.isArray(bandFilter.value)
+    ? (bandFilter.value as number[])
+    : [bandFilter.value as number];
+
+  const filters: QueryFilter[] = [bandFilter];
 
   // Add year filter if valid
   const yearFilter = createYearFilter(year);
   if (yearFilter) {
     filters.push(yearFilter);
   }
+
+  // For multiple bands, sum each band's area-weighted average so that
+  // e.g. "all" = shrub + tree rather than (shrub + tree) / 2.
+  // For a single band the simple expression is equivalent and faster.
+  const aggregationExpr =
+    validBands.length > 1
+      ? validBands
+          .map(
+            (b) =>
+              `COALESCE(SUM(CASE WHEN rap.band = ${b} THEN rap.value * hillslopes.area ELSE 0 END) / NULLIF(SUM(CASE WHEN rap.band = ${b} THEN hillslopes.area ELSE 0 END), 0), 0)`,
+          )
+          .join(" + ")
+      : "COALESCE(SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0), 0)";
 
   const payload: Record<string, unknown> = {
     datasets: [
@@ -202,7 +233,7 @@ export async function fetchRapChoropleth(
     aggregations: [
       {
         alias: "value",
-        expression: "AVG(rap.value)",
+        expression: aggregationExpr,
       },
     ],
     group_by: ["hillslopes.wepp_id"],

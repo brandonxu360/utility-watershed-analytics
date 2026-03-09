@@ -3,6 +3,7 @@ export const AVAILABLE_SCENARIOS = [
   "thinning_40_75",
   "thinning_65_93",
   "prescribed_fire",
+  "wildfire",
 ] as const;
 
 export type ScenarioType = (typeof AVAILABLE_SCENARIOS)[number];

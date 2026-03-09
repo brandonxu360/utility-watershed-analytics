@@ -76,7 +76,7 @@ describe("Home Component Tests", () => {
       mockUseParams.mockReturnValue(null);
       render(<Home />);
       expect(
-        screen.getByText("Explore Watershed Analytics"),
+        screen.getByText("Explore Fire and Watershed Impacts"),
       ).toBeInTheDocument();
     });
 
@@ -84,7 +84,7 @@ describe("Home Component Tests", () => {
       mockUseParams.mockReturnValue(undefined);
       render(<Home />);
       expect(
-        screen.getByText("Explore Watershed Analytics"),
+        screen.getByText("Explore Fire and Watershed Impacts"),
       ).toBeInTheDocument();
       expect(
         screen.queryByRole("region", { name: /watershed overview/i }),
@@ -98,7 +98,7 @@ describe("Home Component Tests", () => {
         screen.getByRole("region", { name: /watershed overview/i }),
       ).toBeInTheDocument();
       expect(
-        screen.queryByText("Explore Watershed Analytics"),
+        screen.queryByText("Explore Fire and Watershed Impacts"),
       ).not.toBeInTheDocument();
     });
 
