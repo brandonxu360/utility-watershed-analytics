@@ -679,6 +679,49 @@ class TestStandaloneRunConfig(unittest.TestCase):
         )
 
 
+class TestStandaloneRunConfigTopaz(unittest.TestCase):
+    """Test StandaloneRunConfig with TOPAZ DEM processor."""
+
+    def test_topaz_data_urls(self):
+        config = StandaloneRunConfig(
+            runid="mdobre-invincible-scarab",
+            display_name="Mill Creek",
+            run_base_url="https://wepp.cloud/weppcloud/runs/mdobre-invincible-scarab/disturbed9002",
+            boundary_url="https://wepp.cloud/weppcloud/runs/mdobre-invincible-scarab/disturbed9002/download/dem/topaz/BOUND.WGS.JSON",
+            dem_processor="topaz",
+        )
+        urls = config.get_data_urls()
+        base = "https://wepp.cloud/weppcloud/runs/mdobre-invincible-scarab/disturbed9002/download"
+        self.assertEqual(urls["boundary"], config.boundary_url)
+        self.assertEqual(urls["subcatchments"], f"{base}/dem/topaz/SUBCATCHMENTS.WGS.JSON")
+        self.assertEqual(urls["channels"], f"{base}/dem/topaz/CHANNELS.WGS.JSON")
+        self.assertEqual(urls["hillslopes"], f"{base}/watershed/hillslopes.parquet")
+        self.assertEqual(urls["soils"], f"{base}/soils/soils.parquet")
+        self.assertEqual(urls["landuse"], f"{base}/landuse/landuse.parquet")
+
+    def test_wbt_is_default(self):
+        config = StandaloneRunConfig(
+            runid="test",
+            display_name="Test",
+            run_base_url="https://example.com/runs/test/disturbed_wbt",
+            boundary_url="https://example.com/runs/test/disturbed_wbt/download/dem/wbt/bound.geojson",
+        )
+        self.assertEqual(config.dem_processor, "wbt")
+        urls = config.get_data_urls()
+        self.assertIn("/dem/wbt/", urls["subcatchments"])
+
+    def test_unknown_dem_processor_falls_back_to_wbt(self):
+        config = StandaloneRunConfig(
+            runid="test",
+            display_name="Test",
+            run_base_url="https://example.com/runs/test/scenario",
+            boundary_url="https://example.com/boundary.geojson",
+            dem_processor="unknown",
+        )
+        urls = config.get_data_urls()
+        self.assertIn("/dem/wbt/", urls["subcatchments"])
+
+
 class TestRunidNormalization(unittest.TestCase):
     """Test runid normalization across batch types."""
 

@@ -66,6 +66,19 @@ export default function HomeSidePanelContent(): JSX.Element {
         >
           Gate Creek (RHESSys inputs)
         </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          className={classes.quickLinkButton}
+          onClick={() =>
+            navigate({
+              to: "/watershed/$webcloudRunId",
+              params: { webcloudRunId: "mdobre-invincible-scarab" },
+            })
+          }
+        >
+          Mill Creek
+        </Button>
       </div>
     </div>
   );
