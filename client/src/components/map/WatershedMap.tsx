@@ -25,6 +25,10 @@ import SearchControl from "./controls/Search";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import RhessysSpatialLayer from "./RhessysSpatialLayer";
+import RhessysOutputLayer from "./RhessysOutputLayer";
+import RhessysChoroplethLayer from "./RhessysChoroplethLayer";
+import { useRhessysChoropleth } from "../../hooks/useRhessysChoropleth";
+import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
 import ChoroplethLegend from "./controls/ChoroplethLegend";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import { buildHillslopeTooltip } from "../../utils/tooltipContent";
@@ -100,7 +104,30 @@ export default function WatershedMap(): JSX.Element {
     getScenarioRow,
   } = useScenarioData();
 
-  const choroplethLegendProps = useChoroplethLegend();
+  const {
+    isActive: rhessysChoroplethActive,
+    isLoading: rhessysChoroplethLoading,
+    geometry: rhessysChoroplethGeometry,
+    getStyle: getRhessysChoroplethStyle,
+    spatialScale: rhessysChoroplethScale,
+    range: rhessysChoroplethRange,
+    styleKey: rhessysChoroplethStyleKey,
+  } = useRhessysChoropleth();
+
+  const rhessysOutputsEffective = isEffective("rhessysOutputs");
+  const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
+  const rhessysOutputsScenario = rhessysOutputsParams.scenario;
+  const rhessysOutputsVariable = rhessysOutputsParams.variable;
+
+  const { scenarios: outputScenarios, variables: outputVariables } =
+    useRhessysOutputs(runId, { reportLayerState: false });
+
+  const choroplethLegendProps = useChoroplethLegend({
+    outputScenarios,
+    outputVariables,
+    rhessysChoroplethActive,
+    rhessysChoroplethRange,
+  });
 
   const scenarioEffective = isEffective("scenario");
   const subcatchmentEffective = isEffective("subcatchment");
@@ -147,13 +174,23 @@ export default function WatershedMap(): JSX.Element {
   const memoSubcatchments = useMemo(() => subcatchments, [subcatchments]);
   const memoChannels = useMemo(() => channelData, [channelData]);
 
+  const anyRasterActive =
+    sbsEffective || rhessysSpatialEffective || rhessysOutputsEffective;
+
   const watershedStyle = useCallback(
     (
       feature:
         | GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>
         | undefined,
-    ) => (feature?.id?.toString() === runId ? selectedStyle : defaultStyle),
-    [runId],
+    ) => {
+      const base =
+        feature?.id?.toString() === runId ? selectedStyle : defaultStyle;
+      if (anyRasterActive) {
+        return { ...base, fillOpacity: 0 };
+      }
+      return base;
+    },
+    [runId, anyRasterActive],
   );
 
   const subcatchmentStyle = useCallback(
@@ -280,14 +317,15 @@ export default function WatershedMap(): JSX.Element {
           channelLoading ||
           choroplethLoading ||
           landuseLoading ||
-          scenarioLoading) && (
-            <div
-              className={classes.mapLoadingOverlay}
-              data-testid="map-loading-overlay"
-            >
-              <CircularProgress size={50} color="inherit" />
-            </div>
-          )}
+          scenarioLoading ||
+          rhessysChoroplethLoading) && (
+          <div
+            className={classes.mapLoadingOverlay}
+            data-testid="map-loading-overlay"
+          >
+            <CircularProgress size={50} color="inherit" />
+          </div>
+        )}
 
         <TileLayer
           key={selectedLayerId}
@@ -356,6 +394,30 @@ export default function WatershedMap(): JSX.Element {
             filename={rhessysSpatialFilename}
             opacity={effective.rhessysSpatial.opacity}
             bounds={sbsBounds}
+          />
+        )}
+
+        {rhessysOutputsEffective &&
+          runId &&
+          rhessysOutputsScenario &&
+          rhessysOutputsVariable &&
+          layerDesired.rhessysOutputs.params.mode !== "choropleth" && (
+            <RhessysOutputLayer
+              runId={runId}
+              scenario={rhessysOutputsScenario}
+              variable={rhessysOutputsVariable}
+              opacity={effective.rhessysOutputs.opacity}
+              bounds={sbsBounds}
+            />
+          )}
+
+        {rhessysChoroplethActive && rhessysChoroplethGeometry && (
+          <RhessysChoroplethLayer
+            geometry={rhessysChoroplethGeometry}
+            getStyle={getRhessysChoroplethStyle}
+            spatialScale={rhessysChoroplethScale}
+            opacity={effective.rhessysOutputs.opacity}
+            styleKey={rhessysChoroplethStyleKey}
           />
         )}
       </MapContainer>

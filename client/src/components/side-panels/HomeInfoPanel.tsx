@@ -53,6 +53,38 @@ export default function HomeSidePanelContent(): JSX.Element {
         <Typography variant="body2">
           Jump to featured watersheds with richer data and model inputs.
         </Typography>
+        {/* Victoria watersheds — uncomment when data is ready
+        <Button
+          variant="outlined"
+          size="small"
+          className={classes.quickLinkButton}
+          onClick={() =>
+            navigate({
+              to: "/watershed/$webcloudRunId",
+              params: {
+                webcloudRunId: "batch;;victoria-ca-2026-sbs;;Sooke15",
+              },
+            })
+          }
+        >
+          Victoria - Sooke15
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          className={classes.quickLinkButton}
+          onClick={() =>
+            navigate({
+              to: "/watershed/$webcloudRunId",
+              params: {
+                webcloudRunId: "batch;;victoria-ca-2026-sbs;;Sooke09",
+              },
+            })
+          }
+        >
+          Victoria - Sooke09
+        </Button>
+        */}
         <Button
           variant="outlined"
           size="small"

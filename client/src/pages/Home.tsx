@@ -4,6 +4,8 @@ import { tss } from "../utils/tss";
 import { WatershedProvider, useWatershed } from "../contexts/WatershedContext";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import { ScenariosTable } from "../components/bottom-panels/ScenariosTable";
+import { RhessysTimeSeries } from "../components/bottom-panels/RhessysTimeSeries";
+import { CHOROPLETH_RUN_IDS } from "../api/rhessysOutputsApi";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
@@ -92,6 +94,14 @@ function ActiveBottomPanel({
     return (
       <BottomPanel isOpen>
         <VegetationCover />
+      </BottomPanel>
+    );
+  }
+
+  if (isEffective("rhessysOutputs") && CHOROPLETH_RUN_IDS.has(runId ?? "")) {
+    return (
+      <BottomPanel isOpen>
+        <RhessysTimeSeries />
       </BottomPanel>
     );
   }

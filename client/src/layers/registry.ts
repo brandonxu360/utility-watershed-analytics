@@ -130,6 +130,25 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     zIndex: 510,
     defaults: { opacity: 0.7, params: { filename: null } },
   },
+
+  rhessysOutputs: {
+    id: "rhessysOutputs",
+    label: "RHESSys Outputs",
+    group: "coverageStyle",
+    kind: "raster",
+    pane: "rasterPane",
+    zIndex: 515,
+    defaults: {
+      opacity: 0.7,
+      params: {
+        scenario: null,
+        variable: null,
+        spatialScale: null,
+        year: null,
+        mode: null,
+      },
+    },
+  },
 };
 
 export function getDescriptor(id: LayerId): LayerDescriptor {

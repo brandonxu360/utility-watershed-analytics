@@ -108,6 +108,34 @@ export type RhessysSpatialListResponse = {
   files: RhessysSpatialFile[];
 };
 
+// ── RHESSys Outputs ─────────────────────────────────────────────────────────
+
+export type RhessysOutputVariable = {
+  id: string;
+  label: string;
+  units: string;
+  filename: string;
+};
+
+export type RhessysOutputScenario = {
+  id: string;
+  label: string;
+  is_change: boolean;
+  variables: string[];
+};
+
+export type RhessysOutputListResponse = {
+  scenarios: RhessysOutputScenario[];
+  variables: RhessysOutputVariable[];
+};
+
+// ── RHESSys Choropleth (Gate Creek) ─────────────────────────────────────────
+
+export type RhessysChoroplethRow = {
+  spatialId: number;
+  value: number;
+};
+
 export type FetchLanduseOptions = {
   runId: string;
   include_schema?: boolean;

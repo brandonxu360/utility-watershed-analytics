@@ -30,4 +30,13 @@ export const API_ENDPOINTS = {
   // RHESSys spatial input tile URL template for use as a Leaflet TileLayer.
   RHESSYS_SPATIAL_TILE: (runId: string, filename: string) =>
     `${API_BASE_URL}/watershed/${runId}/rhessys/spatial-inputs/${filename}/tiles/{z}/{x}/{y}.png`,
+  // RHESSys output maps — discover available scenarios and variables.
+  RHESSYS_OUTPUTS_LIST: (runId: string) =>
+    `${API_BASE_URL}/watershed/${runId}/rhessys/outputs`,
+  // RHESSys output map tile URL template for use as a Leaflet TileLayer.
+  RHESSYS_OUTPUTS_TILE: (runId: string, scenario: string, variable: string) =>
+    `${API_BASE_URL}/watershed/${runId}/rhessys/outputs/${scenario}/${variable}/tiles/{z}/{x}/{y}.png`,
+  // RHESSys output geometry proxy (hillslope/patch GeoJSON via backend to avoid CORS).
+  RHESSYS_OUTPUTS_GEOMETRY: (runId: string, scale: string) =>
+    `${API_BASE_URL}/watershed/${runId}/rhessys/outputs/geometry/${scale}`,
 };

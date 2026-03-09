@@ -22,6 +22,7 @@ export const ALL_LAYER_IDS = [
   "fireSeverity",
   "scenario",
   "rhessysSpatial",
+  "rhessysOutputs",
 ] as const;
 
 export type LayerId = (typeof ALL_LAYER_IDS)[number];
@@ -79,6 +80,16 @@ export interface RhessysSpatialParams {
   filename: string | null;
 }
 
+export interface RhessysOutputParams {
+  scenario: string | null;
+  variable: string | null;
+  /** Gate Creek dynamic choropleth fields */
+  spatialScale: "hillslope" | "patch" | null;
+  year: number | null;
+  /** Distinguishes pre-computed raster vs dynamic vector choropleth */
+  mode: "raster" | "choropleth" | null;
+}
+
 type EmptyParams = Record<string, never>;
 
 export type LayerParamsMap = {
@@ -91,6 +102,7 @@ export type LayerParamsMap = {
   fireSeverity: EmptyParams;
   scenario: ScenarioParams;
   rhessysSpatial: RhessysSpatialParams;
+  rhessysOutputs: RhessysOutputParams;
 };
 
 export interface LayerDesiredState {
