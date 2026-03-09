@@ -39,6 +39,8 @@ const useStyles = tss.create(({ theme }) => ({
   mapContainer: {
     height: "100%",
     width: "100%",
+  },
+  mapContainerWithPanel: {
     "& .leaflet-bottom": {
       marginBottom: "24px",
     },
@@ -72,8 +74,16 @@ const FALLBACK_CENTER: [number, number] = [0, 0];
  * @returns {JSX.Element} - A Leaflet map that contains our GIS watershed data.
  */
 export default function WatershedMap(): JSX.Element {
-  const { classes } = useStyles();
   const navigate = useNavigate();
+
+  const runId =
+    useParams({
+      from: "/watershed/$webcloudRunId",
+      select: (params) => params?.webcloudRunId,
+      shouldThrow: false,
+    }) ?? null;
+
+  const { classes, cx } = useStyles();
 
   const { layerDesired, effective, isEffective } = useWatershed();
 
@@ -103,13 +113,6 @@ export default function WatershedMap(): JSX.Element {
   const rhessysSpatialEffective = isEffective("rhessysSpatial");
   const rhessysSpatialParams = getLayerParams(layerDesired, "rhessysSpatial");
   const rhessysSpatialFilename = rhessysSpatialParams.filename;
-
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
 
   const {
     data: watersheds,
@@ -266,7 +269,7 @@ export default function WatershedMap(): JSX.Element {
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
 
   return (
-    <div className={classes.mapContainer}>
+    <div className={cx(classes.mapContainer, runId && classes.mapContainerWithPanel)}>
       <MapContainer
         center={FALLBACK_CENTER}
         zoom={4}
@@ -284,13 +287,13 @@ export default function WatershedMap(): JSX.Element {
           choroplethLoading ||
           landuseLoading ||
           scenarioLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}
