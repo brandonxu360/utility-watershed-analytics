@@ -229,6 +229,7 @@ export const RhessysTimeSeries: React.FC = () => {
         data={chartData}
         title={title}
         lineKeys={LINE_KEYS}
+        yAxisLabel={varMeta?.units || undefined}
       />
     </div>
   );

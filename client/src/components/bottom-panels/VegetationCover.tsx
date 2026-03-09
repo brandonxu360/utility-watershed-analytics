@@ -219,9 +219,13 @@ export const VegetationCover: React.FC = () => {
       .map(([yr, v]) => toSeries(yr, v.coverage, v.shrub, v.tree));
   }, [rapTimeSeries, selectedYear]);
 
+  // When the user selects "All" years we prefer to show a percent sign
+  // instead of the literal word so titles read like "All Coverage (%)".
+  const selectedYearDisplay = selectedYear === "All" ? "%" : selectedYear;
+
   const chartTitle = selectedHillslopeId
-    ? `${vegOption.label} Coverage - Hillslope ${selectedHillslopeId} (${selectedYear})`
-    : `${vegOption.label} Coverage (${selectedYear})`;
+    ? `${vegOption.label} Coverage - Hillslope ${selectedHillslopeId} (${selectedYearDisplay})`
+    : `${vegOption.label} Coverage (${selectedYearDisplay})`;
 
   return (
     <div>
@@ -301,6 +305,7 @@ export const VegetationCover: React.FC = () => {
         data={chartData}
         title={chartTitle}
         lineKeys={vegOption.chartKeys}
+        yAxisLabel="Percent Cover (%)"
       />
     </div>
   );

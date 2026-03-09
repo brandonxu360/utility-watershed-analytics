@@ -35,7 +35,12 @@ vi.mock("recharts", () => ({
   XAxis: ({ dataKey }: { dataKey: string }) => (
     <div data-testid="x-axis" data-key={dataKey} />
   ),
-  YAxis: () => <div data-testid="y-axis" />,
+  YAxis: ({ label }: { label?: any }) => (
+    <div
+      data-testid="y-axis"
+      data-label={label ? JSON.stringify(label) : undefined}
+    />
+  ),
   CartesianGrid: ({ stroke }: { stroke: string }) => (
     <div data-testid="cartesian-grid" data-stroke={stroke} />
   ),
@@ -205,6 +210,27 @@ describe("CoverageLineChart", () => {
       );
 
       expect(screen.getByTestId("y-axis")).toBeInTheDocument();
+    });
+
+    it("passes optional label prop to YAxis when provided", () => {
+      render(
+        <CoverageLineChart
+          data={mockData}
+          title="Test Title"
+          lineKeys={mockLineKeys}
+          yAxisLabel="Percent Cover (%)"
+        />,
+      );
+
+      const yAxis = screen.getByTestId("y-axis");
+      // the mock stringifies the label object so we can inspect it
+      const labelAttr = yAxis.getAttribute("data-label") || "";
+      expect(labelAttr).toContain("Percent Cover");
+      expect(labelAttr).toContain("dx");
+      // verify we set a centering style (both axes) instead of a big offset
+      expect(labelAttr).toContain("textAnchor");
+      expect(labelAttr).toContain("dominantBaseline");
+      expect(labelAttr).not.toContain("100");
     });
 
     it("renders Tooltip", () => {
