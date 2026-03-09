@@ -175,8 +175,8 @@ export default function WeppSection() {
                 : availableScenarios.length === 0
                   ? selectedScenario
                   : availableScenarios.some(
-                    (s) => s.scenario === selectedScenario,
-                  )
+                        (s) => s.scenario === selectedScenario,
+                      )
                     ? selectedScenario
                     : "none"
             }

@@ -19,12 +19,6 @@ export function getSavedMapView(): {
     : null;
 }
 
-/** Clears the saved view (for tests). */
-export function resetSavedMapView(): void {
-  savedCenter = null;
-  savedZoom = null;
-}
-
 interface MapEffectProps {
   watershedId: string | null;
   watersheds: GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>;
@@ -101,9 +95,6 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
     try {
       const bounds = L.geoJSON(watersheds).getBounds();
       if (bounds.isValid()) {
-        // fitBounds MUST come before setMaxBounds — calling setMaxBounds
-        // while the map is at (0,0) zoom 4 causes Leaflet to pan to the
-        // constrained area at that zoom level (super zoomed out).
         map.fitBounds(bounds, { padding: [30, 30] });
         map.setMaxBounds(bounds.pad(0.5));
         const c = map.getCenter();

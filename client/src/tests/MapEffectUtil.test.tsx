@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { MapEffect, resetSavedMapView } from "../utils/map/MapEffectUtil";
 import { WatershedProperties } from "../types/WatershedProperties";
+
+type MapEffectFn = (props: {
+  watershedId: string | null;
+  watersheds: GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>;
+}) => null;
+let MapEffect: MapEffectFn;
 
 type MoveendHandler = () => void;
 let moveendListeners: MoveendHandler[] = [];
@@ -82,10 +87,12 @@ const renderMapEffect = (props: {
 };
 
 describe("MapEffectUtil", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
-    resetSavedMapView();
+    vi.resetModules();
     moveendListeners = [];
+    const mod = await import("../utils/map/MapEffectUtil");
+    MapEffect = mod.MapEffect;
   });
 
   describe("MapEffect component", () => {

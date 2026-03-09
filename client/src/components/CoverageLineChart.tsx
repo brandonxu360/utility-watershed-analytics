@@ -83,7 +83,7 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
                 data-stroke={theme.palette.secondary.dark}
               />
               <XAxis dataKey="name" />
-              <YAxis tickFormatter={(v: number) => v.toFixed(1)} />
+              <YAxis />
               <Tooltip
                 labelStyle={{ color: theme.palette.secondary.dark }}
                 formatter={(value) =>
