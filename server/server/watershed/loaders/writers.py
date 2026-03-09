@@ -219,7 +219,7 @@ class DjangoDataWriter:
         all features when the property is absent — are used, and their
         geometries are merged into a single MultiPolygon.
         """
-        polygons: list[Polygon | MultiPolygon] = []
+        polygons: list[Polygon] = []
         for feature in layer:
             try:
                 ws_flag = feature.get('Watershed')
@@ -230,15 +230,12 @@ class DjangoDataWriter:
                 continue
 
             geom = _extract_geometry(feature)
-            if isinstance(geom, MultiPolygon):
-                polygons.extend(list(geom))
-            elif isinstance(geom, Polygon):
-                polygons.append(geom)
+            polygons.extend(list(geom))
 
         if not polygons:
             return 0
 
-        merged = MultiPolygon(polygons) if len(polygons) > 1 else MultiPolygon(polygons[0])
+        merged = MultiPolygon(*polygons)
 
         Watershed.objects.update_or_create(
             runid=runid,
