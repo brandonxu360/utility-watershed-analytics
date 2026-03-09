@@ -9,7 +9,14 @@ import App from "./App.tsx";
 import "./index.css";
 
 // Create a Tanstack query client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Avoid automatic network calls when switching back to the tab.
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 /* eslint-disable react-refresh/only-export-components */
 const Root = () => {
