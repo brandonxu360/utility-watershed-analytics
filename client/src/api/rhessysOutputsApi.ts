@@ -6,7 +6,8 @@ import type { RhessysOutputListResponse, RhessysChoroplethRow } from "./types";
  * Fetch the list of available RHESSys output map scenarios and variables.
  *
  * The backend probes the WEPPcloud file browser under rhessys/maps/ and
- * returns the catalog of discovered scenario directories and variable TIFFs.
+ * returns the catalog of discovered scenario directories and variable TIFFs,
+ * along with actual min/max value ranges for each scenario/variable combination.
  */
 export async function fetchRhessysOutputs(
   runId: string,
@@ -107,9 +108,7 @@ export async function fetchRhessysChoropleth(opts: {
     datasets: [{ alias, path: datasetPath }],
     columns: [`${alias}.${idCol} AS spatialId`],
     filters: [{ column: `${alias}.year`, operator: "=", value: year }],
-    aggregations: [
-      { alias: "value", expression: `AVG(${alias}.${variable})` },
-    ],
+    aggregations: [{ alias: "value", expression: `AVG(${alias}.${variable})` }],
     group_by: [`${alias}.${idCol}`],
     order_by: [`${alias}.${idCol}`],
   };
@@ -124,9 +123,7 @@ export async function fetchRhessysChoropleth(opts: {
         value: toFiniteNumber(row.value, NaN),
       };
     })
-    .filter(
-      (r) => Number.isFinite(r.spatialId) && Number.isFinite(r.value),
-    );
+    .filter((r) => Number.isFinite(r.spatialId) && Number.isFinite(r.value));
 }
 
 /**

@@ -60,6 +60,24 @@ def get_tile_png(
         min_val = -abs_max
         max_val = abs_max
 
+    # Flat raster (e.g. all-zero ammonium): rescaling with in_range=(v, v) is
+    # degenerate (division by zero) and maps every pixel to index 0 (the
+    # colormap minimum).
+    #
+    # For change/diverging maps, zero means "no change" which should be the
+    # neutral midpoint — so we centre the range around the constant value.
+    #
+    # For sequential baseline maps a flat zero raster *is* at the minimum,
+    # so we simply expand the range upward to avoid the degenerate case while
+    # keeping all pixels at the bottom of the colormap.
+    if min_val == max_val:
+        if is_change:
+            offset = max(abs(min_val) * 0.01, 1e-10)
+            min_val -= offset
+            max_val += offset
+        else:
+            max_val = min_val + 1e-10  # pixels stay at index 0 (minimum)
+
     with Reader(tif_url) as src:
         img = src.tile(tile_x, tile_y, tile_z, tilesize=256)
 

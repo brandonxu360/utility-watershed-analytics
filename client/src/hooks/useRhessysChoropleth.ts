@@ -53,17 +53,9 @@ export function useRhessysChoropleth() {
   const spatialScale = params.spatialScale ?? "hillslope";
   const year = params.year;
 
-  const shouldQuery =
-    isActive &&
-    !!runId &&
-    !!scenario &&
-    !!variable &&
-    !!year;
+  const shouldQuery = isActive && !!runId && !!scenario && !!variable && !!year;
 
-  const {
-    data: rawData,
-    isLoading: dataLoading,
-  } = useQuery({
+  const { data: rawData, isLoading: dataLoading } = useQuery({
     queryKey: [
       "rhessys-choropleth",
       runId,
@@ -84,10 +76,7 @@ export function useRhessysChoropleth() {
     staleTime: 1000 * 60 * 10,
   });
 
-  const {
-    data: geometry,
-    isLoading: geomLoading,
-  } = useQuery({
+  const { data: geometry, isLoading: geomLoading } = useQuery({
     queryKey: ["rhessys-geometry", runId, spatialScale],
     queryFn: () => fetchRhessysGeometry(runId!, spatialScale),
     enabled: isActive && !!runId,
@@ -111,7 +100,7 @@ export function useRhessysChoropleth() {
 
     return {
       dataMap: map,
-      range: computeRobustRange(values, 0.02, 0.98),
+      range: computeRobustRange(values, 0.0, 1.0),
     };
   }, [rawData]);
 

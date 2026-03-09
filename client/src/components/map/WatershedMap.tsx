@@ -119,12 +119,16 @@ export default function WatershedMap(): JSX.Element {
   const rhessysOutputsScenario = rhessysOutputsParams.scenario;
   const rhessysOutputsVariable = rhessysOutputsParams.variable;
 
-  const { scenarios: outputScenarios, variables: outputVariables } =
-    useRhessysOutputs(runId, { reportLayerState: false });
+  const {
+    scenarios: outputScenarios,
+    variables: outputVariables,
+    valueRanges: outputValueRanges,
+  } = useRhessysOutputs(runId, { reportLayerState: false });
 
   const choroplethLegendProps = useChoroplethLegend({
     outputScenarios,
     outputVariables,
+    outputValueRanges,
     rhessysChoroplethActive,
     rhessysChoroplethRange,
   });
@@ -300,7 +304,12 @@ export default function WatershedMap(): JSX.Element {
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
 
   return (
-    <div className={cx(classes.mapContainer, runId && classes.mapContainerWithPanel)}>
+    <div
+      className={cx(
+        classes.mapContainer,
+        runId && classes.mapContainerWithPanel,
+      )}
+    >
       <MapContainer
         center={savedView?.center ?? FALLBACK_CENTER}
         zoom={savedView?.zoom ?? 4}

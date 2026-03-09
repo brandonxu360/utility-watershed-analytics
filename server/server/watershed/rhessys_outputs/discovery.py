@@ -25,8 +25,8 @@ from .registry import (
     VARIABLE_BY_FILENAME,
     OUTPUT_VARIABLES,
     SCENARIO_REGISTRY,
-    ScenarioMeta,
 )
+from .tile import _get_global_minmax
 
 logger = logging.getLogger("watershed.rhessys_outputs")
 
@@ -93,6 +93,55 @@ def _discover_variables(runid: str, scenario: str) -> list[str]:
     return result
 
 
+def _compute_value_ranges(
+    runid: str,
+    scenarios: list[dict],
+    variables: list[dict],
+) -> dict[str, dict[str, dict]]:
+    """Compute actual min/max value ranges for each scenario/variable.
+
+    Returns a nested dict: {scenario_id: {variable_id: {min, max}}}
+    Applies the same symmetrization logic used for rendering change maps.
+    """
+    ranges: dict[str, dict[str, dict]] = {}
+    
+    for scenario in scenarios:
+        scenario_id = scenario["id"]
+        is_change = scenario["is_change"]
+        ranges[scenario_id] = {}
+        
+        for variable in variables:
+            variable_id = variable["id"]
+            filename = variable["filename"]
+            
+            # Only compute range if this variable exists in this scenario
+            if variable_id not in scenario["variables"]:
+                continue
+            
+            try:
+                tif_url = get_map_download_url(runid, scenario_id, filename)
+                min_val, max_val = _get_global_minmax(tif_url)
+                
+                # Apply same symmetrization logic as tile rendering for change maps
+                if is_change and min_val < 0:
+                    abs_max = max(abs(min_val), abs(max_val))
+                    min_val = -abs_max
+                    max_val = abs_max
+                
+                ranges[scenario_id][variable_id] = {
+                    "min": float(min_val),
+                    "max": float(max_val),
+                }
+            except Exception as e:
+                logger.warning(
+                    "Failed to compute range for %s/%s/%s: %s",
+                    runid, scenario_id, variable_id, e,
+                )
+                continue
+    
+    return ranges
+
+
 def discover_output_maps(runid: str) -> Optional[dict]:
     """Discover available RHESSys output map products for a watershed.
 
@@ -139,9 +188,13 @@ def discover_output_maps(runid: str) -> Optional[dict]:
                 "filename": var.filename,
             })
 
+    # Compute value ranges for each scenario/variable combination
+    value_ranges = _compute_value_ranges(runid, available_scenarios, variables)
+
     result = {
         "scenarios": available_scenarios,
         "variables": variables,
+        "value_ranges": value_ranges,
     }
     _discovery_cache[runid] = result
     return result

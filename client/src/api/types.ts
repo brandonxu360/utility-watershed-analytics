@@ -124,9 +124,15 @@ export type RhessysOutputScenario = {
   variables: string[];
 };
 
+export type RhessysOutputValueRange = {
+  min: number;
+  max: number;
+};
+
 export type RhessysOutputListResponse = {
   scenarios: RhessysOutputScenario[];
   variables: RhessysOutputVariable[];
+  value_ranges?: Record<string, Record<string, RhessysOutputValueRange>>;
 };
 
 // ── RHESSys Choropleth (Gate Creek) ─────────────────────────────────────────

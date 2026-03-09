@@ -95,7 +95,10 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
                         position: "insideLeft",
                         dx: -15,
                         // centre rotated label both horizontally and vertically
-                        style: { textAnchor: "middle", dominantBaseline: "middle" },
+                        style: {
+                          textAnchor: "middle",
+                          dominantBaseline: "middle",
+                        },
                       }
                     : undefined
                 }

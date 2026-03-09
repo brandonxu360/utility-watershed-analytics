@@ -100,7 +100,8 @@ export default function RhessysOutputsSection({
   const params = getLayerParams(layerDesired, "rhessysOutputs");
   const selectedScenario = params.scenario ?? "";
   const selectedVariable = params.variable ?? "";
-  const selectedMode = params.mode ?? (scenarios.length > 0 ? "raster" : "choropleth");
+  const selectedMode =
+    params.mode ?? (scenarios.length > 0 ? "raster" : "choropleth");
   const selectedSpatialScale = params.spatialScale ?? "hillslope";
   const selectedYear = params.year ?? 2000;
   const layerEnabled = effective.rhessysOutputs.enabled;
@@ -154,13 +155,22 @@ export default function RhessysOutputsSection({
         mode: selectedMode,
       });
     },
-    [enableLayerWithParams, selectedScenario, selectedSpatialScale, selectedYear, selectedMode],
+    [
+      enableLayerWithParams,
+      selectedScenario,
+      selectedSpatialScale,
+      selectedYear,
+      selectedMode,
+    ],
   );
 
   // ── Dynamic choropleth handlers ──
 
   const handleSpatialScaleChange = useCallback(
-    (_: React.MouseEvent<HTMLElement>, newScale: "hillslope" | "patch" | null) => {
+    (
+      _: React.MouseEvent<HTMLElement>,
+      newScale: "hillslope" | "patch" | null,
+    ) => {
       if (!newScale) return;
       const vars = GATE_CREEK_VARIABLES[newScale];
       const variable = vars[0]?.id ?? null;
@@ -214,7 +224,12 @@ export default function RhessysOutputsSection({
         year: selectedYear,
       });
     },
-    [enableLayerWithParams, selectedScenario, selectedSpatialScale, selectedYear],
+    [
+      enableLayerWithParams,
+      selectedScenario,
+      selectedSpatialScale,
+      selectedYear,
+    ],
   );
 
   const handleYearChange = useCallback(
@@ -227,7 +242,12 @@ export default function RhessysOutputsSection({
         spatialScale: selectedSpatialScale,
       });
     },
-    [enableLayerWithParams, selectedScenario, selectedVariable, selectedSpatialScale],
+    [
+      enableLayerWithParams,
+      selectedScenario,
+      selectedVariable,
+      selectedSpatialScale,
+    ],
   );
 
   if (isLoading) {
@@ -263,9 +283,7 @@ export default function RhessysOutputsSection({
           <Select
             labelId="rhessys-outputs-scenario-label"
             id="rhessys-outputs-scenario-select"
-            value={
-              layerEnabled && selectedScenario ? selectedScenario : "none"
-            }
+            value={layerEnabled && selectedScenario ? selectedScenario : "none"}
             label="Scenario"
             onChange={handleScenarioChange}
             className={classes.select}
@@ -336,9 +354,7 @@ export default function RhessysOutputsSection({
         <Select
           labelId="rhessys-choropleth-scenario-label"
           id="rhessys-choropleth-scenario-select"
-          value={
-            layerEnabled && selectedScenario ? selectedScenario : "none"
-          }
+          value={layerEnabled && selectedScenario ? selectedScenario : "none"}
           label="Scenario"
           onChange={handleChoroplethScenarioChange}
           className={classes.select}

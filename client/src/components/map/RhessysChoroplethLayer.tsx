@@ -48,7 +48,10 @@ export default function RhessysChoroplethLayer({
     layer.setStyle((feature: GeoJSON.Feature | undefined) => {
       const spatialId = feature?.properties?.DN as number | undefined;
       const base = getStyleRef.current(spatialId);
-      return { ...base, fillOpacity: (base.fillOpacity ?? 0.85) * opacityRef.current };
+      return {
+        ...base,
+        fillOpacity: (base.fillOpacity ?? 0.85) * opacityRef.current,
+      };
     });
 
     return () => {
@@ -63,7 +66,10 @@ export default function RhessysChoroplethLayer({
     layerRef.current.setStyle((feature: GeoJSON.Feature | undefined) => {
       const spatialId = feature?.properties?.DN as number | undefined;
       const base = getStyleRef.current(spatialId);
-      return { ...base, fillOpacity: (base.fillOpacity ?? 0.85) * opacityRef.current };
+      return {
+        ...base,
+        fillOpacity: (base.fillOpacity ?? 0.85) * opacityRef.current,
+      };
     });
   }, [styleKey, opacity]);
 

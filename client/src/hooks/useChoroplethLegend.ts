@@ -11,6 +11,7 @@ import { GATE_CREEK_VARIABLES } from "../api/rhessysOutputsApi";
 import type {
   RhessysOutputScenario,
   RhessysOutputVariable,
+  RhessysOutputValueRange,
 } from "../api/types";
 
 /**
@@ -22,6 +23,7 @@ import type {
 export interface ChoroplethLegendExternalState {
   outputScenarios: RhessysOutputScenario[];
   outputVariables: RhessysOutputVariable[];
+  outputValueRanges: Record<string, Record<string, RhessysOutputValueRange>>;
   rhessysChoroplethActive: boolean;
   rhessysChoroplethRange: { min: number; max: number } | null;
 }
@@ -80,6 +82,7 @@ export function useChoroplethLegend(
   const {
     outputScenarios,
     outputVariables,
+    outputValueRanges,
     rhessysChoroplethActive,
     rhessysChoroplethRange,
   } = external;
@@ -154,6 +157,25 @@ export function useChoroplethLegend(
       selectedOutputVariable
     ) {
       const isChange = selectedOutputScenario.is_change;
+      const scenarioId = selectedOutputScenario.id;
+      const variableId = selectedOutputVariable.id;
+      const valueRange = outputValueRanges[scenarioId]?.[variableId];
+
+      // If we have actual value ranges from the backend, use them (skip if flat/all-zero raster)
+      if (valueRange && valueRange.min !== valueRange.max) {
+        return {
+          title: `${selectedOutputVariable.label} \u2013 ${selectedOutputScenario.label}`,
+          data: {
+            mode: "colormap" as const,
+            colormap: isChange ? "rdbu" : "viridis",
+            range: valueRange,
+            unit: selectedOutputVariable.units,
+            percentile: false,
+          },
+        };
+      }
+
+      // Fallback to normalized 0-1 legend if no range data available or raster is flat
       return {
         title: `${selectedOutputVariable.label} \u2013 ${selectedOutputScenario.label}`,
         data: {
@@ -187,7 +209,7 @@ export function useChoroplethLegend(
           colormap: "viridis",
           range: rhessysChoroplethRange,
           unit: gcVar?.units ?? "",
-          percentile: true,
+          percentile: false,
         },
       };
     }
@@ -221,6 +243,7 @@ export function useChoroplethLegend(
     rhessysOutputsEffective,
     selectedOutputScenario,
     selectedOutputVariable,
+    outputValueRanges,
     rhessysChoroplethActive,
     rhessysChoroplethRange,
     rhessysOutputsParams.variable,

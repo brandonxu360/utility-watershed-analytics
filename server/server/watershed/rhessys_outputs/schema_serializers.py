@@ -15,6 +15,15 @@ class OutputScenarioSerializer(serializers.Serializer):
     variables = serializers.ListField(child=serializers.CharField())
 
 
+class ValueRangeSerializer(serializers.Serializer):
+    min = serializers.FloatField()
+    max = serializers.FloatField()
+
+
 class RhessysOutputListResponseSerializer(serializers.Serializer):
     scenarios = OutputScenarioSerializer(many=True)
     variables = OutputVariableSerializer(many=True)
+    value_ranges = serializers.DictField(
+        child=serializers.DictField(child=ValueRangeSerializer()),
+        help_text="Nested dict: {scenario_id: {variable_id: {min, max}}}",
+    )

@@ -33,9 +33,8 @@ from rio_tiler.errors import TileOutsideBounds
 from server.watershed.loaders.config import resolve_run_base_url
 from .discovery import discover_output_maps, get_map_download_url
 from .schema_serializers import RhessysOutputListResponseSerializer
-from .registry import get_variable, get_scenario, is_change_scenario
+from .registry import get_variable, is_change_scenario
 from .tile import get_tile_png
-from .colormap import get_legend_stops
 
 
 def _build_transparent_png(width: int = 256, height: int = 256) -> bytes:

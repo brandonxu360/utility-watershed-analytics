@@ -13,6 +13,7 @@ import { useLayerQuery } from "./useLayerQuery";
 import type {
   RhessysOutputScenario,
   RhessysOutputVariable,
+  RhessysOutputValueRange,
 } from "../api/types";
 
 export function useRhessysOutputs(
@@ -28,6 +29,10 @@ export function useRhessysOutputs(
 
   const scenarios: RhessysOutputScenario[] = data?.scenarios ?? [];
   const variables: RhessysOutputVariable[] = data?.variables ?? [];
+  const valueRanges: Record<
+    string,
+    Record<string, RhessysOutputValueRange>
+  > = data?.value_ranges ?? {};
   const hasRasterData = !error && scenarios.length > 0;
   const hasChoroplethData = CHOROPLETH_RUN_IDS.has(runId ?? "");
 
@@ -37,5 +42,11 @@ export function useRhessysOutputs(
     hasData: hasRasterData || hasChoroplethData,
   });
 
-  return { scenarios, variables, isLoading, hasData: hasRasterData };
+  return {
+    scenarios,
+    variables,
+    valueRanges,
+    isLoading,
+    hasData: hasRasterData,
+  };
 }
