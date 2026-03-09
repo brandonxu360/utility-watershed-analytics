@@ -8,7 +8,7 @@ Covers:
 """
 
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import rasterio.errors
 from django.contrib.gis.geos import GEOSGeometry
@@ -350,13 +350,15 @@ class SbsColormapViewTests(APITestCase):
 # ---------------------------------------------------------------------------
 
 _TILE_PATCH_TARGET = 'server.watershed.sbs_raster.views.get_tile_png'
-_CONFIG_PATCH_TARGET = 'server.watershed.sbs_raster.views.get_config'
+_RESOLVE_PATCH_TARGET = 'server.watershed.sbs_raster.views.resolve_run_base_url'
 
 
-def _mock_config(base_url: str = 'https://wepp.cloud/weppcloud') -> MagicMock:
-    config = MagicMock()
-    config.api.weppcloud_base_url = base_url
-    return config
+def _mock_resolve(base_url: str = 'https://wepp.cloud/weppcloud'):
+    """Return a side_effect function for resolve_run_base_url."""
+    base = base_url.rstrip('/')
+    def _resolve(runid: str) -> str:
+        return f'{base}/runs/{runid}/disturbed_wbt'
+    return _resolve
 
 
 class SbsRasterTileViewTests(APITestCase):
@@ -380,32 +382,32 @@ class SbsRasterTileViewTests(APITestCase):
 
     # -- Successful tile responses ------------------------------------------
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve())
     @patch(_TILE_PATCH_TARGET, return_value=_MINIMAL_PNG)
-    def test_known_watershed_returns_200(self, mock_tile, mock_cfg):
+    def test_known_watershed_returns_200(self, mock_tile, mock_resolve):
         url = self._url(self.watershed.runid)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve())
     @patch(_TILE_PATCH_TARGET, return_value=_MINIMAL_PNG)
-    def test_response_content_type_is_png(self, mock_tile, mock_cfg):
+    def test_response_content_type_is_png(self, mock_tile, mock_resolve):
         url = self._url(self.watershed.runid)
         response = self.client.get(url)
         self.assertEqual(response['Content-Type'], 'image/png')
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve())
     @patch(_TILE_PATCH_TARGET, return_value=_MINIMAL_PNG)
-    def test_response_body_is_png_bytes(self, mock_tile, mock_cfg):
+    def test_response_body_is_png_bytes(self, mock_tile, mock_resolve):
         url = self._url(self.watershed.runid)
         response = self.client.get(url)
         self.assertEqual(response.content, _MINIMAL_PNG)
 
     # -- Color mode forwarding ----------------------------------------------
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve())
     @patch(_TILE_PATCH_TARGET, return_value=_MINIMAL_PNG)
-    def test_default_color_mode_is_legacy(self, mock_tile, mock_cfg):
+    def test_default_color_mode_is_legacy(self, mock_tile, mock_resolve):
         url = self._url(self.watershed.runid)
         self.client.get(url)
         _z, _x, _y = 10, 160, 387
@@ -413,17 +415,17 @@ class SbsRasterTileViewTests(APITestCase):
         _, _, _, _, mode_arg = mock_tile.call_args[0]
         self.assertEqual(mode_arg, ColorMode.LEGACY)
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve())
     @patch(_TILE_PATCH_TARGET, return_value=_MINIMAL_PNG)
-    def test_shift_mode_forwarded_to_tile_renderer(self, mock_tile, mock_cfg):
+    def test_shift_mode_forwarded_to_tile_renderer(self, mock_tile, mock_resolve):
         url = self._url(self.watershed.runid, mode='shift')
         self.client.get(url)
         _, _, _, _, mode_arg = mock_tile.call_args[0]
         self.assertEqual(mode_arg, ColorMode.SHIFT)
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve())
     @patch(_TILE_PATCH_TARGET, return_value=_MINIMAL_PNG)
-    def test_invalid_mode_falls_back_to_legacy(self, mock_tile, mock_cfg):
+    def test_invalid_mode_falls_back_to_legacy(self, mock_tile, mock_resolve):
         url = self._url(self.watershed.runid, mode='bogus')
         self.client.get(url)
         _, _, _, _, mode_arg = mock_tile.call_args[0]
@@ -431,9 +433,9 @@ class SbsRasterTileViewTests(APITestCase):
 
     # -- TIF URL construction -----------------------------------------------
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config('https://wepp.cloud/weppcloud'))
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve('https://wepp.cloud/weppcloud'))
     @patch(_TILE_PATCH_TARGET, return_value=_MINIMAL_PNG)
-    def test_tif_url_is_constructed_from_config_and_runid(self, mock_tile, mock_cfg):
+    def test_tif_url_is_constructed_from_config_and_runid(self, mock_tile, mock_resolve):
         url = self._url(self.watershed.runid)
         self.client.get(url)
         tif_url_arg = mock_tile.call_args[0][0]
@@ -443,9 +445,9 @@ class SbsRasterTileViewTests(APITestCase):
         )
         self.assertEqual(tif_url_arg, expected)
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config('https://wepp.cloud/weppcloud/'))
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve('https://wepp.cloud/weppcloud/'))
     @patch(_TILE_PATCH_TARGET, return_value=_MINIMAL_PNG)
-    def test_trailing_slash_in_base_url_is_stripped(self, mock_tile, mock_cfg):
+    def test_trailing_slash_in_base_url_is_stripped(self, mock_tile, mock_resolve):
         """A trailing slash on the configured base URL must not produce a double slash."""
         url = self._url(self.watershed.runid)
         self.client.get(url)
@@ -454,9 +456,9 @@ class SbsRasterTileViewTests(APITestCase):
 
     # -- Tile coordinate forwarding -----------------------------------------
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve())
     @patch(_TILE_PATCH_TARGET, return_value=_MINIMAL_PNG)
-    def test_tile_coordinates_forwarded_to_renderer(self, mock_tile, mock_cfg):
+    def test_tile_coordinates_forwarded_to_renderer(self, mock_tile, mock_resolve):
         url = self._url(self.watershed.runid, z=8, x=42, y=99)
         self.client.get(url)
         _, z_arg, x_arg, y_arg, _ = mock_tile.call_args[0]
@@ -466,9 +468,9 @@ class SbsRasterTileViewTests(APITestCase):
 
     # -- Tile outside bounds ------------------------------------------------
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve())
     @patch(_TILE_PATCH_TARGET, side_effect=TileOutsideBounds)
-    def test_tile_outside_bounds_returns_404(self, mock_tile, mock_cfg):
+    def test_tile_outside_bounds_returns_404(self, mock_tile, mock_resolve):
         """
         When the requested tile lies outside the raster extent the view should
         return 404.  The view catches TileOutsideBoundsError (aliased from
@@ -480,9 +482,9 @@ class SbsRasterTileViewTests(APITestCase):
 
     # -- Rasterio HTTP 404 (TIF not found on remote) ------------------------
 
-    @patch(_CONFIG_PATCH_TARGET, return_value=_mock_config())
+    @patch(_RESOLVE_PATCH_TARGET, side_effect=_mock_resolve())
     @patch(_TILE_PATCH_TARGET, side_effect=rasterio.errors.RasterioIOError("HTTP response code: 404"))
-    def test_rasterio_io_error_returns_404(self, mock_tile, mock_cfg):
+    def test_rasterio_io_error_returns_404(self, mock_tile, mock_resolve):
         """
         When rasterio cannot open the remote TIF (e.g. the run has no SBS
         data, or the tile request hits a path that does not exist on WEPPcloud)

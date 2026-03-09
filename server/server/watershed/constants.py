@@ -14,4 +14,6 @@ DEV_RUNIDS = [
     'batch;;victoria-ca-2026-sbs;;Deception',
     # Gate Creek standalone run
     'aversive-forestry',
+    # Mill Creek standalone run (TOPAZ DEM)
+    'mdobre-invincible-scarab',
 ]

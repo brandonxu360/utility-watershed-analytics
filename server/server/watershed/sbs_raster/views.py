@@ -11,7 +11,7 @@ from rio_tiler.errors import TileOutsideBounds
 from server.watershed.sbs_raster.color_map import ColorMode, get_colormap_metadata
 from server.watershed.sbs_raster.schema_serializers import SbsColormapResponseSerializer
 from server.watershed.sbs_raster.tile import get_tile_png
-from server.watershed.loaders.config import get_config
+from server.watershed.loaders.config import resolve_run_base_url
 
 
 class SbsColormapView(APIView):
@@ -94,9 +94,8 @@ class SbsRasterTileView(APIView):
         except ValueError:
             mode = ColorMode.LEGACY
 
-        config = get_config()
-        base = config.api.weppcloud_base_url.rstrip('/')
-        tif_url = f"{base}/runs/{runid}/disturbed_wbt/download/disturbed/sbs_4class.tif"
+        run_base = resolve_run_base_url(runid)
+        tif_url = f"{run_base}/download/disturbed/sbs_4class.tif"
 
         try:
             png_bytes = get_tile_png(tif_url, z, x, y, mode)

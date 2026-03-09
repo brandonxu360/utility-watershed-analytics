@@ -15,7 +15,7 @@ from typing import Optional
 import requests
 from cachetools import TTLCache
 
-from server.watershed.loaders.config import get_config
+from server.watershed.loaders.config import resolve_run_base_url
 from .registry import (
     get_display_name,
     get_meta,
@@ -31,30 +31,15 @@ _DOWNLOAD_SUBPATH = "download/rhessys/spatial_inputs_and_climates"
 _discovery_cache: TTLCache[str, Optional[list[dict]]] = TTLCache(maxsize=100, ttl=3600)
 
 
-def _resolve_run_base_url(runid: str) -> str:
-    """Resolve the WEPPcloud run base URL for a given runid.
-
-    Checks standalone run configs first (which have an explicit base URL),
-    then falls back to the batch convention.
-    """
-    config = get_config()
-    for sr in config.api.standalone_runs:
-        if sr.runid == runid:
-            return sr.run_base_url.rstrip("/")
-
-    base = config.api.weppcloud_base_url.rstrip("/")
-    return f"{base}/runs/{runid}/disturbed_wbt"
-
-
 def get_download_url(runid: str, filename: str) -> str:
     """Build the full download URL for a specific spatial input GeoTIFF."""
-    base = _resolve_run_base_url(runid)
+    base = resolve_run_base_url(runid)
     return f"{base}/{_DOWNLOAD_SUBPATH}/{filename}"
 
 
 def _fetch_browse_page(runid: str) -> Optional[str]:
     """Fetch the HTML directory listing from WEPPcloud, or None on failure."""
-    base = _resolve_run_base_url(runid)
+    base = resolve_run_base_url(runid)
     url = f"{base}/{_BROWSE_SUBPATH}"
     try:
         resp = requests.get(url, timeout=15)

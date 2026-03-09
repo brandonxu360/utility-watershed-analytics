@@ -208,22 +208,40 @@ class DjangoDataWriter:
     ) -> int:
         """
         Save a watershed from a standalone boundary GeoJSON.
-        
+
         Standalone boundary files (e.g. bound.geojson) typically have no
         attribute fields. The runid and display_name are provided externally,
         and geometry is transformed to EPSG:4326 if needed.
+
+        TOPAZ boundary files (BOUND.WGS.JSON) contain two features:
+        ``Watershed=1`` (the actual boundary) and ``Watershed=0`` (the
+        bounding-box complement).  Only features with ``Watershed=1`` — or
+        all features when the property is absent — are used, and their
+        geometries are merged into a single MultiPolygon.
         """
-        instances = []
+        polygons: list[Polygon] = []
         for feature in layer:
+            try:
+                ws_flag = feature.get('Watershed')
+            except (IndexError, KeyError):
+                ws_flag = None
+
+            if ws_flag is not None and int(ws_flag) != 1:
+                continue
+
             geom = _extract_geometry(feature)
-            instances.append(Watershed(
-                runid=runid,
-                srcname=display_name,
-                geom=geom,
-            ))
-        
-        Watershed.objects.bulk_create(instances)
-        return len(instances)
+            polygons.extend(list(geom))
+
+        if not polygons:
+            return 0
+
+        merged = MultiPolygon(*polygons)
+
+        Watershed.objects.update_or_create(
+            runid=runid,
+            defaults={'srcname': display_name, 'geom': merged},
+        )
+        return 1
     
     def save_subcatchments(self, runid: str, layer) -> int:
         """Save subcatchment features for a watershed."""

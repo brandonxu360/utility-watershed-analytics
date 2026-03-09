@@ -78,19 +78,40 @@ class StandaloneRunConfig:
 
     Standalone runs have a fixed runid and URLs derived from a known base URL
     rather than being discovered from a batch API.
+
+    The ``dem_processor`` field controls the DEM sub-path and filename
+    conventions used for subcatchment / channel / boundary GeoJSON files:
+      - ``"wbt"``   (default) — ``dem/wbt/subcatchments.WGS.geojson``
+      - ``"topaz"`` — ``dem/topaz/SUBCATCHMENTS.WGS.JSON`` (uppercase filenames)
     """
     runid: str
     display_name: str
     run_base_url: str
     boundary_url: str
+    dem_processor: str = "wbt"
+
+    _DEM_PATHS: dict = field(default=None, init=False, repr=False)
+
+    def __post_init__(self):
+        self._DEM_PATHS = {
+            "wbt": {
+                "subcatchments": "dem/wbt/subcatchments.WGS.geojson",
+                "channels": "dem/wbt/channels.WGS.geojson",
+            },
+            "topaz": {
+                "subcatchments": "dem/topaz/SUBCATCHMENTS.WGS.JSON",
+                "channels": "dem/topaz/CHANNELS.WGS.JSON",
+            },
+        }
 
     def get_data_urls(self) -> dict[str, str]:
         """Generate all data URLs from the run base URL."""
         base = self.run_base_url.rstrip("/")
+        dem = self._DEM_PATHS.get(self.dem_processor, self._DEM_PATHS["wbt"])
         return {
             "boundary": self.boundary_url,
-            "subcatchments": f"{base}/download/dem/wbt/subcatchments.WGS.geojson",
-            "channels": f"{base}/download/dem/wbt/channels.WGS.geojson",
+            "subcatchments": f"{base}/download/{dem['subcatchments']}",
+            "channels": f"{base}/download/{dem['channels']}",
             "hillslopes": f"{base}/download/watershed/hillslopes.parquet",
             "soils": f"{base}/download/soils/soils.parquet",
             "landuse": f"{base}/download/landuse/landuse.parquet",
@@ -136,6 +157,13 @@ def _default_standalone_runs() -> list[StandaloneRunConfig]:
             display_name="Gate Creek",
             run_base_url="https://wepp.cloud/weppcloud/runs/aversive-forestry/disturbed9002_wbt",
             boundary_url="https://wepp.cloud/weppcloud/runs/aversive-forestry/disturbed9002_wbt/download/dem/wbt/bound.geojson",
+        ),
+        StandaloneRunConfig(
+            runid="mdobre-invincible-scarab",
+            display_name="Mill Creek",
+            run_base_url="https://wepp.cloud/weppcloud/runs/mdobre-invincible-scarab/disturbed9002",
+            boundary_url="https://wepp.cloud/weppcloud/runs/mdobre-invincible-scarab/disturbed9002/download/dem/topaz/BOUND.WGS.JSON",
+            dem_processor="topaz",
         ),
     ]
 
@@ -235,3 +263,18 @@ def reset_config() -> None:
     """Reset the default configuration singleton (useful for testing)."""
     global _default_config
     _default_config = None
+
+
+def resolve_run_base_url(runid: str) -> str:
+    """Resolve the WEPPcloud run base URL for a given runid.
+
+    Checks standalone run configs first (which have an explicit base URL),
+    then falls back to the batch convention (``{base}/runs/{runid}/disturbed_wbt``).
+    """
+    config = get_config()
+    for sr in config.api.standalone_runs:
+        if sr.runid == runid:
+            return sr.run_base_url.rstrip("/")
+
+    base = config.api.weppcloud_base_url.rstrip("/")
+    return f"{base}/runs/{runid}/disturbed_wbt"
