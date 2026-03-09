@@ -83,7 +83,7 @@ LANDUSE_FIELD_MAP = [
 WATERSHED_FIELD_SOURCES = {
     'pws_id':     ('PWS_ID',),
     'srcname':    ('SrcName', 'name'),   # nasa-roses: SrcName; victoria: name
-    'pws_name':   ('PWS_Name',),
+    'pws_name':   ('PWS_Name_2', 'PWS_Name'),  # PWS_Name_2 has cleaner utility names (030926+)
     'county_nam': ('County_Nam',),
     'state':      ('State',),
     'huc10_id':   ('HUC10_ID',),
