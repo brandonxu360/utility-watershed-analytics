@@ -8,13 +8,23 @@ import IconButton from "@mui/material/IconButton";
 import DarkMode from "@mui/icons-material/DarkMode";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { useColorMode } from "../contexts/ColorModeContext";
+import firewiseLogo from "../assets/images/firewise_logo.png";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
     flexGrow: 1,
   },
-  title: {
+  titleWrapper: {
     flexGrow: 1,
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+  },
+  logo: {
+    height: 32,
+    width: "auto",
+  },
+  title: {
     fontSize: theme.typography.body1.fontSize,
     fontWeight: "bold",
   },
@@ -44,9 +54,12 @@ const Navbar: FC = () => {
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" component="div" className={classes.title}>
-            FireWISE Watersheds
-          </Typography>
+          <Link to="/" className={classes.titleWrapper} style={{ textDecoration: "none", color: "inherit" }}>
+            <img src={firewiseLogo} alt="FireWISE logo" className={classes.logo} />
+            <Typography variant="h6" component="div" className={classes.title}>
+              FireWISE Watersheds
+            </Typography>
+          </Link>
           <Link to="/" className={classes.link}>
             Home
           </Link>
