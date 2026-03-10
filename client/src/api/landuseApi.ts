@@ -5,6 +5,7 @@ export type { LanduseMap, LanduseEntry, FetchLanduseOptions };
 
 const LANDUSE_DATASET_PATH = "landuse/landuse.parquet";
 const DEFAULT_SCENARIO = "undisturbed";
+const DEFAULT_LANDUSE_LIMIT = 200_000;
 
 /**
  * Fetch landuse data from the query engine for a given scenario.
@@ -34,7 +35,7 @@ export async function fetchLanduse(
       "landuse.color AS color",
     ],
     order_by: ["landuse.topaz_id"],
-    limit: typeof limit === "number" ? limit : 200000,
+    limit: typeof limit === "number" ? limit : DEFAULT_LANDUSE_LIMIT,
   };
 
   addQueryFlags(payload, include_schema, include_sql);

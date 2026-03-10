@@ -17,7 +17,6 @@ export function useRhessysSpatialInputs(runId: string | null) {
     queryKey: queryKeys.rhessysSpatialInputs.byRun(runId!),
     queryFn: () => fetchRhessysSpatialInputs(runId!),
     enabled: !!runId,
-    staleTime: 1000 * 60 * 30, // 30 min — discovery results rarely change
   });
 
   const files: RhessysSpatialFile[] = data?.files ?? [];

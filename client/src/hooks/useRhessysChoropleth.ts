@@ -73,14 +73,12 @@ export function useRhessysChoropleth() {
         year: year!,
       }),
     enabled: shouldQuery,
-    staleTime: 1000 * 60 * 10,
   });
 
   const { data: geometry, isLoading: geomLoading } = useQuery({
     queryKey: queryKeys.rhessysGeometry.byScale(runId!, spatialScale),
     queryFn: () => fetchRhessysGeometry(runId!, spatialScale),
     enabled: isActive && !!runId,
-    staleTime: 1000 * 60 * 60,
   });
 
   const isLoading = dataLoading || geomLoading;

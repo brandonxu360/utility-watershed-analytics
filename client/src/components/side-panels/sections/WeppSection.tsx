@@ -120,7 +120,6 @@ export default function WeppSection() {
     queryKey: queryKeys.scenariosSummary.byRun(runId!),
     queryFn: () => fetchScenariosSummary(runId!),
     enabled: !!runId,
-    staleTime: 5 * 60_000,
     retry: 1,
   });
 

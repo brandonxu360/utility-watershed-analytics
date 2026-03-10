@@ -46,7 +46,6 @@ export function useRhessysTimeSeries(opts: UseRhessysTimeSeriesOptions) {
         signal,
       }),
     enabled: !!runId,
-    staleTime: 1000 * 60 * 10,
     placeholderData: keepPreviousData,
     select: (rows: RhessysTimeSeriesRow[]): ChartPoint[] =>
       rows.map((row) => ({

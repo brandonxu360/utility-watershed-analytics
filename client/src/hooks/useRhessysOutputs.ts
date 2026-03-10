@@ -25,7 +25,6 @@ export function useRhessysOutputs(
     queryKey: queryKeys.rhessysOutputs.byRun(runId!),
     queryFn: () => fetchRhessysOutputs(runId!),
     enabled: !!runId,
-    staleTime: 1000 * 60 * 30,
   });
 
   const scenarios: RhessysOutputScenario[] = data?.scenarios ?? [];

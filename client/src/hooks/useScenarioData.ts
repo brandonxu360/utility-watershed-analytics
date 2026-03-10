@@ -52,7 +52,6 @@ export function useScenarioData(): UseScenarioDataResult {
     queryFn: () =>
       fetchScenarioData({ runId: runId!, scenario: selectedScenario! }),
     enabled: !!runId && !!selectedScenario && scenarioEnabled,
-    staleTime: 5 * 60_000,
     retry: 1,
   });
 
