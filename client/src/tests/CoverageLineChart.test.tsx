@@ -35,7 +35,7 @@ vi.mock("recharts", () => ({
   XAxis: ({ dataKey }: { dataKey: string }) => (
     <div data-testid="x-axis" data-key={dataKey} />
   ),
-  YAxis: ({ label }: { label?: any }) => (
+  YAxis: ({ label }: { label?: Record<string, unknown> }) => (
     <div
       data-testid="y-axis"
       data-label={label ? JSON.stringify(label) : undefined}
