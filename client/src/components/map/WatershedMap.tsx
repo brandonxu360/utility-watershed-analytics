@@ -175,10 +175,6 @@ export default function WatershedMap(): JSX.Element {
     });
   };
 
-  const memoWatersheds = useMemo(() => watersheds, [watersheds]);
-  const memoSubcatchments = useMemo(() => subcatchments, [subcatchments]);
-  const memoChannels = useMemo(() => channelData, [channelData]);
-
   const anyRasterActive =
     sbsEffective || rhessysSpatialEffective || rhessysOutputsEffective;
 
@@ -290,8 +286,8 @@ export default function WatershedMap(): JSX.Element {
   // Compute the bounding box of the currently selected watershed so the SBS
   // TileLayer only requests tiles that intersect it.
   const sbsBounds = useMemo((): L.LatLngBoundsExpression | undefined => {
-    if (!runId || !memoWatersheds) return undefined;
-    const feature = memoWatersheds.features?.find(
+    if (!runId || !watersheds) return undefined;
+    const feature = watersheds.features?.find(
       (f: GeoJSON.Feature) => f.id?.toString() === runId,
     );
     if (!feature) return undefined;
@@ -300,7 +296,7 @@ export default function WatershedMap(): JSX.Element {
     } catch {
       return undefined;
     }
-  }, [runId, memoWatersheds]);
+  }, [runId, watersheds]);
 
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
 
@@ -360,15 +356,15 @@ export default function WatershedMap(): JSX.Element {
           <ZoomOutControl />
         </div>
 
-        {memoWatersheds && (
-          <MapEffect watershedId={runId} watersheds={memoWatersheds} />
+        {watersheds && (
+          <MapEffect watershedId={runId} watersheds={watersheds} />
         )}
 
         {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
-        {(!subcatchmentEffective || !memoSubcatchments?.features?.length) &&
-          memoWatersheds && (
+        {(!subcatchmentEffective || !subcatchments?.features?.length) &&
+          watersheds && (
             <GeoJSON
-              data={memoWatersheds}
+              data={watersheds}
               style={watershedStyle}
               onEachFeature={(_, layer) =>
                 layer.on({ click: onWatershedClick })
@@ -377,9 +373,9 @@ export default function WatershedMap(): JSX.Element {
           )}
 
         {/* Show subcatchments only when enabled AND data exists with features */}
-        {subcatchmentEffective && memoSubcatchments?.features?.length && (
+        {subcatchmentEffective && subcatchments?.features?.length && (
           <SubcatchmentLayer
-            data={memoSubcatchments}
+            data={subcatchments}
             style={subcatchmentStyle}
             coverageActive={choroplethActive || scenarioEffective}
             coverageKey={coverageKey}
@@ -387,8 +383,8 @@ export default function WatershedMap(): JSX.Element {
           />
         )}
 
-        {channelsEffective && memoChannels && (
-          <GeoJSON data={memoChannels} style={channelStyle} />
+        {channelsEffective && channelData && (
+          <GeoJSON data={channelData} style={channelStyle} />
         )}
 
         {sbsEffective && runId && (

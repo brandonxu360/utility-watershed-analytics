@@ -17,6 +17,7 @@ export type FetchScenarioDataOptions = {
  */
 export async function fetchScenarioData(
   opts: FetchScenarioDataOptions,
+  signal?: AbortSignal,
 ): Promise<ScenarioDataRow[]> {
   const { runId, scenario } = opts;
 
@@ -43,7 +44,7 @@ export async function fetchScenarioData(
     payload.scenario = scenario;
   }
 
-  const rows = await postQuery(runId, payload, `Scenario (${scenario})`);
+  const rows = await postQuery(runId, payload, `Scenario (${scenario})`, signal);
 
   return rows.map((r) => {
     const row = r as Record<string, unknown>;
@@ -76,6 +77,7 @@ export type ScenarioSummaryRow = {
  */
 export async function fetchScenariosSummary(
   runId: string,
+  signal?: AbortSignal,
 ): Promise<ScenarioSummaryRow[]> {
   if (!runId?.trim()) throw new Error("Invalid runId");
 
@@ -95,6 +97,7 @@ export async function fetchScenariosSummary(
         runId,
         payload,
         `Scenario Summary (${scenario})`,
+        signal,
       );
 
       const metrics = new Map<string, number>();

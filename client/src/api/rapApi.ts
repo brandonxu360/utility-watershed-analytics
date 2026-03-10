@@ -71,6 +71,7 @@ function buildRapTimeseriesPayload(
  */
 export async function fetchRap(
   opts: FetchRapOptions,
+  signal?: AbortSignal,
 ): Promise<AggregatedRapRow[]> {
   const { mode, topazId, runId, year, include_schema, include_sql } = opts;
 
@@ -116,7 +117,7 @@ export async function fetchRap(
     addQueryFlags(payload, include_schema, include_sql);
   }
 
-  const rawRows = await postQuery(runId, payload, "RAP");
+  const rawRows = await postQuery(runId, payload, "RAP", signal);
 
   if (mode === "watershed") {
     // Map server-aggregated rows straight to AggregatedRapRow
@@ -192,6 +193,7 @@ export default fetchRap;
  */
 export async function fetchRapChoropleth(
   opts: FetchRapChoroplethOptions,
+  signal?: AbortSignal,
 ): Promise<RapChoroplethRow[]> {
   const { runId, band, year, include_schema, include_sql } = opts;
 
@@ -241,7 +243,7 @@ export async function fetchRapChoropleth(
   };
   addQueryFlags(payload, include_schema, include_sql);
 
-  const rawRows = await postQuery(runId, payload, "RAP Choropleth");
+  const rawRows = await postQuery(runId, payload, "RAP Choropleth", signal);
 
   return rawRows
     .map((r) => {

@@ -58,26 +58,27 @@ export function useRhessysChoropleth() {
 
   const { data: rawData, isLoading: dataLoading } = useQuery({
     queryKey: queryKeys.rhessysChoropleth.byParams(
-      runId!,
+      runId ?? "",
       scenario!,
       variable!,
       spatialScale,
       year!,
     ),
-    queryFn: () =>
+    queryFn: ({ signal }) =>
       fetchRhessysChoropleth({
-        runId: runId!,
+        runId: runId!,  // guaranteed non-null by shouldQuery
         scenario: scenario!,
         variable: variable!,
         spatialScale,
         year: year!,
+        signal,
       }),
     enabled: shouldQuery,
   });
 
   const { data: geometry, isLoading: geomLoading } = useQuery({
-    queryKey: queryKeys.rhessysGeometry.byScale(runId!, spatialScale),
-    queryFn: () => fetchRhessysGeometry(runId!, spatialScale),
+    queryKey: queryKeys.rhessysGeometry.byScale(runId ?? "", spatialScale),
+    queryFn: ({ signal }) => fetchRhessysGeometry(runId!, spatialScale, signal),
     enabled: isActive && !!runId,
   });
 

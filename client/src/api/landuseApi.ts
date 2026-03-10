@@ -19,6 +19,7 @@ const DEFAULT_LANDUSE_LIMIT = 200_000;
  */
 export async function fetchLanduse(
   opts: FetchLanduseOptions,
+  signal?: AbortSignal,
 ): Promise<LanduseMap> {
   const { runId, include_schema, include_sql, limit, scenario } = opts;
 
@@ -40,7 +41,7 @@ export async function fetchLanduse(
 
   addQueryFlags(payload, include_schema, include_sql);
 
-  const rawRows = await postQuery(runId, payload, "Landuse");
+  const rawRows = await postQuery(runId, payload, "Landuse", signal);
 
   const result: LanduseMap = {};
 

@@ -10,9 +10,10 @@ import type { RhessysSpatialListResponse } from "./types";
  */
 export async function fetchRhessysSpatialInputs(
   runId: string,
+  signal?: AbortSignal,
 ): Promise<RhessysSpatialListResponse> {
   const url = API_ENDPOINTS.RHESSYS_SPATIAL_LIST(runId);
-  const response = await fetch(url);
+  const response = await fetch(url, { signal });
   return checkResponse<RhessysSpatialListResponse>(response, {
     url,
     runId,

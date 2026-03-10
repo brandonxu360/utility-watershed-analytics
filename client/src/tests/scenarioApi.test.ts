@@ -124,6 +124,7 @@ describe("scenarioApi", () => {
         TEST_RUN_ID,
         expect.any(Object),
         expect.stringContaining("prescribed_fire"),
+        undefined,
       );
     });
   });

@@ -22,8 +22,8 @@ export function useRhessysOutputs(
   { reportLayerState = true } = {},
 ) {
   const { data, isLoading, error } = useQuery({
-    queryKey: queryKeys.rhessysOutputs.byRun(runId!),
-    queryFn: () => fetchRhessysOutputs(runId!),
+    queryKey: queryKeys.rhessysOutputs.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchRhessysOutputs(runId!, signal),
     enabled: !!runId,
   });
 

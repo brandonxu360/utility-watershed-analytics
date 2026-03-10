@@ -32,8 +32,8 @@ export function useSubcatchmentData(
     isLoading: subLoading,
     isError: subError,
   } = useQuery({
-    queryKey: queryKeys.subcatchments.byRun(runId!),
-    queryFn: () => fetchSubcatchments(runId!),
+    queryKey: queryKeys.subcatchments.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchSubcatchments(runId!, { signal }),
     enabled: Boolean(subcatchmentEnabled && runId),
   });
 
@@ -42,6 +42,7 @@ export function useSubcatchmentData(
     enabled: Boolean(subcatchmentEnabled && runId),
     isLoading: subLoading,
     hasData: !subError && (subcatchments?.features?.length ?? 0) > 0,
+    queryKey: queryKeys.subcatchments.all,
   });
 
   return { subcatchments, subLoading };

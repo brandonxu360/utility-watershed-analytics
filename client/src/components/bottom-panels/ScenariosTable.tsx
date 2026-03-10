@@ -1,11 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "../../api/queryKeys";
 import { useParams } from "@tanstack/react-router";
 
-import {
-  fetchScenariosSummary,
-  type ScenarioSummaryRow,
-} from "../../api/scenarioApi";
+import { type ScenarioSummaryRow } from "../../api/scenarioApi";
+import { useScenariosSummary } from "../../hooks/useScenariosSummary";
 
 import { tss } from "../../utils/tss";
 import Table from "@mui/material/Table";
@@ -84,12 +80,7 @@ export function ScenariosTable() {
       shouldThrow: false,
     }) ?? null;
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: queryKeys.scenariosSummary.byRun(runId!),
-    queryFn: () => fetchScenariosSummary(runId!),
-    enabled: !!runId,
-    retry: 1,
-  });
+  const { data, isLoading, isError, error } = useScenariosSummary(runId);
 
   if (isLoading) {
     return (

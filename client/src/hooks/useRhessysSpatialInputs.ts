@@ -14,8 +14,8 @@ import type { RhessysSpatialFile } from "../api/types";
 
 export function useRhessysSpatialInputs(runId: string | null) {
   const { data, isLoading, error } = useQuery({
-    queryKey: queryKeys.rhessysSpatialInputs.byRun(runId!),
-    queryFn: () => fetchRhessysSpatialInputs(runId!),
+    queryKey: queryKeys.rhessysSpatialInputs.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchRhessysSpatialInputs(runId!, signal),
     enabled: !!runId,
   });
 

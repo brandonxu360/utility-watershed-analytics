@@ -1,12 +1,10 @@
 import { ChangeEvent } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "../../../api/queryKeys";
 import { useParams } from "@tanstack/react-router";
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { useLayerToggle } from "../../../hooks/useLayerToggle";
+import { useScenariosSummary } from "../../../hooks/useScenariosSummary";
 import { hasActiveDependents } from "../../../layers/registry";
 import { getLayerParams } from "../../../layers/types";
-import { fetchScenariosSummary } from "../../../api/scenarioApi";
 
 import {
   SCENARIO_VARIABLES,
@@ -116,12 +114,7 @@ export default function WeppSection() {
     effective,
   } = useWatershed();
 
-  const { data: scenariosSummary } = useQuery({
-    queryKey: queryKeys.scenariosSummary.byRun(runId!),
-    queryFn: () => fetchScenariosSummary(runId!),
-    enabled: !!runId,
-    retry: 1,
-  });
+  const { data: scenariosSummary } = useScenariosSummary(runId);
 
   const availableScenarios = scenariosSummary ?? [];
 

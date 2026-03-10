@@ -134,11 +134,14 @@ describe("useChoropleth", () => {
       });
 
       await waitFor(() => {
-        expect(mockFetchRapChoropleth).toHaveBeenCalledWith({
-          runId: "batch;;test-batch;;test-run",
-          band: [5, 6],
-          year: null,
-        });
+        expect(mockFetchRapChoropleth).toHaveBeenCalledWith(
+          {
+            runId: "batch;;test-batch;;test-run",
+            band: [5, 6],
+            year: null,
+          },
+          expect.any(AbortSignal),
+        );
       });
     });
 
@@ -151,11 +154,14 @@ describe("useChoropleth", () => {
       });
 
       await waitFor(() => {
-        expect(mockFetchRapChoropleth).toHaveBeenCalledWith({
-          runId: "batch;;test-batch;;test-run",
-          band: [5, 6],
-          year: 2020,
-        });
+        expect(mockFetchRapChoropleth).toHaveBeenCalledWith(
+          {
+            runId: "batch;;test-batch;;test-run",
+            band: [5, 6],
+            year: 2020,
+          },
+          expect.any(AbortSignal),
+        );
       });
     });
 

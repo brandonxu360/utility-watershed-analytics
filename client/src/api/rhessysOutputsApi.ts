@@ -12,9 +12,10 @@ import type { RhessysOutputListResponse, RhessysChoroplethRow, QueryPayload } fr
  */
 export async function fetchRhessysOutputs(
   runId: string,
+  signal?: AbortSignal,
 ): Promise<RhessysOutputListResponse> {
   const url = API_ENDPOINTS.RHESSYS_OUTPUTS_LIST(runId);
-  const response = await fetch(url);
+  const response = await fetch(url, { signal });
   return checkResponse<RhessysOutputListResponse>(response, {
     url,
     runId,
@@ -92,8 +93,9 @@ export async function fetchRhessysChoropleth(opts: {
   variable: string;
   spatialScale: SpatialScale;
   year: number;
+  signal?: AbortSignal;
 }): Promise<RhessysChoroplethRow[]> {
-  const { runId, scenario, variable, spatialScale, year } = opts;
+  const { runId, scenario, variable, spatialScale, year, signal } = opts;
 
   const parquetPaths = PARQUET_PATHS[scenario];
   if (!parquetPaths) throw new Error(`Unknown scenario: ${scenario}`);
@@ -111,7 +113,7 @@ export async function fetchRhessysChoropleth(opts: {
     order_by: [`${alias}.${idCol}`],
   };
 
-  const rawRows = await postQuery(runId, payload, "RHESSys Choropleth");
+  const rawRows = await postQuery(runId, payload, "RHESSys Choropleth", signal);
 
   return rawRows
     .map((r) => {
@@ -131,10 +133,11 @@ export async function fetchRhessysChoropleth(opts: {
 export async function fetchRhessysGeometry(
   runId: string,
   spatialScale: SpatialScale,
+  signal?: AbortSignal,
 ): Promise<GeoJSON.FeatureCollection> {
   const url = API_ENDPOINTS.RHESSYS_OUTPUTS_GEOMETRY(runId, spatialScale);
 
-  const response = await fetch(url);
+  const response = await fetch(url, { signal });
   return checkResponse<GeoJSON.FeatureCollection>(response, {
     url,
     runId,

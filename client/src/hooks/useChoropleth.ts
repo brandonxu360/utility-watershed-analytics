@@ -94,17 +94,17 @@ export function useChoropleth(): UseChoroplethResult {
     error: queryError,
   } = useQuery({
     queryKey: queryKeys.rapChoropleth.byParams(
-      runId!,
+      runId ?? "",
       choroplethType,
       choroplethYear,
       effectiveBands,
     ),
-    queryFn: () =>
+    queryFn: ({ signal }) =>
       fetchRapChoropleth({
-        runId: runId!,
+        runId: runId!,  // guaranteed non-null by enabled
         band: effectiveBands,
         year: choroplethYear,
-      }),
+      }, signal),
     enabled: isEnabled,
   });
 

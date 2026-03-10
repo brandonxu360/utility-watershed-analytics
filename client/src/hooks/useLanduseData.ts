@@ -39,8 +39,8 @@ export function useLanduseData(runId: string | null): UseLanduseDataResult {
     isLoading: landuseLoading,
     error: landuseError,
   } = useQuery({
-    queryKey: queryKeys.landuse.undisturbed(runId!),
-    queryFn: () => fetchLanduse({ runId: runId! }),
+    queryKey: queryKeys.landuse.undisturbed(runId ?? ""),
+    queryFn: ({ signal }) => fetchLanduse({ runId: runId! }, signal),
     enabled: Boolean(landuseEnabled && runId),
   });
 
@@ -52,6 +52,7 @@ export function useLanduseData(runId: string | null): UseLanduseDataResult {
       !landuseError &&
       landuseData != null &&
       Object.keys(landuseData).length > 0,
+    queryKey: queryKeys.landuse.undisturbed(runId ?? ""),
   });
 
   // ── Derive legend map ─────────────────────────────────────────────────
