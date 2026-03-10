@@ -180,11 +180,12 @@ export async function fetchRhessysTimeSeries(opts: {
   scenario: string;
   variables: string[];
   spatialScale?: SpatialScale | null;
+  signal?: AbortSignal;
 }): Promise<RhessysTimeSeriesRow[]> {
-  const { runId, scenario, variables, spatialScale } = opts;
+  const { runId, scenario, variables, spatialScale, signal } = opts;
 
   if (spatialScale === "patch") {
-    return fetchPatchTimeSeries(runId, scenario, variables);
+    return fetchPatchTimeSeries(runId, scenario, variables, signal);
   }
 
   const datasetPath = BASIN_DAILY_PATHS[scenario];
@@ -206,7 +207,7 @@ export async function fetchRhessysTimeSeries(opts: {
     order_by: [`${alias}.year`, `${alias}.month`],
   };
 
-  const rawRows = await postQuery(runId, payload, "RHESSys TimeSeries");
+  const rawRows = await postQuery(runId, payload, "RHESSys TimeSeries", signal);
 
   return rawRows.map((r) => {
     const row = r as Record<string, unknown>;
@@ -226,6 +227,7 @@ async function fetchPatchTimeSeries(
   runId: string,
   scenario: string,
   variables: string[],
+  signal?: AbortSignal,
 ): Promise<RhessysTimeSeriesRow[]> {
   const parquetPaths = PARQUET_PATHS[scenario];
   if (!parquetPaths) {
@@ -246,7 +248,7 @@ async function fetchPatchTimeSeries(
     order_by: [`${alias}.year`],
   };
 
-  const rawRows = await postQuery(runId, payload, "RHESSys Patch TimeSeries");
+  const rawRows = await postQuery(runId, payload, "RHESSys Patch TimeSeries", signal);
 
   return rawRows.map((r) => {
     const row = r as Record<string, unknown>;

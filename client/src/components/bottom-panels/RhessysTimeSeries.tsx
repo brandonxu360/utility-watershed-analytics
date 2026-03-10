@@ -1,5 +1,4 @@
 import React, { useMemo, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -10,10 +9,10 @@ import { tss } from "../../utils/tss";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
 import {
-  fetchRhessysTimeSeries,
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_VARIABLES,
 } from "../../api/rhessysOutputsApi";
+import { useRhessysTimeSeries } from "../../hooks/useRhessysTimeSeries";
 import { CoverageLineChart } from "../CoverageLineChart";
 
 type VariableMeta = { id: string; label: string; units: string };
@@ -109,34 +108,12 @@ export const RhessysTimeSeries: React.FC = () => {
   const varMeta = availableVariables.find((v) => v.id === effectiveVariable);
   const isYearly = spatialScale === "patch";
 
-  const { data: rawData, isLoading } = useQuery({
-    queryKey: [
-      "rhessys-timeseries",
-      runId,
-      effectiveScenario,
-      effectiveVariable,
-      spatialScale,
-    ],
-    queryFn: () =>
-      fetchRhessysTimeSeries({
-        runId: runId!,
-        scenario: effectiveScenario,
-        variables: [effectiveVariable],
-        spatialScale,
-      }),
-    enabled: !!runId,
-    staleTime: 1000 * 60 * 10,
+  const { data: chartData = [], isLoading } = useRhessysTimeSeries({
+    runId,
+    scenario: effectiveScenario,
+    variable: effectiveVariable,
+    spatialScale,
   });
-
-  const chartData = useMemo(() => {
-    if (!rawData?.length) return [];
-    return rawData.map((row) => ({
-      name: isYearly
-        ? String(row.year)
-        : `${row.year}-${String(row.month).padStart(2, "0")}`,
-      value: row[effectiveVariable] ?? 0,
-    }));
-  }, [rawData, effectiveVariable, isYearly]);
 
   const handleVariableChange = useCallback(
     (e: SelectChangeEvent) => {
