@@ -1,5 +1,7 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
+import type { WatershedProperties } from "../types/WatershedProperties";
+import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 
 /**
  * Fetches all the available watersheds with the original or
@@ -14,7 +16,7 @@ import { checkResponse } from "./errors";
 export async function fetchWatersheds() {
   const url = API_ENDPOINTS.WATERSHEDS;
   const res = await fetch(url);
-  return checkResponse(res, { url, prefix: "Watersheds" });
+  return checkResponse<GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>>(res, { url, prefix: "Watersheds" });
 }
 
 /**
@@ -32,7 +34,7 @@ export async function fetchWatersheds() {
 export async function fetchWatershed(id: string) {
   const url = API_ENDPOINTS.WATERSHED(id);
   const res = await fetch(url);
-  return checkResponse(res, { url, runId: id, prefix: "Watershed" });
+  return checkResponse<GeoJSON.Feature>(res, { url, runId: id, prefix: "Watershed" });
 }
 
 /**
@@ -49,7 +51,7 @@ export async function fetchWatershed(id: string) {
 export async function fetchSubcatchments(webcloudRunId: string) {
   const url = API_ENDPOINTS.SUBCATCHMENTS(webcloudRunId);
   const res = await fetch(url);
-  return checkResponse(res, { url, runId: webcloudRunId, prefix: "Subcatchments" });
+  return checkResponse<GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>>(res, { url, runId: webcloudRunId, prefix: "Subcatchments" });
 }
 
 /**
@@ -66,5 +68,5 @@ export async function fetchSubcatchments(webcloudRunId: string) {
 export async function fetchChannels(webcloudRunId: string) {
   const url = API_ENDPOINTS.CHANNELS(webcloudRunId);
   const res = await fetch(url);
-  return checkResponse(res, { url, runId: webcloudRunId, prefix: "Channels" });
+  return checkResponse<GeoJSON.FeatureCollection>(res, { url, runId: webcloudRunId, prefix: "Channels" });
 }

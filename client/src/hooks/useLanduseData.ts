@@ -12,6 +12,7 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryKeys";
 import { fetchLanduse } from "../api/landuseApi";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
@@ -38,7 +39,7 @@ export function useLanduseData(runId: string | null): UseLanduseDataResult {
     isLoading: landuseLoading,
     error: landuseError,
   } = useQuery({
-    queryKey: ["landuse-undisturbed", runId],
+    queryKey: queryKeys.landuse.undisturbed(runId!),
     queryFn: () => fetchLanduse({ runId: runId! }),
     enabled: Boolean(landuseEnabled && runId),
   });

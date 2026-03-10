@@ -1,5 +1,6 @@
 import { ChangeEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../../../api/queryKeys";
 import { useParams } from "@tanstack/react-router";
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { useLayerToggle } from "../../../hooks/useLayerToggle";
@@ -116,7 +117,7 @@ export default function WeppSection() {
   } = useWatershed();
 
   const { data: scenariosSummary } = useQuery({
-    queryKey: ["scenariosSummary", runId],
+    queryKey: queryKeys.scenariosSummary.byRun(runId!),
     queryFn: () => fetchScenariosSummary(runId!),
     enabled: !!runId,
     staleTime: 5 * 60_000,

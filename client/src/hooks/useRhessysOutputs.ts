@@ -5,6 +5,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryKeys";
 import {
   fetchRhessysOutputs,
   CHOROPLETH_RUN_IDS,
@@ -21,7 +22,7 @@ export function useRhessysOutputs(
   { reportLayerState = true } = {},
 ) {
   const { data, isLoading, error } = useQuery({
-    queryKey: ["rhessysOutputs", runId],
+    queryKey: queryKeys.rhessysOutputs.byRun(runId!),
     queryFn: () => fetchRhessysOutputs(runId!),
     enabled: !!runId,
     staleTime: 1000 * 60 * 30,

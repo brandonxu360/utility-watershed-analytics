@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../../api/queryKeys";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { MapEffect, getSavedMapView } from "../../utils/map/MapEffectUtil";
 import { fetchWatersheds } from "../../api/api";
@@ -150,7 +151,7 @@ export default function WatershedMap(): JSX.Element {
     error: watershedsError,
     isLoading: watershedsLoading,
   } = useQuery({
-    queryKey: ["watersheds"],
+    queryKey: queryKeys.watersheds.all,
     queryFn: fetchWatersheds,
   });
 
@@ -359,7 +360,9 @@ export default function WatershedMap(): JSX.Element {
           <ZoomOutControl />
         </div>
 
-        <MapEffect watershedId={runId} watersheds={memoWatersheds} />
+        {memoWatersheds && (
+          <MapEffect watershedId={runId} watersheds={memoWatersheds} />
+        )}
 
         {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
         {(!subcatchmentEffective || !memoSubcatchments?.features?.length) &&

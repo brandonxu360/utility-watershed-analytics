@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryKeys";
 import { useParams } from "@tanstack/react-router";
 import { PathOptions } from "leaflet";
 import { useWatershed } from "../contexts/WatershedContext";
@@ -47,7 +48,7 @@ export function useScenarioData(): UseScenarioDataResult {
   const scenarioEnabled = layerDesired.scenario.enabled;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["scenarioData", runId, selectedScenario],
+    queryKey: queryKeys.scenarioData.byScenario(runId!, selectedScenario!),
     queryFn: () =>
       fetchScenarioData({ runId: runId!, scenario: selectedScenario! }),
     enabled: !!runId && !!selectedScenario && scenarioEnabled,

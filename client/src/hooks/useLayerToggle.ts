@@ -4,6 +4,7 @@
  */
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryKeys";
 import { useWatershed } from "../contexts/WatershedContext";
 import { ALL_LAYER_IDS, type LayerId } from "../layers/types";
 
@@ -19,11 +20,11 @@ export function useLayerToggle() {
       dispatchLayerAction({ type: "TOGGLE", id: layerId, on: checked });
 
       if (id === "subcatchment" && !checked) {
-        queryClient.cancelQueries({ queryKey: ["subcatchments"] });
+        queryClient.cancelQueries({ queryKey: queryKeys.subcatchments.all });
         clearSelectedHillslope();
       }
       if (id === "channels" && !checked) {
-        queryClient.cancelQueries({ queryKey: ["channels"] });
+        queryClient.cancelQueries({ queryKey: queryKeys.channels.all });
       }
     },
     [dispatchLayerAction, queryClient, clearSelectedHillslope],

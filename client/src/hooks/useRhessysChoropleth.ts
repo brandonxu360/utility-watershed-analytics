@@ -10,6 +10,7 @@ import { useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
 import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryKeys";
 import { useWatershed } from "../contexts/WatershedContext";
 import { getLayerParams } from "../layers/types";
 import {
@@ -56,14 +57,13 @@ export function useRhessysChoropleth() {
   const shouldQuery = isActive && !!runId && !!scenario && !!variable && !!year;
 
   const { data: rawData, isLoading: dataLoading } = useQuery({
-    queryKey: [
-      "rhessys-choropleth",
-      runId,
-      scenario,
-      variable,
+    queryKey: queryKeys.rhessysChoropleth.byParams(
+      runId!,
+      scenario!,
+      variable!,
       spatialScale,
-      year,
-    ],
+      year!,
+    ),
     queryFn: () =>
       fetchRhessysChoropleth({
         runId: runId!,
@@ -77,7 +77,7 @@ export function useRhessysChoropleth() {
   });
 
   const { data: geometry, isLoading: geomLoading } = useQuery({
-    queryKey: ["rhessys-geometry", runId, spatialScale],
+    queryKey: queryKeys.rhessysGeometry.byScale(runId!, spatialScale),
     queryFn: () => fetchRhessysGeometry(runId!, spatialScale),
     enabled: isActive && !!runId,
     staleTime: 1000 * 60 * 60,

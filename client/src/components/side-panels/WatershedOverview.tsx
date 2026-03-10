@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../../api/queryKeys";
 import { fetchWatersheds } from "../../api/api";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { tss } from "../../utils/tss";
@@ -174,7 +175,7 @@ export default function WatershedOverview() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["watersheds"],
+    queryKey: queryKeys.watersheds.all,
     queryFn: fetchWatersheds,
   });
 

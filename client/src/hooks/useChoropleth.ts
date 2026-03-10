@@ -2,6 +2,7 @@ import { useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
 import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryKeys";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
 import { getLayerParams } from "../layers/types";
@@ -92,13 +93,12 @@ export function useChoropleth(): UseChoroplethResult {
     isError,
     error: queryError,
   } = useQuery({
-    queryKey: [
-      "rap-choropleth",
-      runId,
+    queryKey: queryKeys.rapChoropleth.byParams(
+      runId!,
       choroplethType,
       choroplethYear,
       effectiveBands,
-    ],
+    ),
     queryFn: () =>
       fetchRapChoropleth({
         runId: runId!,

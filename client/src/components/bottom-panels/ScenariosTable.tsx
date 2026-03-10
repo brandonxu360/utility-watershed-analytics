@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../../api/queryKeys";
 import { useParams } from "@tanstack/react-router";
 
 import {
@@ -84,7 +85,7 @@ export function ScenariosTable() {
     }) ?? null;
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["scenariosSummary", runId],
+    queryKey: queryKeys.scenariosSummary.byRun(runId!),
     queryFn: () => fetchScenariosSummary(runId!),
     enabled: !!runId,
     staleTime: 5 * 60_000,
