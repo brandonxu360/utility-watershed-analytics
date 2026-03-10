@@ -1,5 +1,5 @@
 import { addQueryFlags, postQuery, toFiniteNumber } from "./queryUtils";
-import { FetchLanduseOptions, LanduseMap, LanduseEntry } from "./types";
+import { FetchLanduseOptions, LanduseMap, LanduseEntry, QueryPayload } from "./types";
 
 export type { LanduseMap, LanduseEntry, FetchLanduseOptions };
 
@@ -25,7 +25,7 @@ export async function fetchLanduse(
     throw new Error("Invalid runId provided");
   }
 
-  const payload: Record<string, unknown> = {
+  const payload: QueryPayload = {
     scenario: scenario ?? DEFAULT_SCENARIO,
     datasets: [{ alias: "landuse", path: LANDUSE_DATASET_PATH }],
     columns: [

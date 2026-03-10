@@ -1,5 +1,7 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
 import { YEAR_BOUNDS, QueryFilter } from "./types";
+import type { QueryPayload } from "./types";
+import { checkResponse } from "./errors";
 
 /**
  * Extract rows from various query engine response formats.
@@ -23,31 +25,35 @@ export function extractRows(json: unknown): unknown[] {
 /**
  * POST a query to the query engine and return the raw rows.
  *
+ * @typeParam T - Shape of each returned row (defaults to `unknown`)
  * @param runPath - The batch path for the query
- * @param payload - Query payload object
+ * @param payload - Typed query payload
  * @param errorPrefix - Prefix for error messages (e.g., "RAP", "ET")
- * @returns Array of raw row objects
- * @throws Error if the request fails
+ * @param signal - Optional AbortSignal for request cancellation
+ * @returns Array of row objects typed as T
+ * @throws ApiError if the request fails
  */
-export async function postQuery(
+export async function postQuery<T = unknown>(
   runPath: string,
-  payload: unknown,
+  payload: QueryPayload,
   errorPrefix: string = "Query",
-): Promise<unknown[]> {
+  signal?: AbortSignal,
+): Promise<T[]> {
   const url = API_ENDPOINTS.QUERY_RUN(runPath);
 
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+    signal,
   });
 
-  if (!res.ok) {
-    throw new Error(`${errorPrefix} query failed: ${res.status}`);
-  }
-
-  const json = await res.json();
-  return extractRows(json);
+  const json = await checkResponse(res, {
+    url,
+    runId: runPath,
+    prefix: errorPrefix,
+  });
+  return extractRows(json) as T[];
 }
 
 /**
@@ -55,7 +61,7 @@ export async function postQuery(
  * Mutates the payload in place for convenience.
  */
 export function addQueryFlags(
-  payload: Record<string, unknown>,
+  payload: QueryPayload,
   include_schema?: boolean,
   include_sql?: boolean,
 ): void {

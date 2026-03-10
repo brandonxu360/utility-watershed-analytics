@@ -14,7 +14,7 @@ import {
   FetchRapChoroplethOptions,
   RapChoroplethRow,
   RapRow,
-  RapTimeseriesPayload,
+  QueryPayload,
   QueryFilter,
 } from "./types";
 
@@ -31,14 +31,14 @@ import {
 function buildRapTimeseriesPayload(
   topazId: number,
   year?: number,
-): RapTimeseriesPayload {
+): QueryPayload {
   // Validate topazId is a reasonable positive integer
   const validTopazId = Number(topazId);
   if (!Number.isInteger(validTopazId) || validTopazId < 0) {
     throw new Error("Invalid topazId provided");
   }
 
-  const filters: RapTimeseriesPayload["filters"] = [
+  const filters: QueryFilter[] = [
     { column: "rap.topaz_id", operator: "=", value: validTopazId },
     { column: "rap.band", operator: "IN", value: [5, 6] },
   ];
@@ -74,7 +74,7 @@ export async function fetchRap(
 ): Promise<AggregatedRapRow[]> {
   const { mode, topazId, runId, year, include_schema, include_sql } = opts;
 
-  let payload: Record<string, unknown>;
+  let payload: QueryPayload;
 
   if (mode === "hillslope") {
     if (typeof topazId === "undefined")
@@ -222,7 +222,7 @@ export async function fetchRapChoropleth(
           .join(" + ")
       : "COALESCE(SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0), 0)";
 
-  const payload: Record<string, unknown> = {
+  const payload: QueryPayload = {
     datasets: [
       { path: "rap/rap_ts.parquet", alias: "rap" },
       { path: "watershed/hillslopes.parquet", alias: "hillslopes" },

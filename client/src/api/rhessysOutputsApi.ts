@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
 import { postQuery, toFiniteNumber } from "./queryUtils";
-import type { RhessysOutputListResponse, RhessysChoroplethRow } from "./types";
+import type { RhessysOutputListResponse, RhessysChoroplethRow, QueryPayload } from "./types";
 
 /**
  * Fetch the list of available RHESSys output map scenarios and variables.
@@ -104,7 +104,7 @@ export async function fetchRhessysChoropleth(opts: {
   const idCol = SPATIAL_ID_COLUMN[spatialScale];
   const alias = "d";
 
-  const payload: Record<string, unknown> = {
+  const payload: QueryPayload = {
     datasets: [{ alias, path: datasetPath }],
     columns: [`${alias}.${idCol} AS spatialId`],
     filters: [{ column: `${alias}.year`, operator: "=", value: year }],
@@ -198,7 +198,7 @@ export async function fetchRhessysTimeSeries(opts: {
     expression: `AVG(${alias}.${v})`,
   }));
 
-  const payload: Record<string, unknown> = {
+  const payload: QueryPayload = {
     datasets: [{ alias, path: datasetPath }],
     columns: [`${alias}.year AS year`, `${alias}.month AS month`],
     aggregations,
@@ -238,7 +238,7 @@ async function fetchPatchTimeSeries(
     expression: `AVG(${alias}.${v})`,
   }));
 
-  const payload: Record<string, unknown> = {
+  const payload: QueryPayload = {
     datasets: [{ alias, path: parquetPaths.patch }],
     columns: [`${alias}.year AS year`],
     aggregations,

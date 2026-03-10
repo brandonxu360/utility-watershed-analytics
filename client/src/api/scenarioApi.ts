@@ -1,4 +1,5 @@
 import { postQuery, toFiniteNumber } from "./queryUtils";
+import type { QueryPayload } from "./types";
 import { AVAILABLE_SCENARIOS, formatScenarioLabel } from "../layers/scenario";
 import type { ScenarioType, ScenarioDataRow } from "../layers/scenario";
 
@@ -22,7 +23,7 @@ export async function fetchScenarioData(
   if (!runId?.trim()) throw new Error("Invalid runId");
   if (!scenario) throw new Error("Scenario required");
 
-  const payload: Record<string, unknown> = {
+  const payload: QueryPayload = {
     datasets: [{ alias: "loss", path: SCENARIO_LOSS_PATH }],
     columns: [
       "loss.wepp_id AS wepp_id",
@@ -80,7 +81,7 @@ export async function fetchScenariosSummary(
 
   const results = await Promise.allSettled(
     AVAILABLE_SCENARIOS.map(async (scenario) => {
-      const payload: Record<string, unknown> = {
+      const payload: QueryPayload = {
         datasets: [{ alias: "loss", path: SCENARIO_SUMMARY_PATH }],
         columns: ["loss.key AS key", "loss.value AS value"],
       };
