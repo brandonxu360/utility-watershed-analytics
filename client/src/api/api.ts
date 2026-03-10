@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
+import { checkResponse } from "./errors";
 
 /**
  * Fetches all the available watersheds with the original or
@@ -11,9 +12,9 @@ import { API_ENDPOINTS } from "./apiEndpoints";
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
 export async function fetchWatersheds() {
-  const res = await fetch(API_ENDPOINTS.WATERSHEDS);
-  if (!res.ok) throw new Error("Failed to fetch watersheds");
-  return res.json();
+  const url = API_ENDPOINTS.WATERSHEDS;
+  const res = await fetch(url);
+  return checkResponse(res, { url, prefix: "Watersheds" });
 }
 
 /**
@@ -29,9 +30,9 @@ export async function fetchWatersheds() {
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
 export async function fetchWatershed(id: string) {
-  const res = await fetch(API_ENDPOINTS.WATERSHED(id));
-  if (!res.ok) throw new Error("Failed to fetch watershed " + id);
-  return res.json();
+  const url = API_ENDPOINTS.WATERSHED(id);
+  const res = await fetch(url);
+  return checkResponse(res, { url, runId: id, prefix: "Watershed" });
 }
 
 /**
@@ -46,9 +47,9 @@ export async function fetchWatershed(id: string) {
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
 export async function fetchSubcatchments(webcloudRunId: string) {
-  const res = await fetch(API_ENDPOINTS.SUBCATCHMENTS(webcloudRunId));
-  if (!res.ok) throw new Error("Failed to fetch subcatchments");
-  return res.json();
+  const url = API_ENDPOINTS.SUBCATCHMENTS(webcloudRunId);
+  const res = await fetch(url);
+  return checkResponse(res, { url, runId: webcloudRunId, prefix: "Subcatchments" });
 }
 
 /**
@@ -63,7 +64,7 @@ export async function fetchSubcatchments(webcloudRunId: string) {
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
 export async function fetchChannels(webcloudRunId: string) {
-  const res = await fetch(API_ENDPOINTS.CHANNELS(webcloudRunId));
-  if (!res.ok) throw new Error("Failed to fetch channels");
-  return res.json();
+  const url = API_ENDPOINTS.CHANNELS(webcloudRunId);
+  const res = await fetch(url);
+  return checkResponse(res, { url, runId: webcloudRunId, prefix: "Channels" });
 }

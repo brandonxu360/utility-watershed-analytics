@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
+import { checkResponse } from "./errors";
 import { postQuery, toFiniteNumber } from "./queryUtils";
 import type { RhessysOutputListResponse, RhessysChoroplethRow, QueryPayload } from "./types";
 
@@ -14,14 +15,11 @@ export async function fetchRhessysOutputs(
 ): Promise<RhessysOutputListResponse> {
   const url = API_ENDPOINTS.RHESSYS_OUTPUTS_LIST(runId);
   const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch RHESSys outputs (${response.status} ${response.statusText})`,
-    );
-  }
-
-  return response.json() as Promise<RhessysOutputListResponse>;
+  return checkResponse<RhessysOutputListResponse>(response, {
+    url,
+    runId,
+    prefix: "RHESSys Outputs",
+  });
 }
 
 // ── Gate Creek dynamic choropleth ───────────────────────────────────────────
@@ -137,13 +135,11 @@ export async function fetchRhessysGeometry(
   const url = API_ENDPOINTS.RHESSYS_OUTPUTS_GEOMETRY(runId, spatialScale);
 
   const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch RHESSys ${spatialScale} geometry (${response.status})`,
-    );
-  }
-
-  return response.json() as Promise<GeoJSON.FeatureCollection>;
+  return checkResponse<GeoJSON.FeatureCollection>(response, {
+    url,
+    runId,
+    prefix: `RHESSys ${spatialScale} Geometry`,
+  });
 }
 
 // ── Time series ─────────────────────────────────────────────────────────────

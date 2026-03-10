@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
+import { checkResponse } from "./errors";
 import type { RhessysSpatialListResponse } from "./types";
 
 /**
@@ -12,12 +13,9 @@ export async function fetchRhessysSpatialInputs(
 ): Promise<RhessysSpatialListResponse> {
   const url = API_ENDPOINTS.RHESSYS_SPATIAL_LIST(runId);
   const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch RHESSys spatial inputs (${response.status} ${response.statusText})`,
-    );
-  }
-
-  return response.json() as Promise<RhessysSpatialListResponse>;
+  return checkResponse<RhessysSpatialListResponse>(response, {
+    url,
+    runId,
+    prefix: "RHESSys Spatial Inputs",
+  });
 }
