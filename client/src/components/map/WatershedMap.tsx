@@ -111,7 +111,6 @@ export default function WatershedMap(): JSX.Element {
     geometry: rhessysChoroplethGeometry,
     getStyle: getRhessysChoroplethStyle,
     spatialScale: rhessysChoroplethScale,
-    range: rhessysChoroplethRange,
     styleKey: rhessysChoroplethStyleKey,
   } = useRhessysChoropleth();
 
@@ -120,19 +119,9 @@ export default function WatershedMap(): JSX.Element {
   const rhessysOutputsScenario = rhessysOutputsParams.scenario;
   const rhessysOutputsVariable = rhessysOutputsParams.variable;
 
-  const {
-    scenarios: outputScenarios,
-    variables: outputVariables,
-    valueRanges: outputValueRanges,
-  } = useRhessysOutputs(runId, { reportLayerState: false });
+  useRhessysOutputs(runId);
 
-  const choroplethLegendProps = useChoroplethLegend({
-    outputScenarios,
-    outputVariables,
-    outputValueRanges,
-    rhessysChoroplethActive,
-    rhessysChoroplethRange,
-  });
+  const choroplethLegendProps = useChoroplethLegend();
 
   const scenarioEffective = isEffective("scenario");
   const subcatchmentEffective = isEffective("subcatchment");

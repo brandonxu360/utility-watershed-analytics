@@ -4,29 +4,12 @@ import { useChoropleth } from "./useChoropleth";
 import { useScenarioData } from "./useScenarioData";
 import { useRhessysSpatialInputs } from "./useRhessysSpatialInputs";
 import { useLanduseData } from "./useLanduseData";
+import { useRhessysOutputsData } from "./useRhessysOutputsData";
+import { useRhessysChoroplethData } from "./useRhessysChoroplethData";
 import { getLayerParams } from "../layers/types";
 import { useParams } from "@tanstack/react-router";
 import type { ChoroplethLegendProps } from "../components/map/controls/ChoroplethLegend";
 import { GATE_CREEK_VARIABLES } from "../api/rhessysOutputsApi";
-import type {
-  RhessysOutputScenario,
-  RhessysOutputVariable,
-  RhessysOutputValueRange,
-} from "../api/types";
-
-/**
- * State that the caller (WatershedMap) already holds from hooks it has
- * called.  Accepting these as params avoids duplicate hook invocations
- * (and therefore duplicate React Query subscriptions, dataMap builds,
- * and colormap allocations).
- */
-export interface ChoroplethLegendExternalState {
-  outputScenarios: RhessysOutputScenario[];
-  outputVariables: RhessysOutputVariable[];
-  outputValueRanges: Record<string, Record<string, RhessysOutputValueRange>>;
-  rhessysChoroplethActive: boolean;
-  rhessysChoroplethRange: { min: number; max: number } | null;
-}
 
 /**
  * Derives the single choropleth legend to display on the map.
@@ -35,10 +18,13 @@ export interface ChoroplethLegendExternalState {
  * exclusive `coverageStyle` group, at most one is active at any time.
  * This hook checks each in priority order and returns the props for
  * `<ChoroplethLegend>`, or `null` when no legend should be shown.
+ *
+ * Data is sourced from the same hooks that WatershedMap uses.
+ * React Query deduplicates the underlying network requests, and
+ * `useRhessysOutputsData` (the data-only variant) avoids duplicate
+ * layer-system side-effects.
  */
-export function useChoroplethLegend(
-  external: ChoroplethLegendExternalState,
-): ChoroplethLegendProps | null {
+export function useChoroplethLegend(): ChoroplethLegendProps | null {
   const { isEffective, layerDesired } = useWatershed();
 
   const runId =
@@ -76,16 +62,15 @@ export function useChoroplethLegend(
     [rhessysSpatialFiles, rhessysSpatialParams.filename],
   );
 
-  // RHESSys outputs — use caller-provided data to avoid duplicate hooks
+  // RHESSys outputs — data-only hook (no layer reporting side-effects)
   const rhessysOutputsEffective = isEffective("rhessysOutputs");
   const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
-  const {
-    outputScenarios,
-    outputVariables,
-    outputValueRanges,
-    rhessysChoroplethActive,
-    rhessysChoroplethRange,
-  } = external;
+  const { scenarios: outputScenarios, variables: outputVariables, valueRanges: outputValueRanges } =
+    useRhessysOutputsData(runId);
+
+  // RHESSys dynamic choropleth — data-only hook avoids heavy derivations
+  const { isActive: rhessysChoroplethActive, range: rhessysChoroplethRange } =
+    useRhessysChoroplethData();
 
   const selectedOutputScenario = useMemo(
     () => outputScenarios.find((s) => s.id === rhessysOutputsParams.scenario),

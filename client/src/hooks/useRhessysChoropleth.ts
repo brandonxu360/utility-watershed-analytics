@@ -1,26 +1,21 @@
 /**
- * useRhessysChoropleth — fetches aggregated RHESSys output data from the
- * WEPPcloud Query Engine and builds a spatial-ID → colour lookup for
- * Gate Creek dynamic choropleths.
+ * useRhessysChoropleth — thin wrapper around useRhessysChoroplethData
+ * that adds the heavy derivations (dataMap, getStyle, styleKey) needed
+ * for rendering the Gate Creek dynamic choropleth on the map.
  *
- * Follows the same pattern as useChoropleth.ts (RAP vegetation cover).
+ * Components that only need isActive / range (e.g. useChoroplethLegend)
+ * should import useRhessysChoroplethData directly to avoid the cost of
+ * building the Map and style callback.
  */
 
 import { useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
-import { useParams } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "../api/queryKeys";
 import { useWatershed } from "../contexts/WatershedContext";
 import { getLayerParams } from "../layers/types";
-import {
-  fetchRhessysChoropleth,
-  fetchRhessysGeometry,
-} from "../api/rhessysOutputsApi";
+import { useRhessysChoroplethData } from "./useRhessysChoroplethData";
 import {
   createColormap,
   normalizeValue,
-  computeRobustRange,
   type ColorArray,
 } from "../utils/colormap";
 
@@ -37,70 +32,22 @@ function getViridisColormap(): ColorArray {
 }
 
 export function useRhessysChoropleth() {
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const { isActive, isLoading, rawData, geometry, range, spatialScale } =
+    useRhessysChoroplethData();
 
-  const { layerDesired, isEffective } = useWatershed();
+  const { layerDesired } = useWatershed();
   const params = getLayerParams(layerDesired, "rhessysOutputs");
-  const isActive =
-    isEffective("rhessysOutputs") && params.mode === "choropleth";
-
   const scenario = params.scenario;
   const variable = params.variable;
-  const spatialScale = params.spatialScale ?? "hillslope";
   const year = params.year;
 
-  const shouldQuery = isActive && !!runId && !!scenario && !!variable && !!year;
-
-  const { data: rawData, isLoading: dataLoading } = useQuery({
-    queryKey: queryKeys.rhessysChoropleth.byParams(
-      runId ?? "",
-      scenario!,
-      variable!,
-      spatialScale,
-      year!,
-    ),
-    queryFn: ({ signal }) =>
-      fetchRhessysChoropleth({
-        runId: runId!,  // guaranteed non-null by shouldQuery
-        scenario: scenario!,
-        variable: variable!,
-        spatialScale,
-        year: year!,
-        signal,
-      }),
-    enabled: shouldQuery,
-  });
-
-  const { data: geometry, isLoading: geomLoading } = useQuery({
-    queryKey: queryKeys.rhessysGeometry.byScale(runId ?? "", spatialScale),
-    queryFn: ({ signal }) => fetchRhessysGeometry(runId!, spatialScale, signal),
-    enabled: isActive && !!runId,
-  });
-
-  const isLoading = dataLoading || geomLoading;
-
-  const { dataMap, range } = useMemo(() => {
-    if (!rawData || rawData.length === 0) {
-      return { dataMap: null, range: null };
-    }
-
+  const dataMap = useMemo(() => {
+    if (!rawData || rawData.length === 0) return null;
     const map = new Map<number, number>();
-    const values: number[] = [];
-
     for (const row of rawData) {
       map.set(row.spatialId, row.value);
-      values.push(row.value);
     }
-
-    return {
-      dataMap: map,
-      range: computeRobustRange(values, 0.0, 1.0),
-    };
+    return map;
   }, [rawData]);
 
   const getStyle = useCallback(
