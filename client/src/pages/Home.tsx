@@ -1,5 +1,5 @@
-import { useParams } from "@tanstack/react-router";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
+import { useRunId } from "../hooks/useRunId";
 import { tss } from "../utils/tss";
 import { WatershedProvider, useWatershed } from "../contexts/WatershedContext";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
@@ -51,12 +51,7 @@ const useStyles = tss.create(({ theme }) => ({
 export default function Home(): JSX.Element {
   const { classes } = useStyles();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const isSmallScreen = useIsSmallScreen();
 

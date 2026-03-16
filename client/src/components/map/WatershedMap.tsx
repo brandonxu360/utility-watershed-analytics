@@ -3,7 +3,8 @@ import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { useRunId } from "../../hooks/useRunId";
 import { MapEffect, getSavedMapView } from "../../utils/map/MapEffectUtil";
 import { fetchWatersheds } from "../../api/api";
 import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
@@ -79,12 +80,7 @@ export default function WatershedMap(): JSX.Element {
   const navigate = useNavigate();
   const savedView = getSavedMapView();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const { classes, cx } = useStyles();
 

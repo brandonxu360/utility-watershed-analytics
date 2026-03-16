@@ -1,5 +1,5 @@
 import { ChangeEvent } from "react";
-import { useParams } from "@tanstack/react-router";
+import { useRunId } from "../../../hooks/useRunId";
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { useLayerToggle } from "../../../hooks/useLayerToggle";
 import { useScenariosSummary } from "../../../hooks/useScenariosSummary";
@@ -100,12 +100,7 @@ export default function WeppSection() {
   const { classes } = useStyles();
   const toggle = useLayerToggle();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const {
     layerDesired,

@@ -1,8 +1,8 @@
 import { useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
-import { useParams } from "@tanstack/react-router";
 import { PathOptions } from "leaflet";
+import { useRunId } from "./useRunId";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
 import { getLayerParams } from "../layers/types";
@@ -33,12 +33,7 @@ export interface UseScenarioDataResult {
  * Hook to fetch scenario WEPP loss data.
  */
 export function useScenarioData(): UseScenarioDataResult {
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const { layerDesired, isEffective } = useWatershed();
   const params = getLayerParams(layerDesired, "scenario");

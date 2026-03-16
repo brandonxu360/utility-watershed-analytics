@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from "react";
-import { useParams } from "@tanstack/react-router";
 import Typography from "@mui/material/Typography";
+import { useRunId } from "../../hooks/useRunId";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiSelect, { type SelectChangeEvent } from "@mui/material/Select";
@@ -81,12 +81,7 @@ export const RhessysTimeSeries: React.FC = () => {
   const { dispatchLayerAction, layerDesired, enableLayerWithParams } =
     useWatershed();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
   const params = getLayerParams(layerDesired, "rhessysOutputs");
 
   const spatialScale = params.spatialScale ?? "hillslope";

@@ -11,8 +11,8 @@
  */
 
 import { useMemo } from "react";
-import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useRunId } from "./useRunId";
 import { queryKeys } from "../api/queryKeys";
 import { useWatershed } from "../contexts/WatershedContext";
 import { getLayerParams } from "../layers/types";
@@ -23,12 +23,7 @@ import {
 import { computeRobustRange } from "../utils/colormap";
 
 export function useRhessysChoroplethData() {
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const { layerDesired, isEffective } = useWatershed();
   const params = getLayerParams(layerDesired, "rhessysOutputs");

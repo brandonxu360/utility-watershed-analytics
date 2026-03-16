@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { useParams, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { useRunId } from "../../hooks/useRunId";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import { fetchWatersheds } from "../../api/api";
@@ -163,12 +164,7 @@ export default function WatershedOverview() {
   const { classes: accordionClasses } = useSidePanelAccordionStyles();
   const navigate = useNavigate();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const {
     data: watersheds,

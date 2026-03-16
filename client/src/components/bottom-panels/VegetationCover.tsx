@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
-import { useParams } from "@tanstack/react-router";
+import { useRunId } from "../../hooks/useRunId";
 import { CoverageLineChart } from "../CoverageLineChart";
 
 import {
@@ -102,12 +102,7 @@ export const VegetationCover: React.FC = () => {
   const vegOption =
     VEGETATION_OPTIONS.find((o) => o.value === bands) ?? VEGETATION_OPTIONS[0];
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const years = useMemo(
     () =>

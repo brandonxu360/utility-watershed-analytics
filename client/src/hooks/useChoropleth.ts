@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
-import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useRunId } from "./useRunId";
 import { queryKeys } from "../api/queryKeys";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
@@ -56,12 +56,7 @@ interface UseChoroplethResult {
 }
 
 export function useChoropleth(): UseChoroplethResult {
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   // Read control fields from the layer desired-state
   const { layerDesired } = useWatershed();

@@ -11,7 +11,7 @@ import RhessysSection from "./sections/RhessysSection";
 import RhessysOutputsSection from "./sections/RhessysOutputsSection";
 import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
 import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
-import { useParams } from "@tanstack/react-router";
+import { useRunId } from "../../hooks/useRunId";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
@@ -32,12 +32,7 @@ export default function DataLayers() {
   const { classes } = useStyles();
   const { classes: accordionClasses } = useSidePanelAccordionStyles();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const { files, isLoading } = useRhessysSpatialInputs(runId);
   const {

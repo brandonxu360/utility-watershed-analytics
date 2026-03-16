@@ -7,7 +7,7 @@ import { useLanduseData } from "./useLanduseData";
 import { useRhessysOutputsData } from "./useRhessysOutputsData";
 import { useRhessysChoroplethData } from "./useRhessysChoroplethData";
 import { getLayerParams } from "../layers/types";
-import { useParams } from "@tanstack/react-router";
+import { useRunId } from "./useRunId";
 import type { ChoroplethLegendProps } from "../components/map/controls/ChoroplethLegend";
 import { GATE_CREEK_VARIABLES } from "../api/rhessysOutputsApi";
 
@@ -27,12 +27,7 @@ import { GATE_CREEK_VARIABLES } from "../api/rhessysOutputsApi";
 export function useChoroplethLegend(): ChoroplethLegendProps | null {
   const { isEffective, layerDesired } = useWatershed();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   // Vegetation cover choropleth
   const {

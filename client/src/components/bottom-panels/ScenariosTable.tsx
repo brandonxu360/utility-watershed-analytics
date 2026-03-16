@@ -1,4 +1,4 @@
-import { useParams } from "@tanstack/react-router";
+import { useRunId } from "../../hooks/useRunId";
 
 import { type ScenarioSummaryRow } from "../../api/scenarioApi";
 import { useScenariosSummary } from "../../hooks/useScenariosSummary";
@@ -73,12 +73,7 @@ function formatValue(val: number | null): string {
 
 export function ScenariosTable() {
   const { classes } = useStyles();
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const { data, isLoading, isError, error } = useScenariosSummary(runId);
 
