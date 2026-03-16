@@ -11,7 +11,7 @@
  */
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useRunId } from "./useRunId";
 import { queryKeys } from "../api/queryKeys";
 import { useWatershed } from "../contexts/WatershedContext";
@@ -55,12 +55,14 @@ export function useRhessysChoroplethData() {
         signal,
       }),
     enabled: shouldQuery,
+    placeholderData: keepPreviousData,
   });
 
   const { data: geometry, isLoading: geomLoading } = useQuery({
     queryKey: queryKeys.rhessysGeometry.byScale(runId ?? "", spatialScale),
     queryFn: ({ signal }) => fetchRhessysGeometry(runId!, spatialScale, signal),
     enabled: isActive && !!runId,
+    placeholderData: keepPreviousData,
   });
 
   const isLoading = dataLoading || geomLoading;
