@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import type { PathOptions } from "leaflet";
@@ -39,39 +39,40 @@ export default function RhessysChoroplethLayer({
   getStyleRef.current = getStyle;
   opacityRef.current = opacity;
 
+  // Stable style-applier: reads from refs so it never goes stale.
+  const applyStyle = useCallback(
+    (feature: GeoJSON.Feature | undefined): PathOptions => {
+      const spatialId = feature?.properties?.DN as number | undefined;
+      const base = getStyleRef.current(spatialId);
+      return {
+        ...base,
+        fillOpacity: (base.fillOpacity ?? 0.85) * opacityRef.current,
+      };
+    },
+    [],
+  );
+
   // Create / replace the Leaflet layer only when geometry changes.
+  // `spatialScale` is included because a scale change means new geometry
+  // features (hillslope vs patch polygons), so the layer must be rebuilt.
   useEffect(() => {
     const layer = L.geoJSON(geometry);
     layer.addTo(map);
     layerRef.current = layer;
 
-    layer.setStyle((feature: GeoJSON.Feature | undefined) => {
-      const spatialId = feature?.properties?.DN as number | undefined;
-      const base = getStyleRef.current(spatialId);
-      return {
-        ...base,
-        fillOpacity: (base.fillOpacity ?? 0.85) * opacityRef.current,
-      };
-    });
+    layer.setStyle(applyStyle);
 
     return () => {
       map.removeLayer(layer);
       layerRef.current = null;
     };
-  }, [map, geometry, spatialScale]);
+  }, [map, geometry, spatialScale, applyStyle]);
 
   // Re-style in-place when style inputs change — no DOM churn.
   useEffect(() => {
     if (!layerRef.current) return;
-    layerRef.current.setStyle((feature: GeoJSON.Feature | undefined) => {
-      const spatialId = feature?.properties?.DN as number | undefined;
-      const base = getStyleRef.current(spatialId);
-      return {
-        ...base,
-        fillOpacity: (base.fillOpacity ?? 0.85) * opacityRef.current,
-      };
-    });
-  }, [styleKey, opacity]);
+    layerRef.current.setStyle(applyStyle);
+  }, [styleKey, opacity, applyStyle]);
 
   return null;
 }
