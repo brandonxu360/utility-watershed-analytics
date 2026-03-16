@@ -34,7 +34,6 @@ import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
 import ChoroplethLegend from "./controls/ChoroplethLegend";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import { buildHillslopeTooltip } from "../../utils/tooltipContent";
-import type { SbsColorMode } from "../../api/types";
 import { useChoroplethLegend } from "../../hooks/useChoroplethLegend";
 import { getLayerParams } from "../../layers/types";
 import "leaflet/dist/leaflet.css";
@@ -124,8 +123,7 @@ export default function WatershedMap(): JSX.Element {
   const channelsEffective = isEffective("channels");
   const landuseEffective = isEffective("landuse");
   const sbsEffective = isEffective("sbs");
-  const sbsColorMode =
-    (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
+  const sbsColorMode = getLayerParams(layerDesired, "sbs").mode ?? "legacy";
 
   const rhessysSpatialEffective = isEffective("rhessysSpatial");
   const rhessysSpatialParams = getLayerParams(layerDesired, "rhessysSpatial");
@@ -146,8 +144,8 @@ export default function WatershedMap(): JSX.Element {
 
   // Simple key that changes when any coverage styling input changes,
   // forcing SubcatchmentLayer to re-apply styles.
-  const { metric, year, bands } = layerDesired.choropleth.params;
-  const { scenario, variable } = layerDesired.scenario.params;
+  const { metric, year, bands } = getLayerParams(layerDesired, "choropleth");
+  const { scenario, variable } = getLayerParams(layerDesired, "scenario");
   const coverageKey = `${choroplethActive}|${metric}|${year}|${bands}|${scenarioEffective}|${hasScenarioData}|${scenario}|${variable}|${landuseEffective}|${!!landuseData}`;
 
   /* Navigates to a watershed on click */
@@ -394,7 +392,7 @@ export default function WatershedMap(): JSX.Element {
           runId &&
           rhessysOutputsScenario &&
           rhessysOutputsVariable &&
-          layerDesired.rhessysOutputs.params.mode !== "choropleth" && (
+          rhessysOutputsParams.mode !== "choropleth" && (
             <RhessysOutputLayer
               runId={runId}
               scenario={rhessysOutputsScenario}
