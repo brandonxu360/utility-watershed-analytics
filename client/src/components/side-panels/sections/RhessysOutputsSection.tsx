@@ -8,7 +8,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { useWatershed } from "../../../contexts/WatershedContext";
-import { getLayerParams } from "../../../layers/types";
+import { getLayerParams, type RhessysOutputParams } from "../../../layers/types";
 import { tss } from "../../../utils/tss";
 import type {
   RhessysOutputScenario,
@@ -121,48 +121,61 @@ export default function RhessysOutputsSection({
     [selectedSpatialScale],
   );
 
+  // Shared param-update helper
+
+  const currentParams = useMemo(
+    () => ({
+      scenario: selectedScenario || null,
+      variable: selectedVariable || null,
+      mode: selectedMode,
+      spatialScale: selectedSpatialScale,
+      year: selectedYear,
+    }),
+    [
+      selectedScenario,
+      selectedVariable,
+      selectedMode,
+      selectedSpatialScale,
+      selectedYear,
+    ],
+  );
+
+  const updateParams = useCallback(
+    (overrides: Partial<RhessysOutputParams>) => {
+      enableLayerWithParams("rhessysOutputs", {
+        ...currentParams,
+        ...overrides,
+      });
+    },
+    [enableLayerWithParams, currentParams],
+  );
+
+  const turnOff = useCallback(() => {
+    dispatchLayerAction({ type: "TOGGLE", id: "rhessysOutputs", on: false });
+  }, [dispatchLayerAction]);
+
   // ── Pre-computed map handlers ──
 
   const handleScenarioChange = useCallback(
     (event: SelectChangeEvent) => {
       const value = event.target.value;
-      if (value === "none") {
-        dispatchLayerAction({
-          type: "TOGGLE",
-          id: "rhessysOutputs",
-          on: false,
-        });
-      } else {
-        const variable = selectedVariable || variables[0]?.id || null;
-        enableLayerWithParams("rhessysOutputs", {
-          scenario: value,
-          variable,
-          mode: "raster",
-          spatialScale: null,
-          year: null,
-        });
-      }
+      if (value === "none") return turnOff();
+      updateParams({
+        scenario: value,
+        variable: selectedVariable || variables[0]?.id || null,
+        mode: "raster",
+        spatialScale: null,
+        year: null,
+      });
     },
-    [enableLayerWithParams, dispatchLayerAction, selectedVariable, variables],
+    [updateParams, turnOff, selectedVariable, variables],
   );
 
   const handleVariableChange = useCallback(
     (event: SelectChangeEvent) => {
-      enableLayerWithParams("rhessysOutputs", {
-        scenario: selectedScenario || null,
-        variable: event.target.value,
-        spatialScale: selectedSpatialScale,
-        year: selectedYear,
-        mode: selectedMode,
-      });
+      updateParams({ variable: event.target.value });
     },
-    [
-      enableLayerWithParams,
-      selectedScenario,
-      selectedSpatialScale,
-      selectedYear,
-      selectedMode,
-    ],
+    [updateParams],
   );
 
   // ── Dynamic choropleth handlers ──
@@ -174,81 +187,41 @@ export default function RhessysOutputsSection({
     ) => {
       if (!newScale) return;
       const vars = GATE_CREEK_VARIABLES[newScale];
-      const variable = vars[0]?.id ?? null;
-      enableLayerWithParams("rhessysOutputs", {
+      updateParams({
         scenario: selectedScenario || GATE_CREEK_SCENARIOS[0].id,
-        variable,
+        variable: vars[0]?.id ?? null,
         mode: "choropleth",
         spatialScale: newScale,
-        year: selectedYear,
       });
     },
-    [enableLayerWithParams, selectedScenario, selectedYear],
+    [updateParams, selectedScenario],
   );
 
   const handleChoroplethScenarioChange = useCallback(
     (event: SelectChangeEvent) => {
       const value = event.target.value;
-      if (value === "none") {
-        dispatchLayerAction({
-          type: "TOGGLE",
-          id: "rhessysOutputs",
-          on: false,
-        });
-      } else {
-        enableLayerWithParams("rhessysOutputs", {
-          scenario: value,
-          variable: selectedVariable || choroplethVariables[0]?.id || null,
-          mode: "choropleth",
-          spatialScale: selectedSpatialScale,
-          year: selectedYear,
-        });
-      }
+      if (value === "none") return turnOff();
+      updateParams({
+        scenario: value,
+        variable: selectedVariable || choroplethVariables[0]?.id || null,
+        mode: "choropleth",
+      });
     },
-    [
-      enableLayerWithParams,
-      dispatchLayerAction,
-      selectedVariable,
-      selectedSpatialScale,
-      selectedYear,
-      choroplethVariables,
-    ],
+    [updateParams, turnOff, selectedVariable, choroplethVariables],
   );
 
   const handleChoroplethVariableChange = useCallback(
     (event: SelectChangeEvent) => {
-      enableLayerWithParams("rhessysOutputs", {
-        scenario: selectedScenario || null,
-        variable: event.target.value,
-        mode: "choropleth",
-        spatialScale: selectedSpatialScale,
-        year: selectedYear,
-      });
+      updateParams({ variable: event.target.value, mode: "choropleth" });
     },
-    [
-      enableLayerWithParams,
-      selectedScenario,
-      selectedSpatialScale,
-      selectedYear,
-    ],
+    [updateParams],
   );
 
   const handleYearChange = useCallback(
     (event: SelectChangeEvent) => {
-      enableLayerWithParams("rhessysOutputs", {
-        scenario: selectedScenario || null,
-        variable: selectedVariable || null,
-        year: Number(event.target.value),
-        mode: "choropleth",
-        spatialScale: selectedSpatialScale,
-      });
+      updateParams({ year: Number(event.target.value), mode: "choropleth" });
     },
-    [
-      enableLayerWithParams,
-      selectedScenario,
-      selectedVariable,
-      selectedSpatialScale,
-    ],
+    [updateParams],
   );
 
   if (isLoading) {
