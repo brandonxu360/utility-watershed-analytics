@@ -17,6 +17,7 @@ import type {
 import {
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_VARIABLES,
+  GATE_CREEK_YEAR_RANGE,
 } from "../../../api/rhessysOutputsApi";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -328,7 +329,10 @@ export default function RhessysOutputsSection({
   }
 
   // Dynamic choropleth (Gate Creek)
-  const years = Array.from({ length: 2024 - 1985 + 1 }, (_, i) => 1985 + i);
+  const years = Array.from(
+    { length: GATE_CREEK_YEAR_RANGE.max - GATE_CREEK_YEAR_RANGE.min + 1 },
+    (_, i) => GATE_CREEK_YEAR_RANGE.min + i,
+  );
 
   return (
     <>

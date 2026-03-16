@@ -56,6 +56,8 @@ const SPATIAL_ID_COLUMN: Record<SpatialScale, string> = {
 /**
  * Gate Creek scenario metadata for the UI.
  */
+export const GATE_CREEK_YEAR_RANGE = { min: 1985, max: 2024 } as const;
+
 export const GATE_CREEK_SCENARIOS = [
   { id: "S1", label: "S1 \u2013 Pre-fire Baseline" },
   { id: "S2", label: "S2 \u2013 Post-fire Land Cover" },
