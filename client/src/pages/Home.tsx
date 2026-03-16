@@ -5,7 +5,7 @@ import { WatershedProvider, useWatershed } from "../contexts/WatershedContext";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import { ScenariosTable } from "../components/bottom-panels/ScenariosTable";
 import { RhessysTimeSeries } from "../components/bottom-panels/RhessysTimeSeries";
-import { CHOROPLETH_RUN_IDS } from "../api/rhessysOutputsApi";
+import { useRhessysOutputsData } from "../hooks/useRhessysOutputsData";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
@@ -89,6 +89,7 @@ function ActiveBottomPanel({
   runId: string | null;
 }): JSX.Element | null {
   const { isEffective } = useWatershed();
+  const { hasChoroplethData } = useRhessysOutputsData(runId);
 
   if (isEffective("choropleth")) {
     return (
@@ -98,7 +99,7 @@ function ActiveBottomPanel({
     );
   }
 
-  if (isEffective("rhessysOutputs") && CHOROPLETH_RUN_IDS.has(runId ?? "")) {
+  if (isEffective("rhessysOutputs") && hasChoroplethData) {
     return (
       <BottomPanel isOpen>
         <RhessysTimeSeries />

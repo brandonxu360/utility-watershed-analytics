@@ -11,7 +11,6 @@ import RhessysSection from "./sections/RhessysSection";
 import RhessysOutputsSection from "./sections/RhessysOutputsSection";
 import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
 import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
-import { CHOROPLETH_RUN_IDS } from "../../api/rhessysOutputsApi";
 import { useParams } from "@tanstack/react-router";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -45,6 +44,7 @@ export default function DataLayers() {
     scenarios: outputScenarios,
     variables: outputVariables,
     isLoading: outputsLoading,
+    hasChoroplethData,
   } = useRhessysOutputs(runId);
 
   return (
@@ -119,7 +119,7 @@ export default function DataLayers() {
               scenarios={outputScenarios}
               variables={outputVariables}
               isLoading={outputsLoading}
-              hasChoroplethData={CHOROPLETH_RUN_IDS.has(runId ?? "")}
+              hasChoroplethData={hasChoroplethData}
             />
           </AccordionDetails>
         </Accordion>
