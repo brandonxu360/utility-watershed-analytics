@@ -13,9 +13,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
 
-import {
-  fetchRhessysOutputs,
-} from "../api/rhessysOutputsApi";
+import { fetchRhessysOutputs } from "../api/rhessysOutputsApi";
 
 import type {
   RhessysOutputScenario,

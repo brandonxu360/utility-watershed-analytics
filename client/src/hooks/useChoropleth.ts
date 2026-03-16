@@ -95,11 +95,14 @@ export function useChoropleth(): UseChoroplethResult {
       effectiveBands,
     ),
     queryFn: ({ signal }) =>
-      fetchRapChoropleth({
-        runId: runId!,  // guaranteed non-null by enabled
-        band: effectiveBands,
-        year: choroplethYear,
-      }, signal),
+      fetchRapChoropleth(
+        {
+          runId: runId!, // guaranteed non-null by enabled
+          band: effectiveBands,
+          year: choroplethYear,
+        },
+        signal,
+      ),
     enabled: isEnabled,
   });
 

@@ -44,7 +44,12 @@ export async function fetchScenarioData(
     payload.scenario = scenario;
   }
 
-  const rows = await postQuery(runId, payload, `Scenario (${scenario})`, signal);
+  const rows = await postQuery(
+    runId,
+    payload,
+    `Scenario (${scenario})`,
+    signal,
+  );
 
   return rows.map((r) => {
     const row = r as Record<string, unknown>;

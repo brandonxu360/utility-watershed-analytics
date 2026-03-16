@@ -10,7 +10,10 @@ import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
 import { useRhessysTimeSeries } from "../../hooks/useRhessysTimeSeries";
 import { CoverageLineChart } from "../CoverageLineChart";
-import { GATE_CREEK_SCENARIOS, GATE_CREEK_VARIABLES } from "../../api/rhessysConstants";
+import {
+  GATE_CREEK_SCENARIOS,
+  GATE_CREEK_VARIABLES,
+} from "../../api/rhessysConstants";
 
 type VariableMeta = { id: string; label: string; units: string };
 

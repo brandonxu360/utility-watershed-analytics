@@ -7,15 +7,18 @@ export class ApiError extends Error {
   prefix?: string;
   original?: unknown;
 
-  constructor(message: string, opts: {
-    status: number;
-    statusText?: string;
-    body?: unknown;
-    url?: string;
-    runId?: string;
-    prefix?: string;
-    original?: unknown;
-  }) {
+  constructor(
+    message: string,
+    opts: {
+      status: number;
+      statusText?: string;
+      body?: unknown;
+      url?: string;
+      runId?: string;
+      prefix?: string;
+      original?: unknown;
+    },
+  ) {
     super(message, opts.original ? { cause: opts.original } : undefined);
     this.name = "ApiError";
     this.status = opts.status;

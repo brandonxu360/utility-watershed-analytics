@@ -16,7 +16,9 @@ import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 export async function fetchWatersheds() {
   const url = API_ENDPOINTS.WATERSHEDS;
   const res = await fetch(url);
-  return checkResponse<GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>>(res, { url, prefix: "Watersheds" });
+  return checkResponse<
+    GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>
+  >(res, { url, prefix: "Watersheds" });
 }
 
 /**
@@ -34,7 +36,11 @@ export async function fetchWatersheds() {
 export async function fetchWatershed(id: string) {
   const url = API_ENDPOINTS.WATERSHED(id);
   const res = await fetch(url);
-  return checkResponse<GeoJSON.Feature>(res, { url, runId: id, prefix: "Watershed" });
+  return checkResponse<GeoJSON.Feature>(res, {
+    url,
+    runId: id,
+    prefix: "Watershed",
+  });
 }
 
 /**
@@ -48,10 +54,15 @@ export async function fetchWatershed(id: string) {
  *   `/watershed/:id/subcatchments` endpoint.
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
-export async function fetchSubcatchments(webcloudRunId: string, opts?: { signal?: AbortSignal }) {
+export async function fetchSubcatchments(
+  webcloudRunId: string,
+  opts?: { signal?: AbortSignal },
+) {
   const url = API_ENDPOINTS.SUBCATCHMENTS(webcloudRunId);
   const res = await fetch(url, { signal: opts?.signal });
-  return checkResponse<GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>>(res, { url, runId: webcloudRunId, prefix: "Subcatchments" });
+  return checkResponse<
+    GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>
+  >(res, { url, runId: webcloudRunId, prefix: "Subcatchments" });
 }
 
 /**
@@ -65,8 +76,15 @@ export async function fetchSubcatchments(webcloudRunId: string, opts?: { signal?
  *   `/watershed/:id/channels` endpoint.
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
-export async function fetchChannels(webcloudRunId: string, opts?: { signal?: AbortSignal }) {
+export async function fetchChannels(
+  webcloudRunId: string,
+  opts?: { signal?: AbortSignal },
+) {
   const url = API_ENDPOINTS.CHANNELS(webcloudRunId);
   const res = await fetch(url, { signal: opts?.signal });
-  return checkResponse<GeoJSON.FeatureCollection>(res, { url, runId: webcloudRunId, prefix: "Channels" });
+  return checkResponse<GeoJSON.FeatureCollection>(res, {
+    url,
+    runId: webcloudRunId,
+    prefix: "Channels",
+  });
 }

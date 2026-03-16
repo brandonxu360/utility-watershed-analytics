@@ -21,10 +21,7 @@ export const CHOROPLETH_RUN_IDS: ReadonlySet<string> = new Set([
 
 // ── Parquet dataset paths ───────────────────────────────────────────────────
 
-export const PARQUET_PATHS: Record<
-  string,
-  Record<SpatialScale, string>
-> = {
+export const PARQUET_PATHS: Record<string, Record<SpatialScale, string>> = {
   S1: {
     hillslope: "rhessys/scenarios/S1/hillslope.daily.parquet",
     patch: "rhessys/scenarios/S1/patch.yearly.parquet",

@@ -43,7 +43,10 @@ export function useScenarioData(): UseScenarioDataResult {
   const scenarioEnabled = layerDesired.scenario.enabled;
 
   const { data, isLoading } = useQuery({
-    queryKey: queryKeys.scenarioData.byScenario(runId ?? "", selectedScenario ?? ""),
+    queryKey: queryKeys.scenarioData.byScenario(
+      runId ?? "",
+      selectedScenario ?? "",
+    ),
     queryFn: ({ signal }) =>
       fetchScenarioData({ runId: runId!, scenario: selectedScenario! }, signal),
     enabled: !!runId && !!selectedScenario && scenarioEnabled,
@@ -64,7 +67,10 @@ export function useScenarioData(): UseScenarioDataResult {
     enabled: scenarioEnabled,
     isLoading,
     hasData,
-    queryKey: queryKeys.scenarioData.byScenario(runId ?? "", selectedScenario ?? ""),
+    queryKey: queryKeys.scenarioData.byScenario(
+      runId ?? "",
+      selectedScenario ?? "",
+    ),
   });
 
   const range = useMemo(() => {

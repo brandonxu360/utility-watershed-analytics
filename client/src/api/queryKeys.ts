@@ -75,12 +75,6 @@ export const queryKeys = {
       variable: string,
       spatialScale: string,
     ) =>
-      [
-        "rhessys-timeseries",
-        runId,
-        scenario,
-        variable,
-        spatialScale,
-      ] as const,
+      ["rhessys-timeseries", runId, scenario, variable, spatialScale] as const,
   },
 } as const;

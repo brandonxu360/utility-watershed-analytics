@@ -8,7 +8,12 @@ import {
   BASIN_DAILY_PATHS,
 } from "./rhessysConstants";
 
-import type { RhessysOutputListResponse, RhessysChoroplethRow, QueryPayload, SpatialScale } from "./types";
+import type {
+  RhessysOutputListResponse,
+  RhessysChoroplethRow,
+  QueryPayload,
+  SpatialScale,
+} from "./types";
 
 /**
  * Fetch the list of available RHESSys output map scenarios and variables.
@@ -178,7 +183,12 @@ async function fetchPatchTimeSeries(
     order_by: [`${alias}.year`],
   };
 
-  const rawRows = await postQuery(runId, payload, "RHESSys Patch TimeSeries", signal);
+  const rawRows = await postQuery(
+    runId,
+    payload,
+    "RHESSys Patch TimeSeries",
+    signal,
+  );
 
   return rawRows.map((r) => {
     const row = r as Record<string, unknown>;

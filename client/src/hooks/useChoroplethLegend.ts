@@ -60,8 +60,11 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
   // RHESSys outputs — data-only hook (no layer reporting side-effects)
   const rhessysOutputsEffective = isEffective("rhessysOutputs");
   const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
-  const { scenarios: outputScenarios, variables: outputVariables, valueRanges: outputValueRanges } =
-    useRhessysOutputsData(runId);
+  const {
+    scenarios: outputScenarios,
+    variables: outputVariables,
+    valueRanges: outputValueRanges,
+  } = useRhessysOutputsData(runId);
 
   // RHESSys dynamic choropleth — data-only hook avoids heavy derivations
   const { isActive: rhessysChoroplethActive, range: rhessysChoroplethRange } =

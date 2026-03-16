@@ -25,9 +25,12 @@ describe("queryKeys", () => {
   });
 
   it("rapChoropleth.byParams includes all dimensions", () => {
-    const key = queryKeys.rapChoropleth.byParams("r1", "coverage", 2020, [
-      1, 2,
-    ]);
+    const key = queryKeys.rapChoropleth.byParams(
+      "r1",
+      "coverage",
+      2020,
+      [1, 2],
+    );
     expect(key).toEqual(["rap-choropleth", "r1", "coverage", 2020, [1, 2]]);
   });
 

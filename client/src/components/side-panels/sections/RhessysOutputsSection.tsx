@@ -3,7 +3,10 @@ import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useWatershed } from "../../../contexts/WatershedContext";
-import { getLayerParams, type RhessysOutputParams } from "../../../layers/types";
+import {
+  getLayerParams,
+  type RhessysOutputParams,
+} from "../../../layers/types";
 import { tss } from "../../../utils/tss";
 
 import type {
@@ -11,7 +14,10 @@ import type {
   RhessysOutputVariable,
 } from "../../../api/types";
 
-import { GATE_CREEK_SCENARIOS, GATE_CREEK_VARIABLES } from "../../../api/rhessysConstants";
+import {
+  GATE_CREEK_SCENARIOS,
+  GATE_CREEK_VARIABLES,
+} from "../../../api/rhessysConstants";
 import RasterModeSection from "./RasterModeSection";
 import ChoroplethModeSection from "./ChoroplethModeSection";
 
