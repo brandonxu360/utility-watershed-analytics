@@ -30,7 +30,6 @@ import RhessysSpatialLayer from "./RhessysSpatialLayer";
 import RhessysOutputLayer from "./RhessysOutputLayer";
 import RhessysChoroplethLayer from "./RhessysChoroplethLayer";
 import { useRhessysChoropleth } from "../../hooks/useRhessysChoropleth";
-import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
 import ChoroplethLegend from "./controls/ChoroplethLegend";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import { buildHillslopeTooltip } from "../../utils/tooltipContent";
@@ -113,8 +112,6 @@ export default function WatershedMap(): JSX.Element {
   const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
   const rhessysOutputsScenario = rhessysOutputsParams.scenario;
   const rhessysOutputsVariable = rhessysOutputsParams.variable;
-
-  useRhessysOutputs(runId);
 
   const choroplethLegendProps = useChoroplethLegend();
 
