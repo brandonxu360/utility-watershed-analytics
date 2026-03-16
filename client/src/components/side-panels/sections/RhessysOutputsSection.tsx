@@ -10,15 +10,13 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { getLayerParams, type RhessysOutputParams } from "../../../layers/types";
 import { tss } from "../../../utils/tss";
+
 import type {
   RhessysOutputScenario,
   RhessysOutputVariable,
 } from "../../../api/types";
-import {
-  GATE_CREEK_SCENARIOS,
-  GATE_CREEK_VARIABLES,
-  GATE_CREEK_YEAR_RANGE,
-} from "../../../api/rhessysOutputsApi";
+
+import { GATE_CREEK_SCENARIOS, GATE_CREEK_VARIABLES, GATE_CREEK_YEAR_RANGE } from "../../../api/rhessysConstants";
 
 const useStyles = tss.create(({ theme }) => ({
   select: {

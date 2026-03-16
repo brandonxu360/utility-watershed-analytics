@@ -1,6 +1,13 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
 import { postQuery, toFiniteNumber } from "./queryUtils";
+
+import {
+  PARQUET_PATHS,
+  SPATIAL_ID_COLUMN,
+  BASIN_DAILY_PATHS,
+} from "./rhessysConstants";
+
 import type { RhessysOutputListResponse, RhessysChoroplethRow, QueryPayload, SpatialScale } from "./types";
 
 /**
@@ -22,66 +29,6 @@ export async function fetchRhessysOutputs(
     prefix: "RHESSys Outputs",
   });
 }
-
-// ── Gate Creek dynamic choropleth ───────────────────────────────────────────
-
-/**
- * Run IDs whose WEPPcloud stores contain RHESSys scenario parquet files
- * suitable for the dynamic choropleth and time-series features.
- */
-export const CHOROPLETH_RUN_IDS: ReadonlySet<string> = new Set([
-  "aversive-forestry",
-]);
-
-const PARQUET_PATHS: Record<string, Record<SpatialScale, string>> = {
-  S1: {
-    hillslope: "rhessys/scenarios/S1/hillslope.daily.parquet",
-    patch: "rhessys/scenarios/S1/patch.yearly.parquet",
-  },
-  S2: {
-    hillslope: "rhessys/scenarios/S2/hillslope.daily.parquet",
-    patch: "rhessys/scenarios/S2/patch.yearly.parquet",
-  },
-  S4b: {
-    hillslope: "rhessys/scenarios/S4b/hillslope.daily.parquet",
-    patch: "rhessys/scenarios/S4b/patch.yearly.parquet",
-  },
-};
-
-const SPATIAL_ID_COLUMN: Record<SpatialScale, string> = {
-  hillslope: "hillID",
-  patch: "patchID",
-};
-
-/**
- * Gate Creek scenario metadata for the UI.
- */
-export const GATE_CREEK_YEAR_RANGE = { min: 1985, max: 2024 } as const;
-
-export const GATE_CREEK_SCENARIOS = [
-  { id: "S1", label: "S1 \u2013 Pre-fire Baseline" },
-  { id: "S2", label: "S2 \u2013 Post-fire Land Cover" },
-  { id: "S4b", label: "S4b \u2013 Post-fire Regrowth" },
-] as const;
-
-export const GATE_CREEK_VARIABLES: Record<
-  SpatialScale,
-  { id: string; label: string; units: string }[]
-> = {
-  hillslope: [
-    { id: "streamflow", label: "Streamflow", units: "mm/day" },
-    { id: "baseflow", label: "Baseflow", units: "mm/day" },
-    { id: "return", label: "Return Flow", units: "mm/day" },
-    { id: "trans", label: "Transpiration", units: "mm/day" },
-    { id: "evap", label: "Evaporation", units: "mm/day" },
-  ],
-  patch: [
-    { id: "et", label: "Evapotranspiration", units: "mm/yr" },
-    { id: "lai", label: "LAI", units: "m\u00b2/m\u00b2" },
-    { id: "plantc", label: "Plant Carbon", units: "kgC/m\u00b2" },
-    { id: "streamflow", label: "Streamflow", units: "mm/yr" },
-  ],
-};
 
 /**
  * Query the WEPPcloud Query Engine for aggregated RHESSys data by spatial unit.
@@ -145,28 +92,12 @@ export async function fetchRhessysGeometry(
   });
 }
 
-// ── Time series ─────────────────────────────────────────────────────────────
-
 export type RhessysTimeSeriesRow = {
   year: number;
   month: number;
   day: number;
   [key: string]: number;
 };
-
-const BASIN_DAILY_PATHS: Record<string, string> = {
-  S1: "rhessys/scenarios/S1/basin.daily.parquet",
-  S2: "rhessys/scenarios/S2/basin.daily.parquet",
-  S4b: "rhessys/scenarios/S4b/basin.daily.parquet",
-};
-
-export const TIME_SERIES_VARIABLES = [
-  { id: "streamflow", label: "Streamflow", units: "mm/day" },
-  { id: "baseflow", label: "Baseflow", units: "mm/day" },
-  { id: "return", label: "Return Flow", units: "mm/day" },
-  { id: "trans", label: "Transpiration", units: "mm/day" },
-  { id: "evap", label: "Evaporation", units: "mm/day" },
-] as const;
 
 /**
  * Fetch time series data from the WEPPcloud Query Engine.

@@ -15,7 +15,6 @@ import { queryKeys } from "../api/queryKeys";
 
 import {
   fetchRhessysOutputs,
-  CHOROPLETH_RUN_IDS,
 } from "../api/rhessysOutputsApi";
 
 import type {
@@ -23,6 +22,8 @@ import type {
   RhessysOutputVariable,
   RhessysOutputValueRange,
 } from "../api/types";
+
+import { CHOROPLETH_RUN_IDS } from "../api/rhessysConstants";
 
 export function useRhessysOutputsData(runId: string | null) {
   const { data, isLoading, error } = useQuery({

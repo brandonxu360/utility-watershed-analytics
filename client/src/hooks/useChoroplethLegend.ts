@@ -8,8 +8,8 @@ import { useRhessysOutputsData } from "./useRhessysOutputsData";
 import { useRhessysChoroplethData } from "./useRhessysChoroplethData";
 import { getLayerParams } from "../layers/types";
 import { useRunId } from "./useRunId";
+import { GATE_CREEK_VARIABLES } from "../api/rhessysConstants";
 import type { ChoroplethLegendProps } from "../components/map/controls/ChoroplethLegend";
-import { GATE_CREEK_VARIABLES } from "../api/rhessysOutputsApi";
 
 /**
  * Derives the single choropleth legend to display on the map.
