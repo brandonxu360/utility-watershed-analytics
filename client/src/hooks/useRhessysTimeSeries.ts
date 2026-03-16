@@ -1,11 +1,12 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
+
 import {
   fetchRhessysTimeSeries,
   type RhessysTimeSeriesRow,
 } from "../api/rhessysOutputsApi";
 
-type SpatialScale = "hillslope" | "patch";
+import type { SpatialScale } from "../api/types";
 
 type ChartPoint = { name: string; value: number };
 

@@ -1,7 +1,7 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
 import { postQuery, toFiniteNumber } from "./queryUtils";
-import type { RhessysOutputListResponse, RhessysChoroplethRow, QueryPayload } from "./types";
+import type { RhessysOutputListResponse, RhessysChoroplethRow, QueryPayload, SpatialScale } from "./types";
 
 /**
  * Fetch the list of available RHESSys output map scenarios and variables.
@@ -32,8 +32,6 @@ export async function fetchRhessysOutputs(
 export const CHOROPLETH_RUN_IDS: ReadonlySet<string> = new Set([
   "aversive-forestry",
 ]);
-
-type SpatialScale = "hillslope" | "patch";
 
 const PARQUET_PATHS: Record<string, Record<SpatialScale, string>> = {
   S1: {

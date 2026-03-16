@@ -146,6 +146,8 @@ export type RhessysChoroplethRow = {
   value: number;
 };
 
+export type SpatialScale = "hillslope" | "patch";
+
 export type FetchLanduseOptions = {
   runId: string;
   include_schema?: boolean;

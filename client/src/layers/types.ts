@@ -1,4 +1,5 @@
 import type { ScenarioType, ScenarioVariableType } from "./scenario";
+import type { SpatialScale } from "../api/types";
 
 /**
  * Core type definitions for the declarative layer system.
@@ -84,7 +85,7 @@ export interface RhessysOutputParams {
   scenario: string | null;
   variable: string | null;
   /** Gate Creek dynamic choropleth fields */
-  spatialScale: "hillslope" | "patch" | null;
+  spatialScale: SpatialScale | null;
   year: number | null;
   /** Distinguishes pre-computed raster vs dynamic vector choropleth */
   mode: "raster" | "choropleth" | null;
