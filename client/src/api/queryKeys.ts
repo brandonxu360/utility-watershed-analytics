@@ -10,18 +10,18 @@
  */
 export const queryKeys = {
   watersheds: {
-    all: ["watersheds"] as const,
+    all: ["watersheds"],
   },
   subcatchments: {
-    all: ["subcatchments"] as const,
-    byRun: (runId: string) => ["subcatchments", runId] as const,
+    all: ["subcatchments"],
+    byRun: (runId: string) => ["subcatchments", runId],
   },
   channels: {
-    all: ["channels"] as const,
-    byRun: (runId: string) => ["channels", runId] as const,
+    all: ["channels"],
+    byRun: (runId: string) => ["channels", runId],
   },
   landuse: {
-    undisturbed: (runId: string) => ["landuse-undisturbed", runId] as const,
+    undisturbed: (runId: string) => ["landuse-undisturbed", runId],
   },
   rapChoropleth: {
     byParams: (
@@ -29,23 +29,26 @@ export const queryKeys = {
       type: string,
       year: number | null | undefined,
       bands: number | number[],
-    ) => ["rap-choropleth", runId, type, year, bands] as const,
+    ) => ["rap-choropleth", runId, type, year, bands],
   },
   sbsColormap: {
-    byMode: (mode: string) => ["sbs-colormap", mode] as const,
+    byMode: (mode: string) => ["sbs-colormap", mode],
   },
   scenarioData: {
-    byScenario: (runId: string, scenario: string) =>
-      ["scenarioData", runId, scenario] as const,
+    byScenario: (runId: string, scenario: string) => [
+      "scenarioData",
+      runId,
+      scenario,
+    ],
   },
   scenariosSummary: {
-    byRun: (runId: string) => ["scenariosSummary", runId] as const,
+    byRun: (runId: string) => ["scenariosSummary", runId],
   },
   rhessysSpatialInputs: {
-    byRun: (runId: string) => ["rhessysSpatialInputs", runId] as const,
+    byRun: (runId: string) => ["rhessysSpatialInputs", runId],
   },
   rhessysOutputs: {
-    byRun: (runId: string) => ["rhessysOutputs", runId] as const,
+    byRun: (runId: string) => ["rhessysOutputs", runId],
   },
   rhessysChoropleth: {
     byParams: (
@@ -54,19 +57,14 @@ export const queryKeys = {
       variable: string,
       spatialScale: string,
       year: number,
-    ) =>
-      [
-        "rhessys-choropleth",
-        runId,
-        scenario,
-        variable,
-        spatialScale,
-        year,
-      ] as const,
+    ) => ["rhessys-choropleth", runId, scenario, variable, spatialScale, year],
   },
   rhessysGeometry: {
-    byScale: (runId: string, spatialScale: string) =>
-      ["rhessys-geometry", runId, spatialScale] as const,
+    byScale: (runId: string, spatialScale: string) => [
+      "rhessys-geometry",
+      runId,
+      spatialScale,
+    ],
   },
   rhessysTimeSeries: {
     byParams: (
@@ -74,7 +72,6 @@ export const queryKeys = {
       scenario: string,
       variable: string,
       spatialScale: string,
-    ) =>
-      ["rhessys-timeseries", runId, scenario, variable, spatialScale] as const,
+    ) => ["rhessys-timeseries", runId, scenario, variable, spatialScale],
   },
 } as const;
