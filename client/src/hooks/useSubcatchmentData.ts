@@ -33,7 +33,7 @@ export function useSubcatchmentData(
     isError: subError,
   } = useQuery({
     queryKey: queryKeys.subcatchments.byRun(runId ?? ""),
-    queryFn: ({ signal }) => fetchSubcatchments(runId!, { signal }),
+    queryFn: ({ signal }) => fetchSubcatchments(runId!, signal),
     enabled: Boolean(subcatchmentEnabled && runId),
   });
 

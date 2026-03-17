@@ -31,7 +31,7 @@ export function useChannelData(runId: string | null): UseChannelDataResult {
     isError: channelError,
   } = useQuery({
     queryKey: queryKeys.channels.byRun(runId ?? ""),
-    queryFn: ({ signal }) => fetchChannels(runId!, { signal }),
+    queryFn: ({ signal }) => fetchChannels(runId!, signal),
     enabled: Boolean(channelsEnabled && runId),
   });
 

@@ -13,7 +13,9 @@ import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
  *   `/watersheds` endpoint.
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
-export async function fetchWatersheds() {
+export async function fetchWatersheds(): Promise<
+  GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>
+> {
   const url = API_ENDPOINTS.WATERSHEDS;
   const res = await fetch(url);
   return checkResponse<
@@ -29,37 +31,49 @@ export async function fetchWatersheds() {
  * @function fetchWatershed
  * @param {string} id
  *   The unique identifier (e.g. `webcloud_run_id`) of the watershed to fetch.
- * @returns {Promise<unknown>} Resolves with the parsed JSON response from the
+ * @returns {Promise<GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>>} Resolves with the parsed JSON response from the
  *   `/watershed/:id` endpoint.
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
-export async function fetchWatershed(id: string) {
+export async function fetchWatershed(
+  id: string,
+): Promise<GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>> {
   const url = API_ENDPOINTS.WATERSHED(id);
   const res = await fetch(url);
-  return checkResponse<GeoJSON.Feature>(res, {
-    url,
-    runId: id,
-    prefix: "Watershed",
-  });
+  return checkResponse<GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>>(
+    res,
+    {
+      url,
+      runId: id,
+      prefix: "Watershed",
+    },
+  );
 }
 
 /**
  * Fetches subcatchment polygons for a given watershed.
  *
+ * Accepts a required {@link AbortSignal} so the request is automatically
+ * cancelled when the user deselects the watershed.
+ *
  * @async
  * @function fetchSubcatchments
  * @param {string} webcloudRunId
  *   The `webcloud_run_id` of the specified watershed.
- * @returns {Promise<unknown>} Resolves with the parsed JSON response from the
- *   `/watershed/:id/subcatchments` endpoint.
+ * @param {AbortSignal} signal
+ *   An {@link AbortSignal} used to cancel the in‑flight request.
+ * @returns {Promise<GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>>}
+ *   Resolves with the subcatchment feature collection.
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
 export async function fetchSubcatchments(
   webcloudRunId: string,
-  opts?: { signal?: AbortSignal },
-) {
+  signal: AbortSignal,
+): Promise<
+  GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>
+> {
   const url = API_ENDPOINTS.SUBCATCHMENTS(webcloudRunId);
-  const res = await fetch(url, { signal: opts?.signal });
+  const res = await fetch(url, { signal });
   return checkResponse<
     GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>
   >(res, { url, runId: webcloudRunId, prefix: "Subcatchments" });
@@ -68,21 +82,30 @@ export async function fetchSubcatchments(
 /**
  * Fetches channel polygons for a given watershed.
  *
+ * Accepts a required {@link AbortSignal} so the request is automatically
+ * cancelled when the user deselects the watershed.
+ *
  * @async
  * @function fetchChannels
  * @param {string} webcloudRunId
  *   The `webcloud_run_id` of the specified watershed.
- * @returns {Promise<unknown>} Resolves with the parsed JSON response from the
- *   `/watershed/:id/channels` endpoint.
+ * @param {AbortSignal} signal
+ *   An {@link AbortSignal} used to cancel the in‑flight request.
+ * @returns {Promise<GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>>}
+ *   Resolves with the channel feature collection.
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
 export async function fetchChannels(
   webcloudRunId: string,
-  opts?: { signal?: AbortSignal },
-) {
+  signal: AbortSignal,
+): Promise<
+  GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>
+> {
   const url = API_ENDPOINTS.CHANNELS(webcloudRunId);
-  const res = await fetch(url, { signal: opts?.signal });
-  return checkResponse<GeoJSON.FeatureCollection>(res, {
+  const res = await fetch(url, { signal });
+  return checkResponse<
+    GeoJSON.FeatureCollection<GeoJSON.Geometry, SubcatchmentProperties>
+  >(res, {
     url,
     runId: webcloudRunId,
     prefix: "Channels",
