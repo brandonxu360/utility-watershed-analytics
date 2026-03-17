@@ -9,8 +9,6 @@
 
 import type { SpatialScale } from "./types";
 
-// ── Run ID allowlist ────────────────────────────────────────────────────────
-
 /**
  * Run IDs whose WEPPcloud stores contain RHESSys scenario parquet files
  * suitable for the dynamic choropleth and time-series features.
@@ -19,7 +17,7 @@ export const CHOROPLETH_RUN_IDS: ReadonlySet<string> = new Set([
   "aversive-forestry",
 ]);
 
-// ── Parquet dataset paths ───────────────────────────────────────────────────
+// Parquet dataset paths
 
 export const PARQUET_PATHS: Record<string, Record<SpatialScale, string>> = {
   S1: {
@@ -47,15 +45,15 @@ export const BASIN_DAILY_PATHS: Record<string, string> = {
   S4b: "rhessys/scenarios/S4b/basin.daily.parquet",
 };
 
-// ── Gate Creek UI metadata ──────────────────────────────────────────────────
+// Gate Creek UI metadata
 
-export const GATE_CREEK_YEAR_RANGE = { min: 1985, max: 2024 } as const;
+export const GATE_CREEK_YEAR_RANGE = { min: 1985, max: 2024 };
 
 export const GATE_CREEK_SCENARIOS = [
   { id: "S1", label: "S1 \u2013 Pre-fire Baseline" },
   { id: "S2", label: "S2 \u2013 Post-fire Land Cover" },
   { id: "S4b", label: "S4b \u2013 Post-fire Regrowth" },
-] as const;
+];
 
 export const GATE_CREEK_VARIABLES: Record<
   SpatialScale,
@@ -82,4 +80,4 @@ export const TIME_SERIES_VARIABLES = [
   { id: "return", label: "Return Flow", units: "mm/day" },
   { id: "trans", label: "Transpiration", units: "mm/day" },
   { id: "evap", label: "Evaporation", units: "mm/day" },
-] as const;
+];
