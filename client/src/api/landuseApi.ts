@@ -24,7 +24,7 @@ const DEFAULT_LANDUSE_LIMIT = 200_000;
  */
 export async function fetchLanduse(
   opts: FetchLanduseOptions,
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<LanduseMap> {
   const { runId, include_schema, include_sql, limit, scenario } = opts;
 

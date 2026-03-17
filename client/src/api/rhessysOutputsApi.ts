@@ -15,16 +15,26 @@ import type {
   SpatialScale,
 } from "./types";
 
+export type RhessysTimeSeriesRow = {
+  year: number;
+  month: number;
+  day: number;
+  [key: string]: number;
+};
+
 /**
  * Fetch the list of available RHESSys output map scenarios and variables.
  *
- * The backend probes the WEPPcloud file browser under rhessys/maps/ and
+ * The backend probes the WEPPcloud file browser under `rhessys/maps/` and
  * returns the catalog of discovered scenario directories and variable TIFFs,
  * along with actual min/max value ranges for each scenario/variable combination.
+ *
+ * @param runId  - The `webcloud_run_id` of the watershed.
+ * @param signal - {@link AbortSignal} for request cancellation.
  */
 export async function fetchRhessysOutputs(
   runId: string,
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<RhessysOutputListResponse> {
   const url = API_ENDPOINTS.RHESSYS_OUTPUTS_LIST(runId);
   const response = await fetch(url, { signal });
@@ -37,7 +47,16 @@ export async function fetchRhessysOutputs(
 
 /**
  * Query the WEPPcloud Query Engine for aggregated RHESSys data by spatial unit.
- * Returns {spatialId, value} rows for choropleth rendering.
+ *
+ * Returns `{spatialId, value}` rows for choropleth rendering. Rows where
+ * either field is non-finite are silently dropped.
+ *
+ * @param opts.runId        - The `webcloud_run_id` of the watershed.
+ * @param opts.scenario     - RHESSys scenario id (e.g. `"S1"`).
+ * @param opts.variable     - Column name to aggregate (e.g. `"streamflow"`).
+ * @param opts.spatialScale - `"hillslope"` or `"patch"`.
+ * @param opts.year         - Calendar year to filter on.
+ * @param opts.signal       - {@link AbortSignal} for request cancellation.
  */
 export async function fetchRhessysChoropleth(opts: {
   runId: string;
@@ -45,7 +64,7 @@ export async function fetchRhessysChoropleth(opts: {
   variable: string;
   spatialScale: SpatialScale;
   year: number;
-  signal?: AbortSignal;
+  signal: AbortSignal;
 }): Promise<RhessysChoroplethRow[]> {
   const { runId, scenario, variable, spatialScale, year, signal } = opts;
 
@@ -65,27 +84,30 @@ export async function fetchRhessysChoropleth(opts: {
     order_by: [`${alias}.${idCol}`],
   };
 
-  const rawRows = await postQuery(runId, payload, "RHESSys Choropleth", signal);
+  type RawRow = { spatialId?: number; spatialid?: number; value?: number };
+  const rawRows = await postQuery<RawRow>(runId, payload, "RHESSys Choropleth", signal);
 
   return rawRows
-    .map((r) => {
-      const row = r as Record<string, unknown>;
-      return {
-        spatialId: toFiniteNumber(row.spatialId ?? row.spatialid, NaN),
-        value: toFiniteNumber(row.value, NaN),
-      };
-    })
+    .map((row) => ({
+      spatialId: toFiniteNumber(row.spatialId ?? row.spatialid, NaN),
+      value: toFiniteNumber(row.value, NaN),
+    }))
     .filter((r) => Number.isFinite(r.spatialId) && Number.isFinite(r.value));
 }
 
 /**
  * Fetch the hillslope or patch GeoJSON geometry via the backend proxy.
+ *
  * The backend proxies the request to WEPPcloud to avoid CORS issues.
+ *
+ * @param runId        - The `webcloud_run_id` of the watershed.
+ * @param spatialScale - `"hillslope"` or `"patch"`.
+ * @param signal       - {@link AbortSignal} for request cancellation.
  */
 export async function fetchRhessysGeometry(
   runId: string,
   spatialScale: SpatialScale,
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<GeoJSON.FeatureCollection> {
   const url = API_ENDPOINTS.RHESSYS_OUTPUTS_GEOMETRY(runId, spatialScale);
 
@@ -97,49 +119,56 @@ export async function fetchRhessysGeometry(
   });
 }
 
-export type RhessysTimeSeriesRow = {
-  year: number;
-  month: number;
-  day: number;
-  [key: string]: number;
-};
-
 /**
  * Fetch time series data from the WEPPcloud Query Engine.
  *
- * - hillslope / null → basin.daily.parquet, aggregated to monthly means
- * - patch → patch.yearly.parquet, aggregated across all patches per year
+ * - `hillslope` / `null` → `basin.daily.parquet`, aggregated to monthly means.
+ * - `patch` → `patch.yearly.parquet`, aggregated across all patches per year.
+ *
+ * @param opts.runId        - The `webcloud_run_id` of the watershed.
+ * @param opts.scenario     - RHESSys scenario id (e.g. `"S1"`).
+ * @param opts.variables    - Column names to aggregate.
+ * @param opts.spatialScale - `"hillslope"`, `"patch"`, or `null`.
+ * @param opts.signal       - {@link AbortSignal} for request cancellation.
  */
 export async function fetchRhessysTimeSeries(opts: {
   runId: string;
   scenario: string;
   variables: string[];
   spatialScale?: SpatialScale | null;
-  signal?: AbortSignal;
+  signal: AbortSignal;
 }): Promise<RhessysTimeSeriesRow[]> {
   const { runId, scenario, variables, spatialScale, signal } = opts;
+  const isPatch = spatialScale === "patch";
 
-  if (spatialScale === "patch") {
-    return fetchPatchTimeSeries(runId, scenario, variables, signal);
+  // Resolve dataset path
+  let datasetPath: string;
+  if (isPatch) {
+    const parquetPaths = PARQUET_PATHS[scenario];
+    if (!parquetPaths) throw new Error(`Unknown scenario: ${scenario}`);
+    datasetPath = parquetPaths.patch;
+  } else {
+    datasetPath = BASIN_DAILY_PATHS[scenario];
+    if (!datasetPath) throw new Error(`Unknown scenario: ${scenario}`);
   }
 
-  const datasetPath = BASIN_DAILY_PATHS[scenario];
-  if (!datasetPath) {
-    throw new Error(`Unknown scenario for time series: ${scenario}`);
-  }
-
-  const alias = "b";
-  const aggregations = variables.map((v) => ({
-    alias: v,
-    expression: `AVG(${alias}.${v})`,
-  }));
+  const alias = isPatch ? "p" : "b";
+  const columns = isPatch
+    ? [`${alias}.year AS year`]
+    : [`${alias}.year AS year`, `${alias}.month AS month`];
+  const groupBy = isPatch
+    ? [`${alias}.year`]
+    : [`${alias}.year`, `${alias}.month`];
 
   const payload: QueryPayload = {
     datasets: [{ alias, path: datasetPath }],
-    columns: [`${alias}.year AS year`, `${alias}.month AS month`],
-    aggregations,
-    group_by: [`${alias}.year`, `${alias}.month`],
-    order_by: [`${alias}.year`, `${alias}.month`],
+    columns,
+    aggregations: variables.map((v) => ({
+      alias: v,
+      expression: `AVG(${alias}.${v})`,
+    })),
+    group_by: groupBy,
+    order_by: groupBy,
   };
 
   const rawRows = await postQuery(runId, payload, "RHESSys TimeSeries", signal);
@@ -148,53 +177,7 @@ export async function fetchRhessysTimeSeries(opts: {
     const row = r as Record<string, unknown>;
     const result: Record<string, number> = {
       year: toFiniteNumber(row.year, 0),
-      month: toFiniteNumber(row.month, 1),
-      day: 1,
-    };
-    for (const v of variables) {
-      result[v] = toFiniteNumber(row[v], 0);
-    }
-    return result as RhessysTimeSeriesRow;
-  });
-}
-
-async function fetchPatchTimeSeries(
-  runId: string,
-  scenario: string,
-  variables: string[],
-  signal?: AbortSignal,
-): Promise<RhessysTimeSeriesRow[]> {
-  const parquetPaths = PARQUET_PATHS[scenario];
-  if (!parquetPaths) {
-    throw new Error(`Unknown scenario for patch time series: ${scenario}`);
-  }
-
-  const alias = "p";
-  const aggregations = variables.map((v) => ({
-    alias: v,
-    expression: `AVG(${alias}.${v})`,
-  }));
-
-  const payload: QueryPayload = {
-    datasets: [{ alias, path: parquetPaths.patch }],
-    columns: [`${alias}.year AS year`],
-    aggregations,
-    group_by: [`${alias}.year`],
-    order_by: [`${alias}.year`],
-  };
-
-  const rawRows = await postQuery(
-    runId,
-    payload,
-    "RHESSys Patch TimeSeries",
-    signal,
-  );
-
-  return rawRows.map((r) => {
-    const row = r as Record<string, unknown>;
-    const result: Record<string, number> = {
-      year: toFiniteNumber(row.year, 0),
-      month: 0,
+      month: isPatch ? 0 : toFiniteNumber(row.month, 1),
       day: 1,
     };
     for (const v of variables) {

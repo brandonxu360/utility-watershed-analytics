@@ -17,7 +17,7 @@ export type FetchScenarioDataOptions = {
  */
 export async function fetchScenarioData(
   opts: FetchScenarioDataOptions,
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<ScenarioDataRow[]> {
   const { runId, scenario } = opts;
 
@@ -82,7 +82,7 @@ export type ScenarioSummaryRow = {
  */
 export async function fetchScenariosSummary(
   runId: string,
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<ScenarioSummaryRow[]> {
   if (!runId?.trim()) throw new Error("Invalid runId");
 

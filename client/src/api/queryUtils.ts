@@ -37,7 +37,7 @@ export async function postQuery<T = unknown>(
   runPath: string,
   payload: QueryPayload,
   errorPrefix: string = "Query",
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<T[]> {
   const url = API_ENDPOINTS.QUERY_RUN(runPath);
 

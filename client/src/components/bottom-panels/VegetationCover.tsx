@@ -138,7 +138,7 @@ export const VegetationCover: React.FC = () => {
   const [rapStatus, setRapStatus] = useState<RapStatus>({ state: "ready" });
 
   useEffect(() => {
-    let mounted = true;
+    const controller = new AbortController();
 
     async function loadRap() {
       if (!runId) {
@@ -153,19 +153,25 @@ export const VegetationCover: React.FC = () => {
 
       try {
         const rows = selectedHillslopeId
-          ? await fetchRap({
-              mode: "hillslope",
-              topazId: selectedHillslopeId,
-              runId,
-              year: yearParam,
-            })
-          : await fetchRap({ mode: "watershed", runId, year: yearParam });
+          ? await fetchRap(
+              {
+                mode: "hillslope",
+                topazId: selectedHillslopeId,
+                runId,
+                year: yearParam,
+              },
+              controller.signal,
+            )
+          : await fetchRap(
+              { mode: "watershed", runId, year: yearParam },
+              controller.signal,
+            );
 
-        if (!mounted) return;
+        if (controller.signal.aborted) return;
         setRapTimeSeries(Array.isArray(rows) ? rows : []);
         setRapStatus({ state: "ready" });
       } catch (err: unknown) {
-        if (!mounted) return;
+        if (controller.signal.aborted) return;
         setRapStatus({
           state: "error",
           message: err instanceof Error ? err.message : String(err),
@@ -176,7 +182,7 @@ export const VegetationCover: React.FC = () => {
 
     loadRap();
     return () => {
-      mounted = false;
+      controller.abort();
     };
   }, [selectedHillslopeId, selectedYear, runId]);
 

@@ -71,7 +71,7 @@ function buildRapTimeseriesPayload(
  */
 export async function fetchRap(
   opts: FetchRapOptions,
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<AggregatedRapRow[]> {
   const { mode, topazId, runId, year, include_schema, include_sql } = opts;
 
@@ -193,7 +193,7 @@ export default fetchRap;
  */
 export async function fetchRapChoropleth(
   opts: FetchRapChoroplethOptions,
-  signal?: AbortSignal,
+  signal: AbortSignal,
 ): Promise<RapChoroplethRow[]> {
   const { runId, band, year, include_schema, include_sql } = opts;
 
