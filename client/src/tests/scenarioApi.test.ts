@@ -15,6 +15,7 @@ const { fetchScenarioData, fetchScenariosSummary } =
   await import("../api/scenarioApi");
 
 const TEST_RUN_ID = "batch;;test-batch;;test-run";
+const signal = new AbortController().signal;
 
 describe("scenarioApi", () => {
   beforeEach(() => {
@@ -25,28 +26,34 @@ describe("scenarioApi", () => {
   describe("fetchScenarioData - input validation", () => {
     it("throws when runId is empty", async () => {
       await expect(
-        fetchScenarioData({ runId: "", scenario: "undisturbed" }),
+        fetchScenarioData({ runId: "", scenario: "undisturbed" }, signal),
       ).rejects.toThrow("Invalid runId");
     });
 
     it("throws when runId is whitespace only", async () => {
       await expect(
-        fetchScenarioData({ runId: "   ", scenario: "undisturbed" }),
+        fetchScenarioData({ runId: "   ", scenario: "undisturbed" }, signal),
       ).rejects.toThrow("Invalid runId");
     });
 
     it("throws when scenario is falsy", async () => {
       await expect(
-        fetchScenarioData({
-          runId: TEST_RUN_ID,
-          scenario: null as unknown as "undisturbed",
-        }),
+        fetchScenarioData(
+          {
+            runId: TEST_RUN_ID,
+            scenario: null as unknown as "undisturbed",
+          },
+          signal,
+        ),
       ).rejects.toThrow("Scenario required");
     });
 
     it("accepts valid inputs", async () => {
       await expect(
-        fetchScenarioData({ runId: TEST_RUN_ID, scenario: "undisturbed" }),
+        fetchScenarioData(
+          { runId: TEST_RUN_ID, scenario: "undisturbed" },
+          signal,
+        ),
       ).resolves.not.toThrow();
       expect(mockPostQuery).toHaveBeenCalled();
     });
@@ -54,30 +61,39 @@ describe("scenarioApi", () => {
 
   describe("fetchScenarioData - payload construction", () => {
     it("passes scenario to payload", async () => {
-      await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "thinning_40_75",
-      });
+      await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "thinning_40_75",
+        },
+        signal,
+      );
 
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       expect(payload.scenario).toBe("thinning_40_75");
     });
 
     it("omits scenario from payload for wildfire", async () => {
-      await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "wildfire",
-      });
+      await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "wildfire",
+        },
+        signal,
+      );
 
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       expect(payload.scenario).toBeUndefined();
     });
 
     it("uses loss_pw0.hill.parquet dataset path", async () => {
-      await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "undisturbed",
-      });
+      await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "undisturbed",
+        },
+        signal,
+      );
 
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const datasets = payload.datasets as { path: string }[];
@@ -85,10 +101,13 @@ describe("scenarioApi", () => {
     });
 
     it("queries all required columns", async () => {
-      await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "undisturbed",
-      });
+      await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "undisturbed",
+        },
+        signal,
+      );
 
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const columns = payload.columns as string[];
@@ -104,10 +123,13 @@ describe("scenarioApi", () => {
     });
 
     it("orders by wepp_id", async () => {
-      await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "undisturbed",
-      });
+      await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "undisturbed",
+        },
+        signal,
+      );
 
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const orderBy = payload.order_by as string[];
@@ -115,16 +137,19 @@ describe("scenarioApi", () => {
     });
 
     it("passes runId and error prefix to postQuery", async () => {
-      await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "prescribed_fire",
-      });
+      await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "prescribed_fire",
+        },
+        signal,
+      );
 
       expect(mockPostQuery).toHaveBeenCalledWith(
         TEST_RUN_ID,
         expect.any(Object),
         expect.stringContaining("prescribed_fire"),
-        undefined,
+        expect.any(Object),
       );
     });
   });
@@ -154,10 +179,13 @@ describe("scenarioApi", () => {
         },
       ]);
 
-      const result = await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "undisturbed",
-      });
+      const result = await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "undisturbed",
+        },
+        signal,
+      );
 
       expect(result).toEqual([
         {
@@ -197,10 +225,13 @@ describe("scenarioApi", () => {
         },
       ]);
 
-      const result = await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "undisturbed",
-      });
+      const result = await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "undisturbed",
+        },
+        signal,
+      );
 
       expect(result).toEqual([
         {
@@ -230,10 +261,13 @@ describe("scenarioApi", () => {
         },
       ]);
 
-      const result = await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "undisturbed",
-      });
+      const result = await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "undisturbed",
+        },
+        signal,
+      );
 
       expect(result).toEqual([
         {
@@ -252,10 +286,13 @@ describe("scenarioApi", () => {
     it("returns empty array when postQuery returns no rows", async () => {
       mockPostQuery.mockResolvedValue([]);
 
-      const result = await fetchScenarioData({
-        runId: TEST_RUN_ID,
-        scenario: "undisturbed",
-      });
+      const result = await fetchScenarioData(
+        {
+          runId: TEST_RUN_ID,
+          scenario: "undisturbed",
+        },
+        signal,
+      );
 
       expect(result).toEqual([]);
     });
@@ -264,7 +301,10 @@ describe("scenarioApi", () => {
       mockPostQuery.mockRejectedValue(new Error("Query failed: 500"));
 
       await expect(
-        fetchScenarioData({ runId: TEST_RUN_ID, scenario: "undisturbed" }),
+        fetchScenarioData(
+          { runId: TEST_RUN_ID, scenario: "undisturbed" },
+          signal,
+        ),
       ).rejects.toThrow("Query failed: 500");
     });
   });
@@ -278,36 +318,40 @@ describe("fetchScenariosSummary", () => {
 
   describe("input validation", () => {
     it("throws when runId is empty", async () => {
-      await expect(fetchScenariosSummary("")).rejects.toThrow("Invalid runId");
+      await expect(fetchScenariosSummary("", signal)).rejects.toThrow(
+        "Invalid runId",
+      );
     });
 
     it("throws when runId is whitespace only", async () => {
-      await expect(fetchScenariosSummary("   ")).rejects.toThrow(
+      await expect(fetchScenariosSummary("   ", signal)).rejects.toThrow(
         "Invalid runId",
       );
     });
 
     it("accepts a valid runId", async () => {
-      await expect(fetchScenariosSummary(TEST_RUN_ID)).resolves.not.toThrow();
+      await expect(
+        fetchScenariosSummary(TEST_RUN_ID, signal),
+      ).resolves.not.toThrow();
     });
   });
 
   describe("payload construction", () => {
     it("sends one postQuery call per available scenario", async () => {
-      await fetchScenariosSummary(TEST_RUN_ID);
+      await fetchScenariosSummary(TEST_RUN_ID, signal);
       // 5 scenarios: undisturbed, thinning_40_75, thinning_65_93, prescribed_fire, wildfire
       expect(mockPostQuery).toHaveBeenCalledTimes(5);
     });
 
     it("uses loss_pw0.out.parquet dataset path", async () => {
-      await fetchScenariosSummary(TEST_RUN_ID);
+      await fetchScenariosSummary(TEST_RUN_ID, signal);
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const datasets = payload.datasets as { path: string }[];
       expect(datasets[0].path).toContain("loss_pw0.out.parquet");
     });
 
     it("queries key and value columns", async () => {
-      await fetchScenariosSummary(TEST_RUN_ID);
+      await fetchScenariosSummary(TEST_RUN_ID, signal);
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const columns = payload.columns as string[];
       expect(columns.join(" ")).toContain("key");
@@ -315,7 +359,7 @@ describe("fetchScenariosSummary", () => {
     });
 
     it("passes scenario in payload for non-wildfire scenarios", async () => {
-      await fetchScenariosSummary(TEST_RUN_ID);
+      await fetchScenariosSummary(TEST_RUN_ID, signal);
       const scenarios = mockPostQuery.mock.calls.map(
         (call) => (call[1] as Record<string, unknown>).scenario,
       );
@@ -326,7 +370,7 @@ describe("fetchScenariosSummary", () => {
     });
 
     it("omits scenario from payload for wildfire", async () => {
-      await fetchScenariosSummary(TEST_RUN_ID);
+      await fetchScenariosSummary(TEST_RUN_ID, signal);
       // wildfire is the 5th scenario (index 4)
       const wildfirePayload = mockPostQuery.mock.calls[4][1] as Record<
         string,
@@ -352,7 +396,7 @@ describe("fetchScenariosSummary", () => {
     it("maps metrics to ScenarioSummaryRow fields with per-hectare conversion", async () => {
       mockPostQuery.mockResolvedValue(makeSummaryRows());
 
-      const result = await fetchScenariosSummary(TEST_RUN_ID);
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
 
       expect(result.length).toBe(5);
       const row = result[0];
@@ -372,7 +416,7 @@ describe("fetchScenariosSummary", () => {
         }),
       );
 
-      const result = await fetchScenariosSummary(TEST_RUN_ID);
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
       const row = result[0];
       // waterDischarge = (40000 / (200 * 10_000)) * 1_000 = 20
       expect(row.waterDischarge).toBeCloseTo(20);
@@ -386,7 +430,7 @@ describe("fetchScenariosSummary", () => {
         }),
       );
 
-      const result = await fetchScenariosSummary(TEST_RUN_ID);
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
       expect(result[0].waterDischarge).toBeNull();
       expect(result[0].hillslopeSoilLoss).toBeNull();
       expect(result[0].channelSoilLoss).toBeNull();
@@ -400,14 +444,14 @@ describe("fetchScenariosSummary", () => {
       );
       mockPostQuery.mockResolvedValue(filtered);
 
-      const result = await fetchScenariosSummary(TEST_RUN_ID);
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
       expect(result[0].waterDischarge).toBeNull();
     });
 
     it("formats scenario label correctly including wildfire", async () => {
       mockPostQuery.mockResolvedValue(makeSummaryRows());
 
-      const result = await fetchScenariosSummary(TEST_RUN_ID);
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
       const labels = result.map((r) => r.label);
       expect(labels).toContain("Undisturbed");
       expect(labels).toContain("Thinning 40-75");
@@ -422,14 +466,14 @@ describe("fetchScenariosSummary", () => {
         return callCount <= 2 ? makeSummaryRows() : [];
       });
 
-      const result = await fetchScenariosSummary(TEST_RUN_ID);
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
       expect(result.length).toBe(2);
     });
 
     it("returns empty array when all scenarios return empty metrics", async () => {
       mockPostQuery.mockResolvedValue([]);
 
-      const result = await fetchScenariosSummary(TEST_RUN_ID);
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
       expect(result).toEqual([]);
     });
 
@@ -440,7 +484,7 @@ describe("fetchScenariosSummary", () => {
         { key: "Avg. Ann. total channel soil loss", value: NaN },
       ]);
 
-      const result = await fetchScenariosSummary(TEST_RUN_ID);
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
       const row = result[0];
       expect(row.hillslopeSoilLoss).toBeNull();
       expect(row.channelSoilLoss).toBeNull();
@@ -459,7 +503,7 @@ describe("fetchScenariosSummary", () => {
         ];
       });
 
-      const result = await fetchScenariosSummary(TEST_RUN_ID);
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
       // 4 out of 5 succeed
       expect(result.length).toBe(4);
     });
@@ -467,7 +511,7 @@ describe("fetchScenariosSummary", () => {
     it("throws when all scenarios fail", async () => {
       mockPostQuery.mockRejectedValue(new Error("Server down"));
 
-      await expect(fetchScenariosSummary(TEST_RUN_ID)).rejects.toThrow(
+      await expect(fetchScenariosSummary(TEST_RUN_ID, signal)).rejects.toThrow(
         /Failed to fetch scenario summaries/,
       );
     });
@@ -475,7 +519,7 @@ describe("fetchScenariosSummary", () => {
     it("includes runId and failure reasons in all-fail error message", async () => {
       mockPostQuery.mockRejectedValue(new Error("timeout"));
 
-      await expect(fetchScenariosSummary(TEST_RUN_ID)).rejects.toThrow(
+      await expect(fetchScenariosSummary(TEST_RUN_ID, signal)).rejects.toThrow(
         TEST_RUN_ID,
       );
     });

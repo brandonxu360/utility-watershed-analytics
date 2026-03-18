@@ -14,6 +14,7 @@ const mockPostQuery = vi.mocked(queryUtils.postQuery);
 
 // Test run path used for all tests
 const TEST_RUN_PATH = "batch;;test-batch;;test-run";
+const signal = new AbortController().signal;
 
 describe("rapApi validation", () => {
   beforeEach(() => {
@@ -24,42 +25,57 @@ describe("rapApi validation", () => {
   describe("fetchRap - hillslope mode validation", () => {
     it("throws error when topazId is missing in hillslope mode", async () => {
       await expect(
-        fetchRap({ mode: "hillslope", runId: TEST_RUN_PATH }),
+        fetchRap({ mode: "hillslope", runId: TEST_RUN_PATH }, signal),
       ).rejects.toThrow("topazId required for hillslope mode");
     });
 
     it("throws error for negative topazId", async () => {
       await expect(
-        fetchRap({ mode: "hillslope", topazId: -1, runId: TEST_RUN_PATH }),
+        fetchRap(
+          { mode: "hillslope", topazId: -1, runId: TEST_RUN_PATH },
+          signal,
+        ),
       ).rejects.toThrow("Invalid topazId provided");
     });
 
     it("throws error for non-integer topazId", async () => {
       await expect(
-        fetchRap({ mode: "hillslope", topazId: 1.5, runId: TEST_RUN_PATH }),
+        fetchRap(
+          { mode: "hillslope", topazId: 1.5, runId: TEST_RUN_PATH },
+          signal,
+        ),
       ).rejects.toThrow("Invalid topazId provided");
     });
 
     it("accepts valid positive integer topazId", async () => {
       await expect(
-        fetchRap({ mode: "hillslope", topazId: 100, runId: TEST_RUN_PATH }),
+        fetchRap(
+          { mode: "hillslope", topazId: 100, runId: TEST_RUN_PATH },
+          signal,
+        ),
       ).resolves.not.toThrow();
       expect(mockPostQuery).toHaveBeenCalled();
     });
 
     it("accepts topazId of 0", async () => {
       await expect(
-        fetchRap({ mode: "hillslope", topazId: 0, runId: TEST_RUN_PATH }),
+        fetchRap(
+          { mode: "hillslope", topazId: 0, runId: TEST_RUN_PATH },
+          signal,
+        ),
       ).resolves.not.toThrow();
     });
 
     it("ignores invalid year values silently", async () => {
-      await fetchRap({
-        mode: "hillslope",
-        topazId: 100,
-        year: 999,
-        runId: TEST_RUN_PATH,
-      });
+      await fetchRap(
+        {
+          mode: "hillslope",
+          topazId: 100,
+          year: 999,
+          runId: TEST_RUN_PATH,
+        },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;
@@ -75,12 +91,15 @@ describe("rapApi validation", () => {
     });
 
     it("includes valid year in filters", async () => {
-      await fetchRap({
-        mode: "hillslope",
-        topazId: 100,
-        year: 2020,
-        runId: TEST_RUN_PATH,
-      });
+      await fetchRap(
+        {
+          mode: "hillslope",
+          topazId: 100,
+          year: 2020,
+          runId: TEST_RUN_PATH,
+        },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;
@@ -96,11 +115,14 @@ describe("rapApi validation", () => {
 
   describe("fetchRap - watershed mode validation", () => {
     it("validates year in parameterized filters", async () => {
-      await fetchRap({
-        mode: "watershed",
-        year: 2020,
-        runId: TEST_RUN_PATH,
-      });
+      await fetchRap(
+        {
+          mode: "watershed",
+          year: 2020,
+          runId: TEST_RUN_PATH,
+        },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;
@@ -114,11 +136,14 @@ describe("rapApi validation", () => {
     });
 
     it("excludes invalid year from parameterized filters", async () => {
-      await fetchRap({
-        mode: "watershed",
-        year: 3000,
-        runId: TEST_RUN_PATH,
-      });
+      await fetchRap(
+        {
+          mode: "watershed",
+          year: 3000,
+          runId: TEST_RUN_PATH,
+        },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;
@@ -134,39 +159,45 @@ describe("rapApi validation", () => {
   describe("fetchRapChoropleth - band validation", () => {
     it("throws error for empty band array", async () => {
       await expect(
-        fetchRapChoropleth({ band: [], runId: TEST_RUN_PATH }),
+        fetchRapChoropleth({ band: [], runId: TEST_RUN_PATH }, signal),
       ).rejects.toThrow("Invalid band values provided");
     });
 
     it("throws error for invalid band values", async () => {
       await expect(
-        fetchRapChoropleth({ band: [0], runId: TEST_RUN_PATH }),
+        fetchRapChoropleth({ band: [0], runId: TEST_RUN_PATH }, signal),
       ).rejects.toThrow("Invalid band values provided");
       await expect(
-        fetchRapChoropleth({ band: [7], runId: TEST_RUN_PATH }),
+        fetchRapChoropleth({ band: [7], runId: TEST_RUN_PATH }, signal),
       ).rejects.toThrow("Invalid band values provided");
       await expect(
-        fetchRapChoropleth({ band: [-1], runId: TEST_RUN_PATH }),
+        fetchRapChoropleth({ band: [-1], runId: TEST_RUN_PATH }, signal),
       ).rejects.toThrow("Invalid band values provided");
     });
 
     it("accepts valid single band", async () => {
       await expect(
-        fetchRapChoropleth({ band: 5, runId: TEST_RUN_PATH }),
+        fetchRapChoropleth({ band: 5, runId: TEST_RUN_PATH }, signal),
       ).resolves.not.toThrow();
     });
 
     it("accepts valid band array", async () => {
       await expect(
-        fetchRapChoropleth({ band: [1, 4, 5, 6], runId: TEST_RUN_PATH }),
+        fetchRapChoropleth(
+          { band: [1, 4, 5, 6], runId: TEST_RUN_PATH },
+          signal,
+        ),
       ).resolves.not.toThrow();
     });
 
     it("filters out invalid bands from mixed array", async () => {
-      await fetchRapChoropleth({
-        band: [0, 1, 7, 5, -1],
-        runId: TEST_RUN_PATH,
-      });
+      await fetchRapChoropleth(
+        {
+          band: [0, 1, 7, 5, -1],
+          runId: TEST_RUN_PATH,
+        },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;
@@ -183,13 +214,13 @@ describe("rapApi validation", () => {
     it("accepts all valid RAP bands (1-6)", async () => {
       for (let band = 1; band <= 6; band++) {
         mockPostQuery.mockClear();
-        await fetchRapChoropleth({ band, runId: TEST_RUN_PATH });
+        await fetchRapChoropleth({ band, runId: TEST_RUN_PATH }, signal);
         expect(mockPostQuery).toHaveBeenCalled();
       }
     });
 
     it("uses simple aggregation for a single band", async () => {
-      await fetchRapChoropleth({ band: 6, runId: TEST_RUN_PATH });
+      await fetchRapChoropleth({ band: 6, runId: TEST_RUN_PATH }, signal);
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const aggs = payload.aggregations as Array<{
         alias: string;
@@ -201,7 +232,7 @@ describe("rapApi validation", () => {
     });
 
     it("uses CASE-based summed aggregation for multiple bands", async () => {
-      await fetchRapChoropleth({ band: [5, 6], runId: TEST_RUN_PATH });
+      await fetchRapChoropleth({ band: [5, 6], runId: TEST_RUN_PATH }, signal);
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const aggs = payload.aggregations as Array<{
         alias: string;
@@ -216,7 +247,10 @@ describe("rapApi validation", () => {
 
   describe("fetchRapChoropleth - year validation", () => {
     it("excludes year outside valid range from filters", async () => {
-      await fetchRapChoropleth({ band: 5, year: 1800, runId: TEST_RUN_PATH });
+      await fetchRapChoropleth(
+        { band: 5, year: 1800, runId: TEST_RUN_PATH },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;
@@ -228,7 +262,10 @@ describe("rapApi validation", () => {
     });
 
     it("excludes future year from filters", async () => {
-      await fetchRapChoropleth({ band: 5, year: 2200, runId: TEST_RUN_PATH });
+      await fetchRapChoropleth(
+        { band: 5, year: 2200, runId: TEST_RUN_PATH },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;
@@ -240,7 +277,10 @@ describe("rapApi validation", () => {
     });
 
     it("includes valid year in parameterized filters", async () => {
-      await fetchRapChoropleth({ band: 5, year: 2020, runId: TEST_RUN_PATH });
+      await fetchRapChoropleth(
+        { band: 5, year: 2020, runId: TEST_RUN_PATH },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;
@@ -253,7 +293,10 @@ describe("rapApi validation", () => {
     });
 
     it("handles null year gracefully", async () => {
-      await fetchRapChoropleth({ band: 5, year: null, runId: TEST_RUN_PATH });
+      await fetchRapChoropleth(
+        { band: 5, year: null, runId: TEST_RUN_PATH },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;
@@ -265,7 +308,10 @@ describe("rapApi validation", () => {
     });
 
     it("accepts boundary year values in filters", async () => {
-      await fetchRapChoropleth({ band: 5, year: 1900, runId: TEST_RUN_PATH });
+      await fetchRapChoropleth(
+        { band: 5, year: 1900, runId: TEST_RUN_PATH },
+        signal,
+      );
       let payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       let filters = payload.filters as Array<{
         column: string;
@@ -276,7 +322,10 @@ describe("rapApi validation", () => {
       expect(yearFilter?.value).toBe(1900);
 
       mockPostQuery.mockClear();
-      await fetchRapChoropleth({ band: 5, year: 2100, runId: TEST_RUN_PATH });
+      await fetchRapChoropleth(
+        { band: 5, year: 2100, runId: TEST_RUN_PATH },
+        signal,
+      );
       payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       filters = payload.filters as Array<{
         column: string;
@@ -291,11 +340,14 @@ describe("rapApi validation", () => {
   describe("SQL injection prevention", () => {
     it("uses parameterized filters instead of string interpolation", async () => {
       // Parameters are now in the filters array, not embedded in SQL strings
-      await fetchRap({
-        mode: "watershed",
-        year: 2020,
-        runId: TEST_RUN_PATH,
-      });
+      await fetchRap(
+        {
+          mode: "watershed",
+          year: 2020,
+          runId: TEST_RUN_PATH,
+        },
+        signal,
+      );
       const payload = mockPostQuery.mock.calls[0][1] as Record<string, unknown>;
       const filters = payload.filters as Array<{
         column: string;

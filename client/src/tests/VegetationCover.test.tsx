@@ -414,6 +414,7 @@ describe("VegetationCover", () => {
             mode: "hillslope",
             topazId: 123,
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -428,6 +429,7 @@ describe("VegetationCover", () => {
           expect.objectContaining({
             mode: "watershed",
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -449,6 +451,7 @@ describe("VegetationCover", () => {
             topazId: 99,
             year: 2010,
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -468,6 +471,7 @@ describe("VegetationCover", () => {
             mode: "watershed",
             year: 2005,
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -533,6 +537,7 @@ describe("VegetationCover", () => {
           expect.objectContaining({
             year: 2015,
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -547,6 +552,7 @@ describe("VegetationCover", () => {
           expect.objectContaining({
             year: undefined,
           }),
+          expect.any(AbortSignal),
         );
       });
     });

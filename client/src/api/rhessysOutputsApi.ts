@@ -85,7 +85,12 @@ export async function fetchRhessysChoropleth(opts: {
   };
 
   type RawRow = { spatialId?: number; spatialid?: number; value?: number };
-  const rawRows = await postQuery<RawRow>(runId, payload, "RHESSys Choropleth", signal);
+  const rawRows = await postQuery<RawRow>(
+    runId,
+    payload,
+    "RHESSys Choropleth",
+    signal,
+  );
 
   return rawRows
     .map((row) => ({
