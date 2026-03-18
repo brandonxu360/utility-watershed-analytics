@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
+import { checkResponse } from "./errors";
 import { SbsColorMode, SbsColormapResponse } from "./types";
 
 /**
@@ -20,12 +21,8 @@ export async function fetchSbsColormap(
   url.searchParams.set("mode", mode);
 
   const response = await fetch(url.toString());
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch SBS colormap (${response.status} ${response.statusText})`,
-    );
-  }
-
-  return response.json() as Promise<SbsColormapResponse>;
+  return checkResponse<SbsColormapResponse>(response, {
+    url: url.toString(),
+    prefix: "SBS Colormap",
+  });
 }

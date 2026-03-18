@@ -141,7 +141,7 @@ def _default_batches() -> list[BatchConfig]:
             # Drop-in replacement GeoJSON with utility metadata merged in
             # (OwnerType, PopGroup, TreatType, ConnGroup + HUC10 aggregates).
             # Must contain current nasa-roses-2026-sbs runids.
-            watersheds_filename="WWS_Watersheds_HUC10_psbs_030426.geojson",
+            watersheds_filename="WWS_Watersheds_HUC10_psbs_030926.geojson",
         ),
         BatchConfig(
             batch_url="https://wepp.cloud/weppcloud/batch/victoria-ca-2026-sbs",

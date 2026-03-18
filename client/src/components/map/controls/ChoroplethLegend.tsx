@@ -129,9 +129,17 @@ export interface ChoroplethLegendProps {
 }
 
 function formatNum(n: number): string {
+  // Use scientific notation for very large values
   if (Math.abs(n) >= 1e6) return n.toExponential(2);
+
+  // Use scientific notation for very small non-zero values
+  if (n !== 0 && Math.abs(n) < 0.01) return n.toExponential(2);
+
+  // For integers or large values, show at most 1 decimal place
   if (Number.isInteger(n) || Math.abs(n) >= 100)
     return n.toLocaleString(undefined, { maximumFractionDigits: 1 });
+
+  // For regular decimal values, show up to 2 decimal places
   return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 

@@ -15,7 +15,8 @@
  *   });
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useWatershed } from "../contexts/WatershedContext";
 import type { LayerId } from "../layers/types";
 
@@ -34,6 +35,12 @@ export interface UseLayerQueryOpts {
    * Set to `false` when the query errored or returned empty results.
    */
   hasData: boolean;
+  /**
+   * Optional query key prefix for automatic cancellation.
+   * When provided and `enabled` transitions from true → false,
+   * in-flight queries matching this key are cancelled.
+   */
+  queryKey?: readonly unknown[];
 }
 
 /**
@@ -45,8 +52,20 @@ export interface UseLayerQueryOpts {
  */
 export function useLayerQuery(id: LayerId, opts: UseLayerQueryOpts): void {
   const { setDataAvailability, setLayerLoading } = useWatershed();
+  const queryClient = useQueryClient();
 
-  const { enabled, isLoading, hasData } = opts;
+  const { enabled, isLoading, hasData, queryKey } = opts;
+
+  // Track previous `enabled` value so we can detect true → false transitions.
+  const prevEnabledRef = useRef(enabled);
+
+  // ── Cancel in-flight queries when layer is toggled off ────────────────
+  useEffect(() => {
+    if (prevEnabledRef.current && !enabled && queryKey) {
+      queryClient.cancelQueries({ queryKey });
+    }
+    prevEnabledRef.current = enabled;
+  }, [enabled, queryKey, queryClient]);
 
   // ── Report data availability ──────────────────────────────────────────
   useEffect(() => {

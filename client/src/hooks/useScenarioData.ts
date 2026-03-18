@@ -1,7 +1,8 @@
 import { useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { queryKeys } from "../api/queryKeys";
 import { PathOptions } from "leaflet";
+import { useRunId } from "./useRunId";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
 import { getLayerParams } from "../layers/types";
@@ -32,12 +33,7 @@ export interface UseScenarioDataResult {
  * Hook to fetch scenario WEPP loss data.
  */
 export function useScenarioData(): UseScenarioDataResult {
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const { layerDesired, isEffective } = useWatershed();
   const params = getLayerParams(layerDesired, "scenario");
@@ -47,11 +43,13 @@ export function useScenarioData(): UseScenarioDataResult {
   const scenarioEnabled = layerDesired.scenario.enabled;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["scenarioData", runId, selectedScenario],
-    queryFn: () =>
-      fetchScenarioData({ runId: runId!, scenario: selectedScenario! }),
+    queryKey: queryKeys.scenarioData.byScenario(
+      runId ?? "",
+      selectedScenario ?? "",
+    ),
+    queryFn: ({ signal }) =>
+      fetchScenarioData({ runId: runId!, scenario: selectedScenario! }, signal),
     enabled: !!runId && !!selectedScenario && scenarioEnabled,
-    staleTime: 5 * 60_000,
     retry: 1,
   });
 
@@ -69,6 +67,10 @@ export function useScenarioData(): UseScenarioDataResult {
     enabled: scenarioEnabled,
     isLoading,
     hasData,
+    queryKey: queryKeys.scenarioData.byScenario(
+      runId ?? "",
+      selectedScenario ?? "",
+    ),
   });
 
   const range = useMemo(() => {

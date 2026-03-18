@@ -1,9 +1,11 @@
-import { useParams } from "@tanstack/react-router";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
+import { useRunId } from "../hooks/useRunId";
 import { tss } from "../utils/tss";
 import { WatershedProvider, useWatershed } from "../contexts/WatershedContext";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
 import { ScenariosTable } from "../components/bottom-panels/ScenariosTable";
+import { RhessysTimeSeries } from "../components/bottom-panels/RhessysTimeSeries";
+import { useRhessysOutputsData } from "../hooks/useRhessysOutputsData";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
@@ -49,12 +51,7 @@ const useStyles = tss.create(({ theme }) => ({
 export default function Home(): JSX.Element {
   const { classes } = useStyles();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const isSmallScreen = useIsSmallScreen();
 
@@ -87,11 +84,20 @@ function ActiveBottomPanel({
   runId: string | null;
 }): JSX.Element | null {
   const { isEffective } = useWatershed();
+  const { hasChoroplethData } = useRhessysOutputsData(runId);
 
   if (isEffective("choropleth")) {
     return (
       <BottomPanel isOpen>
         <VegetationCover />
+      </BottomPanel>
+    );
+  }
+
+  if (isEffective("rhessysOutputs") && hasChoroplethData) {
+    return (
+      <BottomPanel isOpen>
+        <RhessysTimeSeries />
       </BottomPanel>
     );
   }

@@ -7,6 +7,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryKeys";
 import { fetchSubcatchments } from "../api/api";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
@@ -31,8 +32,8 @@ export function useSubcatchmentData(
     isLoading: subLoading,
     isError: subError,
   } = useQuery({
-    queryKey: ["subcatchments", runId],
-    queryFn: () => fetchSubcatchments(runId!),
+    queryKey: queryKeys.subcatchments.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchSubcatchments(runId!, signal),
     enabled: Boolean(subcatchmentEnabled && runId),
   });
 
@@ -41,6 +42,7 @@ export function useSubcatchmentData(
     enabled: Boolean(subcatchmentEnabled && runId),
     isLoading: subLoading,
     hasData: !subError && (subcatchments?.features?.length ?? 0) > 0,
+    queryKey: queryKeys.subcatchments.all,
   });
 
   return { subcatchments, subLoading };

@@ -8,11 +8,15 @@ import { ColorModeContext } from "./contexts/ColorModeContext.tsx";
 import App from "./App.tsx";
 import "./index.css";
 
-// Create a Tanstack query client
+// Research data is stable and rarely updated, so we treat cached data as
+// permanently fresh (staleTime: Infinity). Queries will only refetch when
+// explicitly invalidated via queryClient.invalidateQueries(). Inactive
+// queries are kept in the cache for 1 hour before garbage collection.
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Avoid automatic network calls when switching back to the tab.
+      staleTime: Infinity,
+      gcTime: 1000 * 60 * 60, // 1 hour
       refetchOnWindowFocus: false,
     },
   },

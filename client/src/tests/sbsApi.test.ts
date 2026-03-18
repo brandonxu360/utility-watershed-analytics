@@ -37,10 +37,12 @@ const MOCK_RESPONSE: SbsColormapResponse = {
 };
 
 function jsonResponse(body: unknown, status = 200, statusText = "OK") {
+  const text = JSON.stringify(body);
   return {
     ok: status >= 200 && status < 300,
     status,
     statusText,
+    text: () => Promise.resolve(text),
     json: () => Promise.resolve(body),
   };
 }
@@ -93,7 +95,7 @@ describe("sbsApi", () => {
       );
 
       await expect(fetchSbsColormap()).rejects.toThrow(
-        "Failed to fetch SBS colormap (500 Internal Server Error)",
+        "SBS Colormap request failed: 500 Internal Server Error",
       );
     });
 
@@ -101,7 +103,7 @@ describe("sbsApi", () => {
       mockFetch.mockResolvedValueOnce(jsonResponse(null, 404, "Not Found"));
 
       await expect(fetchSbsColormap()).rejects.toThrow(
-        "Failed to fetch SBS colormap (404 Not Found)",
+        "SBS Colormap request failed: 404 Not Found",
       );
     });
 

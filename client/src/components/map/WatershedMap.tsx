@@ -2,7 +2,9 @@ import { useCallback, useMemo, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import L from "leaflet";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { queryKeys } from "../../api/queryKeys";
+import { useNavigate } from "@tanstack/react-router";
+import { useRunId } from "../../hooks/useRunId";
 import { MapEffect, getSavedMapView } from "../../utils/map/MapEffectUtil";
 import { fetchWatersheds } from "../../api/api";
 import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
@@ -25,10 +27,12 @@ import SearchControl from "./controls/Search";
 import SbsLegend from "./controls/SbsLegend";
 import SbsLayer from "./SbsLayer";
 import RhessysSpatialLayer from "./RhessysSpatialLayer";
+import RhessysOutputLayer from "./RhessysOutputLayer";
+import RhessysChoroplethLayer from "./RhessysChoroplethLayer";
+import { useRhessysChoropleth } from "../../hooks/useRhessysChoropleth";
 import ChoroplethLegend from "./controls/ChoroplethLegend";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import { buildHillslopeTooltip } from "../../utils/tooltipContent";
-import type { SbsColorMode } from "../../api/types";
 import { useChoroplethLegend } from "../../hooks/useChoroplethLegend";
 import { getLayerParams } from "../../layers/types";
 import "leaflet/dist/leaflet.css";
@@ -74,12 +78,7 @@ export default function WatershedMap(): JSX.Element {
   const navigate = useNavigate();
   const savedView = getSavedMapView();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const { classes, cx } = useStyles();
 
@@ -100,6 +99,20 @@ export default function WatershedMap(): JSX.Element {
     getScenarioRow,
   } = useScenarioData();
 
+  const {
+    isActive: rhessysChoroplethActive,
+    isLoading: rhessysChoroplethLoading,
+    geometry: rhessysChoroplethGeometry,
+    getStyle: getRhessysChoroplethStyle,
+    spatialScale: rhessysChoroplethScale,
+    styleKey: rhessysChoroplethStyleKey,
+  } = useRhessysChoropleth();
+
+  const rhessysOutputsEffective = isEffective("rhessysOutputs");
+  const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
+  const rhessysOutputsScenario = rhessysOutputsParams.scenario;
+  const rhessysOutputsVariable = rhessysOutputsParams.variable;
+
   const choroplethLegendProps = useChoroplethLegend();
 
   const scenarioEffective = isEffective("scenario");
@@ -107,8 +120,7 @@ export default function WatershedMap(): JSX.Element {
   const channelsEffective = isEffective("channels");
   const landuseEffective = isEffective("landuse");
   const sbsEffective = isEffective("sbs");
-  const sbsColorMode =
-    (layerDesired.sbs.params.mode as SbsColorMode) ?? "legacy";
+  const sbsColorMode = getLayerParams(layerDesired, "sbs").mode ?? "legacy";
 
   const rhessysSpatialEffective = isEffective("rhessysSpatial");
   const rhessysSpatialParams = getLayerParams(layerDesired, "rhessysSpatial");
@@ -119,7 +131,7 @@ export default function WatershedMap(): JSX.Element {
     error: watershedsError,
     isLoading: watershedsLoading,
   } = useQuery({
-    queryKey: ["watersheds"],
+    queryKey: queryKeys.watersheds.all,
     queryFn: fetchWatersheds,
   });
 
@@ -129,8 +141,8 @@ export default function WatershedMap(): JSX.Element {
 
   // Simple key that changes when any coverage styling input changes,
   // forcing SubcatchmentLayer to re-apply styles.
-  const { metric, year, bands } = layerDesired.choropleth.params;
-  const { scenario, variable } = layerDesired.scenario.params;
+  const { metric, year, bands } = getLayerParams(layerDesired, "choropleth");
+  const { scenario, variable } = getLayerParams(layerDesired, "scenario");
   const coverageKey = `${choroplethActive}|${metric}|${year}|${bands}|${scenarioEffective}|${hasScenarioData}|${scenario}|${variable}|${landuseEffective}|${!!landuseData}`;
 
   /* Navigates to a watershed on click */
@@ -143,17 +155,23 @@ export default function WatershedMap(): JSX.Element {
     });
   };
 
-  const memoWatersheds = useMemo(() => watersheds, [watersheds]);
-  const memoSubcatchments = useMemo(() => subcatchments, [subcatchments]);
-  const memoChannels = useMemo(() => channelData, [channelData]);
+  const anyRasterActive =
+    sbsEffective || rhessysSpatialEffective || rhessysOutputsEffective;
 
   const watershedStyle = useCallback(
     (
       feature:
         | GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>
         | undefined,
-    ) => (feature?.id?.toString() === runId ? selectedStyle : defaultStyle),
-    [runId],
+    ) => {
+      const base =
+        feature?.id?.toString() === runId ? selectedStyle : defaultStyle;
+      if (anyRasterActive) {
+        return { ...base, fillOpacity: 0 };
+      }
+      return base;
+    },
+    [runId, anyRasterActive],
   );
 
   const subcatchmentStyle = useCallback(
@@ -248,8 +266,8 @@ export default function WatershedMap(): JSX.Element {
   // Compute the bounding box of the currently selected watershed so the SBS
   // TileLayer only requests tiles that intersect it.
   const sbsBounds = useMemo((): L.LatLngBoundsExpression | undefined => {
-    if (!runId || !memoWatersheds) return undefined;
-    const feature = memoWatersheds.features?.find(
+    if (!runId || !watersheds) return undefined;
+    const feature = watersheds.features?.find(
       (f: GeoJSON.Feature) => f.id?.toString() === runId,
     );
     if (!feature) return undefined;
@@ -258,12 +276,17 @@ export default function WatershedMap(): JSX.Element {
     } catch {
       return undefined;
     }
-  }, [runId, memoWatersheds]);
+  }, [runId, watersheds]);
 
   if (watershedsError) return <div>Error: {watershedsError.message}</div>;
 
   return (
-    <div className={cx(classes.mapContainer, runId && classes.mapContainerWithPanel)}>
+    <div
+      className={cx(
+        classes.mapContainer,
+        runId && classes.mapContainerWithPanel,
+      )}
+    >
       <MapContainer
         center={savedView?.center ?? FALLBACK_CENTER}
         zoom={savedView?.zoom ?? 4}
@@ -280,14 +303,15 @@ export default function WatershedMap(): JSX.Element {
           channelLoading ||
           choroplethLoading ||
           landuseLoading ||
-          scenarioLoading) && (
-            <div
-              className={classes.mapLoadingOverlay}
-              data-testid="map-loading-overlay"
-            >
-              <CircularProgress size={50} color="inherit" />
-            </div>
-          )}
+          scenarioLoading ||
+          rhessysChoroplethLoading) && (
+          <div
+            className={classes.mapLoadingOverlay}
+            data-testid="map-loading-overlay"
+          >
+            <CircularProgress size={50} color="inherit" />
+          </div>
+        )}
 
         <TileLayer
           key={selectedLayerId}
@@ -312,13 +336,15 @@ export default function WatershedMap(): JSX.Element {
           <ZoomOutControl />
         </div>
 
-        <MapEffect watershedId={runId} watersheds={memoWatersheds} />
+        {watersheds && (
+          <MapEffect watershedId={runId} watersheds={watersheds} />
+        )}
 
         {/* Show watersheds when subcatchments are not enabled or not loaded or empty */}
-        {(!subcatchmentEffective || !memoSubcatchments?.features?.length) &&
-          memoWatersheds && (
+        {(!subcatchmentEffective || !subcatchments?.features?.length) &&
+          watersheds && (
             <GeoJSON
-              data={memoWatersheds}
+              data={watersheds}
               style={watershedStyle}
               onEachFeature={(_, layer) =>
                 layer.on({ click: onWatershedClick })
@@ -327,9 +353,9 @@ export default function WatershedMap(): JSX.Element {
           )}
 
         {/* Show subcatchments only when enabled AND data exists with features */}
-        {subcatchmentEffective && memoSubcatchments?.features?.length && (
+        {subcatchmentEffective && subcatchments?.features?.length && (
           <SubcatchmentLayer
-            data={memoSubcatchments}
+            data={subcatchments}
             style={subcatchmentStyle}
             coverageActive={choroplethActive || scenarioEffective}
             coverageKey={coverageKey}
@@ -337,8 +363,8 @@ export default function WatershedMap(): JSX.Element {
           />
         )}
 
-        {channelsEffective && memoChannels && (
-          <GeoJSON data={memoChannels} style={channelStyle} />
+        {channelsEffective && channelData && (
+          <GeoJSON data={channelData} style={channelStyle} />
         )}
 
         {sbsEffective && runId && (
@@ -356,6 +382,30 @@ export default function WatershedMap(): JSX.Element {
             filename={rhessysSpatialFilename}
             opacity={effective.rhessysSpatial.opacity}
             bounds={sbsBounds}
+          />
+        )}
+
+        {rhessysOutputsEffective &&
+          runId &&
+          rhessysOutputsScenario &&
+          rhessysOutputsVariable &&
+          rhessysOutputsParams.mode !== "choropleth" && (
+            <RhessysOutputLayer
+              runId={runId}
+              scenario={rhessysOutputsScenario}
+              variable={rhessysOutputsVariable}
+              opacity={effective.rhessysOutputs.opacity}
+              bounds={sbsBounds}
+            />
+          )}
+
+        {rhessysChoroplethActive && rhessysChoroplethGeometry && (
+          <RhessysChoroplethLayer
+            geometry={rhessysChoroplethGeometry}
+            getStyle={getRhessysChoroplethStyle}
+            spatialScale={rhessysChoroplethScale}
+            opacity={effective.rhessysOutputs.opacity}
+            styleKey={rhessysChoroplethStyleKey}
           />
         )}
       </MapContainer>

@@ -3,6 +3,7 @@ from django.urls import path, include
 from server.watershed.views import WatershedViewSet, WatershedSubcatchmentListView, WatershedChannelListView
 from server.watershed.sbs_raster.views import SbsColormapView, SbsRasterTileView
 from server.watershed.rhessys_spatial.views import RhessysSpatialListView, RhessysSpatialTileView
+from server.watershed.rhessys_outputs.views import RhessysOutputListView, RhessysOutputTileView, RhessysOutputGeometryView
 
 # Use router to automatically manage API endpoints based on registered viewsets
 router = routers.DefaultRouter()
@@ -20,5 +21,16 @@ urlpatterns = [
         '<str:runid>/rhessys/spatial-inputs/<str:filename>/tiles/<int:z>/<int:x>/<int:y>.png',
         RhessysSpatialTileView.as_view(),
         name='rhessys-spatial-tile',
+    ),
+    path('<str:runid>/rhessys/outputs', RhessysOutputListView.as_view(), name='rhessys-outputs-list'),
+    path(
+        '<str:runid>/rhessys/outputs/<str:scenario>/<str:variable>/tiles/<int:z>/<int:x>/<int:y>.png',
+        RhessysOutputTileView.as_view(),
+        name='rhessys-outputs-tile',
+    ),
+    path(
+        '<str:runid>/rhessys/outputs/geometry/<str:scale>',
+        RhessysOutputGeometryView.as_view(),
+        name='rhessys-outputs-geometry',
     ),
 ]

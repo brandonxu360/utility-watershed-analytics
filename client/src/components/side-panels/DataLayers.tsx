@@ -8,8 +8,10 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import WeppSection from "./sections/WeppSection";
 import WatershedDataSection from "./sections/WatershedDataSection";
 import RhessysSection from "./sections/RhessysSection";
+import RhessysOutputsSection from "./sections/RhessysOutputsSection";
 import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
-import { useParams } from "@tanstack/react-router";
+import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
+import { useRunId } from "../../hooks/useRunId";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
@@ -19,7 +21,7 @@ const useStyles = tss.create(({ theme }) => ({
     marginBottom: theme.spacing(1),
   },
   accordionDetailsCompact: {
-    padding: `0 ${theme.spacing(2)} ${theme.spacing(1.5)}`,
+    padding: `${theme.spacing(0.5)} ${theme.spacing(2)} ${theme.spacing(1.5)}`,
     display: "flex",
     flexDirection: "column",
     gap: 0,
@@ -30,14 +32,15 @@ export default function DataLayers() {
   const { classes } = useStyles();
   const { classes: accordionClasses } = useSidePanelAccordionStyles();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const { files, isLoading } = useRhessysSpatialInputs(runId);
+  const {
+    scenarios: outputScenarios,
+    variables: outputVariables,
+    isLoading: outputsLoading,
+    hasChoroplethData,
+  } = useRhessysOutputs(runId);
 
   return (
     <div className={classes.root} data-testid="data-layers-side-panel">
@@ -87,6 +90,32 @@ export default function DataLayers() {
           </AccordionSummary>
           <AccordionDetails className={classes.accordionDetailsCompact}>
             <RhessysSection files={files} isLoading={isLoading} />
+          </AccordionDetails>
+        </Accordion>
+
+        {/* RHESSys Outputs */}
+        <Accordion className={accordionClasses.accordion} disableGutters>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="rhessys-outputs-content"
+            id="rhessys-outputs-header"
+            className={accordionClasses.accordionSummary}
+          >
+            <Typography
+              component="span"
+              variant="body2"
+              className={accordionClasses.accordionSummaryLabel}
+            >
+              RHESSys Outputs
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails className={classes.accordionDetailsCompact}>
+            <RhessysOutputsSection
+              scenarios={outputScenarios}
+              variables={outputVariables}
+              isLoading={outputsLoading}
+              hasChoroplethData={hasChoroplethData}
+            />
           </AccordionDetails>
         </Accordion>
 

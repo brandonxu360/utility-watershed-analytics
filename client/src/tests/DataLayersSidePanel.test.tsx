@@ -24,6 +24,8 @@ vi.mock("../contexts/WatershedContext", () => ({
     dispatchLayerAction: mockDispatchLayerAction,
     enableLayerWithParams: mockEnableLayerWithParams,
     clearSelectedHillslope: mockClearSelectedHillslope,
+    setDataAvailability: vi.fn(),
+    setLayerLoading: vi.fn(),
   }),
 }));
 

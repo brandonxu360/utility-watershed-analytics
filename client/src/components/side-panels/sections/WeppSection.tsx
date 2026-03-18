@@ -1,11 +1,10 @@
 import { ChangeEvent } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { useRunId } from "../../../hooks/useRunId";
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { useLayerToggle } from "../../../hooks/useLayerToggle";
+import { useScenariosSummary } from "../../../hooks/useScenariosSummary";
 import { hasActiveDependents } from "../../../layers/registry";
 import { getLayerParams } from "../../../layers/types";
-import { fetchScenariosSummary } from "../../../api/scenarioApi";
 
 import {
   SCENARIO_VARIABLES,
@@ -101,12 +100,7 @@ export default function WeppSection() {
   const { classes } = useStyles();
   const toggle = useLayerToggle();
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const {
     layerDesired,
@@ -115,13 +109,7 @@ export default function WeppSection() {
     effective,
   } = useWatershed();
 
-  const { data: scenariosSummary } = useQuery({
-    queryKey: ["scenariosSummary", runId],
-    queryFn: () => fetchScenariosSummary(runId!),
-    enabled: !!runId,
-    staleTime: 5 * 60_000,
-    retry: 1,
-  });
+  const { data: scenariosSummary } = useScenariosSummary(runId);
 
   const availableScenarios = scenariosSummary ?? [];
 

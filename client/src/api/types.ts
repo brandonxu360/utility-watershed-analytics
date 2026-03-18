@@ -6,11 +6,27 @@ export type QueryFilter = {
 
 export const YEAR_BOUNDS = { min: 1900, max: 2100 } as const;
 
-export type RapTimeseriesPayload = {
-  datasets: { path: string; alias?: string }[];
+export type DatasetRef = { path: string; alias: string };
+
+export type JoinClause = { left: string; right: string; on: string[] };
+
+export type Aggregation = { alias: string; expression: string };
+
+/**
+ * Canonical shape for every POST body sent to the WEPPcloud Query Engine.
+ * All API helpers should build this type (or a subset) instead of ad-hoc
+ * `Record<string, unknown>` objects.
+ */
+export type QueryPayload = {
+  datasets: DatasetRef[];
   columns: string[];
   filters?: QueryFilter[];
+  joins?: JoinClause[];
+  aggregations?: Aggregation[];
+  group_by?: string[];
   order_by?: string[];
+  limit?: number;
+  scenario?: string;
   include_schema?: boolean;
   include_sql?: boolean;
 };
@@ -58,8 +74,6 @@ export type LanduseEntry = {
 
 export type LanduseMap = Record<number, LanduseEntry>;
 
-// ── SBS Colormap ─────────────────────────────────────────────────────────────
-
 /**
  * Color modes for SBS (Soil Burn Severity) raster tiles and legend.
  * The backend is the source of truth; the frontend passes this value as
@@ -67,25 +81,19 @@ export type LanduseMap = Record<number, LanduseEntry>;
  */
 export type SbsColorMode = "legacy" | "shift";
 
-/** One row returned by GET /api/watershed/sbs/colormap */
 export type SbsColormapEntry = {
   /** SBS canonical class value (130 = Unburned … 133 = High) */
   class_value: number;
   /** Human-readable severity label */
   label: string;
-  /** [R, G, B, A] (0-255 each) */
   rgba: [number, number, number, number];
-  /** CSS hex string e.g. "#009E73" */
   hex: string;
 };
 
-/** Full response from GET /api/watershed/sbs/colormap */
 export type SbsColormapResponse = {
   mode: SbsColorMode;
   entries: SbsColormapEntry[];
 };
-
-// ── RHESSys Spatial Inputs ───────────────────────────────────────────────────
 
 export type RhessysSpatialLegendStop = {
   value: number;
@@ -107,6 +115,38 @@ export type RhessysSpatialFile = {
 export type RhessysSpatialListResponse = {
   files: RhessysSpatialFile[];
 };
+
+export type RhessysOutputVariable = {
+  id: string;
+  label: string;
+  units: string;
+  filename: string;
+};
+
+export type RhessysOutputScenario = {
+  id: string;
+  label: string;
+  is_change: boolean;
+  variables: string[];
+};
+
+export type RhessysOutputValueRange = {
+  min: number;
+  max: number;
+};
+
+export type RhessysOutputListResponse = {
+  scenarios: RhessysOutputScenario[];
+  variables: RhessysOutputVariable[];
+  value_ranges?: Record<string, Record<string, RhessysOutputValueRange>>;
+};
+
+export type RhessysChoroplethRow = {
+  spatialId: number;
+  value: number;
+};
+
+export type SpatialScale = "hillslope" | "patch";
 
 export type FetchLanduseOptions = {
   runId: string;

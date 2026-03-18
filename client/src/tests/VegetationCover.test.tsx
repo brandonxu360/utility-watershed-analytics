@@ -41,12 +41,14 @@ vi.mock("../components/CoverageLineChart", () => ({
     data,
     title,
     lineKeys,
+    yAxisLabel,
   }: {
     data: unknown[];
     title: string;
     lineKeys: unknown[];
+    yAxisLabel?: string;
   }) => (
-    <div data-testid="coverage-chart">
+    <div data-testid="coverage-chart" data-y-axis-label={yAxisLabel}>
       {title}
       <span data-testid="chart-data-length">{data.length}</span>
       <span data-testid="line-keys-length">{lineKeys.length}</span>
@@ -125,7 +127,9 @@ describe("VegetationCover", () => {
 
       const chart = screen.getByTestId("coverage-chart");
       expect(chart).toBeInTheDocument();
-      expect(chart).toHaveTextContent("All Coverage (All)");
+      expect(chart).toHaveTextContent("All Coverage (%)");
+      // verify the y-axis label prop was sent
+      expect(chart).toHaveAttribute("data-y-axis-label", "Percent Cover (%)");
     });
 
     it("renders with initial choropleth year from store", async () => {
@@ -159,7 +163,7 @@ describe("VegetationCover", () => {
       });
 
       const chart = screen.getByTestId("coverage-chart");
-      expect(chart).toHaveTextContent("Shrub Coverage (All)");
+      expect(chart).toHaveTextContent("Shrub Coverage (%)");
       expect(screen.getByTestId("line-keys-length")).toHaveTextContent("1");
     });
 
@@ -177,7 +181,7 @@ describe("VegetationCover", () => {
       });
 
       const chart = screen.getByTestId("coverage-chart");
-      expect(chart).toHaveTextContent("Tree Coverage (All)");
+      expect(chart).toHaveTextContent("Tree Coverage (%)");
       expect(screen.getByTestId("line-keys-length")).toHaveTextContent("1");
     });
 
@@ -394,7 +398,7 @@ describe("VegetationCover", () => {
       });
 
       const chart = screen.getByTestId("coverage-chart");
-      expect(chart).toHaveTextContent("All Coverage - Hillslope 42 (All)");
+      expect(chart).toHaveTextContent("All Coverage - Hillslope 42 (%)");
     });
 
     it("fetches hillslope-specific data when hillslope is selected", async () => {
@@ -410,6 +414,7 @@ describe("VegetationCover", () => {
             mode: "hillslope",
             topazId: 123,
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -424,6 +429,7 @@ describe("VegetationCover", () => {
           expect.objectContaining({
             mode: "watershed",
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -445,6 +451,7 @@ describe("VegetationCover", () => {
             topazId: 99,
             year: 2010,
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -464,6 +471,7 @@ describe("VegetationCover", () => {
             mode: "watershed",
             year: 2005,
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -529,6 +537,7 @@ describe("VegetationCover", () => {
           expect.objectContaining({
             year: 2015,
           }),
+          expect.any(AbortSignal),
         );
       });
     });
@@ -543,6 +552,7 @@ describe("VegetationCover", () => {
           expect.objectContaining({
             year: undefined,
           }),
+          expect.any(AbortSignal),
         );
       });
     });

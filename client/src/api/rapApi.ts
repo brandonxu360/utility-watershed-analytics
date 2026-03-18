@@ -14,7 +14,7 @@ import {
   FetchRapChoroplethOptions,
   RapChoroplethRow,
   RapRow,
-  RapTimeseriesPayload,
+  QueryPayload,
   QueryFilter,
 } from "./types";
 
@@ -31,14 +31,14 @@ import {
 function buildRapTimeseriesPayload(
   topazId: number,
   year?: number,
-): RapTimeseriesPayload {
+): QueryPayload {
   // Validate topazId is a reasonable positive integer
   const validTopazId = Number(topazId);
   if (!Number.isInteger(validTopazId) || validTopazId < 0) {
     throw new Error("Invalid topazId provided");
   }
 
-  const filters: RapTimeseriesPayload["filters"] = [
+  const filters: QueryFilter[] = [
     { column: "rap.topaz_id", operator: "=", value: validTopazId },
     { column: "rap.band", operator: "IN", value: [5, 6] },
   ];
@@ -71,10 +71,11 @@ function buildRapTimeseriesPayload(
  */
 export async function fetchRap(
   opts: FetchRapOptions,
+  signal: AbortSignal,
 ): Promise<AggregatedRapRow[]> {
   const { mode, topazId, runId, year, include_schema, include_sql } = opts;
 
-  let payload: Record<string, unknown>;
+  let payload: QueryPayload;
 
   if (mode === "hillslope") {
     if (typeof topazId === "undefined")
@@ -116,7 +117,7 @@ export async function fetchRap(
     addQueryFlags(payload, include_schema, include_sql);
   }
 
-  const rawRows = await postQuery(runId, payload, "RAP");
+  const rawRows = await postQuery(runId, payload, "RAP", signal);
 
   if (mode === "watershed") {
     // Map server-aggregated rows straight to AggregatedRapRow
@@ -192,6 +193,7 @@ export default fetchRap;
  */
 export async function fetchRapChoropleth(
   opts: FetchRapChoroplethOptions,
+  signal: AbortSignal,
 ): Promise<RapChoroplethRow[]> {
   const { runId, band, year, include_schema, include_sql } = opts;
 
@@ -222,7 +224,7 @@ export async function fetchRapChoropleth(
           .join(" + ")
       : "COALESCE(SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0), 0)";
 
-  const payload: Record<string, unknown> = {
+  const payload: QueryPayload = {
     datasets: [
       { path: "rap/rap_ts.parquet", alias: "rap" },
       { path: "watershed/hillslopes.parquet", alias: "hillslopes" },
@@ -241,7 +243,7 @@ export async function fetchRapChoropleth(
   };
   addQueryFlags(payload, include_schema, include_sql);
 
-  const rawRows = await postQuery(runId, payload, "RAP Choropleth");
+  const rawRows = await postQuery(runId, payload, "RAP Choropleth", signal);
 
   return rawRows
     .map((r) => {

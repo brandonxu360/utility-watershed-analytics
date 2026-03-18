@@ -1,4 +1,5 @@
 import { postQuery, toFiniteNumber } from "./queryUtils";
+import type { QueryPayload } from "./types";
 import { AVAILABLE_SCENARIOS, formatScenarioLabel } from "../layers/scenario";
 import type { ScenarioType, ScenarioDataRow } from "../layers/scenario";
 
@@ -16,13 +17,14 @@ export type FetchScenarioDataOptions = {
  */
 export async function fetchScenarioData(
   opts: FetchScenarioDataOptions,
+  signal: AbortSignal,
 ): Promise<ScenarioDataRow[]> {
   const { runId, scenario } = opts;
 
   if (!runId?.trim()) throw new Error("Invalid runId");
   if (!scenario) throw new Error("Scenario required");
 
-  const payload: Record<string, unknown> = {
+  const payload: QueryPayload = {
     datasets: [{ alias: "loss", path: SCENARIO_LOSS_PATH }],
     columns: [
       "loss.wepp_id AS wepp_id",
@@ -42,7 +44,12 @@ export async function fetchScenarioData(
     payload.scenario = scenario;
   }
 
-  const rows = await postQuery(runId, payload, `Scenario (${scenario})`);
+  const rows = await postQuery(
+    runId,
+    payload,
+    `Scenario (${scenario})`,
+    signal,
+  );
 
   return rows.map((r) => {
     const row = r as Record<string, unknown>;
@@ -75,12 +82,13 @@ export type ScenarioSummaryRow = {
  */
 export async function fetchScenariosSummary(
   runId: string,
+  signal: AbortSignal,
 ): Promise<ScenarioSummaryRow[]> {
   if (!runId?.trim()) throw new Error("Invalid runId");
 
   const results = await Promise.allSettled(
     AVAILABLE_SCENARIOS.map(async (scenario) => {
-      const payload: Record<string, unknown> = {
+      const payload: QueryPayload = {
         datasets: [{ alias: "loss", path: SCENARIO_SUMMARY_PATH }],
         columns: ["loss.key AS key", "loss.value AS value"],
       };
@@ -94,6 +102,7 @@ export async function fetchScenariosSummary(
         runId,
         payload,
         `Scenario Summary (${scenario})`,
+        signal,
       );
 
       const metrics = new Map<string, number>();

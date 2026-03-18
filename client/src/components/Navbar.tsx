@@ -54,8 +54,16 @@ const Navbar: FC = () => {
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
-          <Link to="/" className={classes.titleWrapper} style={{ textDecoration: "none", color: "inherit" }}>
-            <img src={firewiseLogo} alt="FireWISE logo" className={classes.logo} />
+          <Link
+            to="/"
+            className={classes.titleWrapper}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <img
+              src={firewiseLogo}
+              alt="FireWISE logo"
+              className={classes.logo}
+            />
             <Typography variant="h6" component="div" className={classes.title}>
               FireWISE Watersheds
             </Typography>

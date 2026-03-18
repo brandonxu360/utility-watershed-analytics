@@ -12,6 +12,7 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryKeys";
 import { fetchLanduse } from "../api/landuseApi";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
@@ -38,8 +39,8 @@ export function useLanduseData(runId: string | null): UseLanduseDataResult {
     isLoading: landuseLoading,
     error: landuseError,
   } = useQuery({
-    queryKey: ["landuse-undisturbed", runId],
-    queryFn: () => fetchLanduse({ runId: runId! }),
+    queryKey: queryKeys.landuse.undisturbed(runId ?? ""),
+    queryFn: ({ signal }) => fetchLanduse({ runId: runId! }, signal),
     enabled: Boolean(landuseEnabled && runId),
   });
 
@@ -51,6 +52,7 @@ export function useLanduseData(runId: string | null): UseLanduseDataResult {
       !landuseError &&
       landuseData != null &&
       Object.keys(landuseData).length > 0,
+    queryKey: queryKeys.landuse.undisturbed(runId ?? ""),
   });
 
   // ── Derive legend map ─────────────────────────────────────────────────

@@ -7,6 +7,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryKeys";
 import { fetchChannels } from "../api/api";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
@@ -29,8 +30,8 @@ export function useChannelData(runId: string | null): UseChannelDataResult {
     isLoading: channelLoading,
     isError: channelError,
   } = useQuery({
-    queryKey: ["channels", runId],
-    queryFn: () => fetchChannels(runId!),
+    queryKey: queryKeys.channels.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchChannels(runId!, signal),
     enabled: Boolean(channelsEnabled && runId),
   });
 
@@ -39,6 +40,7 @@ export function useChannelData(runId: string | null): UseChannelDataResult {
     enabled: Boolean(channelsEnabled && runId),
     isLoading: channelLoading,
     hasData: !channelError && (channelData?.features?.length ?? 0) > 0,
+    queryKey: queryKeys.channels.all,
   });
 
   return { channelData, channelLoading };

@@ -1,10 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { useRunId } from "../../hooks/useRunId";
 
-import {
-  fetchScenariosSummary,
-  type ScenarioSummaryRow,
-} from "../../api/scenarioApi";
+import { type ScenarioSummaryRow } from "../../api/scenarioApi";
+import { useScenariosSummary } from "../../hooks/useScenariosSummary";
 
 import { tss } from "../../utils/tss";
 import Table from "@mui/material/Table";
@@ -76,20 +73,9 @@ function formatValue(val: number | null): string {
 
 export function ScenariosTable() {
   const { classes } = useStyles();
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["scenariosSummary", runId],
-    queryFn: () => fetchScenariosSummary(runId!),
-    enabled: !!runId,
-    staleTime: 5 * 60_000,
-    retry: 1,
-  });
+  const { data, isLoading, isError, error } = useScenariosSummary(runId);
 
   if (isLoading) {
     return (

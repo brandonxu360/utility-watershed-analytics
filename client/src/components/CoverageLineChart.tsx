@@ -23,6 +23,8 @@ export type CoverageLineChartProps = {
     activeFill: string;
     activeStroke: string;
   }[];
+  /** optional label to display on the Y axis (e.g. "Percent Cover (%)") */
+  yAxisLabel?: string;
 };
 
 const useStyles = tss.create(({ theme }) => ({
@@ -50,6 +52,7 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
   data,
   title,
   lineKeys,
+  yAxisLabel,
 }) => {
   const { classes, theme } = useStyles();
   const isEmpty = !data || data.length === 0;
@@ -83,7 +86,23 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
                 data-stroke={theme.palette.secondary.dark}
               />
               <XAxis dataKey="name" />
-              <YAxis />
+              <YAxis
+                label={
+                  yAxisLabel
+                    ? {
+                        value: yAxisLabel,
+                        angle: -90,
+                        position: "insideLeft",
+                        dx: -15,
+                        // centre rotated label both horizontally and vertically
+                        style: {
+                          textAnchor: "middle",
+                          dominantBaseline: "middle",
+                        },
+                      }
+                    : undefined
+                }
+              />
               <Tooltip
                 labelStyle={{ color: theme.palette.secondary.dark }}
                 formatter={(value) =>

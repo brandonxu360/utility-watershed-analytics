@@ -1,10 +1,16 @@
 import { addQueryFlags, postQuery, toFiniteNumber } from "./queryUtils";
-import { FetchLanduseOptions, LanduseMap, LanduseEntry } from "./types";
+import {
+  FetchLanduseOptions,
+  LanduseMap,
+  LanduseEntry,
+  QueryPayload,
+} from "./types";
 
 export type { LanduseMap, LanduseEntry, FetchLanduseOptions };
 
 const LANDUSE_DATASET_PATH = "landuse/landuse.parquet";
 const DEFAULT_SCENARIO = "undisturbed";
+const DEFAULT_LANDUSE_LIMIT = 200_000;
 
 /**
  * Fetch landuse data from the query engine for a given scenario.
@@ -18,6 +24,7 @@ const DEFAULT_SCENARIO = "undisturbed";
  */
 export async function fetchLanduse(
   opts: FetchLanduseOptions,
+  signal: AbortSignal,
 ): Promise<LanduseMap> {
   const { runId, include_schema, include_sql, limit, scenario } = opts;
 
@@ -25,7 +32,7 @@ export async function fetchLanduse(
     throw new Error("Invalid runId provided");
   }
 
-  const payload: Record<string, unknown> = {
+  const payload: QueryPayload = {
     scenario: scenario ?? DEFAULT_SCENARIO,
     datasets: [{ alias: "landuse", path: LANDUSE_DATASET_PATH }],
     columns: [
@@ -34,12 +41,12 @@ export async function fetchLanduse(
       "landuse.color AS color",
     ],
     order_by: ["landuse.topaz_id"],
-    limit: typeof limit === "number" ? limit : 200000,
+    limit: typeof limit === "number" ? limit : DEFAULT_LANDUSE_LIMIT,
   };
 
   addQueryFlags(payload, include_schema, include_sql);
 
-  const rawRows = await postQuery(runId, payload, "Landuse");
+  const rawRows = await postQuery(runId, payload, "Landuse", signal);
 
   const result: LanduseMap = {};
 

@@ -1,7 +1,8 @@
 import { useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
-import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useRunId } from "./useRunId";
+import { queryKeys } from "../api/queryKeys";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
 import { getLayerParams } from "../layers/types";
@@ -55,12 +56,7 @@ interface UseChoroplethResult {
 }
 
 export function useChoropleth(): UseChoroplethResult {
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   // Read control fields from the layer desired-state
   const { layerDesired } = useWatershed();
@@ -92,19 +88,21 @@ export function useChoropleth(): UseChoroplethResult {
     isError,
     error: queryError,
   } = useQuery({
-    queryKey: [
-      "rap-choropleth",
-      runId,
+    queryKey: queryKeys.rapChoropleth.byParams(
+      runId ?? "",
       choroplethType,
       choroplethYear,
       effectiveBands,
-    ],
-    queryFn: () =>
-      fetchRapChoropleth({
-        runId: runId!,
-        band: effectiveBands,
-        year: choroplethYear,
-      }),
+    ),
+    queryFn: ({ signal }) =>
+      fetchRapChoropleth(
+        {
+          runId: runId!, // guaranteed non-null by enabled
+          band: effectiveBands,
+          year: choroplethYear,
+        },
+        signal,
+      ),
     enabled: isEnabled,
   });
 

@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
-import { useParams } from "@tanstack/react-router";
+import { useRunId } from "../../hooks/useRunId";
 import { CoverageLineChart } from "../CoverageLineChart";
 
 import {
@@ -102,12 +102,7 @@ export const VegetationCover: React.FC = () => {
   const vegOption =
     VEGETATION_OPTIONS.find((o) => o.value === bands) ?? VEGETATION_OPTIONS[0];
 
-  const runId =
-    useParams({
-      from: "/watershed/$webcloudRunId",
-      select: (params) => params?.webcloudRunId,
-      shouldThrow: false,
-    }) ?? null;
+  const runId = useRunId();
 
   const years = useMemo(
     () =>
@@ -143,7 +138,7 @@ export const VegetationCover: React.FC = () => {
   const [rapStatus, setRapStatus] = useState<RapStatus>({ state: "ready" });
 
   useEffect(() => {
-    let mounted = true;
+    const controller = new AbortController();
 
     async function loadRap() {
       if (!runId) {
@@ -158,19 +153,25 @@ export const VegetationCover: React.FC = () => {
 
       try {
         const rows = selectedHillslopeId
-          ? await fetchRap({
-              mode: "hillslope",
-              topazId: selectedHillslopeId,
-              runId,
-              year: yearParam,
-            })
-          : await fetchRap({ mode: "watershed", runId, year: yearParam });
+          ? await fetchRap(
+              {
+                mode: "hillslope",
+                topazId: selectedHillslopeId,
+                runId,
+                year: yearParam,
+              },
+              controller.signal,
+            )
+          : await fetchRap(
+              { mode: "watershed", runId, year: yearParam },
+              controller.signal,
+            );
 
-        if (!mounted) return;
+        if (controller.signal.aborted) return;
         setRapTimeSeries(Array.isArray(rows) ? rows : []);
         setRapStatus({ state: "ready" });
       } catch (err: unknown) {
-        if (!mounted) return;
+        if (controller.signal.aborted) return;
         setRapStatus({
           state: "error",
           message: err instanceof Error ? err.message : String(err),
@@ -181,7 +182,7 @@ export const VegetationCover: React.FC = () => {
 
     loadRap();
     return () => {
-      mounted = false;
+      controller.abort();
     };
   }, [selectedHillslopeId, selectedYear, runId]);
 
@@ -219,9 +220,13 @@ export const VegetationCover: React.FC = () => {
       .map(([yr, v]) => toSeries(yr, v.coverage, v.shrub, v.tree));
   }, [rapTimeSeries, selectedYear]);
 
+  // When the user selects "All" years we prefer to show a percent sign
+  // instead of the literal word so titles read like "All Coverage (%)".
+  const selectedYearDisplay = selectedYear === "All" ? "%" : selectedYear;
+
   const chartTitle = selectedHillslopeId
-    ? `${vegOption.label} Coverage - Hillslope ${selectedHillslopeId} (${selectedYear})`
-    : `${vegOption.label} Coverage (${selectedYear})`;
+    ? `${vegOption.label} Coverage - Hillslope ${selectedHillslopeId} (${selectedYearDisplay})`
+    : `${vegOption.label} Coverage (${selectedYearDisplay})`;
 
   return (
     <div>
@@ -301,6 +306,7 @@ export const VegetationCover: React.FC = () => {
         data={chartData}
         title={chartTitle}
         lineKeys={vegOption.chartKeys}
+        yAxisLabel="Percent Cover (%)"
       />
     </div>
   );
