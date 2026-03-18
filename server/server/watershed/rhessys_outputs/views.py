@@ -79,9 +79,6 @@ class RhessysOutputListView(APIView):
         if catalog is None:
             return Response({"scenarios": [], "variables": [], "value_ranges": {}})
 
-        for scenario in catalog["scenarios"]:
-            scenario["legend_type"] = "diverging" if scenario["is_change"] else "sequential"
-
         return Response(catalog)
 
 
