@@ -66,6 +66,13 @@ export const BASIN_DAILY_PATHS: Record<string, string> = {
   S4b: "rhessys/scenarios/S4b/basin.daily.parquet",
 };
 
+/** Basin-level growth daily parquets (watershed-scale LAI, GPP, biomass, etc.). */
+export const GROW_BASIN_DAILY_PATHS: Record<string, string> = {
+  S1: "rhessys/scenarios/S1/grow_basin.daily.parquet",
+  S2: "rhessys/scenarios/S2/grow_basin.daily.parquet",
+  S4b: "rhessys/scenarios/S4b/grow_basin.daily.parquet",
+};
+
 // ---------------------------------------------------------------------------
 // Spatial-ID columns
 // ---------------------------------------------------------------------------
@@ -138,12 +145,35 @@ export function getVariableMeta(
   return GATE_CREEK_VARIABLES[spatialScale].find((v) => v.id === variableId);
 }
 
+/**
+ * How to resolve parquet paths for a variable.
+ *
+ * - `choropleth` — spatial outputs (`hillslope.daily`, `patch.yearly`, etc.).
+ * - `timeSeries` — same as choropleth for patch; for hillslope uses
+ *   `basin.daily` / `grow_basin.daily` (watershed aggregate daily series).
+ */
+export type ParquetResolutionMode = "choropleth" | "timeSeries";
+
 /** Resolve the parquet path and spatial-ID column for a given variable. */
 export function resolveParquetConfig(
   scenario: string,
   spatialScale: SpatialScale,
   source: VariableSource,
+  mode: ParquetResolutionMode = "choropleth",
 ): { datasetPath: string; idColumn: string } {
+  if (mode === "timeSeries" && spatialScale === "hillslope") {
+    const datasetPath =
+      source === "grow"
+        ? GROW_BASIN_DAILY_PATHS[scenario]
+        : BASIN_DAILY_PATHS[scenario];
+    if (!datasetPath) throw new Error(`Unknown scenario: ${scenario}`);
+    return {
+      datasetPath,
+      // Unused for time-series queries; basin-level daily rows use basinID.
+      idColumn: "basinID",
+    };
+  }
+
   const paths = source === "grow" ? GROW_PARQUET_PATHS : PARQUET_PATHS;
   const scenarioPaths = paths[scenario];
   if (!scenarioPaths) throw new Error(`Unknown scenario: ${scenario}`);

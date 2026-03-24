@@ -2,11 +2,7 @@ import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
 import { postQuery, toFiniteNumber } from "./queryUtils";
 
-import {
-  getVariableMeta,
-  resolveParquetConfig,
-  BASIN_DAILY_PATHS,
-} from "./rhessysConstants";
+import { getVariableMeta, resolveParquetConfig } from "./rhessysConstants";
 
 import type {
   RhessysOutputListResponse,
@@ -136,13 +132,13 @@ export async function fetchRhessysGeometry(
 /**
  * Fetch time series data from the WEPPcloud Query Engine.
  *
- * - `hillslope` (default) → uses `basin.daily.parquet` (the RHESSys
- *   area-weighted watershed aggregate) and aggregates to monthly means.
- * - `patch` → `patch.yearly.parquet` (or `grow_patch.yearly.parquet`),
+ * - `hillslope` (default) → daily basin outputs, aggregated to monthly means:
+ *   base hydrology uses `basin.daily.parquet`; growth variables use
+ *   `grow_basin.daily.parquet`.
+ * - `patch` → `patch.yearly.parquet` or `grow_patch.yearly.parquet`,
  *   aggregated across all patches per year.
  *
- * The variable's `source` field determines whether the base or grow parquet
- * is queried (only applicable for patch-scale).
+ * The variable's `source` field selects base vs grow parquet at both scales.
  *
  * @param opts.runId        - The `webcloud_run_id` of the watershed.
  * @param opts.scenario     - RHESSys scenario id (e.g. `"S1"`).
@@ -161,15 +157,14 @@ export async function fetchRhessysTimeSeries(opts: {
   const effectiveScale: SpatialScale = spatialScale ?? "hillslope";
   const isPatch = effectiveScale === "patch";
 
-  let datasetPath: string;
-  if (isPatch) {
-    const varMeta = getVariableMeta(effectiveScale, variables[0]);
-    const source = varMeta?.source ?? "base";
-    ({ datasetPath } = resolveParquetConfig(scenario, effectiveScale, source));
-  } else {
-    datasetPath = BASIN_DAILY_PATHS[scenario];
-    if (!datasetPath) throw new Error(`Unknown scenario: ${scenario}`);
-  }
+  const varMeta = getVariableMeta(effectiveScale, variables[0]);
+  const source = varMeta?.source ?? "base";
+  const { datasetPath } = resolveParquetConfig(
+    scenario,
+    effectiveScale,
+    source,
+    "timeSeries",
+  );
 
   const alias = isPatch ? "p" : "b";
   const columns = isPatch
