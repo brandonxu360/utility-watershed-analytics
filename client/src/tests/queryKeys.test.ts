@@ -90,11 +90,27 @@ describe("queryKeys", () => {
     ]);
   });
 
-  it("rhessysGeometry.byScale produces scoped key", () => {
+  it("rhessysGeometry.byScale produces scoped key (no scenario)", () => {
     expect(queryKeys.rhessysGeometry.byScale("r1", "hillslope")).toEqual([
       "rhessys-geometry",
       "r1",
       "hillslope",
+      null,
+    ]);
+  });
+
+  it("rhessysGeometry.byScale includes patch geometry revision when provided", () => {
+    expect(queryKeys.rhessysGeometry.byScale("r1", "patch", "2021")).toEqual([
+      "rhessys-geometry",
+      "r1",
+      "patch",
+      "2021",
+    ]);
+    expect(queryKeys.rhessysGeometry.byScale("r1", "patch", "1985")).toEqual([
+      "rhessys-geometry",
+      "r1",
+      "patch",
+      "1985",
     ]);
   });
 

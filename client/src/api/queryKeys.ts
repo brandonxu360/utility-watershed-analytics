@@ -60,10 +60,16 @@ export const queryKeys = {
     ) => ["rhessys-choropleth", runId, scenario, variable, spatialScale, year],
   },
   rhessysGeometry: {
-    byScale: (runId: string, spatialScale: string) => [
+    /** `patchGeometryRevision`: null for hillslope; `"1985"` / `"2021"` for patch. */
+    byScale: (
+      runId: string,
+      spatialScale: string,
+      patchGeometryRevision?: "1985" | "2021" | null,
+    ) => [
       "rhessys-geometry",
       runId,
       spatialScale,
+      patchGeometryRevision ?? null,
     ],
   },
   rhessysTimeSeries: {

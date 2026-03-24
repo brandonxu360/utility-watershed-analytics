@@ -21,7 +21,7 @@ import type {
   RhessysOutputValueRange,
 } from "../api/types";
 
-import { CHOROPLETH_RUN_IDS } from "../api/rhessysConstants";
+import { CHOROPLETH_RUN_IDS } from "../api/rhessys/constants";
 
 export function useRhessysOutputsData(runId: string | null) {
   const { data, isLoading, error } = useQuery({

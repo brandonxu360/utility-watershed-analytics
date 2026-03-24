@@ -2,11 +2,7 @@ import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
 import { postQuery, toFiniteNumber } from "./queryUtils";
 
-import {
-  PARQUET_PATHS,
-  SPATIAL_ID_COLUMN,
-  BASIN_DAILY_PATHS,
-} from "./rhessysConstants";
+import { getVariableMeta, resolveParquetConfig } from "./rhessys/utils";
 
 import type {
   RhessysOutputListResponse,
@@ -68,20 +64,22 @@ export async function fetchRhessysChoropleth(opts: {
 }): Promise<RhessysChoroplethRow[]> {
   const { runId, scenario, variable, spatialScale, year, signal } = opts;
 
-  const parquetPaths = PARQUET_PATHS[scenario];
-  if (!parquetPaths) throw new Error(`Unknown scenario: ${scenario}`);
-
-  const datasetPath = parquetPaths[spatialScale];
-  const idCol = SPATIAL_ID_COLUMN[spatialScale];
+  const varMeta = getVariableMeta(spatialScale, variable);
+  const source = varMeta?.source ?? "base";
+  const { datasetPath, idColumn } = resolveParquetConfig(
+    scenario,
+    spatialScale,
+    source,
+  );
   const alias = "d";
 
   const payload: QueryPayload = {
     datasets: [{ alias, path: datasetPath }],
-    columns: [`${alias}.${idCol} AS spatialId`],
+    columns: [`${alias}.${idColumn} AS spatialId`],
     filters: [{ column: `${alias}.year`, operator: "=", value: year }],
     aggregations: [{ alias: "value", expression: `AVG(${alias}.${variable})` }],
-    group_by: [`${alias}.${idCol}`],
-    order_by: [`${alias}.${idCol}`],
+    group_by: [`${alias}.${idColumn}`],
+    order_by: [`${alias}.${idColumn}`],
   };
 
   type RawRow = { spatialId?: number; spatialid?: number; value?: number };
@@ -104,17 +102,24 @@ export async function fetchRhessysChoropleth(opts: {
  * Fetch the hillslope or patch GeoJSON geometry via the backend proxy.
  *
  * The backend proxies the request to WEPPcloud to avoid CORS issues.
+ * For patch geometry, the `scenario` query parameter selects the GeoJSON asset
+ * (omitted or non–2021 scenarios → 1985 patch IDs; S2 or S4b → 2021 patch IDs).
  *
  * @param runId        - The `webcloud_run_id` of the watershed.
  * @param spatialScale - `"hillslope"` or `"patch"`.
  * @param signal       - {@link AbortSignal} for request cancellation.
+ * @param scenario     - Optional; when `"S2"` or `"S4b"`, selects 2021 patch geometry.
  */
 export async function fetchRhessysGeometry(
   runId: string,
   spatialScale: SpatialScale,
   signal: AbortSignal,
+  scenario?: string | null,
 ): Promise<GeoJSON.FeatureCollection> {
-  const url = API_ENDPOINTS.RHESSYS_OUTPUTS_GEOMETRY(runId, spatialScale);
+  let url = API_ENDPOINTS.RHESSYS_OUTPUTS_GEOMETRY(runId, spatialScale);
+  if (scenario) {
+    url += `?scenario=${encodeURIComponent(scenario)}`;
+  }
 
   const response = await fetch(url, { signal });
   return checkResponse<GeoJSON.FeatureCollection>(response, {
@@ -127,13 +132,18 @@ export async function fetchRhessysGeometry(
 /**
  * Fetch time series data from the WEPPcloud Query Engine.
  *
- * - `hillslope` / `null` → `basin.daily.parquet`, aggregated to monthly means.
- * - `patch` → `patch.yearly.parquet`, aggregated across all patches per year.
+ * - `hillslope` (default) → daily basin outputs, aggregated to monthly means:
+ *   base hydrology uses `basin.daily.parquet`; growth variables use
+ *   `grow_basin.daily.parquet`.
+ * - `patch` → `patch.yearly.parquet` or `grow_patch.yearly.parquet`,
+ *   aggregated across all patches per year.
+ *
+ * The variable's `source` field selects base vs grow parquet at both scales.
  *
  * @param opts.runId        - The `webcloud_run_id` of the watershed.
  * @param opts.scenario     - RHESSys scenario id (e.g. `"S1"`).
  * @param opts.variables    - Column names to aggregate.
- * @param opts.spatialScale - `"hillslope"`, `"patch"`, or `null`.
+ * @param opts.spatialScale - `"hillslope"` or `"patch"`.
  * @param opts.signal       - {@link AbortSignal} for request cancellation.
  */
 export async function fetchRhessysTimeSeries(opts: {
@@ -144,18 +154,17 @@ export async function fetchRhessysTimeSeries(opts: {
   signal: AbortSignal;
 }): Promise<RhessysTimeSeriesRow[]> {
   const { runId, scenario, variables, spatialScale, signal } = opts;
-  const isPatch = spatialScale === "patch";
+  const effectiveScale: SpatialScale = spatialScale ?? "hillslope";
+  const isPatch = effectiveScale === "patch";
 
-  // Resolve dataset path
-  let datasetPath: string;
-  if (isPatch) {
-    const parquetPaths = PARQUET_PATHS[scenario];
-    if (!parquetPaths) throw new Error(`Unknown scenario: ${scenario}`);
-    datasetPath = parquetPaths.patch;
-  } else {
-    datasetPath = BASIN_DAILY_PATHS[scenario];
-    if (!datasetPath) throw new Error(`Unknown scenario: ${scenario}`);
-  }
+  const varMeta = getVariableMeta(effectiveScale, variables[0]);
+  const source = varMeta?.source ?? "base";
+  const { datasetPath } = resolveParquetConfig(
+    scenario,
+    effectiveScale,
+    source,
+    "timeSeries",
+  );
 
   const alias = isPatch ? "p" : "b";
   const columns = isPatch

@@ -20,6 +20,10 @@ import {
   fetchRhessysChoropleth,
   fetchRhessysGeometry,
 } from "../api/rhessysOutputsApi";
+import {
+  getPatchGeometryQueryScenario,
+  getPatchGeometryRevision,
+} from "../api/rhessys/utils";
 import { computeRobustRange } from "../utils/colormap";
 
 export function useRhessysChoroplethData() {
@@ -58,9 +62,24 @@ export function useRhessysChoroplethData() {
     placeholderData: keepPreviousData,
   });
 
+  const patchGeometryRevision = getPatchGeometryRevision(spatialScale, scenario);
+  const geometryQueryScenario = getPatchGeometryQueryScenario(
+    patchGeometryRevision,
+  );
+
   const { data: geometry, isLoading: geomLoading } = useQuery({
-    queryKey: queryKeys.rhessysGeometry.byScale(runId ?? "", spatialScale),
-    queryFn: ({ signal }) => fetchRhessysGeometry(runId!, spatialScale, signal),
+    queryKey: queryKeys.rhessysGeometry.byScale(
+      runId ?? "",
+      spatialScale,
+      patchGeometryRevision,
+    ),
+    queryFn: ({ signal }) =>
+      fetchRhessysGeometry(
+        runId!,
+        spatialScale,
+        signal,
+        geometryQueryScenario,
+      ),
     enabled: isActive && !!runId,
     placeholderData: keepPreviousData,
   });

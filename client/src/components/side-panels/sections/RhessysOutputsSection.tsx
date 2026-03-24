@@ -14,10 +14,7 @@ import type {
   RhessysOutputVariable,
 } from "../../../api/types";
 
-import {
-  GATE_CREEK_SCENARIOS,
-  GATE_CREEK_VARIABLES,
-} from "../../../api/rhessysConstants";
+import { GATE_CREEK_VARIABLES } from "../../../api/rhessys/constants";
 import RasterModeSection from "./RasterModeSection";
 import ChoroplethModeSection from "./ChoroplethModeSection";
 
@@ -187,15 +184,33 @@ export default function RhessysOutputsSection({
       newScale: "hillslope" | "patch" | null,
     ) => {
       if (!newScale) return;
+
       const vars = GATE_CREEK_VARIABLES[newScale];
-      updateParams({
-        scenario: selectedScenario || GATE_CREEK_SCENARIOS[0].id,
-        variable: vars[0]?.id ?? null,
-        mode: "choropleth",
+      const variableStillValid = vars.some((v) => v.id === selectedVariable);
+      const nextVariable = variableStillValid
+        ? selectedVariable
+        : (vars[0]?.id ?? null);
+
+      const nextParams: Partial<RhessysOutputParams> = {
         spatialScale: newScale,
-      });
+        variable: nextVariable,
+        mode: "choropleth",
+      };
+
+      if (layerEnabled) {
+        updateParams(nextParams);
+      } else {
+        for (const [key, value] of Object.entries(nextParams)) {
+          dispatchLayerAction({
+            type: "SET_PARAM",
+            id: "rhessysOutputs",
+            key,
+            value,
+          });
+        }
+      }
     },
-    [updateParams, selectedScenario],
+    [updateParams, dispatchLayerAction, layerEnabled, selectedVariable],
   );
 
   const handleChoroplethScenarioChange = useCallback(

@@ -8,7 +8,7 @@ import { useRhessysOutputsData } from "./useRhessysOutputsData";
 import { useRhessysChoroplethData } from "./useRhessysChoroplethData";
 import { getLayerParams } from "../layers/types";
 import { useRunId } from "./useRunId";
-import { GATE_CREEK_VARIABLES } from "../api/rhessysConstants";
+import { GATE_CREEK_VARIABLES } from "../api/rhessys/constants";
 import type { ChoroplethLegendProps } from "../components/map/controls/ChoroplethLegend";
 
 /**

@@ -26,7 +26,7 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 from rio_tiler.errors import TileOutsideBounds
 
@@ -131,8 +131,17 @@ _GEOMETRY_FILES = {
     "patch": "rhessys/spatial_inputs_and_climates/masked_daymet_patchID_1985.geojson",
 }
 
-# In-memory cache: (runid, scale) → reprojected GeoJSON bytes
-_geometry_cache: TTLCache[tuple[str, str], bytes] = TTLCache(maxsize=10, ttl=3600)
+_PATCH_2021_SCENARIOS = {"S2", "S4b"}
+
+_PATCH_GEOMETRY_FILES = {
+    "1985": "rhessys/spatial_inputs_and_climates/masked_daymet_patchID_1985.geojson",
+    "2021": "rhessys/spatial_inputs_and_climates/masked_daymet_patchID_2021.geojson",
+}
+
+# In-memory cache: (runid, scale, geometry_revision) → reprojected GeoJSON bytes.
+# geometry_revision is None for hillslope; for patch it is "1985" or "2021" so
+# scenarios that share the same file (e.g. S2 and S4b → 2021) share one entry.
+_geometry_cache: TTLCache[tuple[str, str, str | None], bytes] = TTLCache(maxsize=20, ttl=3600)
 
 
 def _reproject_geojson(geojson: dict) -> dict:
@@ -198,6 +207,19 @@ class RhessysOutputGeometryView(APIView):
     @extend_schema(
         operation_id='watershed_rhessys_outputs_geometry_retrieve',
         summary='Get RHESSys hillslope/patch GeoJSON geometry (WGS84)',
+        parameters=[
+            OpenApiParameter(
+                name='scenario',
+                required=False,
+                type=str,
+                enum=['S1', 'S2', 'S4b'],
+                description=(
+                    'RHESSys scenario id; only affects patch geometry. '
+                    'S2 and S4b use 2021 patch IDs; S1, omitted, or other unknown '
+                    'values use 1985 patch IDs.'
+                ),
+            ),
+        ],
         responses={
             (200, 'application/geo+json'): OpenApiResponse(
                 description='GeoJSON FeatureCollection in WGS84',
@@ -205,11 +227,19 @@ class RhessysOutputGeometryView(APIView):
         },
     )
     def get(self, request, runid: str, scale: str):
-        geojson_path = _GEOMETRY_FILES.get(scale)
+        scenario = request.query_params.get("scenario")
+
+        if scale == "patch" and scenario in _PATCH_2021_SCENARIOS:
+            geojson_path = _PATCH_GEOMETRY_FILES["2021"]
+            geometry_revision = "2021"
+        else:
+            geojson_path = _GEOMETRY_FILES.get(scale)
+            geometry_revision = "1985" if scale == "patch" else None
+
         if not geojson_path:
             raise NotFound(f"Unknown spatial scale: {scale}. Use 'hillslope' or 'patch'.")
 
-        cache_key = (runid, scale)
+        cache_key = (runid, scale, geometry_revision)
         cached = _geometry_cache.get(cache_key)
         if cached is not None:
             return HttpResponse(cached, content_type="application/geo+json")

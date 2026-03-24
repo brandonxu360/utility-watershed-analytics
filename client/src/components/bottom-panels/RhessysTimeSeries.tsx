@@ -13,9 +13,8 @@ import { CoverageLineChart } from "../CoverageLineChart";
 import {
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_VARIABLES,
-} from "../../api/rhessysConstants";
-
-type VariableMeta = { id: string; label: string; units: string };
+  type GateCreekVariable,
+} from "../../api/rhessys/constants";
 
 const LINE_KEYS = [
   {
@@ -87,7 +86,7 @@ export const RhessysTimeSeries: React.FC = () => {
   const spatialScale = params.spatialScale ?? "hillslope";
   const effectiveScenario = params.scenario || GATE_CREEK_SCENARIOS[0].id;
 
-  const availableVariables: readonly VariableMeta[] =
+  const availableVariables: readonly GateCreekVariable[] =
     GATE_CREEK_VARIABLES[spatialScale];
 
   const effectiveVariable = useMemo(() => {
@@ -144,7 +143,7 @@ export const RhessysTimeSeries: React.FC = () => {
     });
   }, [dispatchLayerAction]);
 
-  const scaleLabel = isYearly ? "yearly avg" : "monthly avg";
+  const scaleLabel = isYearly ? "yearly avg" : "watershed monthly avg";
   const title = `${varMeta?.label ?? effectiveVariable} (${varMeta?.units ?? ""}, ${scaleLabel}) \u2013 ${effectiveScenario}`;
 
   return (
