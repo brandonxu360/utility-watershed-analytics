@@ -17,10 +17,6 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   });
 });
 
-vi.mock("../components/side-panels/DataLayers", () => ({
-  default: () => <div data-testid="data-layers-side-panel" />,
-}));
-
 const mockFetchWatersheds = vi.fn();
 
 vi.mock("../api/api", () => ({
@@ -189,13 +185,6 @@ describe("WatershedOverview", () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
-        expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
-      });
-
-      // Expand the Short Term Impact accordion
-      fireEvent.click(screen.getByText("Short Term Impact"));
-
-      await waitFor(() => {
         expect(
           screen.getByRole("link", {
             name: /View Detailed WEPP Model Results/i,
@@ -212,15 +201,6 @@ describe("WatershedOverview", () => {
       });
     });
 
-    it("renders the data layers side panel", async () => {
-      renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() => {
-        expect(
-          screen.getByTestId("data-layers-side-panel"),
-        ).toBeInTheDocument();
-      });
-    });
   });
 
   describe("navigation", () => {
@@ -320,13 +300,6 @@ describe("WatershedOverview", () => {
 
     it("WEPP model results link has proper aria-label and href", async () => {
       renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() => {
-        expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
-      });
-
-      // Expand the Short Term Impact accordion
-      fireEvent.click(screen.getByText("Short Term Impact"));
 
       await waitFor(() => {
         const weppLink = screen.getByRole("link", {
