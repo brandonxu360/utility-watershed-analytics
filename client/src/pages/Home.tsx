@@ -102,6 +102,10 @@ function ActiveBottomPanel({
     );
   }
 
+  if (isEffective("rhessysOutputs") || isEffective("rhessysSpatial")) {
+    return null;
+  }
+
   if (runId) {
     return (
       <BottomPanel isOpen>

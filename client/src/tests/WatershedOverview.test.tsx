@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
+import { WatershedProvider } from "../contexts/WatershedContext";
 
 const mockNavigate = vi.fn();
 
@@ -17,14 +18,20 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   });
 });
 
-vi.mock("../components/side-panels/DataLayers", () => ({
-  default: () => <div data-testid="data-layers-side-panel" />,
-}));
-
 const mockFetchWatersheds = vi.fn();
 
 vi.mock("../api/api", () => ({
   fetchWatersheds: () => mockFetchWatersheds(),
+}));
+
+vi.mock("../api/rhessysApi", () => ({
+  fetchRhessysSpatialInputs: vi.fn().mockResolvedValue({ files: [] }),
+}));
+
+vi.mock("../api/rhessysOutputsApi", () => ({
+  fetchRhessysOutputs: vi
+    .fn()
+    .mockResolvedValue({ scenarios: [], variables: [], value_ranges: {} }),
 }));
 
 // Sample watershed data
@@ -66,8 +73,13 @@ const createTestQueryClient = () =>
 
 const renderWithProviders = (ui: React.ReactElement) => {
   const queryClient = createTestQueryClient();
+  // Derive the runId from the current mock so WatershedProvider always
+  // matches what the component sees via useParams().
+  const runId = (mockUseParams() as string | null) ?? "test-watershed-123";
   return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+    <QueryClientProvider client={queryClient}>
+      <WatershedProvider runId={runId}>{ui}</WatershedProvider>
+    </QueryClientProvider>,
   );
 };
 
@@ -84,7 +96,7 @@ describe("WatershedOverview", () => {
   describe("loading state", () => {
     it("renders skeleton panel while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
 
       renderWithProviders(<WatershedOverview />);
 
@@ -95,7 +107,7 @@ describe("WatershedOverview", () => {
 
     it("renders skeleton buttons while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<WatershedOverview />);
 
@@ -189,13 +201,6 @@ describe("WatershedOverview", () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
-        expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
-      });
-
-      // Expand the Short Term Impact accordion
-      fireEvent.click(screen.getByText("Short Term Impact"));
-
-      await waitFor(() => {
         expect(
           screen.getByRole("link", {
             name: /View Detailed WEPP Model Results/i,
@@ -212,15 +217,6 @@ describe("WatershedOverview", () => {
       });
     });
 
-    it("renders the data layers side panel", async () => {
-      renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() => {
-        expect(
-          screen.getByTestId("data-layers-side-panel"),
-        ).toBeInTheDocument();
-      });
-    });
   });
 
   describe("navigation", () => {
@@ -320,13 +316,6 @@ describe("WatershedOverview", () => {
 
     it("WEPP model results link has proper aria-label and href", async () => {
       renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() => {
-        expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
-      });
-
-      // Expand the Short Term Impact accordion
-      fireEvent.click(screen.getByText("Short Term Impact"));
 
       await waitFor(() => {
         const weppLink = screen.getByRole("link", {

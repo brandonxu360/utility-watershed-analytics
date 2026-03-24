@@ -4,21 +4,26 @@ import { useRunId } from "../../hooks/useRunId";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import { fetchWatersheds } from "../../api/api";
+import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { tss } from "../../utils/tss";
-import { useSidePanelAccordionStyles } from "./styles";
 import { toast } from "react-toastify";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
 import Link from "@mui/material/Link";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import DataLayers from "./DataLayers";
+import Paper from "@mui/material/Paper";
+import WeppSection from "./sections/WeppSection";
+import WatershedDataSection from "./sections/WatershedDataSection";
+import RhessysSection from "./sections/RhessysSection";
+import RhessysOutputsSection from "./sections/RhessysOutputsSection";
+import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
+import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
 
 const useStyles = tss.create(({ theme }) => ({
+  root: {
+    paddingBottom: theme.spacing(4),
+  },
   closeButton: {
     backgroundColor: theme.palette.error.main,
     color: theme.palette.primary.light,
@@ -32,6 +37,21 @@ const useStyles = tss.create(({ theme }) => ({
   },
   modelsBox: {
     marginTop: theme.spacing(3),
+  },
+  impactPaper: {
+    marginTop: theme.spacing(1.5),
+    padding: theme.spacing(1.5),
+    backgroundColor: theme.palette.action.hover,
+    borderRadius: theme.shape.borderRadius,
+  },
+  sectionHeading: {
+    fontWeight: 600,
+    marginBottom: theme.spacing(1),
+  },
+  emptyState: {
+    fontSize: theme.typography.body2.fontSize,
+    color: theme.palette.text.secondary,
+    fontStyle: "italic",
   },
   title: {
     marginBottom: theme.spacing(1.5),
@@ -51,6 +71,7 @@ const useStyles = tss.create(({ theme }) => ({
     textAlign: "left",
     cursor: "pointer",
     display: "block",
+    marginBottom: theme.spacing(1.5),
   },
   skeletonClose: {
     marginTop: theme.spacing(1.5),
@@ -161,10 +182,17 @@ function SkeletonWatershedPanel() {
 
 export default function WatershedOverview() {
   const { classes } = useStyles();
-  const { classes: accordionClasses } = useSidePanelAccordionStyles();
   const navigate = useNavigate();
 
   const runId = useRunId();
+
+  const { files, isLoading: rhessysLoading } = useRhessysSpatialInputs(runId);
+  const {
+    scenarios: outputScenarios,
+    variables: outputVariables,
+    isLoading: outputsLoading,
+    hasChoroplethData,
+  } = useRhessysOutputs(runId);
 
   const {
     data: watersheds,
@@ -182,6 +210,13 @@ export default function WatershedOverview() {
         feature.id && feature.id.toString() === runId,
     );
   }, [watersheds?.features, runId]);
+
+  const hasNoLongTermData =
+    !rhessysLoading &&
+    !outputsLoading &&
+    files.length === 0 &&
+    outputScenarios.length === 0 &&
+    !hasChoroplethData;
 
   const hasMultipleUtilities =
     (watershed?.properties?.huc10_utility_count ?? 0) > 1;
@@ -205,7 +240,7 @@ export default function WatershedOverview() {
   }
 
   return (
-    <div>
+    <div className={classes.root}>
       <Button
         onClick={() => {
           navigate({ to: "/" });
@@ -250,87 +285,67 @@ export default function WatershedOverview() {
         {(watershed?.properties?.owner_type ||
           watershed?.properties?.pop_group ||
           watershed?.properties?.treat_type) && (
-          <>
-            <Typography variant="body1" className={classes.paragraph}>
-              <strong>Water Utility Type: </strong>
-              {watershed?.properties?.owner_type ?? "N/A"}
-            </Typography>
-            <Typography variant="body1" className={classes.paragraph}>
-              <strong>Customers Served: </strong>
-              {watershed?.properties?.pop_group ?? "N/A"}
-            </Typography>
-            <Typography variant="body1" className={classes.paragraph}>
-              <strong>Treatment Processes: </strong>
-              {watershed?.properties?.treat_type ?? "N/A"}
-            </Typography>
-          </>
-        )}
+            <>
+              <Typography variant="body1" className={classes.paragraph}>
+                <strong>Water Utility Type: </strong>
+                {watershed?.properties?.owner_type ?? "N/A"}
+              </Typography>
+              <Typography variant="body1" className={classes.paragraph}>
+                <strong>Customers Served: </strong>
+                {watershed?.properties?.pop_group ?? "N/A"}
+              </Typography>
+              <Typography variant="body1" className={classes.paragraph}>
+                <strong>Treatment Processes: </strong>
+                {watershed?.properties?.treat_type ?? "N/A"}
+              </Typography>
+            </>
+          )}
       </div>
 
       <div className={classes.modelsBox}>
-        <div>
-          <Typography variant="body1">
-            <strong>Impact Assessment</strong>
+        <Typography variant="body1">
+          <strong>Impact Assessment</strong>
+        </Typography>
+
+        <Paper elevation={0} className={classes.impactPaper}>
+          <Typography variant="body2" className={classes.sectionHeading}>
+            Short Term Impact
           </Typography>
-        </div>
-        <div className={accordionClasses.accordionGroup} key={runId}>
-          {/* Short Term Impact */}
-          <Accordion className={accordionClasses.accordion} disableGutters>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="short-term-content"
-              id="short-term-header"
-              className={accordionClasses.accordionSummary}
-            >
-              <Typography
-                component="span"
-                variant="body2"
-                className={accordionClasses.accordionSummaryLabel}
-              >
-                Short Term Impact
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails className={accordionClasses.accordionDetails}>
-              <Link
-                href={`https://wepp.cloud/weppcloud/runs/${runId}/disturbed9002_wbt/gl-dashboard`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={classes.actionLink}
-                underline="hover"
-                aria-label="View Detailed WEPP Model Results"
-              >
-                View Detailed WEPP Model Results
-              </Link>
-            </AccordionDetails>
-          </Accordion>
+          <Link
+            href={runId ? API_ENDPOINTS.WEPP_DASHBOARD(runId) : undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={classes.actionLink}
+            underline="hover"
+            aria-label="View Detailed WEPP Model Results"
+          >
+            View Detailed WEPP Model Results
+          </Link>
+          <WeppSection />
+          <WatershedDataSection />
+        </Paper>
 
-          {/* Long Term Impact */}
-          <Accordion className={accordionClasses.accordion} disableGutters>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="long-term-content"
-              id="long-term-header"
-              className={accordionClasses.accordionSummary}
-            >
-              <Typography
-                component="span"
-                variant="body2"
-                className={accordionClasses.accordionSummaryLabel}
-              >
-                Long Term Impact
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails className={accordionClasses.accordionDetails}>
-              <Typography variant="body2" color="textSecondary">
-                No features available yet.
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
-        </div>
+        <Paper elevation={0} className={classes.impactPaper}>
+          <Typography variant="body2" className={classes.sectionHeading}>
+            Long Term Impact
+          </Typography>
+          {hasNoLongTermData ? (
+            <Typography className={classes.emptyState}>
+              No long term impact data available for the selected watershed.
+            </Typography>
+          ) : (
+            <>
+              <RhessysSection files={files} isLoading={rhessysLoading} />
+              <RhessysOutputsSection
+                scenarios={outputScenarios}
+                variables={outputVariables}
+                isLoading={outputsLoading}
+                hasChoroplethData={hasChoroplethData}
+              />
+            </>
+          )}
+        </Paper>
       </div>
-
-      {/* Data Layers Content */}
-      <DataLayers />
     </div>
   );
 }

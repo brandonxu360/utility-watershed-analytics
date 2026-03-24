@@ -2,6 +2,19 @@
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://unstable.wepp.cloud/api";
 const QUERY_RUN_PATH = "https://wepp.cloud/query-engine/runs";
+const WEPPCLOUD_BASE = "https://wepp.cloud/weppcloud/runs";
+
+/**
+ * Default disturbed-scenario sub-run base used by the WEPPcloud batch pipeline.
+ * Standalone runs may use a different base (see WEPP_DASHBOARD_RUN_BASE_OVERRIDES).
+ */
+const DEFAULT_WEPP_DASHBOARD_RUN_BASE = "disturbed_wbt";
+
+/**
+ * Per-runId overrides for the WEPP dashboard sub-run base.
+ * Add entries here for standalone runs that deviate from the batch convention.
+ */
+const WEPP_DASHBOARD_RUN_BASE_OVERRIDES: Record<string, string> = {};
 
 /** Encode a user-supplied path segment to prevent URL breakage. */
 const e = encodeURIComponent;
@@ -44,4 +57,13 @@ export const API_ENDPOINTS = {
   // RHESSys output geometry proxy (hillslope/patch GeoJSON via backend to avoid CORS).
   RHESSYS_OUTPUTS_GEOMETRY: (runId: string, scale: string) =>
     `${API_BASE_URL}/watershed/${e(runId)}/rhessys/outputs/geometry/${e(scale)}`,
+  // WEPPcloud dashboard for a given watershed run.
+  // Resolves the correct disturbed-scenario sub-run base via the override map,
+  // falling back to the standard batch convention (disturbed_wbt).
+  WEPP_DASHBOARD: (runId: string) => {
+    const runBase =
+      WEPP_DASHBOARD_RUN_BASE_OVERRIDES[runId] ??
+      DEFAULT_WEPP_DASHBOARD_RUN_BASE;
+    return `${WEPPCLOUD_BASE}/${e(runId)}/${runBase}/gl-dashboard`;
+  },
 };

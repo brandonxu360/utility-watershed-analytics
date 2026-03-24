@@ -252,11 +252,7 @@ export default function RhessysOutputsSection({
   }
 
   if (!hasRasterData && !hasChoroplethData) {
-    return (
-      <Typography variant="body2" color="textSecondary">
-        No output data available.
-      </Typography>
-    );
+    return null;
   }
 
   // Pre-computed raster maps (Victoria + Mill Creek)

@@ -284,7 +284,10 @@ export default function WatershedMap(): JSX.Element {
     <div
       className={cx(
         classes.mapContainer,
-        runId && classes.mapContainerWithPanel,
+        runId &&
+        !rhessysSpatialEffective &&
+        (!rhessysOutputsEffective || rhessysChoroplethActive) &&
+        classes.mapContainerWithPanel,
       )}
     >
       <MapContainer
@@ -305,13 +308,13 @@ export default function WatershedMap(): JSX.Element {
           landuseLoading ||
           scenarioLoading ||
           rhessysChoroplethLoading) && (
-          <div
-            className={classes.mapLoadingOverlay}
-            data-testid="map-loading-overlay"
-          >
-            <CircularProgress size={50} color="inherit" />
-          </div>
-        )}
+            <div
+              className={classes.mapLoadingOverlay}
+              data-testid="map-loading-overlay"
+            >
+              <CircularProgress size={50} color="inherit" />
+            </div>
+          )}
 
         <TileLayer
           key={selectedLayerId}

@@ -96,11 +96,7 @@ export default function RhessysSection({
   }
 
   if (files.length === 0) {
-    return (
-      <Typography variant="body2" color="textSecondary">
-        No features available yet.
-      </Typography>
-    );
+    return null;
   }
 
   return (

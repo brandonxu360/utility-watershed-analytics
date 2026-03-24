@@ -74,7 +74,7 @@ export default function WatershedDataSection() {
       </div>
       <div className={classes.layer}>
         <Typography className={classes.layerTitle}>
-          Soil Burn Severity
+          Predicted Soil Burn Severity
         </Typography>
         <Checkbox
           checked={sbsChecked}
