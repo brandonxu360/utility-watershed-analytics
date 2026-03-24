@@ -73,6 +73,9 @@ export type ScenarioSummaryRow = {
   hillslopeSoilLoss: number | null;
   channelSoilLoss: number | null;
   sedimentDischarge: number | null;
+  hillslopeSoilLossTonnes: number | null;
+  channelSoilLossTonnes: number | null;
+  sedimentDischargeTonnes: number | null;
 };
 
 /**
@@ -132,19 +135,23 @@ export async function fetchScenariosSummary(
           ? val / totalArea
           : null;
 
+      const rawHillslopeSoilLoss =
+        metrics.get("Avg. Ann. total hillslope soil loss") ?? null;
+      const rawChannelSoilLoss =
+        metrics.get("Avg. Ann. total channel soil loss") ?? null;
+      const rawSedimentDischarge =
+        metrics.get("Avg. Ann. sediment discharge from outlet") ?? null;
+
       return {
         scenario,
         label: formatScenarioLabel(scenario),
         waterDischarge,
-        hillslopeSoilLoss: toPerHa(
-          metrics.get("Avg. Ann. total hillslope soil loss") ?? null,
-        ),
-        channelSoilLoss: toPerHa(
-          metrics.get("Avg. Ann. total channel soil loss") ?? null,
-        ),
-        sedimentDischarge: toPerHa(
-          metrics.get("Avg. Ann. sediment discharge from outlet") ?? null,
-        ),
+        hillslopeSoilLoss: toPerHa(rawHillslopeSoilLoss),
+        channelSoilLoss: toPerHa(rawChannelSoilLoss),
+        sedimentDischarge: toPerHa(rawSedimentDischarge),
+        hillslopeSoilLossTonnes: rawHillslopeSoilLoss,
+        channelSoilLossTonnes: rawChannelSoilLoss,
+        sedimentDischargeTonnes: rawSedimentDischarge,
       };
     }),
   );

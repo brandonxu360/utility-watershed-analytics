@@ -35,8 +35,8 @@ const useStyles = tss.create(({ theme }) => ({
 
 type MetricKey = {
   [K in keyof ScenarioSummaryRow]: ScenarioSummaryRow[K] extends number | null
-    ? K
-    : never;
+  ? K
+  : never;
 }[keyof ScenarioSummaryRow];
 
 type MetricColumn = {
@@ -60,6 +60,18 @@ const METRIC_COLUMNS: MetricColumn[] = [
   {
     header: "Sediment discharge from outlet (t/ha)",
     key: "sedimentDischarge",
+  },
+  {
+    header: "Hillslope soil loss (t)",
+    key: "hillslopeSoilLossTonnes",
+  },
+  {
+    header: "Channel soil loss (t)",
+    key: "channelSoilLossTonnes",
+  },
+  {
+    header: "Sediment discharge from outlet (t)",
+    key: "sedimentDischargeTonnes",
   },
 ];
 
