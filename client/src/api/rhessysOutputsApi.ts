@@ -102,13 +102,13 @@ export async function fetchRhessysChoropleth(opts: {
  * Fetch the hillslope or patch GeoJSON geometry via the backend proxy.
  *
  * The backend proxies the request to WEPPcloud to avoid CORS issues.
- * For patch geometry, the `scenario` parameter selects the correct GeoJSON
- * (S1 uses 1985 patch IDs, S2/S4b use 2021 patch IDs).
+ * For patch geometry, the `scenario` query parameter selects the GeoJSON asset
+ * (omitted or non–2021 scenarios → 1985 patch IDs; S2 or S4b → 2021 patch IDs).
  *
  * @param runId        - The `webcloud_run_id` of the watershed.
  * @param spatialScale - `"hillslope"` or `"patch"`.
  * @param signal       - {@link AbortSignal} for request cancellation.
- * @param scenario     - Optional scenario id; used to select correct patch geometry.
+ * @param scenario     - Optional; when `"S2"` or `"S4b"`, selects 2021 patch geometry.
  */
 export async function fetchRhessysGeometry(
   runId: string,

@@ -99,12 +99,18 @@ describe("queryKeys", () => {
     ]);
   });
 
-  it("rhessysGeometry.byScale includes scenario when provided", () => {
-    expect(queryKeys.rhessysGeometry.byScale("r1", "patch", "S2")).toEqual([
+  it("rhessysGeometry.byScale includes patch geometry revision when provided", () => {
+    expect(queryKeys.rhessysGeometry.byScale("r1", "patch", "2021")).toEqual([
       "rhessys-geometry",
       "r1",
       "patch",
-      "S2",
+      "2021",
+    ]);
+    expect(queryKeys.rhessysGeometry.byScale("r1", "patch", "1985")).toEqual([
+      "rhessys-geometry",
+      "r1",
+      "patch",
+      "1985",
     ]);
   });
 

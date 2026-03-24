@@ -211,3 +211,30 @@ export function resolveParquetConfig(
 
 /** Scenarios that use the 2021 patch geometry instead of 1985. */
 export const PATCH_2021_SCENARIOS: ReadonlySet<string> = new Set(["S2", "S4b"]);
+
+/** Distinct patch GeoJSON assets; used for React Query / cache keys. */
+export type PatchGeometryRevision = "1985" | "2021";
+
+/**
+ * Scenario query value that selects 2021 patch geometry on the API.
+ * Any scenario in {@link PATCH_2021_SCENARIOS} works; one canonical id keeps URLs stable.
+ */
+export const PATCH_GEOMETRY_2021_QUERY_SCENARIO = "S2" as const;
+
+/** Geometry revision for cache keys: hillslope → null; patch → 1985 or 2021. */
+export function getPatchGeometryRevision(
+  spatialScale: SpatialScale,
+  scenario: string | null | undefined,
+): PatchGeometryRevision | null {
+  if (spatialScale !== "patch") return null;
+  if (scenario && PATCH_2021_SCENARIOS.has(scenario)) return "2021";
+  return "1985";
+}
+
+/** Query param for geometry fetch; null means omit (1985 patch IDs on the server). */
+export function getPatchGeometryQueryScenario(
+  revision: PatchGeometryRevision | null,
+): string | null {
+  if (revision === "2021") return PATCH_GEOMETRY_2021_QUERY_SCENARIO;
+  return null;
+}
