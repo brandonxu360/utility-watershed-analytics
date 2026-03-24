@@ -4,6 +4,7 @@ import { useRunId } from "../../hooks/useRunId";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import { fetchWatersheds } from "../../api/api";
+import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { tss } from "../../utils/tss";
 import { toast } from "react-toastify";
@@ -284,21 +285,21 @@ export default function WatershedOverview() {
         {(watershed?.properties?.owner_type ||
           watershed?.properties?.pop_group ||
           watershed?.properties?.treat_type) && (
-          <>
-            <Typography variant="body1" className={classes.paragraph}>
-              <strong>Water Utility Type: </strong>
-              {watershed?.properties?.owner_type ?? "N/A"}
-            </Typography>
-            <Typography variant="body1" className={classes.paragraph}>
-              <strong>Customers Served: </strong>
-              {watershed?.properties?.pop_group ?? "N/A"}
-            </Typography>
-            <Typography variant="body1" className={classes.paragraph}>
-              <strong>Treatment Processes: </strong>
-              {watershed?.properties?.treat_type ?? "N/A"}
-            </Typography>
-          </>
-        )}
+            <>
+              <Typography variant="body1" className={classes.paragraph}>
+                <strong>Water Utility Type: </strong>
+                {watershed?.properties?.owner_type ?? "N/A"}
+              </Typography>
+              <Typography variant="body1" className={classes.paragraph}>
+                <strong>Customers Served: </strong>
+                {watershed?.properties?.pop_group ?? "N/A"}
+              </Typography>
+              <Typography variant="body1" className={classes.paragraph}>
+                <strong>Treatment Processes: </strong>
+                {watershed?.properties?.treat_type ?? "N/A"}
+              </Typography>
+            </>
+          )}
       </div>
 
       <div className={classes.modelsBox}>
@@ -311,7 +312,7 @@ export default function WatershedOverview() {
             Short Term Impact
           </Typography>
           <Link
-            href={`https://wepp.cloud/weppcloud/runs/${runId}/disturbed9002_wbt/gl-dashboard`}
+            href={runId ? API_ENDPOINTS.WEPP_DASHBOARD(runId) : undefined}
             target="_blank"
             rel="noopener noreferrer"
             className={classes.actionLink}

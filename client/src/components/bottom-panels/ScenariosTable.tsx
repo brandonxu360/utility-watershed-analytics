@@ -62,16 +62,16 @@ const METRIC_COLUMNS: MetricColumn[] = [
     key: "sedimentDischarge",
   },
   {
-    header: "Hillslope soil loss (t)",
-    key: "hillslopeSoilLossTonnes",
+    header: "Hillslope soil loss (t/yr)",
+    key: "hillslopeSoilLossTonnesPerYear",
   },
   {
-    header: "Channel soil loss (t)",
-    key: "channelSoilLossTonnes",
+    header: "Channel soil loss (t/yr)",
+    key: "channelSoilLossTonnesPerYear",
   },
   {
-    header: "Sediment discharge from outlet (t)",
-    key: "sedimentDischargeTonnes",
+    header: "Sediment discharge from outlet (t/yr)",
+    key: "sedimentDischargeTonnesPerYear",
   },
 ];
 

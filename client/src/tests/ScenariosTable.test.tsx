@@ -31,9 +31,9 @@ function makeRow(
     hillslopeSoilLoss: 2,
     channelSoilLoss: 1.5,
     sedimentDischarge: 3,
-    hillslopeSoilLossTonnes: 200,
-    channelSoilLossTonnes: 150,
-    sedimentDischargeTonnes: 300,
+    hillslopeSoilLossTonnesPerYear: 200,
+    channelSoilLossTonnesPerYear: 150,
+    sedimentDischargeTonnesPerYear: 300,
     ...overrides,
   };
 }
@@ -164,6 +164,33 @@ describe("ScenariosTable", () => {
         }),
       ).toBeInTheDocument();
     });
+
+    it("renders the hillslope-soil-loss-per-year header with t/yr units", () => {
+      render(<ScenariosTable />);
+      expect(
+        screen.getByRole("columnheader", {
+          name: /hillslope soil loss \(t\/yr\)/i,
+        }),
+      ).toBeInTheDocument();
+    });
+
+    it("renders the channel-soil-loss-per-year header with t/yr units", () => {
+      render(<ScenariosTable />);
+      expect(
+        screen.getByRole("columnheader", {
+          name: /channel soil loss \(t\/yr\)/i,
+        }),
+      ).toBeInTheDocument();
+    });
+
+    it("renders the sediment-discharge-per-year header with t/yr units", () => {
+      render(<ScenariosTable />);
+      expect(
+        screen.getByRole("columnheader", {
+          name: /sediment discharge from outlet \(t\/yr\)/i,
+        }),
+      ).toBeInTheDocument();
+    });
   });
 
   describe("metric values rendered directly", () => {
@@ -244,6 +271,54 @@ describe("ScenariosTable", () => {
         isLoading: false,
         isError: false,
         data: [makeRow({ waterDischarge: null })],
+        error: null,
+      });
+      render(<ScenariosTable />);
+      const table = screen.getByTestId("scenarios-table");
+      expect(table).toHaveTextContent("—");
+    });
+
+    it("renders hillslopeSoilLossTonnesPerYear value", () => {
+      mockUseQuery.mockReturnValue({
+        isLoading: false,
+        isError: false,
+        data: [makeRow({ hillslopeSoilLossTonnesPerYear: 42.5 })],
+        error: null,
+      });
+      render(<ScenariosTable />);
+      const table = screen.getByTestId("scenarios-table");
+      expect(table).toHaveTextContent("42.5");
+    });
+
+    it("renders channelSoilLossTonnesPerYear value", () => {
+      mockUseQuery.mockReturnValue({
+        isLoading: false,
+        isError: false,
+        data: [makeRow({ channelSoilLossTonnesPerYear: 7.8 })],
+        error: null,
+      });
+      render(<ScenariosTable />);
+      const table = screen.getByTestId("scenarios-table");
+      expect(table).toHaveTextContent("7.8");
+    });
+
+    it("renders sedimentDischargeTonnesPerYear value", () => {
+      mockUseQuery.mockReturnValue({
+        isLoading: false,
+        isError: false,
+        data: [makeRow({ sedimentDischargeTonnesPerYear: 12.34 })],
+        error: null,
+      });
+      render(<ScenariosTable />);
+      const table = screen.getByTestId("scenarios-table");
+      expect(table).toHaveTextContent("12.34");
+    });
+
+    it("renders dash when hillslopeSoilLossTonnesPerYear is null", () => {
+      mockUseQuery.mockReturnValue({
+        isLoading: false,
+        isError: false,
+        data: [makeRow({ hillslopeSoilLossTonnesPerYear: null })],
         error: null,
       });
       render(<ScenariosTable />);

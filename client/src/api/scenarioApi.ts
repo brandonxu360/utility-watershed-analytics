@@ -73,9 +73,12 @@ export type ScenarioSummaryRow = {
   hillslopeSoilLoss: number | null;
   channelSoilLoss: number | null;
   sedimentDischarge: number | null;
-  hillslopeSoilLossTonnes: number | null;
-  channelSoilLossTonnes: number | null;
-  sedimentDischargeTonnes: number | null;
+  /** Avg. annual hillslope soil loss in tonnes/year (raw metric value before per-ha conversion). */
+  hillslopeSoilLossTonnesPerYear: number | null;
+  /** Avg. annual channel soil loss in tonnes/year (raw metric value before per-ha conversion). */
+  channelSoilLossTonnesPerYear: number | null;
+  /** Avg. annual sediment discharge from outlet in tonnes/year (raw metric value before per-ha conversion). */
+  sedimentDischargeTonnesPerYear: number | null;
 };
 
 /**
@@ -149,9 +152,9 @@ export async function fetchScenariosSummary(
         hillslopeSoilLoss: toPerHa(rawHillslopeSoilLoss),
         channelSoilLoss: toPerHa(rawChannelSoilLoss),
         sedimentDischarge: toPerHa(rawSedimentDischarge),
-        hillslopeSoilLossTonnes: rawHillslopeSoilLoss,
-        channelSoilLossTonnes: rawChannelSoilLoss,
-        sedimentDischargeTonnes: rawSedimentDischarge,
+        hillslopeSoilLossTonnesPerYear: rawHillslopeSoilLoss,
+        channelSoilLossTonnesPerYear: rawChannelSoilLoss,
+        sedimentDischargeTonnesPerYear: rawSedimentDischarge,
       };
     }),
   );

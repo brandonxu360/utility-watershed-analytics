@@ -286,7 +286,7 @@ export default function WatershedMap(): JSX.Element {
         classes.mapContainer,
         runId &&
         !rhessysSpatialEffective &&
-        !rhessysOutputsEffective &&
+        (!rhessysOutputsEffective || rhessysChoroplethActive) &&
         classes.mapContainerWithPanel,
       )}
     >
