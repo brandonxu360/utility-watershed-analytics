@@ -210,12 +210,7 @@ export default function RhessysOutputsSection({
         }
       }
     },
-    [
-      updateParams,
-      dispatchLayerAction,
-      layerEnabled,
-      selectedVariable,
-    ],
+    [updateParams, dispatchLayerAction, layerEnabled, selectedVariable],
   );
 
   const handleChoroplethScenarioChange = useCallback(

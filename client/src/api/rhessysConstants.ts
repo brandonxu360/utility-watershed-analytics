@@ -38,21 +38,23 @@ export const PARQUET_PATHS: Record<string, Record<SpatialScale, string>> = {
 };
 
 /** Growth parquets: grow_hillslope.daily / grow_patch.yearly per scenario. */
-export const GROW_PARQUET_PATHS: Record<string, Record<SpatialScale, string>> =
-  {
-    S1: {
-      hillslope: "rhessys/scenarios/S1/grow_hillslope.daily.parquet",
-      patch: "rhessys/scenarios/S1/grow_patch.yearly.parquet",
-    },
-    S2: {
-      hillslope: "rhessys/scenarios/S2/grow_hillslope.daily.parquet",
-      patch: "rhessys/scenarios/S2/grow_patch.yearly.parquet",
-    },
-    S4b: {
-      hillslope: "rhessys/scenarios/S4b/grow_hillslope.daily.parquet",
-      patch: "rhessys/scenarios/S4b/grow_patch.yearly.parquet",
-    },
-  };
+export const GROW_PARQUET_PATHS: Record<
+  string,
+  Record<SpatialScale, string>
+> = {
+  S1: {
+    hillslope: "rhessys/scenarios/S1/grow_hillslope.daily.parquet",
+    patch: "rhessys/scenarios/S1/grow_patch.yearly.parquet",
+  },
+  S2: {
+    hillslope: "rhessys/scenarios/S2/grow_hillslope.daily.parquet",
+    patch: "rhessys/scenarios/S2/grow_patch.yearly.parquet",
+  },
+  S4b: {
+    hillslope: "rhessys/scenarios/S4b/grow_hillslope.daily.parquet",
+    patch: "rhessys/scenarios/S4b/grow_patch.yearly.parquet",
+  },
+};
 
 /**
  * Basin-level daily parquets (one row per day for the whole watershed).
@@ -122,14 +124,34 @@ export const GATE_CREEK_VARIABLES: Record<SpatialScale, GateCreekVariable[]> = {
     { id: "evap", label: "Evaporation", units: "mm/day", source: "base" },
     { id: "lai", label: "LAI", units: "m\u00b2/m\u00b2", source: "grow" },
     { id: "gpsn", label: "GPP", units: "gC/m\u00b2/day", source: "grow" },
-    { id: "plantc", label: "Plant Biomass", units: "kgC/m\u00b2", source: "grow" },
+    {
+      id: "plantc",
+      label: "Plant Biomass",
+      units: "kgC/m\u00b2",
+      source: "grow",
+    },
   ],
   patch: [
     { id: "et", label: "Evapotranspiration", units: "mm/yr", source: "base" },
     { id: "lai", label: "LAI", units: "m\u00b2/m\u00b2", source: "base" },
-    { id: "plant_c", label: "Plant Carbon", units: "kgC/m\u00b2", source: "grow" },
-    { id: "litter_c", label: "Litter Carbon", units: "kgC/m\u00b2", source: "grow" },
-    { id: "soil_c", label: "Soil Carbon", units: "kgC/m\u00b2", source: "grow" },
+    {
+      id: "plant_c",
+      label: "Plant Carbon",
+      units: "kgC/m\u00b2",
+      source: "grow",
+    },
+    {
+      id: "litter_c",
+      label: "Litter Carbon",
+      units: "kgC/m\u00b2",
+      source: "grow",
+    },
+    {
+      id: "soil_c",
+      label: "Soil Carbon",
+      units: "kgC/m\u00b2",
+      source: "grow",
+    },
   ],
 };
 

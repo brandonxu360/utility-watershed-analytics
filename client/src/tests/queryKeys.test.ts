@@ -108,7 +108,6 @@ describe("queryKeys", () => {
     ]);
   });
 
-
   it("keys are readonly tuples (immutable)", () => {
     const key = queryKeys.subcatchments.byRun("x");
     // TypeScript readonly prevents mutation; at runtime we just ensure shape
