@@ -8,7 +8,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import {
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_YEAR_RANGE,
-} from "../../../api/rhessysConstants";
+} from "../../../api/rhessys/constants";
 
 interface ChoroplethVariable {
   id: string;

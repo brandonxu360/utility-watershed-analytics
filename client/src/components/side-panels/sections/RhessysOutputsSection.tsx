@@ -14,7 +14,7 @@ import type {
   RhessysOutputVariable,
 } from "../../../api/types";
 
-import { GATE_CREEK_VARIABLES } from "../../../api/rhessysConstants";
+import { GATE_CREEK_VARIABLES } from "../../../api/rhessys/constants";
 import RasterModeSection from "./RasterModeSection";
 import ChoroplethModeSection from "./ChoroplethModeSection";
 

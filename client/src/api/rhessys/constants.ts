@@ -1,13 +1,11 @@
 /**
  * Static domain constants for the Gate Creek RHESSys integration.
  *
- * Centralises parquet paths, scenario/variable catalogs, year ranges,
- * and the set of run IDs that support the dynamic choropleth / time-series
- * features.  Fetch functions live in rhessysOutputsApi.ts and import
- * from here as needed.
+ * Parquet paths, scenario/variable catalogs, and geometry metadata.
+ * Helper functions live in `utils.ts` alongside this file.
  */
 
-import type { SpatialScale } from "./types";
+import type { SpatialScale } from "../types";
 
 /**
  * Run IDs whose WEPPcloud stores contain RHESSys scenario parquet files
@@ -155,60 +153,6 @@ export const GATE_CREEK_VARIABLES: Record<SpatialScale, GateCreekVariable[]> = {
   ],
 };
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Look up variable metadata, including its source parquet type. */
-export function getVariableMeta(
-  spatialScale: SpatialScale,
-  variableId: string,
-): GateCreekVariable | undefined {
-  return GATE_CREEK_VARIABLES[spatialScale].find((v) => v.id === variableId);
-}
-
-/**
- * How to resolve parquet paths for a variable.
- *
- * - `choropleth` — spatial outputs (`hillslope.daily`, `patch.yearly`, etc.).
- * - `timeSeries` — same as choropleth for patch; for hillslope uses
- *   `basin.daily` / `grow_basin.daily` (watershed aggregate daily series).
- */
-export type ParquetResolutionMode = "choropleth" | "timeSeries";
-
-/** Resolve the parquet path and spatial-ID column for a given variable. */
-export function resolveParquetConfig(
-  scenario: string,
-  spatialScale: SpatialScale,
-  source: VariableSource,
-  mode: ParquetResolutionMode = "choropleth",
-): { datasetPath: string; idColumn: string } {
-  if (mode === "timeSeries" && spatialScale === "hillslope") {
-    const datasetPath =
-      source === "grow"
-        ? GROW_BASIN_DAILY_PATHS[scenario]
-        : BASIN_DAILY_PATHS[scenario];
-    if (!datasetPath) throw new Error(`Unknown scenario: ${scenario}`);
-    return {
-      datasetPath,
-      // Unused for time-series queries; basin-level daily rows use basinID.
-      idColumn: "basinID",
-    };
-  }
-
-  const paths = source === "grow" ? GROW_PARQUET_PATHS : PARQUET_PATHS;
-  const scenarioPaths = paths[scenario];
-  if (!scenarioPaths) throw new Error(`Unknown scenario: ${scenario}`);
-
-  const idColumns =
-    source === "grow" ? GROW_SPATIAL_ID_COLUMN : SPATIAL_ID_COLUMN;
-
-  return {
-    datasetPath: scenarioPaths[spatialScale],
-    idColumn: idColumns[spatialScale],
-  };
-}
-
 /** Scenarios that use the 2021 patch geometry instead of 1985. */
 export const PATCH_2021_SCENARIOS: ReadonlySet<string> = new Set(["S2", "S4b"]);
 
@@ -220,21 +164,3 @@ export type PatchGeometryRevision = "1985" | "2021";
  * Any scenario in {@link PATCH_2021_SCENARIOS} works; one canonical id keeps URLs stable.
  */
 export const PATCH_GEOMETRY_2021_QUERY_SCENARIO = "S2" as const;
-
-/** Geometry revision for cache keys: hillslope → null; patch → 1985 or 2021. */
-export function getPatchGeometryRevision(
-  spatialScale: SpatialScale,
-  scenario: string | null | undefined,
-): PatchGeometryRevision | null {
-  if (spatialScale !== "patch") return null;
-  if (scenario && PATCH_2021_SCENARIOS.has(scenario)) return "2021";
-  return "1985";
-}
-
-/** Query param for geometry fetch; null means omit (1985 patch IDs on the server). */
-export function getPatchGeometryQueryScenario(
-  revision: PatchGeometryRevision | null,
-): string | null {
-  if (revision === "2021") return PATCH_GEOMETRY_2021_QUERY_SCENARIO;
-  return null;
-}

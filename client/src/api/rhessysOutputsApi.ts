@@ -2,7 +2,7 @@ import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
 import { postQuery, toFiniteNumber } from "./queryUtils";
 
-import { getVariableMeta, resolveParquetConfig } from "./rhessysConstants";
+import { getVariableMeta, resolveParquetConfig } from "./rhessys/utils";
 
 import type {
   RhessysOutputListResponse,

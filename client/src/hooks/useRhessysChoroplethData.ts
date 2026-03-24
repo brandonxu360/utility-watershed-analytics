@@ -23,7 +23,7 @@ import {
 import {
   getPatchGeometryQueryScenario,
   getPatchGeometryRevision,
-} from "../api/rhessysConstants";
+} from "../api/rhessys/utils";
 import { computeRobustRange } from "../utils/colormap";
 
 export function useRhessysChoroplethData() {

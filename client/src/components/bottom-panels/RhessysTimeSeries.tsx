@@ -14,7 +14,7 @@ import {
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_VARIABLES,
   type GateCreekVariable,
-} from "../../api/rhessysConstants";
+} from "../../api/rhessys/constants";
 
 const LINE_KEYS = [
   {
