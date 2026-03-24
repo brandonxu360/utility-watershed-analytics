@@ -60,11 +60,11 @@ export const queryKeys = {
     ) => ["rhessys-choropleth", runId, scenario, variable, spatialScale, year],
   },
   rhessysGeometry: {
-    byScale: (runId: string, spatialScale: string) => [
-      "rhessys-geometry",
-      runId,
-      spatialScale,
-    ],
+    byScale: (
+      runId: string,
+      spatialScale: string,
+      scenario?: string | null,
+    ) => ["rhessys-geometry", runId, spatialScale, scenario ?? null],
   },
   rhessysTimeSeries: {
     byParams: (

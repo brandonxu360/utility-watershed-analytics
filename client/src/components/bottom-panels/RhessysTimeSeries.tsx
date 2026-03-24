@@ -13,9 +13,8 @@ import { CoverageLineChart } from "../CoverageLineChart";
 import {
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_VARIABLES,
+  type GateCreekVariable,
 } from "../../api/rhessysConstants";
-
-type VariableMeta = { id: string; label: string; units: string };
 
 const LINE_KEYS = [
   {
@@ -87,7 +86,7 @@ export const RhessysTimeSeries: React.FC = () => {
   const spatialScale = params.spatialScale ?? "hillslope";
   const effectiveScenario = params.scenario || GATE_CREEK_SCENARIOS[0].id;
 
-  const availableVariables: readonly VariableMeta[] =
+  const availableVariables: readonly GateCreekVariable[] =
     GATE_CREEK_VARIABLES[spatialScale];
 
   const effectiveVariable = useMemo(() => {

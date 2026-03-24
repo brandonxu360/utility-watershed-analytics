@@ -17,8 +17,11 @@ export const CHOROPLETH_RUN_IDS: ReadonlySet<string> = new Set([
   "aversive-forestry",
 ]);
 
+// ---------------------------------------------------------------------------
 // Parquet dataset paths
+// ---------------------------------------------------------------------------
 
+/** Hydrology parquets: hillslope.daily / patch.yearly per scenario. */
 export const PARQUET_PATHS: Record<string, Record<SpatialScale, string>> = {
   S1: {
     hillslope: "rhessys/scenarios/S1/hillslope.daily.parquet",
@@ -34,18 +37,61 @@ export const PARQUET_PATHS: Record<string, Record<SpatialScale, string>> = {
   },
 };
 
-export const SPATIAL_ID_COLUMN: Record<SpatialScale, string> = {
-  hillslope: "hillID",
-  patch: "patchID",
-};
+/** Growth parquets: grow_hillslope.daily / grow_patch.yearly per scenario. */
+export const GROW_PARQUET_PATHS: Record<string, Record<SpatialScale, string>> =
+  {
+    S1: {
+      hillslope: "rhessys/scenarios/S1/grow_hillslope.daily.parquet",
+      patch: "rhessys/scenarios/S1/grow_patch.yearly.parquet",
+    },
+    S2: {
+      hillslope: "rhessys/scenarios/S2/grow_hillslope.daily.parquet",
+      patch: "rhessys/scenarios/S2/grow_patch.yearly.parquet",
+    },
+    S4b: {
+      hillslope: "rhessys/scenarios/S4b/grow_hillslope.daily.parquet",
+      patch: "rhessys/scenarios/S4b/grow_patch.yearly.parquet",
+    },
+  };
 
+/** Retained for potential future basin-level views. */
 export const BASIN_DAILY_PATHS: Record<string, string> = {
   S1: "rhessys/scenarios/S1/basin.daily.parquet",
   S2: "rhessys/scenarios/S2/basin.daily.parquet",
   S4b: "rhessys/scenarios/S4b/basin.daily.parquet",
 };
 
+// ---------------------------------------------------------------------------
+// Spatial-ID columns
+// ---------------------------------------------------------------------------
+
+export const SPATIAL_ID_COLUMN: Record<SpatialScale, string> = {
+  hillslope: "hillID",
+  patch: "patchID",
+};
+
+/** grow_hillslope uses `basinID` as its spatial key per the data spec. */
+export const GROW_SPATIAL_ID_COLUMN: Record<SpatialScale, string> = {
+  hillslope: "basinID",
+  patch: "patchID",
+};
+
+// ---------------------------------------------------------------------------
+// Variable source type — determines which parquet file to query
+// ---------------------------------------------------------------------------
+
+export type VariableSource = "base" | "grow";
+
+export type GateCreekVariable = {
+  id: string;
+  label: string;
+  units: string;
+  source: VariableSource;
+};
+
+// ---------------------------------------------------------------------------
 // Gate Creek UI metadata
+// ---------------------------------------------------------------------------
 
 export const GATE_CREEK_YEAR_RANGE = { min: 1985, max: 2024 };
 
@@ -55,21 +101,56 @@ export const GATE_CREEK_SCENARIOS = [
   { id: "S4b", label: "S4b \u2013 Post-fire Regrowth" },
 ];
 
-export const GATE_CREEK_VARIABLES: Record<
-  SpatialScale,
-  { id: string; label: string; units: string }[]
-> = {
+export const GATE_CREEK_VARIABLES: Record<SpatialScale, GateCreekVariable[]> = {
   hillslope: [
-    { id: "streamflow", label: "Streamflow", units: "mm/day" },
-    { id: "baseflow", label: "Baseflow", units: "mm/day" },
-    { id: "return", label: "Return Flow", units: "mm/day" },
-    { id: "trans", label: "Transpiration", units: "mm/day" },
-    { id: "evap", label: "Evaporation", units: "mm/day" },
+    { id: "streamflow", label: "Streamflow", units: "mm/day", source: "base" },
+    { id: "baseflow", label: "Baseflow", units: "mm/day", source: "base" },
+    { id: "return", label: "Return Flow", units: "mm/day", source: "base" },
+    { id: "trans", label: "Transpiration", units: "mm/day", source: "base" },
+    { id: "evap", label: "Evaporation", units: "mm/day", source: "base" },
+    { id: "lai", label: "LAI", units: "m\u00b2/m\u00b2", source: "grow" },
+    { id: "gpsn", label: "GPP", units: "gC/m\u00b2/day", source: "grow" },
+    { id: "plantc", label: "Plant Biomass", units: "kgC/m\u00b2", source: "grow" },
   ],
   patch: [
-    { id: "et", label: "Evapotranspiration", units: "mm/yr" },
-    { id: "lai", label: "LAI", units: "m\u00b2/m\u00b2" },
-    { id: "plantc", label: "Plant Carbon", units: "kgC/m\u00b2" },
-    { id: "streamflow", label: "Streamflow", units: "mm/yr" },
+    { id: "et", label: "Evapotranspiration", units: "mm/yr", source: "base" },
+    { id: "lai", label: "LAI", units: "m\u00b2/m\u00b2", source: "base" },
+    { id: "plant_c", label: "Plant Carbon", units: "kgC/m\u00b2", source: "grow" },
+    { id: "litter_c", label: "Litter Carbon", units: "kgC/m\u00b2", source: "grow" },
+    { id: "soil_c", label: "Soil Carbon", units: "kgC/m\u00b2", source: "grow" },
   ],
 };
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Look up variable metadata, including its source parquet type. */
+export function getVariableMeta(
+  spatialScale: SpatialScale,
+  variableId: string,
+): GateCreekVariable | undefined {
+  return GATE_CREEK_VARIABLES[spatialScale].find((v) => v.id === variableId);
+}
+
+/** Resolve the parquet path and spatial-ID column for a given variable. */
+export function resolveParquetConfig(
+  scenario: string,
+  spatialScale: SpatialScale,
+  source: VariableSource,
+): { datasetPath: string; idColumn: string } {
+  const paths = source === "grow" ? GROW_PARQUET_PATHS : PARQUET_PATHS;
+  const scenarioPaths = paths[scenario];
+  if (!scenarioPaths) throw new Error(`Unknown scenario: ${scenario}`);
+
+  const idColumns =
+    source === "grow" ? GROW_SPATIAL_ID_COLUMN : SPATIAL_ID_COLUMN;
+
+  return {
+    datasetPath: scenarioPaths[spatialScale],
+    idColumn: idColumns[spatialScale],
+  };
+}
+
+/** Scenarios that use the 2021 patch geometry instead of 1985. */
+export const PATCH_2021_SCENARIOS: ReadonlySet<string> = new Set(["S2", "S4b"]);

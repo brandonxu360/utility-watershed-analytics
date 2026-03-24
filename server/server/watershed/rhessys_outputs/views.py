@@ -131,8 +131,15 @@ _GEOMETRY_FILES = {
     "patch": "rhessys/spatial_inputs_and_climates/masked_daymet_patchID_1985.geojson",
 }
 
-# In-memory cache: (runid, scale) → reprojected GeoJSON bytes
-_geometry_cache: TTLCache[tuple[str, str], bytes] = TTLCache(maxsize=10, ttl=3600)
+_PATCH_2021_SCENARIOS = {"S2", "S4b"}
+
+_PATCH_GEOMETRY_FILES = {
+    "1985": "rhessys/spatial_inputs_and_climates/masked_daymet_patchID_1985.geojson",
+    "2021": "rhessys/spatial_inputs_and_climates/masked_daymet_patchID_2021.geojson",
+}
+
+# In-memory cache: (runid, scale, scenario_key) → reprojected GeoJSON bytes
+_geometry_cache: TTLCache[tuple[str, str, str | None], bytes] = TTLCache(maxsize=20, ttl=3600)
 
 
 def _reproject_geojson(geojson: dict) -> dict:
@@ -205,11 +212,17 @@ class RhessysOutputGeometryView(APIView):
         },
     )
     def get(self, request, runid: str, scale: str):
-        geojson_path = _GEOMETRY_FILES.get(scale)
+        scenario = request.query_params.get("scenario")
+
+        if scale == "patch" and scenario in _PATCH_2021_SCENARIOS:
+            geojson_path = _PATCH_GEOMETRY_FILES["2021"]
+        else:
+            geojson_path = _GEOMETRY_FILES.get(scale)
+
         if not geojson_path:
             raise NotFound(f"Unknown spatial scale: {scale}. Use 'hillslope' or 'patch'.")
 
-        cache_key = (runid, scale)
+        cache_key = (runid, scale, scenario if scale == "patch" else None)
         cached = _geometry_cache.get(cache_key)
         if cached is not None:
             return HttpResponse(cached, content_type="application/geo+json")

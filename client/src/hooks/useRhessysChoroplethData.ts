@@ -20,6 +20,7 @@ import {
   fetchRhessysChoropleth,
   fetchRhessysGeometry,
 } from "../api/rhessysOutputsApi";
+import { PATCH_2021_SCENARIOS } from "../api/rhessysConstants";
 import { computeRobustRange } from "../utils/colormap";
 
 export function useRhessysChoroplethData() {
@@ -58,9 +59,21 @@ export function useRhessysChoroplethData() {
     placeholderData: keepPreviousData,
   });
 
+  // Patch geometry varies by scenario (S1→1985, S2/S4b→2021).
+  // For hillslope the geometry is the same regardless of scenario.
+  const geometryScenario =
+    spatialScale === "patch" && scenario && PATCH_2021_SCENARIOS.has(scenario)
+      ? scenario
+      : null;
+
   const { data: geometry, isLoading: geomLoading } = useQuery({
-    queryKey: queryKeys.rhessysGeometry.byScale(runId ?? "", spatialScale),
-    queryFn: ({ signal }) => fetchRhessysGeometry(runId!, spatialScale, signal),
+    queryKey: queryKeys.rhessysGeometry.byScale(
+      runId ?? "",
+      spatialScale,
+      geometryScenario,
+    ),
+    queryFn: ({ signal }) =>
+      fetchRhessysGeometry(runId!, spatialScale, signal, geometryScenario),
     enabled: isActive && !!runId,
     placeholderData: keepPreviousData,
   });
