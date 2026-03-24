@@ -24,6 +24,16 @@ vi.mock("../api/api", () => ({
   fetchWatersheds: () => mockFetchWatersheds(),
 }));
 
+vi.mock("../api/rhessysApi", () => ({
+  fetchRhessysSpatialInputs: vi.fn().mockResolvedValue({ files: [] }),
+}));
+
+vi.mock("../api/rhessysOutputsApi", () => ({
+  fetchRhessysOutputs: vi
+    .fn()
+    .mockResolvedValue({ scenarios: [], variables: [], value_ranges: {} }),
+}));
+
 // Sample watershed data
 const mockWatershedData = {
   features: [
@@ -63,9 +73,12 @@ const createTestQueryClient = () =>
 
 const renderWithProviders = (ui: React.ReactElement) => {
   const queryClient = createTestQueryClient();
+  // Derive the runId from the current mock so WatershedProvider always
+  // matches what the component sees via useParams().
+  const runId = (mockUseParams() as string | null) ?? "test-watershed-123";
   return render(
     <QueryClientProvider client={queryClient}>
-      <WatershedProvider runId="test-watershed-123">{ui}</WatershedProvider>
+      <WatershedProvider runId={runId}>{ui}</WatershedProvider>
     </QueryClientProvider>,
   );
 };
