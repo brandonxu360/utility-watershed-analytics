@@ -5,6 +5,7 @@ import { postQuery, toFiniteNumber } from "./queryUtils";
 import {
   getVariableMeta,
   resolveParquetConfig,
+  BASIN_DAILY_PATHS,
 } from "./rhessysConstants";
 
 import type {
@@ -135,13 +136,13 @@ export async function fetchRhessysGeometry(
 /**
  * Fetch time series data from the WEPPcloud Query Engine.
  *
- * - `hillslope` → `hillslope.daily.parquet` (or `grow_hillslope.daily.parquet`
- *   for growth variables), aggregated across all hillslopes to monthly means.
+ * - `hillslope` (default) → uses `basin.daily.parquet` (the RHESSys
+ *   area-weighted watershed aggregate) and aggregates to monthly means.
  * - `patch` → `patch.yearly.parquet` (or `grow_patch.yearly.parquet`),
  *   aggregated across all patches per year.
  *
  * The variable's `source` field determines whether the base or grow parquet
- * is queried.
+ * is queried (only applicable for patch-scale).
  *
  * @param opts.runId        - The `webcloud_run_id` of the watershed.
  * @param opts.scenario     - RHESSys scenario id (e.g. `"S1"`).
@@ -158,19 +159,25 @@ export async function fetchRhessysTimeSeries(opts: {
 }): Promise<RhessysTimeSeriesRow[]> {
   const { runId, scenario, variables, spatialScale, signal } = opts;
   const effectiveScale: SpatialScale = spatialScale ?? "hillslope";
-  const isDaily = effectiveScale === "hillslope";
+  const isPatch = effectiveScale === "patch";
 
-  const varMeta = getVariableMeta(effectiveScale, variables[0]);
-  const source = varMeta?.source ?? "base";
-  const { datasetPath } = resolveParquetConfig(scenario, effectiveScale, source);
+  let datasetPath: string;
+  if (isPatch) {
+    const varMeta = getVariableMeta(effectiveScale, variables[0]);
+    const source = varMeta?.source ?? "base";
+    ({ datasetPath } = resolveParquetConfig(scenario, effectiveScale, source));
+  } else {
+    datasetPath = BASIN_DAILY_PATHS[scenario];
+    if (!datasetPath) throw new Error(`Unknown scenario: ${scenario}`);
+  }
 
-  const alias = isDaily ? "h" : "p";
-  const columns = isDaily
-    ? [`${alias}.year AS year`, `${alias}.month AS month`]
-    : [`${alias}.year AS year`];
-  const groupBy = isDaily
-    ? [`${alias}.year`, `${alias}.month`]
-    : [`${alias}.year`];
+  const alias = isPatch ? "p" : "b";
+  const columns = isPatch
+    ? [`${alias}.year AS year`]
+    : [`${alias}.year AS year`, `${alias}.month AS month`];
+  const groupBy = isPatch
+    ? [`${alias}.year`]
+    : [`${alias}.year`, `${alias}.month`];
 
   const payload: QueryPayload = {
     datasets: [{ alias, path: datasetPath }],
@@ -189,7 +196,7 @@ export async function fetchRhessysTimeSeries(opts: {
     const row = r as Record<string, unknown>;
     const result: Record<string, number> = {
       year: toFiniteNumber(row.year, 0),
-      month: isDaily ? toFiniteNumber(row.month, 1) : 0,
+      month: isPatch ? 0 : toFiniteNumber(row.month, 1),
       day: 1,
     };
     for (const v of variables) {

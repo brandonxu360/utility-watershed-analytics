@@ -143,7 +143,7 @@ export const RhessysTimeSeries: React.FC = () => {
     });
   }, [dispatchLayerAction]);
 
-  const scaleLabel = isYearly ? "yearly avg" : "monthly avg";
+  const scaleLabel = isYearly ? "yearly avg" : "watershed monthly avg";
   const title = `${varMeta?.label ?? effectiveVariable} (${varMeta?.units ?? ""}, ${scaleLabel}) \u2013 ${effectiveScenario}`;
 
   return (

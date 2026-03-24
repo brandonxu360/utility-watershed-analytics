@@ -54,7 +54,12 @@ export const GROW_PARQUET_PATHS: Record<string, Record<SpatialScale, string>> =
     },
   };
 
-/** Retained for potential future basin-level views. */
+/**
+ * Basin-level daily parquets (one row per day for the whole watershed).
+ * Used as the time-series data source for hillslope-scale views because
+ * the basin is the properly area-weighted watershed aggregate computed
+ * by RHESSys.
+ */
 export const BASIN_DAILY_PATHS: Record<string, string> = {
   S1: "rhessys/scenarios/S1/basin.daily.parquet",
   S2: "rhessys/scenarios/S2/basin.daily.parquet",
@@ -77,7 +82,7 @@ export const GROW_SPATIAL_ID_COLUMN: Record<SpatialScale, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// Variable source type — determines which parquet file to query
+// Variable source type \u2014 determines which parquet file to query
 // ---------------------------------------------------------------------------
 
 export type VariableSource = "base" | "grow";
