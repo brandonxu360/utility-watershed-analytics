@@ -31,6 +31,9 @@ function makeRow(
     hillslopeSoilLoss: 2,
     channelSoilLoss: 1.5,
     sedimentDischarge: 3,
+    hillslopeSoilLossTonnes: 200,
+    channelSoilLossTonnes: 150,
+    sedimentDischargeTonnes: 300,
     ...overrides,
   };
 }

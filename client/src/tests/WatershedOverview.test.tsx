@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
+import { WatershedProvider } from "../contexts/WatershedContext";
 
 const mockNavigate = vi.fn();
 
@@ -63,7 +64,9 @@ const createTestQueryClient = () =>
 const renderWithProviders = (ui: React.ReactElement) => {
   const queryClient = createTestQueryClient();
   return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+    <QueryClientProvider client={queryClient}>
+      <WatershedProvider runId="test-watershed-123">{ui}</WatershedProvider>
+    </QueryClientProvider>,
   );
 };
 
@@ -80,7 +83,7 @@ describe("WatershedOverview", () => {
   describe("loading state", () => {
     it("renders skeleton panel while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { })); // Never resolves
 
       renderWithProviders(<WatershedOverview />);
 
@@ -91,7 +94,7 @@ describe("WatershedOverview", () => {
 
     it("renders skeleton buttons while loading", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
+      mockFetchWatersheds.mockReturnValue(new Promise(() => { }));
 
       renderWithProviders(<WatershedOverview />);
 
