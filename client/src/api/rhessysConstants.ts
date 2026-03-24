@@ -73,11 +73,3 @@ export const GATE_CREEK_VARIABLES: Record<
     { id: "streamflow", label: "Streamflow", units: "mm/yr" },
   ],
 };
-
-export const TIME_SERIES_VARIABLES = [
-  { id: "streamflow", label: "Streamflow", units: "mm/day" },
-  { id: "baseflow", label: "Baseflow", units: "mm/day" },
-  { id: "return", label: "Return Flow", units: "mm/day" },
-  { id: "trans", label: "Transpiration", units: "mm/day" },
-  { id: "evap", label: "Evaporation", units: "mm/day" },
-];
