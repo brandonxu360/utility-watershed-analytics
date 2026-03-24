@@ -1,16 +1,23 @@
+import { useState } from "react";
 import { useRunId } from "../../hooks/useRunId";
 
 import { type ScenarioSummaryRow } from "../../api/scenarioApi";
 import { useScenariosSummary } from "../../hooks/useScenariosSummary";
 
 import { tss } from "../../utils/tss";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import CheckIcon from "@mui/icons-material/Check";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DownloadIcon from "@mui/icons-material/Download";
 
 const useStyles = tss.create(({ theme }) => ({
   statusMessage: {
@@ -27,8 +34,14 @@ const useStyles = tss.create(({ theme }) => ({
   scenarioCell: {
     fontWeight: 600,
   },
-  title: {
+  titleRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: theme.spacing(1),
     marginBottom: theme.spacing(2),
+  },
+  title: {
     fontWeight: "bold",
   },
 }));
@@ -83,11 +96,49 @@ function formatValue(val: number | null): string {
   });
 }
 
+function buildCsvContent(data: ScenarioSummaryRow[]): string {
+  const headers = ["Scenario", ...METRIC_COLUMNS.map((c) => c.header)];
+  const rows = data.map((row) => [
+    row.label,
+    ...METRIC_COLUMNS.map((col) => {
+      const val = row[col.key];
+      return val == null ? "" : String(val);
+    }),
+  ]);
+  return [headers, ...rows]
+    .map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+}
+
+function downloadCsv(data: ScenarioSummaryRow[]) {
+  const csv = buildCsvContent(data);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "scenarios_summary.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyCsv(data: ScenarioSummaryRow[]) {
+  const csv = buildCsvContent(data);
+  navigator.clipboard.writeText(csv);
+}
+
 export function ScenariosTable() {
   const { classes } = useStyles();
   const runId = useRunId();
+  const [copied, setCopied] = useState(false);
 
   const { data, isLoading, isError, error } = useScenariosSummary(runId);
+
+  function handleCopy() {
+    if (!data) return;
+    copyCsv(data);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
 
   if (isLoading) {
     return (
@@ -121,9 +172,25 @@ export function ScenariosTable() {
 
   return (
     <>
-      <Typography align="center" variant="h4" className={classes.title}>
-        Annual Averages
-      </Typography>
+      <Box className={classes.titleRow}>
+        <Typography variant="h4" className={classes.title}>
+          Annual Averages
+        </Typography>
+        <Tooltip title="Download as CSV">
+          <IconButton size="small" onClick={() => downloadCsv(data)}>
+            <DownloadIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={copied ? "Copied!" : "Copy as CSV"}>
+          <IconButton size="small" onClick={handleCopy}>
+            {copied ? (
+              <CheckIcon fontSize="small" />
+            ) : (
+              <ContentCopyIcon fontSize="small" />
+            )}
+          </IconButton>
+        </Tooltip>
+      </Box>
       <TableContainer>
         <Table
           size="small"
