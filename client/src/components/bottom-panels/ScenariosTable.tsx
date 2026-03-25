@@ -5,6 +5,10 @@ import { type ScenarioSummaryRow } from "../../api/scenarioApi";
 import { useScenariosSummary } from "../../hooks/useScenariosSummary";
 
 import { tss } from "../../utils/tss";
+import {
+  copyCsv,
+  downloadCsv,
+} from "../../utils/download";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
@@ -96,34 +100,17 @@ function formatValue(val: number | null): string {
   });
 }
 
-function buildCsvContent(data: ScenarioSummaryRow[]): string {
-  const headers = ["Scenario", ...METRIC_COLUMNS.map((c) => c.header)];
-  const rows = data.map((row) => [
+function scenarioCsvHeaders(): string[] {
+  return ["Scenario", ...METRIC_COLUMNS.map((c) => c.header)];
+}
+
+function scenarioCsvRows(
+  data: ScenarioSummaryRow[],
+): (string | number | null)[][] {
+  return data.map((row) => [
     row.label,
-    ...METRIC_COLUMNS.map((col) => {
-      const val = row[col.key];
-      return val == null ? "" : String(val);
-    }),
+    ...METRIC_COLUMNS.map((col) => row[col.key]),
   ]);
-  return [headers, ...rows]
-    .map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(","))
-    .join("\n");
-}
-
-function downloadCsv(data: ScenarioSummaryRow[]) {
-  const csv = buildCsvContent(data);
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "scenarios_summary.csv";
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function copyCsv(data: ScenarioSummaryRow[]) {
-  const csv = buildCsvContent(data);
-  navigator.clipboard.writeText(csv);
 }
 
 export function ScenariosTable() {
@@ -135,7 +122,7 @@ export function ScenariosTable() {
 
   function handleCopy() {
     if (!data) return;
-    copyCsv(data);
+    copyCsv(scenarioCsvHeaders(), scenarioCsvRows(data));
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }
@@ -177,7 +164,16 @@ export function ScenariosTable() {
           Annual Averages
         </Typography>
         <Tooltip title="Download as CSV">
-          <IconButton size="small" onClick={() => downloadCsv(data)}>
+          <IconButton
+            size="small"
+            onClick={() =>
+              downloadCsv(
+                "scenarios_summary.csv",
+                scenarioCsvHeaders(),
+                scenarioCsvRows(data),
+              )
+            }
+          >
             <DownloadIcon fontSize="small" />
           </IconButton>
         </Tooltip>

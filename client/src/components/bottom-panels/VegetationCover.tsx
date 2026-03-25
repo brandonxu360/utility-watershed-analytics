@@ -1,5 +1,6 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { tss } from "../../utils/tss";
+import { downloadCsv, downloadChartAsPng } from "../../utils/download";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
 import { useRunId } from "../../hooks/useRunId";
@@ -16,9 +17,11 @@ import { AggregatedRapRow } from "../../api/types";
 import fetchRap from "../../api/rapApi";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
-import MuiSelect, { type SelectChangeEvent } from "@mui/material/Select";
+import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
+import MuiSelect, { type SelectChangeEvent } from "@mui/material/Select";
 
 type RapStatus = {
   state: "loading" | "ready" | "error";
@@ -83,6 +86,16 @@ const useStyles = tss.create(({ theme }) => ({
       backgroundColor: theme.palette.error.main,
     },
   },
+  downloadButton: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    borderRadius: 2,
+    fontSize: theme.typography.caption.fontSize,
+    cursor: "pointer",
+    "&:hover": {
+      backgroundColor: theme.palette.primary.dark,
+    },
+  },
 }));
 
 export const VegetationCover: React.FC = () => {
@@ -93,6 +106,10 @@ export const VegetationCover: React.FC = () => {
     selectedHillslopeId,
     clearSelectedHillslope,
   } = useWatershed();
+
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [downloadAnchorEl, setDownloadAnchorEl] =
+    useState<HTMLElement | null>(null);
 
   const choroplethParams = getLayerParams(layerDesired, "choropleth");
   const bands = (choroplethParams.bands as VegetationBandType) ?? "all";
@@ -228,6 +245,49 @@ export const VegetationCover: React.FC = () => {
     ? `${vegOption.label} Coverage - Hillslope ${selectedHillslopeId} (${selectedYearDisplay})`
     : `${vegOption.label} Coverage (${selectedYearDisplay})`;
 
+  const csvFilename = selectedHillslopeId
+    ? `veg_cover_hillslope_${selectedHillslopeId}.csv`
+    : "veg_cover_watershed.csv";
+
+  function buildVegCsvRows() {
+    return chartData.map((row) => [
+      row.name,
+      ...vegOption.chartKeys.map((k) => {
+        const v = row[k.key as keyof typeof row] as number;
+        return typeof v === "number" ? parseFloat(v.toFixed(4)) : v;
+      }),
+    ]);
+  }
+
+  function buildVegCsvHeaders() {
+    return [
+      "Year",
+      ...vegOption.chartKeys.map(
+        (k) => k.key.charAt(0).toUpperCase() + k.key.slice(1),
+      ),
+    ];
+  }
+
+  async function handleDownloadGraph() {
+    setDownloadAnchorEl(null);
+    if (chartContainerRef.current) {
+      await downloadChartAsPng(chartContainerRef.current, chartTitle + ".png");
+    }
+  }
+
+  function handleDownloadCsv() {
+    setDownloadAnchorEl(null);
+    downloadCsv(csvFilename, buildVegCsvHeaders(), buildVegCsvRows());
+  }
+
+  async function handleDownloadAll() {
+    setDownloadAnchorEl(null);
+    if (chartContainerRef.current) {
+      await downloadChartAsPng(chartContainerRef.current, chartTitle + ".png");
+    }
+    downloadCsv(csvFilename, buildVegCsvHeaders(), buildVegCsvRows());
+  }
+
   return (
     <div>
       <div className={classes.titleBar}>
@@ -282,6 +342,13 @@ export const VegetationCover: React.FC = () => {
             </MuiSelect>
           </div>
           <IconButton
+            className={classes.downloadButton}
+            aria-label="Download vegetation cover"
+            onClick={(e) => setDownloadAnchorEl(e.currentTarget)}
+          >
+            <DownloadIcon />
+          </IconButton>
+          <IconButton
             className={classes.closeButton}
             data-testid="veg-close-button"
             onClick={() => {
@@ -298,16 +365,29 @@ export const VegetationCover: React.FC = () => {
         </div>
       </div>
 
+      <Menu
+        anchorEl={downloadAnchorEl}
+        open={Boolean(downloadAnchorEl)}
+        onClose={() => setDownloadAnchorEl(null)}
+        sx={{ zIndex: 20000 }}
+      >
+        <MenuItem onClick={handleDownloadAll}>All</MenuItem>
+        <MenuItem onClick={handleDownloadGraph}>Graph (PNG)</MenuItem>
+        <MenuItem onClick={handleDownloadCsv}>Data (CSV)</MenuItem>
+      </Menu>
+
       {rapStatus.state === "loading" && (
         <Typography align="center">Loading vegetation data…</Typography>
       )}
 
-      <CoverageLineChart
-        data={chartData}
-        title={chartTitle}
-        lineKeys={vegOption.chartKeys}
-        yAxisLabel="Percent Cover (%)"
-      />
+      <div ref={chartContainerRef}>
+        <CoverageLineChart
+          data={chartData}
+          title={chartTitle}
+          lineKeys={vegOption.chartKeys}
+          yAxisLabel="Percent Cover (%)"
+        />
+      </div>
     </div>
   );
 };
