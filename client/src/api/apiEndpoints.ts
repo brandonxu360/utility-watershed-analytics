@@ -60,10 +60,20 @@ export const API_ENDPOINTS = {
   // WEPPcloud dashboard for a given watershed run.
   // Resolves the correct disturbed-scenario sub-run base via the override map,
   // falling back to the standard batch convention (disturbed_wbt).
+  // NOTE: WEPPcloud uses raw ;; separators in run IDs — do NOT encode them.
   WEPP_DASHBOARD: (runId: string) => {
     const runBase =
       WEPP_DASHBOARD_RUN_BASE_OVERRIDES[runId] ??
       DEFAULT_WEPP_DASHBOARD_RUN_BASE;
-    return `${WEPPCLOUD_BASE}/${e(runId)}/${runBase}/gl-dashboard`;
+    return `${WEPPCLOUD_BASE}/${runId}/${runBase}/gl-dashboard`;
+  },
+  // Direct download link for the SBS 4-class classified GeoTIFF.
+  // Uses the same disturbed sub-run base as WEPP_DASHBOARD.
+  // NOTE: WEPPcloud uses raw ;; separators in run IDs — do NOT encode them.
+  SBS_TIFF_DOWNLOAD: (runId: string) => {
+    const runBase =
+      WEPP_DASHBOARD_RUN_BASE_OVERRIDES[runId] ??
+      DEFAULT_WEPP_DASHBOARD_RUN_BASE;
+    return `${WEPPCLOUD_BASE}/${runId}/${runBase}/browse/disturbed/sbs_4class.tif`;
   },
 };
