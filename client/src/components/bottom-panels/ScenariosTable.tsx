@@ -40,11 +40,18 @@ const useStyles = tss.create(({ theme }) => ({
     fontWeight: 600,
   },
   titleRow: {
+    position: "relative",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: theme.spacing(1),
     marginBottom: theme.spacing(2),
+  },
+  titleActions: {
+    position: "absolute",
+    right: 0,
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(0.5),
   },
   title: {
     fontWeight: "bold",
@@ -165,29 +172,31 @@ export function ScenariosTable() {
         <Typography variant="h4" className={classes.title}>
           Annual Averages
         </Typography>
-        <Tooltip title="Download as CSV">
-          <IconButton
-            size="small"
-            onClick={() =>
-              downloadCsv(
-                `${watershedName}_scenarios_summary.csv`,
-                scenarioCsvHeaders(),
-                scenarioCsvRows(data),
-              )
-            }
-          >
-            <DownloadIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={copied ? "Copied!" : "Copy as CSV"}>
-          <IconButton size="small" onClick={handleCopy}>
-            {copied ? (
-              <CheckIcon fontSize="small" />
-            ) : (
-              <ContentCopyIcon fontSize="small" />
-            )}
-          </IconButton>
-        </Tooltip>
+        <Box className={classes.titleActions}>
+          <Tooltip title="Download as CSV">
+            <IconButton
+              size="small"
+              onClick={() =>
+                downloadCsv(
+                  `${watershedName}_scenarios_summary.csv`,
+                  scenarioCsvHeaders(),
+                  scenarioCsvRows(data),
+                )
+              }
+            >
+              <DownloadIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={copied ? "Copied!" : "Copy as CSV"}>
+            <IconButton size="small" onClick={handleCopy}>
+              {copied ? (
+                <CheckIcon fontSize="small" />
+              ) : (
+                <ContentCopyIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
       <TableContainer>
         <Table
