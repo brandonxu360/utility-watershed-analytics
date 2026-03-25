@@ -351,7 +351,6 @@ export default function WatershedOverview() {
             View Detailed WEPP Model Results
           </Link>
           <WeppSection />
-          <WatershedDataSection />
         </Paper>
 
         <Paper elevation={0} className={classes.impactPaper}>
@@ -373,6 +372,13 @@ export default function WatershedOverview() {
               />
             </>
           )}
+        </Paper>
+
+        <Paper elevation={0} className={classes.impactPaper}>
+          <Typography variant="body2" className={classes.sectionHeading}>
+            Watershed Data
+          </Typography>
+          <WatershedDataSection />
         </Paper>
       </div>
     </div>
