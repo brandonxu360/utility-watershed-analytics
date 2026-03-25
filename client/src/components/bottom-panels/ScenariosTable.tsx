@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRunId } from "../../hooks/useRunId";
+import { useWatershedName } from "../../hooks/useWatershedName";
 
 import { type ScenarioSummaryRow } from "../../api/scenarioApi";
 import { useScenariosSummary } from "../../hooks/useScenariosSummary";
@@ -116,6 +117,7 @@ function scenarioCsvRows(
 export function ScenariosTable() {
   const { classes } = useStyles();
   const runId = useRunId();
+  const watershedName = useWatershedName();
   const [copied, setCopied] = useState(false);
 
   const { data, isLoading, isError, error } = useScenariosSummary(runId);
@@ -168,7 +170,7 @@ export function ScenariosTable() {
             size="small"
             onClick={() =>
               downloadCsv(
-                "scenarios_summary.csv",
+                `${watershedName}_scenarios_summary.csv`,
                 scenarioCsvHeaders(),
                 scenarioCsvRows(data),
               )

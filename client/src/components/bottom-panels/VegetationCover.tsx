@@ -4,6 +4,7 @@ import { downloadCsv, downloadChartAsPng } from "../../utils/download";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
 import { useRunId } from "../../hooks/useRunId";
+import { useWatershedName } from "../../hooks/useWatershedName";
 import { CoverageLineChart } from "../CoverageLineChart";
 
 import {
@@ -110,6 +111,8 @@ export const VegetationCover: React.FC = () => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [downloadAnchorEl, setDownloadAnchorEl] =
     useState<HTMLElement | null>(null);
+
+  const watershedName = useWatershedName();
 
   const choroplethParams = getLayerParams(layerDesired, "choropleth");
   const bands = (choroplethParams.bands as VegetationBandType) ?? "all";
@@ -245,9 +248,7 @@ export const VegetationCover: React.FC = () => {
     ? `${vegOption.label} Coverage - Hillslope ${selectedHillslopeId} (${selectedYearDisplay})`
     : `${vegOption.label} Coverage (${selectedYearDisplay})`;
 
-  const csvFilename = selectedHillslopeId
-    ? `veg_cover_hillslope_${selectedHillslopeId}.csv`
-    : "veg_cover_watershed.csv";
+  const csvFilename = `${watershedName}_veg_cover_${vegOption.value}_${selectedYear === "All" ? "all_years" : selectedYear}.csv`;
 
   function buildVegCsvRows() {
     return chartData.map((row) => [
@@ -270,8 +271,10 @@ export const VegetationCover: React.FC = () => {
 
   async function handleDownloadGraph() {
     setDownloadAnchorEl(null);
+    const suffix = selectedHillslopeId ? `_hillslope_${selectedHillslopeId}` : "";
+    const pngName = `${watershedName}_veg_cover_${vegOption.value}_${selectedYear === "All" ? "all_years" : selectedYear}${suffix}.png`;
     if (chartContainerRef.current) {
-      await downloadChartAsPng(chartContainerRef.current, chartTitle + ".png");
+      await downloadChartAsPng(chartContainerRef.current, pngName);
     }
   }
 
@@ -282,8 +285,10 @@ export const VegetationCover: React.FC = () => {
 
   async function handleDownloadAll() {
     setDownloadAnchorEl(null);
+    const suffix = selectedHillslopeId ? `_hillslope_${selectedHillslopeId}` : "";
+    const pngName = `${watershedName}_veg_cover_${vegOption.value}_${selectedYear === "All" ? "all_years" : selectedYear}${suffix}.png`;
     if (chartContainerRef.current) {
-      await downloadChartAsPng(chartContainerRef.current, chartTitle + ".png");
+      await downloadChartAsPng(chartContainerRef.current, pngName);
     }
     downloadCsv(csvFilename, buildVegCsvHeaders(), buildVegCsvRows());
   }

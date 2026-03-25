@@ -13,6 +13,10 @@ import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import DownloadIcon from "@mui/icons-material/Download";
 import WeppSection from "./sections/WeppSection";
 import WatershedDataSection from "./sections/WatershedDataSection";
 import RhessysSection from "./sections/RhessysSection";
@@ -253,17 +257,42 @@ export default function WatershedOverview() {
         BACK
       </Button>
       <div className={classes.contentBox}>
-        {hasMultipleUtilities ? (
-          utilityDisplayNames.map((name: string, i: number) => (
-            <Typography key={i} variant="h6" className={classes.titleMulti}>
-              <strong>{name}</strong>
-            </Typography>
-          ))
-        ) : (
-          <Typography variant="h6" className={classes.title}>
-            <strong>{watershed?.properties?.pws_name}</strong>
-          </Typography>
-        )}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            {hasMultipleUtilities ? (
+              utilityDisplayNames.map((name: string, i: number) => (
+                <Typography
+                  key={i}
+                  variant="h6"
+                  className={classes.titleMulti}
+                >
+                  <strong>{name}</strong>
+                </Typography>
+              ))
+            ) : (
+              <Typography variant="h6" className={classes.title}>
+                <strong>{watershed?.properties?.pws_name}</strong>
+              </Typography>
+            )}
+          </div>
+          <Tooltip title="Download watershed data (not yet implemented)">
+            <IconButton
+              onClick={() =>
+                toast.info("Master download has not been implemented yet.")
+              }
+              aria-label="Download watershed data"
+              sx={{ color: "action.disabled" }}
+            >
+              <DownloadIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <Typography variant="body1" className={classes.paragraph}>
           <strong>County: </strong>
           {watershed?.properties?.county_nam ?? "N/A"}
