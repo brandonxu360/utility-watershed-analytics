@@ -248,7 +248,12 @@ export const VegetationCover: React.FC = () => {
     ? `${vegOption.label} Coverage - Hillslope ${selectedHillslopeId} (${selectedYearDisplay})`
     : `${vegOption.label} Coverage (${selectedYearDisplay})`;
 
-  const csvFilename = `${watershedName}_veg_cover_${vegOption.value}_${selectedYear === "All" ? "all_years" : selectedYear}.csv`;
+  const hillslopeSuffix = selectedHillslopeId
+    ? `_hillslope_${selectedHillslopeId}`
+    : "";
+  const fileBase = `${watershedName}_veg_cover_${vegOption.value}_${selectedYear === "All" ? "all_years" : selectedYear}${hillslopeSuffix}`;
+  const csvFilename = `${fileBase}.csv`;
+  const pngFilename = `${fileBase}.png`;
 
   function buildVegCsvRows() {
     return chartData.map((row) => [
@@ -271,10 +276,8 @@ export const VegetationCover: React.FC = () => {
 
   async function handleDownloadGraph() {
     setDownloadAnchorEl(null);
-    const suffix = selectedHillslopeId ? `_hillslope_${selectedHillslopeId}` : "";
-    const pngName = `${watershedName}_veg_cover_${vegOption.value}_${selectedYear === "All" ? "all_years" : selectedYear}${suffix}.png`;
     if (chartContainerRef.current) {
-      await downloadChartAsPng(chartContainerRef.current, pngName);
+      await downloadChartAsPng(chartContainerRef.current, pngFilename);
     }
   }
 
@@ -285,10 +288,8 @@ export const VegetationCover: React.FC = () => {
 
   async function handleDownloadAll() {
     setDownloadAnchorEl(null);
-    const suffix = selectedHillslopeId ? `_hillslope_${selectedHillslopeId}` : "";
-    const pngName = `${watershedName}_veg_cover_${vegOption.value}_${selectedYear === "All" ? "all_years" : selectedYear}${suffix}.png`;
     if (chartContainerRef.current) {
-      await downloadChartAsPng(chartContainerRef.current, pngName);
+      await downloadChartAsPng(chartContainerRef.current, pngFilename);
     }
     downloadCsv(csvFilename, buildVegCsvHeaders(), buildVegCsvRows());
   }
