@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRunId } from "../../hooks/useRunId";
 import { useWatershedName } from "../../hooks/useWatershedName";
 
@@ -129,11 +129,20 @@ export function ScenariosTable() {
 
   const { data, isLoading, isError, error } = useScenariosSummary(runId);
 
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
+
   function handleCopy() {
     if (!data) return;
     copyCsv(scenarioCsvHeaders(), scenarioCsvRows(data));
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
   }
 
   if (isLoading) {
@@ -176,6 +185,7 @@ export function ScenariosTable() {
           <Tooltip title="Download as CSV">
             <IconButton
               size="small"
+              aria-label="Download as CSV"
               onClick={() =>
                 downloadCsv(
                   `${watershedName}_scenarios_summary.csv`,
@@ -188,7 +198,7 @@ export function ScenariosTable() {
             </IconButton>
           </Tooltip>
           <Tooltip title={copied ? "Copied!" : "Copy as CSV"}>
-            <IconButton size="small" onClick={handleCopy}>
+            <IconButton size="small" aria-label={copied ? "Copied!" : "Copy as CSV"} onClick={handleCopy}>
               {copied ? (
                 <CheckIcon fontSize="small" />
               ) : (

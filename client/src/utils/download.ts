@@ -31,15 +31,47 @@ export function downloadCsv(
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(link);
+  requestAnimationFrame(() => URL.revokeObjectURL(url));
+}
+
+function fallbackCopyToClipboard(text: string): void {
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.top = "0";
+    textarea.style.left = "0";
+    textarea.style.width = "1px";
+    textarea.style.height = "1px";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+      document.execCommand("copy");
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  } catch {
+    alert("Failed to copy CSV to clipboard.");
+  }
 }
 
 export function copyCsv(
   headers: string[],
   rows: (string | number | null | undefined)[][],
 ): void {
-  navigator.clipboard.writeText(buildCsv(headers, rows));
+  const csv = buildCsv(headers, rows);
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(csv).catch(() => {
+      fallbackCopyToClipboard(csv);
+    });
+  } else {
+    fallbackCopyToClipboard(csv);
+  }
 }
 
 export async function downloadChartAsPng(
@@ -52,8 +84,21 @@ export async function downloadChartAsPng(
     useCORS: true,
     logging: false,
   });
+  const blob = await new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob((b) => {
+      if (b) {
+        resolve(b);
+      } else {
+        reject(new Error("Failed to generate PNG blob from canvas"));
+      }
+    }, "image/png"),
+  );
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.download = filename;
-  link.href = canvas.toDataURL("image/png");
+  link.href = url;
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
+  requestAnimationFrame(() => URL.revokeObjectURL(url));
 }

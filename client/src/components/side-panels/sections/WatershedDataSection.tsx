@@ -98,6 +98,9 @@ export default function WatershedDataSection() {
               onClick={() => {
                 const link = document.createElement("a");
                 link.href = API_ENDPOINTS.SBS_TIFF_DOWNLOAD(runId);
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.download = "";
                 link.click();
               }}
             >

@@ -18,6 +18,7 @@ export function useWatershedName(): string {
   const { data: watersheds } = useQuery({
     queryKey: queryKeys.watersheds.all,
     queryFn: fetchWatersheds,
+    enabled: !!runId,
   });
 
   return useMemo(() => {
@@ -26,7 +27,7 @@ export function useWatershedName(): string {
         f.id?.toString() === runId,
     );
     const name = feature?.properties?.pws_name ?? runId ?? "watershed";
-    // Replace characters that are unsafe in filenames with underscores
+    // Remove characters that are unsafe in filenames and replace whitespace with underscores
     return name.replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
   }, [watersheds?.features, runId]);
 }
