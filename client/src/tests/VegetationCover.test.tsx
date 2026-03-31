@@ -21,10 +21,6 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   });
 });
 
-vi.mock("../hooks/useWatershedName", () => ({
-  useWatershedName: () => "test_watershed",
-}));
-
 const { mockFetchRap } = vi.hoisted(() => ({
   mockFetchRap: vi.fn().mockImplementation(() =>
     Promise.resolve([

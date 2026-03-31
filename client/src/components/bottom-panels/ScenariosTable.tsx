@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { useRunId } from "../../hooks/useRunId";
-import { useWatershedName } from "../../hooks/useWatershedName";
 
 import { type ScenarioSummaryRow } from "../../api/scenarioApi";
 import { useScenariosSummary } from "../../hooks/useScenariosSummary";
@@ -123,7 +122,7 @@ function scenarioCsvRows(
 export function ScenariosTable() {
   const { classes } = useStyles();
   const runId = useRunId();
-  const watershedName = useWatershedName();
+  const watershedName = (runId ?? "watershed").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
   const [copied, setCopied] = useState(false);
 
   const { data, isLoading, isError, error } = useScenariosSummary(runId);

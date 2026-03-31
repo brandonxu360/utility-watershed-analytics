@@ -4,7 +4,6 @@ import { downloadCsv, downloadChartAsPng } from "../../utils/download";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
 import { useRunId } from "../../hooks/useRunId";
-import { useWatershedName } from "../../hooks/useWatershedName";
 import { CoverageLineChart } from "../CoverageLineChart";
 
 import {
@@ -112,7 +111,8 @@ export const VegetationCover: React.FC = () => {
   const [downloadAnchorEl, setDownloadAnchorEl] =
     useState<HTMLElement | null>(null);
 
-  const watershedName = useWatershedName();
+  const runId = useRunId();
+  const watershedName = (runId ?? "watershed").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
 
   const choroplethParams = getLayerParams(layerDesired, "choropleth");
   const bands = (choroplethParams.bands as VegetationBandType) ?? "all";
@@ -121,8 +121,6 @@ export const VegetationCover: React.FC = () => {
 
   const vegOption =
     VEGETATION_OPTIONS.find((o) => o.value === bands) ?? VEGETATION_OPTIONS[0];
-
-  const runId = useRunId();
 
   const years = useMemo(
     () =>
