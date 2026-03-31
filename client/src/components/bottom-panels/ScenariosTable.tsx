@@ -10,7 +10,6 @@ import {
   copyCsv,
   downloadCsv,
 } from "../../utils/download";
-import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -177,11 +176,11 @@ export function ScenariosTable() {
 
   return (
     <>
-      <Box className={classes.titleRow}>
+      <div className={classes.titleRow}>
         <Typography variant="h4" className={classes.title}>
           Annual Averages
         </Typography>
-        <Box className={classes.titleActions}>
+        <div className={classes.titleActions}>
           <Tooltip title="Download as CSV">
             <IconButton
               size="small"
@@ -206,8 +205,8 @@ export function ScenariosTable() {
               )}
             </IconButton>
           </Tooltip>
-        </Box>
-      </Box>
+        </div>
+      </div>
       <TableContainer>
         <Table
           size="small"

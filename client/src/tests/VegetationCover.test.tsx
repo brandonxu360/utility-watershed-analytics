@@ -801,4 +801,14 @@ describe("VegetationCover", () => {
       expect(filename).toMatch(/\.png$/);
     });
   });
+
+  // Mock MUI Menu to always render children in tests to avoid anchorEl errors
+  defineMockMenu();
+
+  function defineMockMenu() {
+    vi.mock("@mui/material/Menu", () => ({
+      __esModule: true,
+      default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    }));
+  }
 });

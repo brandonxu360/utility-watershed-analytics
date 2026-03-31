@@ -13,7 +13,6 @@ import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -92,6 +91,11 @@ const useStyles = tss.create(({ theme }) => ({
     flexDirection: "column",
     gap: theme.spacing(1.5),
     marginTop: theme.spacing(4),
+  },
+  titleHeader: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
   },
 }));
 
@@ -257,13 +261,7 @@ export default function WatershedOverview() {
         BACK
       </Button>
       <div className={classes.contentBox}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-          }}
-        >
+        <div className={classes.titleHeader}>
           <div>
             {hasMultipleUtilities ? (
               utilityDisplayNames.map((name: string, i: number) => (
@@ -291,7 +289,7 @@ export default function WatershedOverview() {
               </IconButton>
             </span>
           </Tooltip>
-        </Box>
+        </div>
         <Typography variant="body1" className={classes.paragraph}>
           <strong>County: </strong>
           {watershed?.properties?.county_nam ?? "N/A"}
