@@ -208,6 +208,20 @@ function collectLngLatPairs(value: unknown, pairs: [number, number][]): void {
   }
 }
 
+function collectGeometryPairs(
+  geometry: GeoJSON.Geometry,
+  pairs: [number, number][],
+): void {
+  if (geometry.type === "GeometryCollection") {
+    for (const child of geometry.geometries) {
+      collectGeometryPairs(child, pairs);
+    }
+    return;
+  }
+
+  collectLngLatPairs(geometry.coordinates, pairs);
+}
+
 function getBoundsFromGeometry(
   geometry: GeoJSON.Geometry | null | undefined,
 ): [number, number, number, number] | null {
@@ -216,7 +230,7 @@ function getBoundsFromGeometry(
   }
 
   const pairs: [number, number][] = [];
-  collectLngLatPairs((geometry as GeoJSON.Geometry).coordinates, pairs);
+  collectGeometryPairs(geometry, pairs);
 
   if (pairs.length === 0) {
     return null;
@@ -255,16 +269,18 @@ function toSearchIndex(
       const center: [number, number] = [(south + north) / 2, (west + east) / 2];
       const props = feature.properties;
 
-      return {
+      const item: WatershedIndexItem = {
         id: String(feature.id ?? props.pws_id ?? ""),
         name: props.pws_name ?? props.huc10_name ?? "Unknown Watershed",
         sourceName: props.srcname ?? "",
         huc: props.huc10_id ?? "",
         center,
         bbox,
-      } satisfies WatershedIndexItem;
+      };
+
+      return item.id ? item : null;
     })
-    .filter((item): item is WatershedIndexItem => item !== null && !!item.id);
+    .filter((item): item is WatershedIndexItem => item !== null);
 }
 
 const useStyles = tss.create(({ theme }) => ({

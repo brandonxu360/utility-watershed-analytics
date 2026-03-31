@@ -6,7 +6,7 @@ import type { WatershedProperties } from "../types/WatershedProperties";
 
 const mockSetView = vi.fn();
 const mockNavigate = vi.fn();
-const mockUseRunId = vi.fn(() => null);
+const mockUseRunId = vi.fn<() => string | null>(() => null);
 
 vi.mock("react-leaflet", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-leaflet")>();
