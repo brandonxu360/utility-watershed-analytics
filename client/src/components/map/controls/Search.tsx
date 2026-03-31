@@ -497,7 +497,13 @@ export default function SearchControl({ watersheds }: SearchControlProps) {
     const matches = rankWatershedMatches(normalizedQuery, searchIndex);
     if (matches.length === 0) {
       setResults([]);
-      toast.error("No watershed match found. Try coordinates or another name.");
+      const hasSearchableWatersheds =
+        Boolean(watersheds?.features?.length) && searchIndex.length > 0;
+      toast.error(
+        hasSearchableWatersheds
+          ? "No watershed match found. Try coordinates or another name."
+          : "Watershed data is still loading or unavailable. Try coordinates.",
+      );
       return;
     }
 

@@ -346,6 +346,26 @@ describe("Search Component Tests", () => {
       expect(options[0]).toHaveTextContent("Deer Creek 2");
     });
 
+    it("shows loading/unavailable toast when watershed data is missing", () => {
+      const emptyCollection: GeoJSON.FeatureCollection<
+        GeoJSON.Geometry,
+        WatershedProperties
+      > = { type: "FeatureCollection", features: [] };
+
+      render(<Search watersheds={emptyCollection} />);
+
+      fireEvent.click(screen.getByRole("button", { name: /search location/i }));
+      fireEvent.change(screen.getByLabelText("Search bar"), {
+        target: { value: "clear creek" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /go button/i }));
+
+      expect(toastErrorMock).toHaveBeenCalledTimes(1);
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        "Watershed data is still loading or unavailable. Try coordinates.",
+      );
+    });
+
     it("includes matched attribute/value for sourceName matches", () => {
       render(<Search watersheds={testWatersheds} />);
 
