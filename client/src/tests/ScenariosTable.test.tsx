@@ -1,11 +1,18 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ScenariosTable } from "../components/bottom-panels/ScenariosTable";
 import type { ScenarioSummaryRow } from "../api/scenarioApi";
 
-const { mockUseQuery, mockUseParams } = vi.hoisted(() => ({
+const { mockUseQuery, mockUseParams, mockDownloadCsv, mockCopyCsv } = vi.hoisted(() => ({
   mockUseQuery: vi.fn(),
   mockUseParams: vi.fn(),
+  mockDownloadCsv: vi.fn(),
+  mockCopyCsv: vi.fn(),
+}));
+
+vi.mock("../utils/download", () => ({
+  downloadCsv: mockDownloadCsv,
+  copyCsv: mockCopyCsv,
 }));
 
 vi.mock("@tanstack/react-query", () => ({
@@ -414,6 +421,39 @@ describe("ScenariosTable", () => {
       render(<ScenariosTable />);
       expect(capturedOpts.enabled).toBe(true);
       expect(capturedOpts.queryKey).toEqual(["scenariosSummary", RUN_ID]);
+    });
+  });
+
+  describe("download and copy actions", () => {
+    beforeEach(() => {
+      mockUseQuery.mockReturnValue({
+        isLoading: false,
+        isError: false,
+        data: [makeRow()],
+        error: null,
+      });
+    });
+
+    it("calls downloadCsv with correct filename when download button is clicked", () => {
+      render(<ScenariosTable />);
+      fireEvent.click(screen.getByRole("button", { name: /download as csv/i }));
+      expect(mockDownloadCsv).toHaveBeenCalledOnce();
+      const [filename] = mockDownloadCsv.mock.calls[0] as [string, ...unknown[]];
+      expect(filename).toMatch(/scenarios_summary\.csv$/);
+    });
+
+    it("calls copyCsv when copy button is clicked", () => {
+      render(<ScenariosTable />);
+      fireEvent.click(screen.getByRole("button", { name: /copy as csv/i }));
+      expect(mockCopyCsv).toHaveBeenCalledOnce();
+    });
+
+    it("shows 'Copied!' label after copy button is clicked", async () => {
+      render(<ScenariosTable />);
+      fireEvent.click(screen.getByRole("button", { name: /copy as csv/i }));
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: /copied!/i })).toBeInTheDocument(),
+      );
     });
   });
 });

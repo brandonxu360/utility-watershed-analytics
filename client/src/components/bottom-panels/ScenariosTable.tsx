@@ -1,16 +1,26 @@
+import { useState, useRef, useEffect } from "react";
 import { useRunId } from "../../hooks/useRunId";
 
 import { type ScenarioSummaryRow } from "../../api/scenarioApi";
 import { useScenariosSummary } from "../../hooks/useScenariosSummary";
 
 import { tss } from "../../utils/tss";
+import {
+  copyCsv,
+  downloadCsv,
+} from "../../utils/download";
+import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import CheckIcon from "@mui/icons-material/Check";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DownloadIcon from "@mui/icons-material/Download";
 
 const useStyles = tss.create(({ theme }) => ({
   statusMessage: {
@@ -27,8 +37,21 @@ const useStyles = tss.create(({ theme }) => ({
   scenarioCell: {
     fontWeight: 600,
   },
-  title: {
+  titleRow: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: theme.spacing(2),
+  },
+  titleActions: {
+    position: "absolute",
+    right: 0,
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(0.5),
+  },
+  title: {
     fontWeight: "bold",
   },
 }));
@@ -83,11 +106,42 @@ function formatValue(val: number | null): string {
   });
 }
 
+function scenarioCsvHeaders(): string[] {
+  return ["Scenario", ...METRIC_COLUMNS.map((c) => c.header)];
+}
+
+function scenarioCsvRows(
+  data: ScenarioSummaryRow[],
+): (string | number | null)[][] {
+  return data.map((row) => [
+    row.label,
+    ...METRIC_COLUMNS.map((col) => row[col.key]),
+  ]);
+}
+
 export function ScenariosTable() {
   const { classes } = useStyles();
   const runId = useRunId();
+  const watershedName = (runId ?? "watershed").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
+  const [copied, setCopied] = useState(false);
 
   const { data, isLoading, isError, error } = useScenariosSummary(runId);
+
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
+
+  function handleCopy() {
+    if (!data) return;
+    copyCsv(scenarioCsvHeaders(), scenarioCsvRows(data));
+    setCopied(true);
+    if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
+  }
 
   if (isLoading) {
     return (
@@ -121,9 +175,37 @@ export function ScenariosTable() {
 
   return (
     <>
-      <Typography align="center" variant="h4" className={classes.title}>
-        Annual Averages
-      </Typography>
+      <div className={classes.titleRow}>
+        <Typography variant="h4" className={classes.title}>
+          Annual Averages
+        </Typography>
+        <div className={classes.titleActions}>
+          <Tooltip title="Download as CSV">
+            <IconButton
+              size="small"
+              aria-label="Download as CSV"
+              onClick={() =>
+                downloadCsv(
+                  `${watershedName}_scenarios_summary.csv`,
+                  scenarioCsvHeaders(),
+                  scenarioCsvRows(data),
+                )
+              }
+            >
+              <DownloadIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={copied ? "Copied!" : "Copy as CSV"}>
+            <IconButton size="small" aria-label={copied ? "Copied!" : "Copy as CSV"} onClick={handleCopy}>
+              {copied ? (
+                <CheckIcon fontSize="small" />
+              ) : (
+                <ContentCopyIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+        </div>
+      </div>
       <TableContainer>
         <Table
           size="small"

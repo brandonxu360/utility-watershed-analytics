@@ -179,13 +179,15 @@ describe("WatershedOverview", () => {
     it("renders back button", async () => {
       renderWithProviders(<WatershedOverview />);
 
-      await waitFor(() => {
-        const backButton = screen.getByRole("button", {
-          name: /close watershed panel/i,
-        });
-        expect(backButton).toBeInTheDocument();
-        expect(backButton).toHaveTextContent("BACK");
+      await waitFor(() =>
+        expect(screen.getByText("Test Watershed")).toBeInTheDocument(),
+      );
+
+      const backButton = screen.getByRole("button", {
+        name: /close watershed panel/i,
       });
+      expect(backButton).toBeInTheDocument();
+      expect(backButton).toHaveTextContent("BACK");
     });
 
     it("renders watershed model accordion sections", async () => {

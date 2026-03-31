@@ -13,6 +13,9 @@ import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import DownloadIcon from "@mui/icons-material/Download";
 import WeppSection from "./sections/WeppSection";
 import WatershedDataSection from "./sections/WatershedDataSection";
 import RhessysSection from "./sections/RhessysSection";
@@ -88,6 +91,11 @@ const useStyles = tss.create(({ theme }) => ({
     flexDirection: "column",
     gap: theme.spacing(1.5),
     marginTop: theme.spacing(4),
+  },
+  titleHeader: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
   },
 }));
 
@@ -253,17 +261,35 @@ export default function WatershedOverview() {
         BACK
       </Button>
       <div className={classes.contentBox}>
-        {hasMultipleUtilities ? (
-          utilityDisplayNames.map((name: string, i: number) => (
-            <Typography key={i} variant="h6" className={classes.titleMulti}>
-              <strong>{name}</strong>
-            </Typography>
-          ))
-        ) : (
-          <Typography variant="h6" className={classes.title}>
-            <strong>{watershed?.properties?.pws_name}</strong>
-          </Typography>
-        )}
+        <div className={classes.titleHeader}>
+          <div>
+            {hasMultipleUtilities ? (
+              utilityDisplayNames.map((name: string, i: number) => (
+                <Typography
+                  key={i}
+                  variant="h6"
+                  className={classes.titleMulti}
+                >
+                  <strong>{name}</strong>
+                </Typography>
+              ))
+            ) : (
+              <Typography variant="h6" className={classes.title}>
+                <strong>{watershed?.properties?.pws_name}</strong>
+              </Typography>
+            )}
+          </div>
+          <Tooltip title="Download watershed data (not yet implemented)">
+            <span>
+              <IconButton
+                disabled
+                aria-label="Download watershed data"
+              >
+                <DownloadIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </div>
         <Typography variant="body1" className={classes.paragraph}>
           <strong>County: </strong>
           {watershed?.properties?.county_nam ?? "N/A"}
@@ -322,7 +348,6 @@ export default function WatershedOverview() {
             View Detailed WEPP Model Results
           </Link>
           <WeppSection />
-          <WatershedDataSection />
         </Paper>
 
         <Paper elevation={0} className={classes.impactPaper}>
@@ -344,6 +369,13 @@ export default function WatershedOverview() {
               />
             </>
           )}
+        </Paper>
+
+        <Paper elevation={0} className={classes.impactPaper}>
+          <Typography variant="body2" className={classes.sectionHeading}>
+            Watershed Data
+          </Typography>
+          <WatershedDataSection />
         </Paper>
       </div>
     </div>

@@ -56,6 +56,16 @@ vi.mock("../components/CoverageLineChart", () => ({
   ),
 }));
 
+const { mockDownloadCsv, mockDownloadChartAsPng } = vi.hoisted(() => ({
+  mockDownloadCsv: vi.fn(),
+  mockDownloadChartAsPng: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../utils/download", () => ({
+  downloadCsv: mockDownloadCsv,
+  downloadChartAsPng: mockDownloadChartAsPng,
+}));
+
 vi.mock("react-icons/fa6", () => ({
   FaXmark: ({
     className,
@@ -730,4 +740,71 @@ describe("VegetationCover", () => {
       expect(screen.getByTestId("line-keys-length")).toHaveTextContent("1");
     });
   });
+
+  describe("download menu actions", () => {
+    it("opens download menu when download button is clicked", async () => {
+      await act(async () => {
+        render(<VegetationCover />);
+      });
+
+      await waitFor(() => expect(mockFetchRap).toHaveBeenCalled());
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /download vegetation cover/i }),
+      );
+
+      expect(screen.getByText("Data (CSV)")).toBeInTheDocument();
+      expect(screen.getByText("Graph (PNG)")).toBeInTheDocument();
+    });
+
+    it("calls downloadCsv when 'Data (CSV)' menu item is clicked", async () => {
+      await act(async () => {
+        render(<VegetationCover />);
+      });
+
+      await waitFor(() => expect(mockFetchRap).toHaveBeenCalled());
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /download vegetation cover/i }),
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("Data (CSV)"));
+      });
+
+      expect(mockDownloadCsv).toHaveBeenCalledOnce();
+      const [filename] = mockDownloadCsv.mock.calls[0] as [string, ...unknown[]];
+      expect(filename).toMatch(/\.csv$/);
+    });
+
+    it("calls downloadChartAsPng when 'Graph (PNG)' menu item is clicked", async () => {
+      await act(async () => {
+        render(<VegetationCover />);
+      });
+
+      await waitFor(() => expect(mockFetchRap).toHaveBeenCalled());
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /download vegetation cover/i }),
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("Graph (PNG)"));
+      });
+
+      expect(mockDownloadChartAsPng).toHaveBeenCalledOnce();
+      const [, filename] = mockDownloadChartAsPng.mock.calls[0] as [unknown, string];
+      expect(filename).toMatch(/\.png$/);
+    });
+  });
+
+  // Mock MUI Menu to always render children in tests to avoid anchorEl errors
+  defineMockMenu();
+
+  function defineMockMenu() {
+    vi.mock("@mui/material/Menu", () => ({
+      __esModule: true,
+      default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    }));
+  }
 });

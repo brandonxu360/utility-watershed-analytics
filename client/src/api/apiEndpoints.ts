@@ -16,8 +16,8 @@ const DEFAULT_WEPP_DASHBOARD_RUN_BASE = "disturbed_wbt";
  */
 const WEPP_DASHBOARD_RUN_BASE_OVERRIDES: Record<string, string> = {};
 
-/** Encode a user-supplied path segment to prevent URL breakage. */
-const e = encodeURIComponent;
+/** Encode a path segment, preserving ;; separators used by WEPPcloud run IDs. */
+const e = (s: string) => encodeURIComponent(s).replaceAll("%3B", ";");
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -65,5 +65,13 @@ export const API_ENDPOINTS = {
       WEPP_DASHBOARD_RUN_BASE_OVERRIDES[runId] ??
       DEFAULT_WEPP_DASHBOARD_RUN_BASE;
     return `${WEPPCLOUD_BASE}/${e(runId)}/${runBase}/gl-dashboard`;
+  },
+  // Direct download link for the SBS 4-class classified GeoTIFF.
+  // Uses the same disturbed sub-run base as WEPP_DASHBOARD.
+  SBS_TIFF_DOWNLOAD: (runId: string) => {
+    const runBase =
+      WEPP_DASHBOARD_RUN_BASE_OVERRIDES[runId] ??
+      DEFAULT_WEPP_DASHBOARD_RUN_BASE;
+    return `${WEPPCLOUD_BASE}/${e(runId)}/${runBase}/browse/disturbed/sbs_4class.tif`;
   },
 };
