@@ -269,8 +269,8 @@ describe("Search Component Tests", () => {
 
       const options = screen.getAllByRole("option");
       expect(options).toHaveLength(1);
-      expect(screen.getByText("South Fork Basin")).toBeInTheDocument();
-      expect(screen.getByText("170703010101 • Gate Creek")).toBeInTheDocument();
+      expect(options[0]).toHaveTextContent("South Fork Basin");
+      expect(options[0]).toHaveTextContent("170703010101 • Gate Creek");
       expect(mockNavigate).not.toHaveBeenCalled();
       expect(mockSetView).not.toHaveBeenCalled();
       expect(screen.getByLabelText("Search bar")).toBeInTheDocument();
@@ -287,8 +287,8 @@ describe("Search Component Tests", () => {
 
       const options = screen.getAllByRole("option");
       expect(options.length).toBeGreaterThan(1);
-      expect(screen.getByText("Clear Creek")).toBeInTheDocument();
-      expect(screen.getByText("Clear Lake")).toBeInTheDocument();
+      expect(options[0]).toHaveTextContent("Clear Creek");
+      expect(options[1]).toHaveTextContent("Clear Lake");
       expect(mockSetView).not.toHaveBeenCalled();
       expect(mockNavigate).not.toHaveBeenCalled();
     });
@@ -315,12 +315,13 @@ describe("Search Component Tests", () => {
 
       fireEvent.click(screen.getByRole("button", { name: /search location/i }));
       fireEvent.change(screen.getByLabelText("Search bar"), {
-        target: { value: "creek" },
+        target: { value: "tributary" },
       });
       fireEvent.click(screen.getByRole("button", { name: /go button/i }));
 
-      expect(screen.getByText(/sourceName:/i)).toBeInTheDocument();
-      expect(screen.getByText(/Gate Creek/i)).toBeInTheDocument();
+      const options = screen.getAllByRole("option");
+      expect(options[0]).toHaveTextContent("sourceName:");
+      expect(options[0]).toHaveTextContent("Clear Lake Tributary");
       expect(document.querySelectorAll("mark").length).toBeGreaterThan(0);
     });
   });
