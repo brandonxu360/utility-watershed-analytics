@@ -55,8 +55,8 @@ function fallbackCopyToClipboard(text: string): void {
     } finally {
       document.body.removeChild(textarea);
     }
-  } catch {
-    alert("Failed to copy CSV to clipboard.");
+  } catch (error) {
+    console.error("Failed to copy CSV to clipboard.", error);
   }
 }
 

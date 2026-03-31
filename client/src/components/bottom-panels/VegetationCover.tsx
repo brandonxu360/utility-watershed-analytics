@@ -174,18 +174,18 @@ export const VegetationCover: React.FC = () => {
       try {
         const rows = selectedHillslopeId
           ? await fetchRap(
-              {
-                mode: "hillslope",
-                topazId: selectedHillslopeId,
-                runId,
-                year: yearParam,
-              },
-              controller.signal,
-            )
+            {
+              mode: "hillslope",
+              topazId: selectedHillslopeId,
+              runId,
+              year: yearParam,
+            },
+            controller.signal,
+          )
           : await fetchRap(
-              { mode: "watershed", runId, year: yearParam },
-              controller.signal,
-            );
+            { mode: "watershed", runId, year: yearParam },
+            controller.signal,
+          );
 
         if (controller.signal.aborted) return;
         setRapTimeSeries(Array.isArray(rows) ? rows : []);
@@ -277,7 +277,11 @@ export const VegetationCover: React.FC = () => {
   async function handleDownloadGraph() {
     setDownloadAnchorEl(null);
     if (chartContainerRef.current) {
-      await downloadChartAsPng(chartContainerRef.current, pngFilename);
+      try {
+        await downloadChartAsPng(chartContainerRef.current, pngFilename);
+      } catch (err) {
+        console.error("Failed to export chart as PNG.", err);
+      }
     }
   }
 
@@ -289,7 +293,11 @@ export const VegetationCover: React.FC = () => {
   async function handleDownloadAll() {
     setDownloadAnchorEl(null);
     if (chartContainerRef.current) {
-      await downloadChartAsPng(chartContainerRef.current, pngFilename);
+      try {
+        await downloadChartAsPng(chartContainerRef.current, pngFilename);
+      } catch (err) {
+        console.error("Failed to export chart as PNG.", err);
+      }
     }
     downloadCsv(csvFilename, buildVegCsvHeaders(), buildVegCsvRows());
   }

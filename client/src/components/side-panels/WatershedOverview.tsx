@@ -282,15 +282,14 @@ export default function WatershedOverview() {
             )}
           </div>
           <Tooltip title="Download watershed data (not yet implemented)">
-            <IconButton
-              onClick={() =>
-                toast.info("Master download has not been implemented yet.")
-              }
-              aria-label="Download watershed data"
-              sx={{ color: "action.disabled" }}
-            >
-              <DownloadIcon />
-            </IconButton>
+            <span>
+              <IconButton
+                disabled
+                aria-label="Download watershed data"
+              >
+                <DownloadIcon />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
         <Typography variant="body1" className={classes.paragraph}>

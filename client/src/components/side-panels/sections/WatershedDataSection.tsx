@@ -101,7 +101,9 @@ export default function WatershedDataSection() {
                 link.target = "_blank";
                 link.rel = "noopener noreferrer";
                 link.download = "";
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
               }}
             >
               <DownloadIcon fontSize="small" />
