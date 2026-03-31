@@ -51,7 +51,7 @@ const useStyles = tss.create(({ theme }) => ({
     padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
     borderRadius: theme.spacing(1),
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-    zIndex: 1000,
+    zIndex: 9999,
   },
   layersHeading: {
     marginBottom: theme.spacing(1),
