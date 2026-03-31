@@ -489,7 +489,7 @@ export default function SearchControl({ watersheds }: SearchControlProps) {
 
     if (isCoordinateLike(trimmedInput)) {
       toast.error(
-        'Invalid coordinates. Please enter in "latitude, longitude" format.',
+        'Invalid coordinates. Use "latitude, longitude" or "latitude longitude".',
       );
       return;
     }

@@ -254,7 +254,7 @@ describe("Search Component Tests", () => {
 
       expect(toastErrorMock).toHaveBeenCalledTimes(1);
       expect(toastErrorMock).toHaveBeenCalledWith(
-        'Invalid coordinates. Please enter in "latitude, longitude" format.',
+        'Invalid coordinates. Use "latitude, longitude" or "latitude longitude".',
       );
       expect(mockSetView).not.toHaveBeenCalled();
 
