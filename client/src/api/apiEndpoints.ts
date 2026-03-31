@@ -16,15 +16,8 @@ const DEFAULT_WEPP_DASHBOARD_RUN_BASE = "disturbed_wbt";
  */
 const WEPP_DASHBOARD_RUN_BASE_OVERRIDES: Record<string, string> = {};
 
-/** Encode a user-supplied path segment to prevent URL breakage. */
-const e = encodeURIComponent;
-
-/**
- * Encode a WEPPcloud run ID, preserving raw ;; separators that WEPPcloud
- * uses as path delimiters while still encoding other special characters.
- */
-const encodeRunId = (runId: string) =>
-  encodeURIComponent(runId).replaceAll("%3B", ";");
+/** Encode a path segment, preserving ;; separators used by WEPPcloud run IDs. */
+const e = (s: string) => encodeURIComponent(s).replaceAll("%3B", ";");
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -67,20 +60,18 @@ export const API_ENDPOINTS = {
   // WEPPcloud dashboard for a given watershed run.
   // Resolves the correct disturbed-scenario sub-run base via the override map,
   // falling back to the standard batch convention (disturbed_wbt).
-  // NOTE: WEPPcloud uses raw ;; separators in run IDs — do NOT encode them.
   WEPP_DASHBOARD: (runId: string) => {
     const runBase =
       WEPP_DASHBOARD_RUN_BASE_OVERRIDES[runId] ??
       DEFAULT_WEPP_DASHBOARD_RUN_BASE;
-    return `${WEPPCLOUD_BASE}/${encodeRunId(runId)}/${runBase}/gl-dashboard`;
+    return `${WEPPCLOUD_BASE}/${e(runId)}/${runBase}/gl-dashboard`;
   },
   // Direct download link for the SBS 4-class classified GeoTIFF.
   // Uses the same disturbed sub-run base as WEPP_DASHBOARD.
-  // NOTE: WEPPcloud uses raw ;; separators in run IDs — do NOT encode them.
   SBS_TIFF_DOWNLOAD: (runId: string) => {
     const runBase =
       WEPP_DASHBOARD_RUN_BASE_OVERRIDES[runId] ??
       DEFAULT_WEPP_DASHBOARD_RUN_BASE;
-    return `${WEPPCLOUD_BASE}/${encodeRunId(runId)}/${runBase}/browse/disturbed/sbs_4class.tif`;
+    return `${WEPPCLOUD_BASE}/${e(runId)}/${runBase}/browse/disturbed/sbs_4class.tif`;
   },
 };
