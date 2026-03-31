@@ -66,6 +66,9 @@ export const API_ENDPOINTS = {
       DEFAULT_WEPP_DASHBOARD_RUN_BASE;
     return `${WEPPCLOUD_BASE}/${e(runId)}/${runBase}/gl-dashboard`;
   },
+  // WEPPcloud deval details report for a given watershed run.
+  WEPP_DEVAL_DETAILS: (runId: string) =>
+    `${WEPPCLOUD_BASE}/${e(runId)}/disturbed9002_wbt/report/deval_details/`,
   // Direct download link for the SBS 4-class classified GeoTIFF.
   // Uses the same disturbed sub-run base as WEPP_DASHBOARD.
   SBS_TIFF_DOWNLOAD: (runId: string) => {
