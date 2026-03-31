@@ -330,7 +330,7 @@ export default function WatershedMap(): JSX.Element {
 
         {/* TOP RIGHT CONTROLS */}
         <div className="leaflet-top leaflet-right">
-          <SearchControl />
+          <SearchControl watersheds={watersheds} />
           <LayersControl
             selectedLayerId={selectedLayerId}
             setSelectedLayerId={setSelectedLayerId}
