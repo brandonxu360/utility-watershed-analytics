@@ -328,7 +328,8 @@ const useStyles = tss.create(({ theme }) => ({
     border: `1px solid ${theme.palette.surface.border}`,
     boxShadow: "0 10px 26px rgba(0, 0, 0, 0.35)",
     zIndex: 1000,
-    minWidth: 400,
+    minWidth: 0,
+    width: "min(400px, calc(100vw - 110px))",
     maxWidth: "min(440px, calc(100vw - 110px))",
   },
   searchContent: {
