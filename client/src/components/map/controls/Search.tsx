@@ -43,10 +43,7 @@ type SearchCandidate = {
 };
 
 type SearchControlProps = {
-  watersheds?: GeoJSON.FeatureCollection<
-    GeoJSON.Geometry,
-    WatershedProperties
-  >;
+  watersheds?: GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>;
 };
 
 function escapeRegExp(input: string): string {
@@ -89,7 +86,7 @@ function highlightMatches(
 
 const SEARCH_FIELDS: MatchField[] = ["id", "huc", "name", "sourceName"];
 
-export function parseLatLng(input: string): [number, number] | null {
+function parseLatLng(input: string): [number, number] | null {
   const trimmed = input.trim();
   const coordsPattern = /^(-?\d+(?:\.\d+)?)\s*(?:,\s*|\s+)(-?\d+(?:\.\d+)?)$/;
   const match = trimmed.match(coordsPattern);
@@ -115,7 +112,8 @@ function isCoordinateLike(input: string): boolean {
   const normalized = input.trim();
   return (
     /\d/.test(normalized) &&
-    (normalized.includes(",") || normalized.split(/\s+/).filter(Boolean).length >= 2)
+    (normalized.includes(",") ||
+      normalized.split(/\s+/).filter(Boolean).length >= 2)
   );
 }
 
@@ -149,7 +147,10 @@ function rankWatershedMatches(
         score = 2;
       } else if (value.includes(normalized)) {
         score = 3;
-      } else if (tokens.length > 1 && tokens.every((token) => value.includes(token))) {
+      } else if (
+        tokens.length > 1 &&
+        tokens.every((token) => value.includes(token))
+      ) {
         score = 4;
       }
 
@@ -175,7 +176,9 @@ function rankWatershedMatches(
           }
         : null;
     })
-    .filter((entry): entry is SearchCandidate & { score: number } => entry !== null)
+    .filter(
+      (entry): entry is SearchCandidate & { score: number } => entry !== null,
+    )
     .sort((a, b) => {
       if (a.score !== b.score) {
         return a.score - b.score;
@@ -566,14 +569,17 @@ export default function SearchControl({ watersheds }: SearchControlProps) {
               {results.length > 0 && (
                 <List className={classes.suggestions} role="listbox">
                   {results.map((candidate, index) => {
-                    const metadata = [candidate.item.huc, candidate.item.sourceName]
+                    const metadata = [
+                      candidate.item.huc,
+                      candidate.item.sourceName,
+                    ]
                       .filter(Boolean)
                       .join(" • ");
-                      const matchedFieldValue = String(
-                        candidate.item[candidate.matchField] ?? "",
-                      ).trim();
-                      const showMatchedFieldLine =
-                        candidate.matchField !== "name" && !!matchedFieldValue;
+                    const matchedFieldValue = String(
+                      candidate.item[candidate.matchField] ?? "",
+                    ).trim();
+                    const showMatchedFieldLine =
+                      candidate.matchField !== "name" && !!matchedFieldValue;
 
                     return (
                       <ListItemButton
@@ -585,30 +591,32 @@ export default function SearchControl({ watersheds }: SearchControlProps) {
                         aria-selected={index === activeSuggestionIndex}
                       >
                         <ListItemText
-                            primary={highlightMatches(
-                              candidate.item.name,
-                              input,
-                              classes.matchHighlight,
-                            )}
-                            secondary={
-                              metadata || showMatchedFieldLine ? (
-                                <>
-                                  {metadata && (
-                                    <span className={classes.suggestionMeta}>{metadata}</span>
-                                  )}
-                                  {showMatchedFieldLine && (
-                                    <span className={classes.suggestionMeta}>
-                                      {`${candidate.matchField}: `}
-                                      {highlightMatches(
-                                        matchedFieldValue,
-                                        input,
-                                        classes.matchHighlight,
-                                      )}
-                                    </span>
-                                  )}
-                                </>
-                              ) : undefined
-                            }
+                          primary={highlightMatches(
+                            candidate.item.name,
+                            input,
+                            classes.matchHighlight,
+                          )}
+                          secondary={
+                            metadata || showMatchedFieldLine ? (
+                              <>
+                                {metadata && (
+                                  <span className={classes.suggestionMeta}>
+                                    {metadata}
+                                  </span>
+                                )}
+                                {showMatchedFieldLine && (
+                                  <span className={classes.suggestionMeta}>
+                                    {`${candidate.matchField}: `}
+                                    {highlightMatches(
+                                      matchedFieldValue,
+                                      input,
+                                      classes.matchHighlight,
+                                    )}
+                                  </span>
+                                )}
+                              </>
+                            ) : undefined
+                          }
                           className={classes.suggestionText}
                           slotProps={{
                             secondary: {

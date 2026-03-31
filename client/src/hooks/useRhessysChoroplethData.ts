@@ -62,7 +62,10 @@ export function useRhessysChoroplethData() {
     placeholderData: keepPreviousData,
   });
 
-  const patchGeometryRevision = getPatchGeometryRevision(spatialScale, scenario);
+  const patchGeometryRevision = getPatchGeometryRevision(
+    spatialScale,
+    scenario,
+  );
   const geometryQueryScenario = getPatchGeometryQueryScenario(
     patchGeometryRevision,
   );
@@ -74,12 +77,7 @@ export function useRhessysChoroplethData() {
       patchGeometryRevision,
     ),
     queryFn: ({ signal }) =>
-      fetchRhessysGeometry(
-        runId!,
-        spatialScale,
-        signal,
-        geometryQueryScenario,
-      ),
+      fetchRhessysGeometry(runId!, spatialScale, signal, geometryQueryScenario),
     enabled: isActive && !!runId,
     placeholderData: keepPreviousData,
   });

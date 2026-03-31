@@ -35,8 +35,8 @@ const useStyles = tss.create(({ theme }) => ({
 
 type MetricKey = {
   [K in keyof ScenarioSummaryRow]: ScenarioSummaryRow[K] extends number | null
-  ? K
-  : never;
+    ? K
+    : never;
 }[keyof ScenarioSummaryRow];
 
 type MetricColumn = {

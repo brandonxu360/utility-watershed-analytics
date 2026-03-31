@@ -285,21 +285,21 @@ export default function WatershedOverview() {
         {(watershed?.properties?.owner_type ||
           watershed?.properties?.pop_group ||
           watershed?.properties?.treat_type) && (
-            <>
-              <Typography variant="body1" className={classes.paragraph}>
-                <strong>Water Utility Type: </strong>
-                {watershed?.properties?.owner_type ?? "N/A"}
-              </Typography>
-              <Typography variant="body1" className={classes.paragraph}>
-                <strong>Customers Served: </strong>
-                {watershed?.properties?.pop_group ?? "N/A"}
-              </Typography>
-              <Typography variant="body1" className={classes.paragraph}>
-                <strong>Treatment Processes: </strong>
-                {watershed?.properties?.treat_type ?? "N/A"}
-              </Typography>
-            </>
-          )}
+          <>
+            <Typography variant="body1" className={classes.paragraph}>
+              <strong>Water Utility Type: </strong>
+              {watershed?.properties?.owner_type ?? "N/A"}
+            </Typography>
+            <Typography variant="body1" className={classes.paragraph}>
+              <strong>Customers Served: </strong>
+              {watershed?.properties?.pop_group ?? "N/A"}
+            </Typography>
+            <Typography variant="body1" className={classes.paragraph}>
+              <strong>Treatment Processes: </strong>
+              {watershed?.properties?.treat_type ?? "N/A"}
+            </Typography>
+          </>
+        )}
       </div>
 
       <div className={classes.modelsBox}>
