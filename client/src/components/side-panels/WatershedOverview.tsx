@@ -70,11 +70,12 @@ const useStyles = tss.create(({ theme }) => ({
   },
   actionLink: {
     fontSize: theme.typography.body2.fontSize,
-    color: theme.palette.accent.main,
+    color: theme.palette.accent.light,
     textAlign: "left",
     cursor: "pointer",
     display: "block",
     marginBottom: theme.spacing(1.5),
+    textDecorationColor: theme.palette.accent.light,
   },
   skeletonClose: {
     marginTop: theme.spacing(1.5),
@@ -342,10 +343,20 @@ export default function WatershedOverview() {
             target="_blank"
             rel="noopener noreferrer"
             className={classes.actionLink}
-            underline="hover"
+            underline="always"
             aria-label="View Detailed WEPP Model Results"
           >
             View Detailed WEPP Model Results
+          </Link>
+          <Link
+            href={runId ? API_ENDPOINTS.WEPP_DEVAL_DETAILS(runId) : undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={classes.actionLink}
+            underline="always"
+            aria-label="View WEPP Deval Details Report"
+          >
+            View WEPP Deval Details Report
           </Link>
           <WeppSection />
         </Paper>
