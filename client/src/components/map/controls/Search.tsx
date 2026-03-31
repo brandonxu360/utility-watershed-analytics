@@ -110,11 +110,21 @@ function isValidLatLngRange(lat: number, lng: number): boolean {
 
 function isCoordinateLike(input: string): boolean {
   const normalized = input.trim();
-  return (
-    /\d/.test(normalized) &&
-    (normalized.includes(",") ||
-      normalized.split(/\s+/).filter(Boolean).length >= 2)
+  if (!/\d/.test(normalized)) {
+    return false;
+  }
+  if (parseLatLng(normalized) !== null) {
+    return true;
+  }
+  // Comma usually indicates a lat/lng attempt even when parsing fails (e.g. "45,").
+  if (normalized.includes(",")) {
+    return true;
+  }
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  const numericTokens = tokens.filter((token) =>
+    /^-?\d+(?:\.\d+)?$/.test(token),
   );
+  return numericTokens.length >= 2;
 }
 
 function rankWatershedMatches(

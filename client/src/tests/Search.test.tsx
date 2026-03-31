@@ -149,6 +149,27 @@ const testWatersheds: GeoJSON.FeatureCollection<
         ],
       },
     },
+    {
+      type: "Feature",
+      id: "deer-creek-2",
+      properties: makeWatershedProps({
+        pws_name: "Deer Creek 2",
+        srcname: "North Fork",
+        huc10_id: "170703010105",
+      }),
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-121.5, 44.0],
+            [-121.42, 44.0],
+            [-121.42, 44.05],
+            [-121.5, 44.05],
+            [-121.5, 44.0],
+          ],
+        ],
+      },
+    },
   ],
 };
 
@@ -308,6 +329,21 @@ describe("Search Component Tests", () => {
       );
       expect(mockSetView).not.toHaveBeenCalled();
       expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it("does not treat name-with-number watershed queries as invalid coordinates", () => {
+      render(<Search watersheds={testWatersheds} />);
+
+      fireEvent.click(screen.getByRole("button", { name: /search location/i }));
+      fireEvent.change(screen.getByLabelText("Search bar"), {
+        target: { value: "deer creek 2" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /go button/i }));
+
+      expect(toastErrorMock).not.toHaveBeenCalled();
+      const options = screen.getAllByRole("option");
+      expect(options).toHaveLength(1);
+      expect(options[0]).toHaveTextContent("Deer Creek 2");
     });
 
     it("includes matched attribute/value for sourceName matches", () => {
