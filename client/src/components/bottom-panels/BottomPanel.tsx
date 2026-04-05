@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { tss } from "../../utils/tss";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -67,35 +67,51 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   const startY = useRef<number>(0);
   const startHeight = useRef<number>(0);
   const dragHeight = useRef<number>(0);
+  const activeDragHandlers = useRef<{
+    onDrag: (e: MouseEvent) => void;
+    stopDrag: () => void;
+  } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (activeDragHandlers.current) {
+        document.removeEventListener("mousemove", activeDragHandlers.current.onDrag);
+        document.removeEventListener("mouseup", activeDragHandlers.current.stopDrag);
+      }
+    };
+  }, []);
 
   const handleDrag = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isExpanded) setIsExpanded(true);
     startY.current = e.clientY;
     startHeight.current = panelRef.current?.offsetHeight || MIN_HEIGHT_PX;
+
+    const onDrag = (ev: MouseEvent) => {
+      if (panelRef.current) {
+        const newHeight = Math.max(
+          MIN_HEIGHT_PX,
+          Math.min(
+            MAX_HEIGHT_PX,
+            startHeight.current - (ev.clientY - startY.current),
+          ),
+        );
+        dragHeight.current = newHeight;
+        panelRef.current.style.height = `${newHeight}px`;
+      }
+    };
+
+    const stopDrag = () => {
+      document.removeEventListener("mousemove", onDrag);
+      document.removeEventListener("mouseup", stopDrag);
+      activeDragHandlers.current = null;
+      if (dragHeight.current <= MIN_HEIGHT_PX) {
+        setIsExpanded(false);
+      }
+    };
+
+    activeDragHandlers.current = { onDrag, stopDrag };
     document.addEventListener("mousemove", onDrag);
     document.addEventListener("mouseup", stopDrag);
-  };
-
-  const onDrag = (e: MouseEvent) => {
-    if (panelRef.current) {
-      const newHeight = Math.max(
-        MIN_HEIGHT_PX,
-        Math.min(
-          MAX_HEIGHT_PX,
-          startHeight.current - (e.clientY - startY.current),
-        ),
-      );
-      dragHeight.current = newHeight;
-      panelRef.current.style.height = `${newHeight}px`;
-    }
-  };
-
-  const stopDrag = () => {
-    document.removeEventListener("mousemove", onDrag);
-    document.removeEventListener("mouseup", stopDrag);
-    if (dragHeight.current <= MIN_HEIGHT_PX) {
-      setIsExpanded(false);
-    }
   };
 
   if (!isOpen) return null;
