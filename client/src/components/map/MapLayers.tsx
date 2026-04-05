@@ -25,9 +25,9 @@ import RhessysChoroplethLayer from "./RhessysChoroplethLayer";
 export default function MapLayers() {
   const navigate = useNavigate();
   const runId = useRunId();
+  
   const { layerDesired, effective, isEffective } = useWatershed();
 
-  // ── Data fetching ───────────────────────────────────────────────────
   const { data: watersheds, isLoading: watershedsLoading } = useQuery({
     queryKey: queryKeys.watersheds.all,
     queryFn: fetchWatersheds,
@@ -59,7 +59,6 @@ export default function MapLayers() {
     styleKey: rhessysChoroplethStyleKey,
   } = useRhessysChoropleth();
 
-  // ── Derived layer state ─────────────────────────────────────────────
   const scenarioEffective = isEffective("scenario");
   const subcatchmentEffective = isEffective("subcatchment");
   const channelsEffective = isEffective("channels");
@@ -71,7 +70,6 @@ export default function MapLayers() {
   const rhessysSpatialFilename = getLayerParams(layerDesired, "rhessysSpatial").filename;
   const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
 
-  // ── Styles ──────────────────────────────────────────────────────────
   const { watershedStyle, subcatchmentStyle, tooltipContent, channelStyle, sbsBounds, coverageKey } =
     useLayerStyles({
       runId,
@@ -86,7 +84,6 @@ export default function MapLayers() {
       getScenarioRow,
     });
 
-  // ── Loading ─────────────────────────────────────────────────────────
   const isLoading = [
     watershedsLoading,
     subLoading,
@@ -102,7 +99,6 @@ export default function MapLayers() {
     navigate({ to: `/watershed/${feature.id}` });
   };
 
-  // ── Render ──────────────────────────────────────────────────────────
   return (
     <>
       <MapLoadingOverlay isLoading={isLoading} />

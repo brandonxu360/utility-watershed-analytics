@@ -1,12 +1,12 @@
 import L from "leaflet";
 import { useCallback, useMemo } from "react";
-import type { PathOptions } from "leaflet";
 import { useWatershed } from "../contexts/WatershedContext";
 import { selectedStyle, defaultStyle } from "../components/map/constants";
 import { buildHillslopeTooltip } from "../utils/tooltipContent";
 import { getLayerParams } from "../layers/types";
+import type { PathOptions } from "leaflet";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
-import type { WatershedProperties } from "../types/WatershedProperties";
+import type { WatershedProperties, WatershedCollection } from "../types/WatershedProperties";
 import type { LanduseMap } from "../api/types";
 import type { ScenarioDataRow } from "../layers/scenario";
 import type { ChoroplethStyleFn } from "./useChoropleth";
@@ -20,9 +20,7 @@ const CHANNEL_STYLE: PathOptions = {
 
 interface UseLayerStylesInput {
   runId: string | null;
-  watersheds:
-    | GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>
-    | undefined;
+  watersheds: WatershedCollection | undefined;
   choroplethActive: boolean;
   scenarioEffective: boolean;
   hasScenarioData: boolean;

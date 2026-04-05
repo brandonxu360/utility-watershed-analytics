@@ -24,7 +24,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import type { WatershedProperties } from "../../../types/WatershedProperties";
+import type { WatershedProperties, WatershedCollection } from "../../../types/WatershedProperties";
 
 type WatershedIndexItem = {
   id: string;
@@ -43,7 +43,7 @@ type SearchCandidate = {
 };
 
 type SearchControlProps = {
-  watersheds?: GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>;
+  watersheds?: WatershedCollection;
 };
 
 function escapeRegExp(input: string): string {
@@ -262,7 +262,7 @@ function getBoundsFromGeometry(
 }
 
 function toSearchIndex(
-  watersheds?: GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>,
+  watersheds?: WatershedCollection,
 ): WatershedIndexItem[] {
   if (!watersheds?.features?.length) {
     return [];
