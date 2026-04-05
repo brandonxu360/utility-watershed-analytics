@@ -577,7 +577,7 @@ describe("Map Component", () => {
         expect(lastChannelGeoJsonProps).toBeTruthy();
       });
 
-      const style = lastChannelGeoJsonProps!.style();
+      const style = lastChannelGeoJsonProps!.style;
       expect(style).toMatchObject({
         color: "#000080",
         fillOpacity: 1,
