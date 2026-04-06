@@ -6,7 +6,10 @@ import { buildHillslopeTooltip } from "../utils/tooltipContent";
 import { getLayerParams } from "../layers/types";
 import type { PathOptions } from "leaflet";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
-import type { WatershedProperties, WatershedCollection } from "../types/WatershedProperties";
+import type {
+  WatershedProperties,
+  WatershedCollection,
+} from "../types/WatershedProperties";
 import type { LanduseMap } from "../api/types";
 import type { ScenarioDataRow } from "../layers/scenario";
 import type { ChoroplethStyleFn } from "./useChoropleth";
@@ -135,5 +138,12 @@ export function useLayerStyles({
   const { scenario, variable } = getLayerParams(layerDesired, "scenario");
   const coverageKey = `${choroplethActive}|${metric}|${year}|${bands}|${scenarioEffective}|${hasScenarioData}|${scenario}|${variable}|${!!landuseData}`;
 
-  return { watershedStyle, subcatchmentStyle, tooltipContent, channelStyle: CHANNEL_STYLE, sbsBounds, coverageKey };
+  return {
+    watershedStyle,
+    subcatchmentStyle,
+    tooltipContent,
+    channelStyle: CHANNEL_STYLE,
+    sbsBounds,
+    coverageKey,
+  };
 }

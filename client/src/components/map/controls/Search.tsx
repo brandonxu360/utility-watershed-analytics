@@ -24,7 +24,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import type { WatershedProperties, WatershedCollection } from "../../../types/WatershedProperties";
+import type { WatershedCollection } from "../../../types/WatershedProperties";
 
 type WatershedIndexItem = {
   id: string;
@@ -261,9 +261,7 @@ function getBoundsFromGeometry(
   return [south, west, north, east];
 }
 
-function toSearchIndex(
-  watersheds?: WatershedCollection,
-): WatershedIndexItem[] {
+function toSearchIndex(watersheds?: WatershedCollection): WatershedIndexItem[] {
   if (!watersheds?.features?.length) {
     return [];
   }

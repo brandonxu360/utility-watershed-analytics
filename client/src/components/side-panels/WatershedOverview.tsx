@@ -266,11 +266,7 @@ export default function WatershedOverview() {
           <div>
             {hasMultipleUtilities ? (
               utilityDisplayNames.map((name: string, i: number) => (
-                <Typography
-                  key={i}
-                  variant="h6"
-                  className={classes.titleMulti}
-                >
+                <Typography key={i} variant="h6" className={classes.titleMulti}>
                   <strong>{name}</strong>
                 </Typography>
               ))
@@ -282,10 +278,7 @@ export default function WatershedOverview() {
           </div>
           <Tooltip title="Download watershed data (not yet implemented)">
             <span>
-              <IconButton
-                disabled
-                aria-label="Download watershed data"
-              >
+              <IconButton disabled aria-label="Download watershed data">
                 <DownloadIcon />
               </IconButton>
             </span>

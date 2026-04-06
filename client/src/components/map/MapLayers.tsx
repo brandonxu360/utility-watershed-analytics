@@ -25,7 +25,7 @@ import RhessysChoroplethLayer from "./RhessysChoroplethLayer";
 export default function MapLayers() {
   const navigate = useNavigate();
   const runId = useRunId();
-  
+
   const { layerDesired, effective, isEffective } = useWatershed();
 
   const { data: watersheds, isLoading: watershedsLoading } = useQuery({
@@ -67,22 +67,31 @@ export default function MapLayers() {
   const rhessysOutputsEffective = isEffective("rhessysOutputs");
 
   const sbsColorMode = getLayerParams(layerDesired, "sbs").mode ?? "legacy";
-  const rhessysSpatialFilename = getLayerParams(layerDesired, "rhessysSpatial").filename;
+  const rhessysSpatialFilename = getLayerParams(
+    layerDesired,
+    "rhessysSpatial",
+  ).filename;
   const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
 
-  const { watershedStyle, subcatchmentStyle, tooltipContent, channelStyle, sbsBounds, coverageKey } =
-    useLayerStyles({
-      runId,
-      watersheds,
-      choroplethActive,
-      scenarioEffective,
-      hasScenarioData,
-      landuseData,
-      layerDesired,
-      getChoroplethStyle,
-      getScenarioStyle,
-      getScenarioRow,
-    });
+  const {
+    watershedStyle,
+    subcatchmentStyle,
+    tooltipContent,
+    channelStyle,
+    sbsBounds,
+    coverageKey,
+  } = useLayerStyles({
+    runId,
+    watersheds,
+    choroplethActive,
+    scenarioEffective,
+    hasScenarioData,
+    landuseData,
+    layerDesired,
+    getChoroplethStyle,
+    getScenarioStyle,
+    getScenarioRow,
+  });
 
   const isLoading = [
     watershedsLoading,
@@ -110,9 +119,7 @@ export default function MapLayers() {
           <GeoJSON
             data={watersheds}
             style={watershedStyle}
-            onEachFeature={(_, layer) =>
-              layer.on({ click: onWatershedClick })
-            }
+            onEachFeature={(_, layer) => layer.on({ click: onWatershedClick })}
           />
         )}
 

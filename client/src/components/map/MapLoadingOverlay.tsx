@@ -23,7 +23,9 @@ interface MapLoadingOverlayProps {
   isLoading: boolean;
 }
 
-export default function MapLoadingOverlay({ isLoading }: MapLoadingOverlayProps) {
+export default function MapLoadingOverlay({
+  isLoading,
+}: MapLoadingOverlayProps) {
   const { classes } = useStyles();
 
   if (!isLoading) return null;

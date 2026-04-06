@@ -75,8 +75,14 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   useEffect(() => {
     return () => {
       if (activeDragHandlers.current) {
-        document.removeEventListener("mousemove", activeDragHandlers.current.onDrag);
-        document.removeEventListener("mouseup", activeDragHandlers.current.stopDrag);
+        document.removeEventListener(
+          "mousemove",
+          activeDragHandlers.current.onDrag,
+        );
+        document.removeEventListener(
+          "mouseup",
+          activeDragHandlers.current.stopDrag,
+        );
       }
     };
   }, []);

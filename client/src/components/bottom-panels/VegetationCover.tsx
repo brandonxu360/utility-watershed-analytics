@@ -108,11 +108,14 @@ export const VegetationCover: React.FC = () => {
   } = useWatershed();
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const [downloadAnchorEl, setDownloadAnchorEl] =
-    useState<HTMLElement | null>(null);
+  const [downloadAnchorEl, setDownloadAnchorEl] = useState<HTMLElement | null>(
+    null,
+  );
 
   const runId = useRunId();
-  const watershedName = (runId ?? "watershed").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
+  const watershedName = (runId ?? "watershed")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "_");
 
   const choroplethParams = getLayerParams(layerDesired, "choropleth");
   const bands = (choroplethParams.bands as VegetationBandType) ?? "all";
@@ -172,18 +175,18 @@ export const VegetationCover: React.FC = () => {
       try {
         const rows = selectedHillslopeId
           ? await fetchRap(
-            {
-              mode: "hillslope",
-              topazId: selectedHillslopeId,
-              runId,
-              year: yearParam,
-            },
-            controller.signal,
-          )
+              {
+                mode: "hillslope",
+                topazId: selectedHillslopeId,
+                runId,
+                year: yearParam,
+              },
+              controller.signal,
+            )
           : await fetchRap(
-            { mode: "watershed", runId, year: yearParam },
-            controller.signal,
-          );
+              { mode: "watershed", runId, year: yearParam },
+              controller.signal,
+            );
 
         if (controller.signal.aborted) return;
         setRapTimeSeries(Array.isArray(rows) ? rows : []);

@@ -81,10 +81,7 @@ export default function WatershedMap(): JSX.Element {
   const rhessysOutputsChoroplethMode =
     getLayerParams(layerDesired, "rhessysOutputs").mode === "choropleth";
 
-  const {
-    data: watersheds,
-    error: watershedsError,
-  } = useQuery({
+  const { data: watersheds, error: watershedsError } = useQuery({
     queryKey: queryKeys.watersheds.all,
     queryFn: fetchWatersheds,
   });
