@@ -1,10 +1,12 @@
 import { useMap } from "react-leaflet";
 import { useEffect, useRef } from "react";
 import { zoomToFeature } from "./MapUtil";
-import {
+
+import type {
   WatershedProperties,
   WatershedCollection,
 } from "../../types/WatershedProperties";
+
 import L from "leaflet";
 
 // Persists the map viewport at module scope so it survives component
