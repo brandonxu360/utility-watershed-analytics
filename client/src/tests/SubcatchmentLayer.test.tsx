@@ -137,7 +137,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -165,7 +164,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -187,7 +185,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -222,7 +219,6 @@ describe("SubcatchmentLayer", () => {
         }
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -255,7 +251,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -276,7 +271,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={true}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -301,7 +295,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={true}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -323,7 +316,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -344,7 +336,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -362,7 +353,7 @@ describe("SubcatchmentLayer", () => {
     expect(layer.closeTooltip).toHaveBeenCalledTimes(1);
   });
 
-  it("updates non-selected layer styles when coverageKey changes", async () => {
+  it("updates non-selected layer styles when style reference changes", async () => {
     const feature = createFeature("1");
     const layer = createLayer();
 
@@ -371,7 +362,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -379,22 +369,30 @@ describe("SubcatchmentLayer", () => {
     lastGeoJsonProps!.onEachFeature(feature, layer);
     layer.setStyle.mockClear();
 
+    const newStyleFn = vi.fn(
+      (feature: Feature | undefined): PathOptions => ({
+        color: `#new-${feature?.id?.toString?.() ?? "none"}`,
+        weight: 2,
+        fillColor: "#abcdef",
+        fillOpacity: 0.5,
+      }),
+    );
+
     await act(async () => {
       r.rerender(
         <SubcatchmentLayer
           data={data}
-          style={styleFn}
+          style={newStyleFn}
           coverageActive={false}
-          coverageKey="k2"
           tooltipContent={defaultTooltip}
         />,
       );
     });
 
-    expect(layer.setStyle).toHaveBeenCalledWith(styleFn(feature));
+    expect(layer.setStyle).toHaveBeenCalledWith(newStyleFn(feature));
   });
 
-  it("does not update the selected layer style when coverageKey changes", async () => {
+  it("does not update the selected layer style when style reference changes", async () => {
     const feature = createFeature("1");
     const layer = createLayer();
 
@@ -403,7 +401,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -412,13 +409,21 @@ describe("SubcatchmentLayer", () => {
     layer.__handlers.click?.({ target: layer });
     layer.setStyle.mockClear();
 
+    const newStyleFn = vi.fn(
+      (feature: Feature | undefined): PathOptions => ({
+        color: `#new-${feature?.id?.toString?.() ?? "none"}`,
+        weight: 2,
+        fillColor: "#abcdef",
+        fillOpacity: 0.5,
+      }),
+    );
+
     await act(async () => {
       r.rerender(
         <SubcatchmentLayer
           data={data}
-          style={styleFn}
+          style={newStyleFn}
           coverageActive={false}
-          coverageKey="k2"
           tooltipContent={defaultTooltip}
         />,
       );
@@ -433,7 +438,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -463,7 +467,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -490,7 +493,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -516,7 +518,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -558,7 +559,6 @@ describe("SubcatchmentLayer", () => {
         }
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -604,7 +604,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );
@@ -618,7 +617,6 @@ describe("SubcatchmentLayer", () => {
           data={data}
           style={styleFn2}
           coverageActive={true}
-          coverageKey="k1"
           tooltipContent={defaultTooltip}
         />,
       );
@@ -642,7 +640,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={customTooltip}
       />,
     );
@@ -662,7 +659,6 @@ describe("SubcatchmentLayer", () => {
         data={data}
         style={styleFn}
         coverageActive={false}
-        coverageKey="k1"
         tooltipContent={defaultTooltip}
       />,
     );

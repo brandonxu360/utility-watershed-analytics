@@ -44,7 +44,6 @@ export default function MapLayers() {
   } = useChoropleth();
 
   const {
-    hasData: hasScenarioData,
     isLoading: scenarioLoading,
     getScenarioStyle,
     getScenarioRow,
@@ -79,15 +78,11 @@ export default function MapLayers() {
     tooltipContent,
     channelStyle,
     sbsBounds,
-    coverageKey,
   } = useLayerStyles({
     runId,
     watersheds,
     choroplethActive,
-    scenarioEffective,
-    hasScenarioData,
     landuseData,
-    layerDesired,
     getChoroplethStyle,
     getScenarioStyle,
     getScenarioRow,
@@ -128,7 +123,6 @@ export default function MapLayers() {
           data={subcatchments}
           style={subcatchmentStyle}
           coverageActive={choroplethActive || scenarioEffective}
-          coverageKey={coverageKey}
           tooltipContent={tooltipContent}
         />
       )}

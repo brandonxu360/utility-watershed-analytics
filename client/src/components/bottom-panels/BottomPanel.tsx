@@ -91,8 +91,14 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
     // Clean up any in-progress drag before starting a new one
     // (guards against duplicate listeners from repeated mousedowns)
     if (activeDragHandlers.current) {
-      document.removeEventListener("mousemove", activeDragHandlers.current.onDrag);
-      document.removeEventListener("mouseup", activeDragHandlers.current.stopDrag);
+      document.removeEventListener(
+        "mousemove",
+        activeDragHandlers.current.onDrag,
+      );
+      document.removeEventListener(
+        "mouseup",
+        activeDragHandlers.current.stopDrag,
+      );
       activeDragHandlers.current = null;
     }
     if (!isExpanded) setIsExpanded(true);
