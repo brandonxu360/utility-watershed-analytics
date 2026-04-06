@@ -136,7 +136,7 @@ export function useLayerStyles({
   // forcing SubcatchmentLayer to re-apply styles.
   const { metric, year, bands } = getLayerParams(layerDesired, "choropleth");
   const { scenario, variable } = getLayerParams(layerDesired, "scenario");
-  const coverageKey = `${choroplethActive}|${metric}|${year}|${bands}|${scenarioEffective}|${hasScenarioData}|${scenario}|${variable}|${!!landuseData}`;
+  const coverageKey = `${choroplethActive}|${metric}|${year}|${bands}|${scenarioEffective}|${hasScenarioData}|${scenario}|${variable}|${landuseEffective}|${!!landuseData}`;
 
   return {
     watershedStyle,

@@ -88,6 +88,13 @@ export default function BottomPanel({ isOpen, children }: BottomPanelProps) {
   }, []);
 
   const handleDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Clean up any in-progress drag before starting a new one
+    // (guards against duplicate listeners from repeated mousedowns)
+    if (activeDragHandlers.current) {
+      document.removeEventListener("mousemove", activeDragHandlers.current.onDrag);
+      document.removeEventListener("mouseup", activeDragHandlers.current.stopDrag);
+      activeDragHandlers.current = null;
+    }
     if (!isExpanded) setIsExpanded(true);
     startY.current = e.clientY;
     startHeight.current = panelRef.current?.offsetHeight || MIN_HEIGHT_PX;
