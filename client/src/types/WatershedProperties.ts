@@ -37,3 +37,8 @@ export interface WatershedProperties {
   huc10_treat_types: string | null;
   huc10_utility_count: number | null;
 }
+
+export type WatershedCollection = GeoJSON.FeatureCollection<
+  GeoJSON.Geometry,
+  WatershedProperties
+>;

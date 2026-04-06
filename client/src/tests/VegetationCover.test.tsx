@@ -773,7 +773,10 @@ describe("VegetationCover", () => {
       });
 
       expect(mockDownloadCsv).toHaveBeenCalledOnce();
-      const [filename] = mockDownloadCsv.mock.calls[0] as [string, ...unknown[]];
+      const [filename] = mockDownloadCsv.mock.calls[0] as [
+        string,
+        ...unknown[],
+      ];
       expect(filename).toMatch(/\.csv$/);
     });
 
@@ -793,7 +796,10 @@ describe("VegetationCover", () => {
       });
 
       expect(mockDownloadChartAsPng).toHaveBeenCalledOnce();
-      const [, filename] = mockDownloadChartAsPng.mock.calls[0] as [unknown, string];
+      const [, filename] = mockDownloadChartAsPng.mock.calls[0] as [
+        unknown,
+        string,
+      ];
       expect(filename).toMatch(/\.png$/);
     });
   });
@@ -804,7 +810,9 @@ describe("VegetationCover", () => {
   function defineMockMenu() {
     vi.mock("@mui/material/Menu", () => ({
       __esModule: true,
-      default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+      default: ({ children }: { children: React.ReactNode }) => (
+        <div>{children}</div>
+      ),
     }));
   }
 });

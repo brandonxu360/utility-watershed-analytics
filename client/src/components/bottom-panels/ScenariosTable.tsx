@@ -5,10 +5,7 @@ import { type ScenarioSummaryRow } from "../../api/scenarioApi";
 import { useScenariosSummary } from "../../hooks/useScenariosSummary";
 
 import { tss } from "../../utils/tss";
-import {
-  copyCsv,
-  downloadCsv,
-} from "../../utils/download";
+import { copyCsv, downloadCsv } from "../../utils/download";
 import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -122,7 +119,9 @@ function scenarioCsvRows(
 export function ScenariosTable() {
   const { classes } = useStyles();
   const runId = useRunId();
-  const watershedName = (runId ?? "watershed").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
+  const watershedName = (runId ?? "watershed")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "_");
   const [copied, setCopied] = useState(false);
 
   const { data, isLoading, isError, error } = useScenariosSummary(runId);
@@ -196,7 +195,11 @@ export function ScenariosTable() {
             </IconButton>
           </Tooltip>
           <Tooltip title={copied ? "Copied!" : "Copy as CSV"}>
-            <IconButton size="small" aria-label={copied ? "Copied!" : "Copy as CSV"} onClick={handleCopy}>
+            <IconButton
+              size="small"
+              aria-label={copied ? "Copied!" : "Copy as CSV"}
+              onClick={handleCopy}
+            >
               {copied ? (
                 <CheckIcon fontSize="small" />
               ) : (

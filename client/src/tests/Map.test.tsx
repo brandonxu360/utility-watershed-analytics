@@ -193,19 +193,16 @@ vi.mock("../components/map/SubcatchmentLayer", () => ({
   default: ({
     style,
     coverageActive,
-    coverageKey,
   }: {
     data: unknown;
     style: SubcatchmentStyleFn;
     coverageActive: boolean;
-    coverageKey: string;
   }) => {
     lastSubcatchmentStyleFn = style;
     return (
       <div
         data-testid="subcatchment-layer"
         data-coverage-active={coverageActive}
-        data-coverage-key={coverageKey}
       />
     );
   },
@@ -577,7 +574,7 @@ describe("Map Component", () => {
         expect(lastChannelGeoJsonProps).toBeTruthy();
       });
 
-      const style = lastChannelGeoJsonProps!.style();
+      const style = lastChannelGeoJsonProps!.style;
       expect(style).toMatchObject({
         color: "#000080",
         fillOpacity: 1,
@@ -784,60 +781,6 @@ describe("Map Component", () => {
         expect(screen.getByTestId("selected-layer").textContent).toBe(
           "Topographic",
         );
-      });
-    });
-  });
-
-  describe("choropleth key generation", () => {
-    it("generates correct choropleth key", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      const ld = desiredWith("subcatchment", "choropleth");
-      ld.choropleth.params = {
-        metric: "vegetationCover",
-        year: 2020,
-        bands: "tree",
-      };
-      mockDesired = ld;
-      mockUseChoropleth.mockReturnValue({
-        isActive: true,
-        getChoroplethStyle: mockGetChoroplethStyle,
-        isLoading: false,
-        choropleth: "vegetationCover",
-      });
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        const layer = screen.getByTestId("subcatchment-layer");
-        expect(layer.getAttribute("data-coverage-key")).toContain(
-          "vegetationCover",
-        );
-        expect(layer.getAttribute("data-coverage-key")).toContain("2020");
-        expect(layer.getAttribute("data-coverage-key")).toContain("tree");
-      });
-    });
-
-    it("uses 'all' for null year in choropleth key", async () => {
-      mockUseParams.mockReturnValue("watershed-1");
-      const ld = desiredWith("subcatchment", "choropleth");
-      ld.choropleth.params = {
-        metric: "vegetationCover",
-        year: null,
-        bands: "all",
-      };
-      mockDesired = ld;
-      mockUseChoropleth.mockReturnValue({
-        isActive: true,
-        getChoroplethStyle: mockGetChoroplethStyle,
-        isLoading: false,
-        choropleth: "vegetationCover",
-      });
-
-      renderWithProviders(<WatershedMap />);
-
-      await waitFor(() => {
-        const layer = screen.getByTestId("subcatchment-layer");
-        expect(layer.getAttribute("data-coverage-key")).toContain("all");
       });
     });
   });

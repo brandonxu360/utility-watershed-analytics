@@ -1,6 +1,9 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
-import type { WatershedProperties } from "../types/WatershedProperties";
+import type {
+  WatershedProperties,
+  WatershedCollection,
+} from "../types/WatershedProperties";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 
 /**
@@ -13,14 +16,10 @@ import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
  *   `/watersheds` endpoint.
  * @throws {Error} If the network request fails or returns a non‑2xx status.
  */
-export async function fetchWatersheds(): Promise<
-  GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>
-> {
+export async function fetchWatersheds(): Promise<WatershedCollection> {
   const url = API_ENDPOINTS.WATERSHEDS;
   const res = await fetch(url);
-  return checkResponse<
-    GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>
-  >(res, { url, prefix: "Watersheds" });
+  return checkResponse<WatershedCollection>(res, { url, prefix: "Watersheds" });
 }
 
 /**

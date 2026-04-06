@@ -3,12 +3,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ScenariosTable } from "../components/bottom-panels/ScenariosTable";
 import type { ScenarioSummaryRow } from "../api/scenarioApi";
 
-const { mockUseQuery, mockUseParams, mockDownloadCsv, mockCopyCsv } = vi.hoisted(() => ({
-  mockUseQuery: vi.fn(),
-  mockUseParams: vi.fn(),
-  mockDownloadCsv: vi.fn(),
-  mockCopyCsv: vi.fn(),
-}));
+const { mockUseQuery, mockUseParams, mockDownloadCsv, mockCopyCsv } =
+  vi.hoisted(() => ({
+    mockUseQuery: vi.fn(),
+    mockUseParams: vi.fn(),
+    mockDownloadCsv: vi.fn(),
+    mockCopyCsv: vi.fn(),
+  }));
 
 vi.mock("../utils/download", () => ({
   downloadCsv: mockDownloadCsv,
@@ -438,7 +439,10 @@ describe("ScenariosTable", () => {
       render(<ScenariosTable />);
       fireEvent.click(screen.getByRole("button", { name: /download as csv/i }));
       expect(mockDownloadCsv).toHaveBeenCalledOnce();
-      const [filename] = mockDownloadCsv.mock.calls[0] as [string, ...unknown[]];
+      const [filename] = mockDownloadCsv.mock.calls[0] as [
+        string,
+        ...unknown[],
+      ];
       expect(filename).toMatch(/scenarios_summary\.csv$/);
     });
 
@@ -452,7 +456,9 @@ describe("ScenariosTable", () => {
       render(<ScenariosTable />);
       fireEvent.click(screen.getByRole("button", { name: /copy as csv/i }));
       await waitFor(() =>
-        expect(screen.getByRole("button", { name: /copied!/i })).toBeInTheDocument(),
+        expect(
+          screen.getByRole("button", { name: /copied!/i }),
+        ).toBeInTheDocument(),
       );
     });
   });

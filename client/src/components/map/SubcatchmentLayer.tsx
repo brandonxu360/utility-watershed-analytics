@@ -11,12 +11,10 @@ export default function SubcatchmentLayer({
   data,
   style,
   coverageActive,
-  coverageKey,
   tooltipContent,
 }: {
   data: GeoJSON.FeatureCollection;
   coverageActive: boolean;
-  coverageKey: string;
   style: (
     feature:
       | GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>
@@ -78,11 +76,10 @@ export default function SubcatchmentLayer({
         (layer as LeafletEvent["target"]).setStyle(styleRef.current(feature));
       }
     });
-  }, [coverageKey]);
+  }, [style]);
 
   return (
     <GeoJSON
-      key={coverageKey}
       data={data}
       style={style}
       onEachFeature={(feature, layer) => {

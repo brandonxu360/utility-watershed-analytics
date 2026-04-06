@@ -1,7 +1,12 @@
 import { useMap } from "react-leaflet";
 import { useEffect, useRef } from "react";
 import { zoomToFeature } from "./MapUtil";
-import { WatershedProperties } from "../../types/WatershedProperties";
+
+import type {
+  WatershedProperties,
+  WatershedCollection,
+} from "../../types/WatershedProperties";
+
 import L from "leaflet";
 
 // Persists the map viewport at module scope so it survives component
@@ -21,7 +26,7 @@ export function getSavedMapView(): {
 
 interface MapEffectProps {
   watershedId: string | null;
-  watersheds: GeoJSON.FeatureCollection<GeoJSON.Geometry, WatershedProperties>;
+  watersheds: WatershedCollection;
 }
 
 /**
