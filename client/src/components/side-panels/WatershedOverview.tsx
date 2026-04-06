@@ -44,7 +44,7 @@ const useStyles = tss.create(({ theme }) => ({
   impactPaper: {
     marginTop: theme.spacing(1.5),
     padding: theme.spacing(1.5),
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: theme.palette.primary.main,
     borderRadius: theme.shape.borderRadius,
   },
   sectionHeading: {
@@ -328,7 +328,7 @@ export default function WatershedOverview() {
         </Typography>
 
         <Paper elevation={0} className={classes.impactPaper}>
-          <Typography variant="body2" className={classes.sectionHeading}>
+          <Typography variant="body1" className={classes.sectionHeading}>
             Short Term Impact
           </Typography>
           <Link
@@ -355,7 +355,7 @@ export default function WatershedOverview() {
         </Paper>
 
         <Paper elevation={0} className={classes.impactPaper}>
-          <Typography variant="body2" className={classes.sectionHeading}>
+          <Typography variant="body1" className={classes.sectionHeading}>
             Long Term Impact
           </Typography>
           {hasNoLongTermData ? (
@@ -376,7 +376,7 @@ export default function WatershedOverview() {
         </Paper>
 
         <Paper elevation={0} className={classes.impactPaper}>
-          <Typography variant="body2" className={classes.sectionHeading}>
+          <Typography variant="body1" className={classes.sectionHeading}>
             Watershed Data
           </Typography>
           <WatershedDataSection />
