@@ -34,8 +34,8 @@ export function AboutWeppCloudSidePanelContent() {
         <h3>IN A NUTSHELL</h3>
         <p>
           <span>What it is:</span>&nbsp; WEPPcloud is an online interface for
-          the <Link to="/about/wepp">WEPP watershed model</Link>, built on a Python
-          software framework (wepppy).
+          the <Link to="/about/wepp">WEPP watershed model</Link>, built on a
+          Python software framework (wepppy).
         </p>
         <p>
           <span>Purpose:</span>&nbsp; WEPPcloud is designed as a

@@ -75,9 +75,11 @@ const useStyles = tss.create(({ theme }) => ({
       display: "inline-block",
       verticalAlign: "top",
     },
-  },  navButtonsSpaced: {
+  },
+  navButtonsSpaced: {
     marginBottom: "1rem",
-  },}));
+  },
+}));
 
 /* ABOUT: SIDE PANEL CONTENT */
 export function AboutSidePanelContent() {
@@ -252,7 +254,8 @@ export function AboutMainContent() {
           <p>
             Developed in partnership with Pacific Northwest water utilities,{" "}
             <strong>FireWISE Watersheds</strong> is designed to be used by
-            managers for <Link to="/about/scenarios">scenario-based planning</Link>,
+            managers for{" "}
+            <Link to="/about/scenarios">scenario-based planning</Link>,
             real-time analysis, and long-term resilience assessments. It is
             designed to guide preparedness, treatment operations, and watershed
             management decisions following wildfire disturbances.
@@ -304,11 +307,13 @@ export function AboutMainContent() {
           <p>
             Leveraging NASA Earth observations—including Landsat, Sentinel-2,
             SMAP soil moisture, and MODIS vegetation metrics—along with advanced
-            modeling systems such as <Link to="/about/rhessys">RHESSys-WMFire</Link>,
-            <Link to="/about/wepp">WEPP</Link>, and <Link to="/about/watar">WATAR</Link>,
-            users can explore how different watershed burn severity affects ash
-            deposition, streamflow, sediment loads, changes in forest biomass,
-            and nitrogen leaching.
+            modeling systems such as{" "}
+            <Link to="/about/rhessys">RHESSys-WMFire</Link>,
+            <Link to="/about/wepp">WEPP</Link>, and{" "}
+            <Link to="/about/watar">WATAR</Link>, users can explore how
+            different watershed burn severity affects ash deposition,
+            streamflow, sediment loads, changes in forest biomass, and nitrogen
+            leaching.
           </p>
         </div>
       </div>

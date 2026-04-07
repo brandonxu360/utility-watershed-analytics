@@ -62,9 +62,9 @@ export function ScenariosMainContent() {
       </p>
       <p>
         Scenarios are a core concept of the Water Erosion Prediction Project (
-        <Link to="/about/wepp">WEPP</Link>) model and provide a fast, low-cost way to
-        test alternatives without waiting for real-world outcomes. They are
-        widely used as decision-support tools by land and water resource
+        <Link to="/about/wepp">WEPP</Link>) model and provide a fast, low-cost
+        way to test alternatives without waiting for real-world outcomes. They
+        are widely used as decision-support tools by land and water resource
         managers.
       </p>
 
