@@ -76,7 +76,7 @@ const useStyles = tss.create(({ theme }) => ({
     width: "100%",
     textAlign: "left",
     color: theme.palette.text.primary,
-    background: theme.palette.background.default,
+    background: theme.palette.surface.content,
     padding: "0 60px 60px 60px",
     lineHeight: 1.8,
   },

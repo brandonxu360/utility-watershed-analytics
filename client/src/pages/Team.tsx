@@ -71,10 +71,7 @@ const useStyles = tss.create(({ theme }) => ({
     flex: 1,
     overflowY: "auto",
     color: theme.palette.text.primary,
-    background:
-      theme.palette.mode === "light"
-        ? theme.palette.surface.main
-        : theme.palette.background.default,
+    background: theme.palette.surface.content,
     padding: "0 40px 50px 40px",
   },
   universitySections: {
