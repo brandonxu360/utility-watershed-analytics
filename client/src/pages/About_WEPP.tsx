@@ -519,9 +519,6 @@ const Content = () => {
   );
 };
 
-/**
- * Layout for the ABOUT WEPP page.
- */
 export default function AboutWepp() {
   const { classes } = useStyles();
   const isSmallScreen = useIsSmallScreen();

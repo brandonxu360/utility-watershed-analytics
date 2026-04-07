@@ -266,9 +266,6 @@ const Content = () => {
   );
 };
 
-/**
- * Layout for the ABOUT WEPPCLOUD page.
- */
 export default function AboutWeppCloud() {
   const { classes } = useStyles();
   const isSmallScreen = useIsSmallScreen();

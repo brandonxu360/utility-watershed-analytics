@@ -362,9 +362,6 @@ const Content = () => {
   );
 };
 
-/**
- * Layout for the ABOUT RHESSys page.
- */
 export default function AboutRHESSys() {
   const { classes } = useStyles();
   const isSmallScreen = useIsSmallScreen();
