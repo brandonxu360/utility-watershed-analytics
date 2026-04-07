@@ -15,6 +15,7 @@ import osu_dark from "../assets/images/osu_logo_horiz_dark.png";
 import usfs from "../assets/images/usfs_rockyMtn_logo.png";
 import firewise_diagram from "../assets/images/firewise_diagram.png";
 import fire_image from "../assets/images/wildfire-threat-water-supply.jpg";
+import Paper from "@mui/material/Paper";
 
 const useStyles = tss.create(({ theme }) => ({
   ...commonStyles(theme),
@@ -74,8 +75,9 @@ const useStyles = tss.create(({ theme }) => ({
       display: "inline-block",
       verticalAlign: "top",
     },
-  },
-}));
+  },  navButtonsSpaced: {
+    marginBottom: "1rem",
+  },}));
 
 /* ABOUT: SIDE PANEL CONTENT */
 export function AboutSidePanelContent() {
@@ -84,7 +86,7 @@ export function AboutSidePanelContent() {
   const isDark = theme.palette.mode === "dark";
   const navigate = useNavigate();
   return (
-    <div className="about-panel">
+    <div>
       <h2>About the Project</h2>
       <p>
         This product was supported by NASA and builds upon individual components
@@ -100,7 +102,7 @@ export function AboutSidePanelContent() {
       <br />
       <h2>Model Architecture</h2>
 
-      <div className={classes.navButtons} style={{ marginBottom: "1rem" }}>
+      <div className={`${classes.navButtons} ${classes.navButtonsSpaced}`}>
         <button
           onClick={() => {
             navigate({ to: "/about/wepp" });
@@ -339,12 +341,12 @@ export default function About() {
 
   return (
     <div className={classes.aboutContainer}>
-      <div className={classes.sidePanel}>
+      <Paper elevation={3} square className={classes.sidePanel}>
         <div className={classes.sidePanelContent}>
           <AboutSidePanelContent />
         </div>
-      </div>
-      <div className={classes.aboutWrapper} style={{ position: "relative" }}>
+      </Paper>
+      <div className={classes.aboutWrapper}>
         <AboutMainContent />
       </div>
     </div>

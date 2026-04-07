@@ -5,6 +5,7 @@ import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import { useNavigate } from "@tanstack/react-router";
 import sbs_diagram from "../assets/images/sbs_diagram.png";
+import Paper from "@mui/material/Paper";
 
 const useStyles = tss.create(({ theme }) => ({
   ...commonStyles(theme),
@@ -16,7 +17,7 @@ export function AboutSBSSidePanelContent() {
   const { classes } = useStyles();
   const navigate = useNavigate();
   return (
-    <div className="about-panel">
+    <div>
       <button
         onClick={() => {
           navigate({ to: "/about" });
@@ -24,7 +25,6 @@ export function AboutSBSSidePanelContent() {
         className={classes.closeButton}
         aria-label="Close SBS panel"
         title="Close SBS panel"
-        style={{ padding: "0.313rem 0.5rem" }}
       >
         BACK
       </button>
@@ -179,9 +179,9 @@ export function AboutSBSMainContent() {
 function SidePanel({ children }: { children: React.ReactNode }) {
   const { classes } = useStyles();
   return (
-    <div className={classes.sidePanel}>
+    <Paper elevation={3} square className={classes.sidePanel}>
       <div className={classes.sidePanelContent}>{children}</div>
-    </div>
+    </Paper>
   );
 }
 
@@ -201,7 +201,7 @@ export default function AboutSBS() {
       <SidePanel>
         <AboutSBSSidePanelContent />
       </SidePanel>
-      <div className={classes.aboutWrapper} style={{ position: "relative" }}>
+      <div className={classes.aboutWrapper}>
         <AboutSBSMainContent />
       </div>
     </div>

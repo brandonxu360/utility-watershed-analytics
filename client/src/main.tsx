@@ -6,7 +6,6 @@ import { ThemeProvider } from "@mui/material/styles";
 import { darkTheme, lightTheme } from "./utils/theme.ts";
 import { ColorModeContext } from "./contexts/ColorModeContext.tsx";
 import App from "./App.tsx";
-import "./index.css";
 
 // Research data is stable and rarely updated, so we treat cached data as
 // permanently fresh (staleTime: Infinity). Queries will only refetch when

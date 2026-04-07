@@ -5,6 +5,7 @@ import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import { useNavigate } from "@tanstack/react-router";
 import watar_diagram from "../assets/images/watar_diagram.png";
+import Paper from "@mui/material/Paper";
 
 const useStyles = tss.create(({ theme }) => ({
   ...commonStyles(theme),
@@ -16,7 +17,7 @@ export function AboutWatarSidePanelContent() {
   const { classes } = useStyles();
   const navigate = useNavigate();
   return (
-    <div className="about-panel">
+    <div>
       <button
         onClick={() => {
           navigate({ to: "/about" });
@@ -24,7 +25,6 @@ export function AboutWatarSidePanelContent() {
         className={classes.closeButton}
         aria-label="Close WATAR panel"
         title="Close WATAR panel"
-        style={{ padding: "0.313rem 0.5rem" }}
       >
         BACK
       </button>
@@ -180,9 +180,9 @@ export function AboutWatarMainContent() {
 function SidePanel({ children }: { children: React.ReactNode }) {
   const { classes } = useStyles();
   return (
-    <div className={classes.sidePanel}>
+    <Paper elevation={3} square className={classes.sidePanel}>
       <div className={classes.sidePanelContent}>{children}</div>
-    </div>
+    </Paper>
   );
 }
 
@@ -202,7 +202,7 @@ export default function AboutWATAR() {
       <SidePanel>
         <AboutWatarSidePanelContent />
       </SidePanel>
-      <div className={classes.aboutWrapper} style={{ position: "relative" }}>
+      <div className={classes.aboutWrapper}>
         <AboutWatarMainContent />
       </div>
     </div>

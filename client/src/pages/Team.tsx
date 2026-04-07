@@ -16,6 +16,7 @@ import JennyAdam from "../assets/images/jenny_adam.png";
 import KevinBladon from "../assets/images/kevin_bladon.png";
 import RyanCole from "../assets/images/ryan_cole.png";
 import PeteRobichaud from "../assets/images/pete_robichaud.png";
+import Paper from "@mui/material/Paper";
 
 const useStyles = tss.create(({ theme }) => ({
   ...commonStyles(theme),
@@ -95,7 +96,7 @@ const scrollToUniversity = (e: React.MouseEvent, name: string) => {
 export function TeamSidePanelContent() {
   const { classes } = useStyles();
   return (
-    <div className="about-panel">
+    <div>
       <h2>Project Team & Partners</h2>
       <p>
         Select from the following to see our team of experts and partner
@@ -290,7 +291,7 @@ export function TeamMainContent() {
   );
 
   return (
-    <div className={`${classes.aboutContainerMain} scroll-container`}>
+    <div className={classes.aboutContainerMain}>
       <div className={classes.textCenter}>
         {Object.entries(groupedMembers).map(([university, members]) => (
           <section key={university} id={university.replace(/\s+/g, "_")}>
@@ -390,9 +391,9 @@ export function TeamMainContent() {
 function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
   const { classes } = useStyles();
   return (
-    <div className={classes.sidePanel}>
+    <Paper elevation={3} square className={classes.sidePanel}>
       <div className={classes.sidePanelContent}>{children}</div>
-    </div>
+    </Paper>
   );
 }
 /**
@@ -411,7 +412,7 @@ export default function Team() {
       <SidePanel>
         <TeamSidePanelContent />
       </SidePanel>
-      <div className={classes.aboutWrapper} style={{ position: "relative" }}>
+      <div className={classes.aboutWrapper}>
         <TeamMainContent />
       </div>
     </div>

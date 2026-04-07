@@ -19,6 +19,7 @@ export const commonStyles = (theme: Theme) => ({
     flex: 1,
     minHeight: 0,
     overflowY: "scroll",
+    position: "relative",
   } as CSSObject,
   sidePanel: {
     width: "30%",
@@ -36,10 +37,10 @@ export const commonStyles = (theme: Theme) => ({
     "& h2": {
       fontSize: "2rem",
       fontWeight: "bold",
-      marginBottom: "var(--size-400)",
+      marginBottom: "1rem",
     },
     "& h3": {
-      marginBottom: "var(--size-300)",
+      marginBottom: "0.75rem",
     },
     "& h3, & strong": {
       fontSize: "1.7rem",
@@ -47,7 +48,7 @@ export const commonStyles = (theme: Theme) => ({
     },
     "& p": {
       fontSize: "1.2rem",
-      marginBottom: "var(--size-400)",
+      marginBottom: "1rem",
     },
     "& hr": {
       marginTop: 20,
@@ -137,6 +138,9 @@ export const subPageStyles = (theme: Theme) => ({
     border: "none",
     borderRadius: 3,
     color: theme.palette.common.white,
+    padding: "0.313rem 0.5rem",
+    marginBottom: "1rem",
+    cursor: "pointer",
     "&:hover": {
       background: `${theme.palette.error.dark} !important`,
       border: "none",

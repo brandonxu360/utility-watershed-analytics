@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import wepp_diagram from "../assets/images/wepp_diagram_v2.png";
+import Paper from "@mui/material/Paper";
 
 const useStyles = tss.create(({ theme }) => ({
   ...commonStyles(theme),
@@ -15,7 +16,7 @@ export function AboutWeppSidePanelContent() {
   const { classes } = useStyles();
   const navigate = useNavigate();
   return (
-    <div className="about-panel">
+    <div>
       <button
         onClick={() => {
           navigate({ to: "/about" });
@@ -23,7 +24,6 @@ export function AboutWeppSidePanelContent() {
         className={classes.closeButton}
         aria-label="Close WEPP panel"
         title="Close WEPP panel"
-        style={{ padding: "0.313rem 0.5rem", marginBottom: "1rem" }}
       >
         BACK
       </button>
@@ -377,9 +377,9 @@ export function AboutWeppMainContent() {
 function SidePanel({ children }: { children: React.ReactNode }): JSX.Element {
   const { classes } = useStyles();
   return (
-    <div className={classes.sidePanel}>
+    <Paper elevation={3} square className={classes.sidePanel}>
       <div className={classes.sidePanelContent}>{children}</div>
-    </div>
+    </Paper>
   );
 }
 
@@ -399,7 +399,7 @@ export default function AboutWepp() {
       <SidePanel>
         <AboutWeppSidePanelContent />
       </SidePanel>
-      <div className={classes.aboutWrapper} style={{ position: "relative" }}>
+      <div className={classes.aboutWrapper}>
         <AboutWeppMainContent />
       </div>
     </div>
