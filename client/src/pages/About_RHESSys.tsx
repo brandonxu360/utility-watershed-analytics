@@ -182,7 +182,7 @@ export function AboutRHESSysMainContent() {
           grasslands, or urban areas are.
         </li>
         <li>
-          <span>Vegetation Paramters:</span> Physiology tables for the specific
+          <span>Vegetation Parameters:</span> Physiology tables for the specific
           plants in the region (e.g., pine vs. oak vs. grass).
         </li>
         <li>
