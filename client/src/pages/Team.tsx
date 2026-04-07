@@ -278,7 +278,7 @@ const MemberCard = ({ person }: { person: TeamMember }) => {
   );
 };
 
-const renderSidePanel = () => {
+const SidePanel = () => {
   const { classes } = useStyles();
   return (
     <Paper elevation={3} square className={classes.sidePanel}>
@@ -340,7 +340,7 @@ const renderSidePanel = () => {
   );
 };
 
-const renderContent = () => {
+const Content = () => {
   const { classes } = useStyles();
   return (
     <div className={classes.mainContent}>
@@ -351,10 +351,7 @@ const renderContent = () => {
             id={university.replace(/\s+/g, "_")}
             className={classes.universitySection}
           >
-            <Typography
-              component="h2"
-              className={classes.univHeading}
-            >
+            <Typography component="h2" className={classes.univHeading}>
               {university}
             </Typography>
             {members.map((person) => (
@@ -471,8 +468,8 @@ export default function Team() {
 
   return (
     <div className={classes.root}>
-      {renderSidePanel()}
-      {renderContent()}
+      <SidePanel />
+      <Content />
     </div>
   );
 }
