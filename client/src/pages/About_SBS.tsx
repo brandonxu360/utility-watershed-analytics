@@ -187,7 +187,7 @@ const Content = () => {
           Predicted SBS Tool: Purpose and Applications
         </Typography>
         <Typography variant="body1" mb={3}>
-          The predicted-Soil Burn Severity (p-SBS) tool extends the concept of
+          The predicted Soil Burn Severity (p-SBS) tool extends the concept of
           SBS into the pre-fire environment to provide a model-based forecast of
           potential severity. Its purpose is to enable proactive planning and
           risk assessment, allowing managers to anticipate areas with higher

@@ -255,7 +255,7 @@ const Content = () => {
         </Typography>
         <Typography variant="body1" mb={3}>
           RHESSys is essentially a &ldquo;super-model&rdquo; that combines
-          adaptations of two older, well-established models:
+          adaptations of three older, well-established models:
         </Typography>
         <ul>
           <li>

@@ -153,12 +153,9 @@ const Content = () => {
         </Typography>
         <Typography variant="body1" mb={3}>
           Scenarios are a core concept of the Water Erosion Prediction Project
-          ({" "}
-          <Link to="/about/wepp" className={classes.contentLink}>
+          (<Link to="/about/wepp" className={classes.contentLink}>
             WEPP
-          </Link>
-          {" "}
-          ) model and provide a fast, low-cost way to test alternatives without
+          </Link>) model and provide a fast, low-cost way to test alternatives without
           waiting for real-world outcomes. They are widely used as
           decision-support tools by land and water resource managers.
         </Typography>
@@ -203,11 +200,11 @@ const Content = () => {
             <span>Low-, Moderate-, and High-Severity Wildfire</span> Simulate
             increasing levels of vegetation and ground cover loss.
             <ul>
-              <li>Low severity reflects limited soil disturbance</li>
-              <li>Moderate severity represents partial soil exposure</li>
+              <li>Low severity reflects limited soil disturbance.</li>
+              <li>Moderate severity represents partial soil exposure.</li>
               <li>
                 High severity represents worst-case conditions, with major
-                erosion and water quality impacts
+                erosion and water quality impacts.
               </li>
             </ul>
           </li>

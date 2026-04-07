@@ -333,7 +333,7 @@ const Content = () => {
                   RHESSys
                 </Link>
                 <Typography variant="body1">
-                  Regional HydroEcological Simulation System
+                  Regional Hydro-Ecological Simulation System
                 </Typography>
               </Stack>
             </Stack>
