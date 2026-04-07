@@ -10,8 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeamRouteImport } from './routes/team'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutIndexRouteImport } from './routes/about/index'
@@ -26,16 +24,6 @@ import { Route as AboutRhessysRouteImport } from './routes/about/rhessys'
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -92,8 +80,6 @@ const AboutRhessysRoute = AboutRhessysRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRouteWithChildren
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
   '/team': typeof TeamRoute
   '/about/rhessys': typeof AboutRhessysRoute
   '/about/sbs': typeof AboutSbsRoute
@@ -106,8 +92,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
   '/team': typeof TeamRoute
   '/about/rhessys': typeof AboutRhessysRoute
   '/about/sbs': typeof AboutSbsRoute
@@ -122,8 +106,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRouteWithChildren
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
   '/team': typeof TeamRoute
   '/about/rhessys': typeof AboutRhessysRoute
   '/about/sbs': typeof AboutSbsRoute
@@ -139,8 +121,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/login'
-    | '/register'
     | '/team'
     | '/about/rhessys'
     | '/about/sbs'
@@ -153,8 +133,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/login'
-    | '/register'
     | '/team'
     | '/about/rhessys'
     | '/about/sbs'
@@ -168,8 +146,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
-    | '/login'
-    | '/register'
     | '/team'
     | '/about/rhessys'
     | '/about/sbs'
@@ -184,8 +160,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRouteWithChildren
-  LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
   TeamRoute: typeof TeamRoute
   WatershedWebcloudRunIdRoute: typeof WatershedWebcloudRunIdRoute
 }
@@ -197,20 +171,6 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof TeamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -311,8 +271,6 @@ const AboutRouteWithChildren = AboutRoute._addFileChildren(AboutRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRouteWithChildren,
-  LoginRoute: LoginRoute,
-  RegisterRoute: RegisterRoute,
   TeamRoute: TeamRoute,
   WatershedWebcloudRunIdRoute: WatershedWebcloudRunIdRoute,
 }

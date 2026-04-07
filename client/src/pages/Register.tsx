@@ -1,5 +1,5 @@
 import { useState, FormEvent, FC } from "react";
-import { Link } from "@tanstack/react-router";
+
 import { tss } from "../utils/tss";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../components/SmallScreenNotice";
@@ -202,9 +202,10 @@ const Register: FC<RegisterProps> = ({ onSubmit }) => {
           </Button>
           <div className={classes.authFooter}>
             <Typography variant="body2">Already have an account?</Typography>
-            <Link to="/login" className={classes.linkButton}>
+            {/* TODO: Replace with TanStack Link component when building out auth */}
+            <a href="/login" className={classes.linkButton}>
               Login
-            </Link>
+            </a>
           </div>
         </Paper>
       </div>

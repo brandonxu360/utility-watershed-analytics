@@ -77,9 +77,11 @@ const Navbar: FC = () => {
           <Link to="/about" className={classes.link}>
             About
           </Link>
+          {/* TODO: add login/logout links when auth is implemented
           <Link to="/login" className={classes.link}>
             Login
           </Link>
+          */}
           <IconButton className={classes.colorToggle} onClick={toggleColorMode}>
             {mode === "dark" ? <Brightness7Icon /> : <DarkMode />}
           </IconButton>
