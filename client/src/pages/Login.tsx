@@ -173,9 +173,10 @@ const Login: FC<LoginProps> = ({ onSubmit }) => {
           </Button>
           <div className={classes.authFooter}>
             <Typography variant="body2">Don't have an account?</Typography>
-            <Link to="/register" className={classes.linkButton}>
+            {/* TODO: Replace with TanStack Link component when building out auth */}
+            <a href="/register" className={classes.linkButton}>
               Register
-            </Link>
+            </a>
           </div>
         </Paper>
       </div>

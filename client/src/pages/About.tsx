@@ -144,7 +144,7 @@ const SidePanel = () => {
   return (
     <Paper elevation={3} square className={classes.sidePanel}>
       <div className={classes.sidePanelContent}>
-        <Typography component="h5" variant="h2" fontWeight="bold" marginY={2}>
+        <Typography component="h2" variant="h2" fontWeight="bold" marginY={2}>
           About the Project
         </Typography>
         <Typography variant="body1" mb={4}>
@@ -155,7 +155,7 @@ const SidePanel = () => {
         <Link to="/" className={classes.btnLink}>
           Explore Watersheds
         </Link>
-        <Typography component="h6" variant="h2" fontWeight="bold" mt={4} mb={1}>
+        <Typography component="h3" variant="h2" fontWeight="bold" mt={4} mb={1}>
           Model Architecture
         </Typography>
         <div className={classes.navButtons}>
@@ -199,7 +199,7 @@ const SidePanel = () => {
 
         <div className={classes.institutions}>
           <Typography
-            component="h6"
+            component="h3"
             variant="h2"
             fontWeight="bold"
             mt={4}

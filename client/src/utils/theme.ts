@@ -41,6 +41,7 @@ declare module "@mui/material/styles" {
 
 // Common typography
 const typography: TypographyVariantsOptions = {
+  fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   fontWeightRegular: 500,
   h1: { fontSize: "3rem" },
   h2: { fontSize: "2rem" },

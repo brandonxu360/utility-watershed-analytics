@@ -111,7 +111,7 @@ const SidePanel = () => {
         >
           BACK
         </Button>
-        <Typography component="h5" variant="h2" fontWeight="bold" marginY={2}>
+        <Typography component="h2" variant="h2" fontWeight="bold" marginY={2}>
           Model Scenarios
         </Typography>
         <Divider />
@@ -152,10 +152,11 @@ const Content = () => {
           influence watershed outcomes.
         </Typography>
         <Typography variant="body1" mb={3}>
-          Scenarios are a core concept of the Water Erosion Prediction Project
-          (<Link to="/about/wepp" className={classes.contentLink}>
+          Scenarios are a core concept of the Water Erosion Prediction Project (
+          <Link to="/about/wepp" className={classes.contentLink}>
             WEPP
-          </Link>) model and provide a fast, low-cost way to test alternatives without
+          </Link>
+          ) model and provide a fast, low-cost way to test alternatives without
           waiting for real-world outcomes. They are widely used as
           decision-support tools by land and water resource managers.
         </Typography>
@@ -227,12 +228,12 @@ const Content = () => {
           scenes, WEPP organizes vegetation, soil conditions, surface
           disturbance, and management actions into structured inputs. Some soil
           and management parameters&mdash;including critical shear stress,
-          hydraulic conductivity, and rill and interrill
-          erodibility&mdash;are automatically adjusted based on land cover or
-          disturbance type and soil texture. These default values are derived
-          from field observations and experimental studies conducted across the
-          western United States, ensuring that scenario simulations reflect
-          realistic post-disturbance soil behavior.
+          hydraulic conductivity, and rill and interrill erodibility&mdash;are
+          automatically adjusted based on land cover or disturbance type and
+          soil texture. These default values are derived from field observations
+          and experimental studies conducted across the western United States,
+          ensuring that scenario simulations reflect realistic post-disturbance
+          soil behavior.
         </Typography>
         <Typography variant="body1" mb={3}>
           By comparing results across scenarios, users can:

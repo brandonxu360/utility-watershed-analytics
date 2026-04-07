@@ -124,12 +124,12 @@ const SidePanel = () => {
         >
           BACK
         </Button>
-        <Typography component="h5" variant="h2" fontWeight="bold" marginY={2}>
+        <Typography component="h2" variant="h2" fontWeight="bold" marginY={2}>
           About WEPPcloud
         </Typography>
         <Divider />
         <div className={classes.nutshell}>
-          <Typography component="h6" variant="h3" fontWeight="bold" marginY={3}>
+          <Typography component="h3" variant="h3" fontWeight="bold" marginY={3}>
             IN A NUTSHELL
           </Typography>
           <Typography variant="body1" mb={2}>
