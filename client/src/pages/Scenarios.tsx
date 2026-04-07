@@ -3,7 +3,7 @@ import { tss } from "../utils/tss";
 import { commonStyles, subPageStyles } from "../utils/sharedStyles";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../components/SmallScreenNotice";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import scenarios_diagram from "../assets/images/scenarios_diagram.png";
 import Paper from "@mui/material/Paper";
 
@@ -62,7 +62,7 @@ export function ScenariosMainContent() {
       </p>
       <p>
         Scenarios are a core concept of the Water Erosion Prediction Project (
-        <a href="about-wepp">WEPP</a>) model and provide a fast, low-cost way to
+        <Link to="/about/wepp">WEPP</Link>) model and provide a fast, low-cost way to
         test alternatives without waiting for real-world outcomes. They are
         widely used as decision-support tools by land and water resource
         managers.
@@ -120,7 +120,7 @@ export function ScenariosMainContent() {
         <li>
           <span>Simulated Wildfire</span>
           <br />
-          Based on a simulated wildfire (<a href="about-sbs">p-SBS</a>)
+          Based on a simulated wildfire (<Link to="/about/sbs">p-SBS</Link>)
         </li>
       </ul>
 

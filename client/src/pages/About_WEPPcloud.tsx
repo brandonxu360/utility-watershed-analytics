@@ -1,6 +1,6 @@
 import { tss } from "../utils/tss";
 import { commonStyles, subPageStyles } from "../utils/sharedStyles";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import weppcloud_diagram from "../assets/images/weppcloud_diagram.png";
@@ -34,7 +34,7 @@ export function AboutWeppCloudSidePanelContent() {
         <h3>IN A NUTSHELL</h3>
         <p>
           <span>What it is:</span>&nbsp; WEPPcloud is an online interface for
-          the <a href="about-wepp">WEPP watershed model</a>, built on a Python
+          the <Link to="/about/wepp">WEPP watershed model</Link>, built on a Python
           software framework (wepppy).
         </p>
         <p>

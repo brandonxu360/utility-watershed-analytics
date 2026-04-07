@@ -24,8 +24,8 @@ const useStyles = tss.create(({ theme }) => ({
   btnLink: {
     background:
       theme.palette.mode === "dark"
-        ? "theme.palette.common.black theme.palette.accent.main"
-        : "theme.palette.accent.main theme.palette.common.white",
+        ? `${theme.palette.common.black} ${theme.palette.accent.main}`
+        : `${theme.palette.accent.main} ${theme.palette.common.white}`,
     padding: "8px 16px",
     border: `1px solid ${theme.palette.accent.main}`,
     borderRadius: 4,
@@ -252,7 +252,7 @@ export function AboutMainContent() {
           <p>
             Developed in partnership with Pacific Northwest water utilities,{" "}
             <strong>FireWISE Watersheds</strong> is designed to be used by
-            managers for <a href="scenarios">scenario-based planning</a>,
+            managers for <Link to="/about/scenarios">scenario-based planning</Link>,
             real-time analysis, and long-term resilience assessments. It is
             designed to guide preparedness, treatment operations, and watershed
             management decisions following wildfire disturbances.
@@ -274,9 +274,9 @@ export function AboutMainContent() {
               <tr>
                 <td>
                   <p className={classes.textCenter}>
-                    <a href="about-wepp" className={classes.btnLink}>
+                    <Link to="/about/wepp" className={classes.btnLink}>
                       WEPP
-                    </a>
+                    </Link>
                     &nbsp;
                   </p>
                 </td>
@@ -287,9 +287,9 @@ export function AboutMainContent() {
               <tr>
                 <td>
                   <p>
-                    <a href="about-rhessys" className={classes.btnLink}>
+                    <Link to="/about/rhessys" className={classes.btnLink}>
                       RHESSys
-                    </a>
+                    </Link>
                     &nbsp;
                   </p>
                 </td>
@@ -304,8 +304,8 @@ export function AboutMainContent() {
           <p>
             Leveraging NASA Earth observations—including Landsat, Sentinel-2,
             SMAP soil moisture, and MODIS vegetation metrics—along with advanced
-            modeling systems such as <a href="about-rhessys">RHESSys-WMFire</a>,
-            <a href="about-wepp">WEPP</a>, and <a href="about-watar">WATAR</a>,
+            modeling systems such as <Link to="/about/rhessys">RHESSys-WMFire</Link>,
+            <Link to="/about/wepp">WEPP</Link>, and <Link to="/about/watar">WATAR</Link>,
             users can explore how different watershed burn severity affects ash
             deposition, streamflow, sediment loads, changes in forest biomass,
             and nitrogen leaching.
