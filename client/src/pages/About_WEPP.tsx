@@ -270,8 +270,8 @@ const Content = () => {
           <li>
             <span>Breakpoint rainfall data</span>
             <br />
-            Climate input files can be manually constructed to include breakpoint
-            rainfall data for detailed storm representation.
+            Climate input files can be manually constructed to include
+            breakpoint rainfall data for detailed storm representation.
           </li>
           <li>
             <span>Single Storm simulations</span>
@@ -313,8 +313,8 @@ const Content = () => {
             <span>Future Climate</span>
             <br />
             The future climate option uses downscaled daily climate series from
-            Coupled Model Intercomparison Project Phase 5 (CMIP5) global
-            climate models to simulate conditions between 2006 and 2099.
+            Coupled Model Intercomparison Project Phase 5 (CMIP5) global climate
+            models to simulate conditions between 2006 and 2099.
           </li>
         </ul>
 
