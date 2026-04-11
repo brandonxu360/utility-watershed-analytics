@@ -332,7 +332,7 @@ describe("WatershedOverview", () => {
         expect(dashboardLink).toHaveAttribute("rel", "noopener noreferrer");
 
         const reportLink = screen.getByRole("link", {
-          name: /view WEPP interactive report/i,
+          name: /View WEPP interactive report/i,
         });
         expect(reportLink).toHaveAttribute(
           "aria-label",

@@ -79,12 +79,12 @@ const useStyles = tss.create(({ theme }) => ({
     padding: `${theme.spacing(0.25)} 0`,
   },
   variableTitle: {
-    fontSize: theme.typography.caption.fontSize,
+    fontSize: theme.typography.body2.fontSize,
     flex: 1,
     paddingLeft: theme.spacing(0.5),
   },
   variableHeading: {
-    fontSize: theme.typography.caption.fontSize,
+    fontSize: theme.typography.body2.fontSize,
     flex: 1,
     paddingLeft: theme.spacing(0.5),
     fontWeight: 600,
@@ -227,7 +227,12 @@ export default function WeppSection() {
                   arrow: classes.tooltipArrow,
                 }}
               >
-                <Typography className={classes.scenarioInfo}>
+                <Typography
+                  className={classes.scenarioInfo}
+                  tabIndex={0}
+                  role="button"
+                  aria-label="About this scenario"
+                >
                   <InfoOutlinedIcon fontSize="inherit" />
                   About this scenario
                 </Typography>

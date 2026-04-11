@@ -343,7 +343,7 @@ export default function WatershedOverview() {
             underline="always"
             aria-label="View WEPP interactive report"
           >
-            view WEPP interactive report
+            View WEPP interactive report
           </Link>
           <WeppSection />
         </Paper>

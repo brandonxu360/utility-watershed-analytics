@@ -1,5 +1,5 @@
-import React from "react";
 import { tss } from "../utils/tss";
+import { MouseEvent } from "react";
 import Typography from "@mui/material/Typography";
 import MemberCard from "../components/MemberCard";
 import { groupedMembers } from "../data/team";
@@ -58,7 +58,7 @@ const useStyles = tss.create(({ theme }) => ({
   },
 }));
 
-const scrollToUniversity = (e: React.MouseEvent, id: string) => {
+const scrollToUniversity = (e: MouseEvent, id: string) => {
   e.preventDefault();
   document
     .getElementById(id)
