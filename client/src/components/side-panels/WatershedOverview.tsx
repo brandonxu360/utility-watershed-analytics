@@ -9,7 +9,6 @@ import { WatershedProperties } from "../../types/WatershedProperties";
 import { tss } from "../../utils/tss";
 import { toast } from "react-toastify";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
@@ -22,18 +21,11 @@ import RhessysSection from "./sections/RhessysSection";
 import RhessysOutputsSection from "./sections/RhessysOutputsSection";
 import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
 import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
+import BackButton from "../BackButton";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
     paddingBottom: theme.spacing(4),
-  },
-  closeButton: {
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.primary.light,
-    fontSize: theme.typography.body2.fontSize,
-    marginTop: theme.spacing(1.5),
-    marginBottom: theme.spacing(1),
-    padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
   },
   contentBox: {
     marginTop: theme.spacing(2),
@@ -250,17 +242,7 @@ export default function WatershedOverview() {
 
   return (
     <div className={classes.root}>
-      <Button
-        onClick={() => {
-          navigate({ to: "/" });
-        }}
-        className={classes.closeButton}
-        aria-label="Close watershed panel"
-        title="Close watershed panel"
-        variant="contained"
-      >
-        BACK
-      </Button>
+      <BackButton onClick={() => navigate({ to: "/" })} label="Close watershed overview panel" />
       <div className={classes.contentBox}>
         <div className={classes.titleHeader}>
           <div>

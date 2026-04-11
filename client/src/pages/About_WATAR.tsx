@@ -2,23 +2,11 @@ import { tss } from "../utils/tss";
 import { useNavigate } from "@tanstack/react-router";
 import watar_diagram from "../assets/images/watar_diagram.png";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import SidePanelLayout from "../components/side-panels/SidePanelLayout";
+import BackButton from "../components/BackButton";
 
 const useStyles = tss.create(({ theme }) => ({
-  backButton: {
-    background: theme.palette.error.main,
-    color: theme.palette.common.white,
-    borderRadius: 3,
-    padding: "5px 8px",
-    margin: "16px 0",
-    minWidth: "auto",
-    textTransform: "none",
-    "&:hover": {
-      background: theme.palette.error.dark,
-    },
-  },
   nutshell: {
     marginTop: 20,
   },
@@ -56,13 +44,7 @@ const SidePanel = () => {
   const navigate = useNavigate();
   return (
     <>
-      <Button
-        className={classes.backButton}
-        onClick={() => navigate({ to: "/about" })}
-        aria-label="Back to About"
-      >
-        BACK
-      </Button>
+      <BackButton onClick={() => navigate({ to: "/about" })} label="Back to about page" />
       <Typography component="h2" variant="h2" fontWeight="bold" marginY={2}>
         About WATAR
       </Typography>
