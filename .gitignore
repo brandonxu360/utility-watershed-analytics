@@ -5,3 +5,6 @@
 pgadmin-servers.json
 
 caddy_data/
+
+# MacOS
+.DS_Store
