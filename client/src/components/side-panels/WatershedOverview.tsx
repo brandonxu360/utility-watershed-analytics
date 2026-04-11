@@ -322,9 +322,9 @@ export default function WatershedOverview() {
             rel="noopener noreferrer"
             className={classes.actionLink}
             underline="always"
-            aria-label="View Detailed WEPP Model Results"
+            aria-label="View WEPP model dashboard"
           >
-            View Detailed WEPP Model Results
+            View WEPP model dashboard
           </Link>
           <Link
             href={runId ? API_ENDPOINTS.WEPP_DEVAL_DETAILS(runId) : undefined}
@@ -332,9 +332,9 @@ export default function WatershedOverview() {
             rel="noopener noreferrer"
             className={classes.actionLink}
             underline="always"
-            aria-label="View WEPP Deval Details Report"
+            aria-label="View WEPP interactive report"
           >
-            View WEPP Deval Details Report
+            view WEPP interactive report
           </Link>
           <WeppSection />
         </Paper>
