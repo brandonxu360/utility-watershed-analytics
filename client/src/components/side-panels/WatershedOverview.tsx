@@ -339,26 +339,20 @@ export default function WatershedOverview() {
           <WeppSection />
         </Paper>
 
-        <Paper elevation={0} className={classes.impactPaper}>
-          <Typography variant="body1" className={classes.sectionHeading}>
-            Long Term Impact
-          </Typography>
-          {hasNoLongTermData ? (
-            <Typography className={classes.emptyState}>
-              No long term impact data available for the selected watershed.
+        {hasNoLongTermData ? null : (
+          <Paper elevation={0} className={classes.impactPaper}>
+            <Typography variant="body1" className={classes.sectionHeading}>
+              Long Term Impact
             </Typography>
-          ) : (
-            <>
-              <RhessysSection files={files} isLoading={rhessysLoading} />
-              <RhessysOutputsSection
-                scenarios={outputScenarios}
-                variables={outputVariables}
-                isLoading={outputsLoading}
-                hasChoroplethData={hasChoroplethData}
-              />
-            </>
-          )}
-        </Paper>
+            <RhessysSection files={files} isLoading={rhessysLoading} />
+            <RhessysOutputsSection
+              scenarios={outputScenarios}
+              variables={outputVariables}
+              isLoading={outputsLoading}
+              hasChoroplethData={hasChoroplethData}
+            />
+          </Paper>
+        )}
 
         <Paper elevation={0} className={classes.impactPaper}>
           <Typography variant="body1" className={classes.sectionHeading}>
