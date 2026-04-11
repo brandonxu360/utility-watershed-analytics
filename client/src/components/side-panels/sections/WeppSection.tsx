@@ -9,6 +9,7 @@ import { getLayerParams } from "../../../layers/types";
 import {
   SCENARIO_VARIABLES,
   SCENARIO_VARIABLE_CONFIG,
+  SCENARIO_DESCRIPTIONS,
   type ScenarioType,
   type ScenarioVariableType,
 } from "../../../layers/scenario";
@@ -22,6 +23,8 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import Tooltip from "@mui/material/Tooltip";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 const useStyles = tss.create(({ theme }) => ({
   layer: {
@@ -76,23 +79,48 @@ const useStyles = tss.create(({ theme }) => ({
     padding: `${theme.spacing(0.25)} 0`,
   },
   variableTitle: {
-    fontSize: theme.typography.caption.fontSize,
+    fontSize: theme.typography.body2.fontSize,
     flex: 1,
     paddingLeft: theme.spacing(0.5),
   },
   variableHeading: {
-    fontSize: theme.typography.caption.fontSize,
+    fontSize: theme.typography.body2.fontSize,
     flex: 1,
     paddingLeft: theme.spacing(0.5),
     fontWeight: 600,
-    paddingTop: theme.spacing(1.5),
-    paddingBottom: theme.spacing(0.5),
   },
   radio: {
     color: theme.palette.primary.contrastText,
     "&.Mui-checked": {
       color: theme.palette.primary.contrastText,
     },
+  },
+  scenarioInfo: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: theme.spacing(0.5),
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.common.white,
+    background: theme.palette.accent.main,
+    borderRadius: "999px",
+    padding: `${theme.spacing(0.25)} ${theme.spacing(1)}`,
+    cursor: "help",
+    userSelect: "none" as const,
+  },
+  variableHeadingRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: theme.spacing(1.5),
+    paddingBottom: theme.spacing(0.5),
+  },
+  tooltipBubble: {
+    backgroundColor: theme.palette.accent.main,
+    color: theme.palette.common.white,
+    fontSize: theme.typography.caption.fontSize,
+  },
+  tooltipArrow: {
+    color: theme.palette.accent.main,
   },
 }));
 
@@ -183,12 +211,33 @@ export default function WeppSection() {
 
         {scenarioEnabled && selectedScenario && (
           <>
-            <Typography
-              className={classes.variableHeading}
-              id="scenario-variable-label"
-            >
-              Variable
-            </Typography>
+            <div className={classes.variableHeadingRow}>
+              <Typography
+                className={classes.variableHeading}
+                id="scenario-variable-label"
+              >
+                Variable
+              </Typography>
+              <Tooltip
+                title={SCENARIO_DESCRIPTIONS[selectedScenario] ?? ""}
+                placement="top"
+                arrow
+                classes={{
+                  tooltip: classes.tooltipBubble,
+                  arrow: classes.tooltipArrow,
+                }}
+              >
+                <Typography
+                  className={classes.scenarioInfo}
+                  tabIndex={0}
+                  role="button"
+                  aria-label="About this scenario"
+                >
+                  <InfoOutlinedIcon fontSize="inherit" />
+                  About this scenario
+                </Typography>
+              </Tooltip>
+            </div>
             <RadioGroup
               aria-labelledby="scenario-variable-label"
               name="scenario-variable"

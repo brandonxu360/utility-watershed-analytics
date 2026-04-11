@@ -6,9 +6,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useWatershed } from "../../../contexts/WatershedContext";
+import { useRunId } from "../../../hooks/useRunId";
+import { useRhessysSpatialInputs } from "../../../hooks/useRhessysSpatialInputs";
 import { getLayerParams } from "../../../layers/types";
 import { tss } from "../../../utils/tss";
-import type { RhessysSpatialFile } from "../../../api/types";
 
 const useStyles = tss.create(({ theme }) => ({
   select: {
@@ -47,16 +48,10 @@ const useStyles = tss.create(({ theme }) => ({
   },
 }));
 
-interface RhessysSectionProps {
-  files: RhessysSpatialFile[];
-  isLoading: boolean;
-}
-
-export default function RhessysSection({
-  files,
-  isLoading,
-}: RhessysSectionProps) {
+export default function RhessysSection() {
   const { classes } = useStyles();
+  const runId = useRunId();
+  const { files, isLoading } = useRhessysSpatialInputs(runId);
   const {
     layerDesired,
     enableLayerWithParams,

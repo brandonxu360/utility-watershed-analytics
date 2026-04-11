@@ -4,12 +4,12 @@ import { useRunId } from "../../hooks/useRunId";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import { fetchWatersheds } from "../../api/api";
+import { fetchRhessysSpatialInputs } from "../../api/rhessysApi";
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { tss } from "../../utils/tss";
 import { toast } from "react-toastify";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
@@ -20,20 +20,12 @@ import WeppSection from "./sections/WeppSection";
 import WatershedDataSection from "./sections/WatershedDataSection";
 import RhessysSection from "./sections/RhessysSection";
 import RhessysOutputsSection from "./sections/RhessysOutputsSection";
-import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
-import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
+import { useRhessysOutputsData } from "../../hooks/useRhessysOutputsData";
+import BackButton from "../BackButton";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
     paddingBottom: theme.spacing(4),
-  },
-  closeButton: {
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.primary.light,
-    fontSize: theme.typography.body2.fontSize,
-    marginTop: theme.spacing(1.5),
-    marginBottom: theme.spacing(1),
-    padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
   },
   contentBox: {
     marginTop: theme.spacing(2),
@@ -195,13 +187,22 @@ export default function WatershedOverview() {
 
   const runId = useRunId();
 
-  const { files, isLoading: rhessysLoading } = useRhessysSpatialInputs(runId);
+  // Lightweight data checks for the Long Term Impact visibility guard.
+  // The sections themselves call the full hooks with useLayerQuery side-effects.
+  // React Query deduplicates the underlying fetches.
+  const { data: spatialData, isLoading: rhessysLoading } = useQuery({
+    queryKey: queryKeys.rhessysSpatialInputs.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchRhessysSpatialInputs(runId!, signal),
+    enabled: !!runId,
+  });
+
+  const spatialFiles = spatialData?.files ?? [];
+
   const {
     scenarios: outputScenarios,
-    variables: outputVariables,
     isLoading: outputsLoading,
     hasChoroplethData,
-  } = useRhessysOutputs(runId);
+  } = useRhessysOutputsData(runId);
 
   const {
     data: watersheds,
@@ -223,7 +224,7 @@ export default function WatershedOverview() {
   const hasNoLongTermData =
     !rhessysLoading &&
     !outputsLoading &&
-    files.length === 0 &&
+    spatialFiles.length === 0 &&
     outputScenarios.length === 0 &&
     !hasChoroplethData;
 
@@ -250,17 +251,10 @@ export default function WatershedOverview() {
 
   return (
     <div className={classes.root}>
-      <Button
-        onClick={() => {
-          navigate({ to: "/" });
-        }}
-        className={classes.closeButton}
-        aria-label="Close watershed panel"
-        title="Close watershed panel"
-        variant="contained"
-      >
-        BACK
-      </Button>
+      <BackButton
+        onClick={() => navigate({ to: "/" })}
+        label="Close watershed overview panel"
+      />
       <div className={classes.contentBox}>
         <div className={classes.titleHeader}>
           <div>
@@ -337,9 +331,9 @@ export default function WatershedOverview() {
             rel="noopener noreferrer"
             className={classes.actionLink}
             underline="always"
-            aria-label="View Detailed WEPP Model Results"
+            aria-label="View WEPP model dashboard"
           >
-            View Detailed WEPP Model Results
+            View WEPP model dashboard
           </Link>
           <Link
             href={runId ? API_ENDPOINTS.WEPP_DEVAL_DETAILS(runId) : undefined}
@@ -347,33 +341,22 @@ export default function WatershedOverview() {
             rel="noopener noreferrer"
             className={classes.actionLink}
             underline="always"
-            aria-label="View WEPP Deval Details Report"
+            aria-label="View WEPP interactive report"
           >
-            View WEPP Deval Details Report
+            View WEPP interactive report
           </Link>
           <WeppSection />
         </Paper>
 
-        <Paper elevation={0} className={classes.impactPaper}>
-          <Typography variant="body1" className={classes.sectionHeading}>
-            Long Term Impact
-          </Typography>
-          {hasNoLongTermData ? (
-            <Typography className={classes.emptyState}>
-              No long term impact data available for the selected watershed.
+        {hasNoLongTermData ? null : (
+          <Paper elevation={0} className={classes.impactPaper}>
+            <Typography variant="body1" className={classes.sectionHeading}>
+              Long Term Impact
             </Typography>
-          ) : (
-            <>
-              <RhessysSection files={files} isLoading={rhessysLoading} />
-              <RhessysOutputsSection
-                scenarios={outputScenarios}
-                variables={outputVariables}
-                isLoading={outputsLoading}
-                hasChoroplethData={hasChoroplethData}
-              />
-            </>
-          )}
-        </Paper>
+            <RhessysSection />
+            <RhessysOutputsSection />
+          </Paper>
+        )}
 
         <Paper elevation={0} className={classes.impactPaper}>
           <Typography variant="body1" className={classes.sectionHeading}>
