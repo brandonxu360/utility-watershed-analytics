@@ -4,6 +4,7 @@ import { useRunId } from "../../hooks/useRunId";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import { fetchWatersheds } from "../../api/api";
+import { fetchRhessysSpatialInputs } from "../../api/rhessysApi";
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { WatershedProperties } from "../../types/WatershedProperties";
 import { tss } from "../../utils/tss";
@@ -19,8 +20,7 @@ import WeppSection from "./sections/WeppSection";
 import WatershedDataSection from "./sections/WatershedDataSection";
 import RhessysSection from "./sections/RhessysSection";
 import RhessysOutputsSection from "./sections/RhessysOutputsSection";
-import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
-import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
+import { useRhessysOutputsData } from "../../hooks/useRhessysOutputsData";
 import BackButton from "../BackButton";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -187,13 +187,22 @@ export default function WatershedOverview() {
 
   const runId = useRunId();
 
-  const { files, isLoading: rhessysLoading } = useRhessysSpatialInputs(runId);
+  // Lightweight data checks for the Long Term Impact visibility guard.
+  // The sections themselves call the full hooks with useLayerQuery side-effects.
+  // React Query deduplicates the underlying fetches.
+  const { data: spatialData, isLoading: rhessysLoading } = useQuery({
+    queryKey: queryKeys.rhessysSpatialInputs.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchRhessysSpatialInputs(runId!, signal),
+    enabled: !!runId,
+  });
+
+  const spatialFiles = spatialData?.files ?? [];
+
   const {
     scenarios: outputScenarios,
-    variables: outputVariables,
     isLoading: outputsLoading,
     hasChoroplethData,
-  } = useRhessysOutputs(runId);
+  } = useRhessysOutputsData(runId);
 
   const {
     data: watersheds,
@@ -215,7 +224,7 @@ export default function WatershedOverview() {
   const hasNoLongTermData =
     !rhessysLoading &&
     !outputsLoading &&
-    files.length === 0 &&
+    spatialFiles.length === 0 &&
     outputScenarios.length === 0 &&
     !hasChoroplethData;
 
@@ -344,13 +353,8 @@ export default function WatershedOverview() {
             <Typography variant="body1" className={classes.sectionHeading}>
               Long Term Impact
             </Typography>
-            <RhessysSection files={files} isLoading={rhessysLoading} />
-            <RhessysOutputsSection
-              scenarios={outputScenarios}
-              variables={outputVariables}
-              isLoading={outputsLoading}
-              hasChoroplethData={hasChoroplethData}
-            />
+            <RhessysSection />
+            <RhessysOutputsSection />
           </Paper>
         )}
 
