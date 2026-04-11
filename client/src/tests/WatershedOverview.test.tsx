@@ -184,7 +184,7 @@ describe("WatershedOverview", () => {
       );
 
       const backButton = screen.getByRole("button", {
-        name: /close watershed panel/i,
+        name: /close watershed overview panel/i,
       });
       expect(backButton).toBeInTheDocument();
       expect(backButton).toHaveTextContent("BACK");
@@ -195,7 +195,7 @@ describe("WatershedOverview", () => {
 
       await waitFor(() => {
         expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
-        expect(screen.getByText("Long Term Impact")).toBeInTheDocument();
+        expect(screen.getByText("Watershed Data")).toBeInTheDocument();
       });
     });
 
@@ -205,7 +205,7 @@ describe("WatershedOverview", () => {
       await waitFor(() => {
         expect(
           screen.getByRole("link", {
-            name: /View Detailed WEPP Model Results/i,
+            name: /View WEPP model dashboard/i,
           }),
         ).toBeInTheDocument();
       });
@@ -234,7 +234,7 @@ describe("WatershedOverview", () => {
       });
 
       const backButton = screen.getByRole("button", {
-        name: /close watershed panel/i,
+        name: /close watershed overview panel/i,
       });
       fireEvent.click(backButton);
 
@@ -295,40 +295,52 @@ describe("WatershedOverview", () => {
 
       await waitFor(() => {
         const backButton = screen.getByRole("button", {
-          name: /close watershed panel/i,
+          name: /close watershed overview panel/i,
         });
         expect(backButton).toHaveAttribute(
           "aria-label",
-          "Close watershed panel",
+          "Close watershed overview panel",
         );
       });
     });
 
-    it("back button has proper title attribute", async () => {
+    it("back button is focusable and clickable", async () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
         const backButton = screen.getByRole("button", {
-          name: /close watershed panel/i,
+          name: /close watershed overview panel/i,
         });
-        expect(backButton).toHaveAttribute("title", "Close watershed panel");
+        expect(backButton).not.toBeDisabled();
+        expect(backButton).toHaveAttribute("type", "button");
       });
     });
 
-    it("WEPP model results link has proper aria-label and href", async () => {
+    it("WEPP model links have proper aria-labels and open externally", async () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
-        const weppLink = screen.getByRole("link", {
-          name: /View Detailed WEPP Model Results/i,
+        const dashboardLink = screen.getByRole("link", {
+          name: /View WEPP model dashboard/i,
         });
-        expect(weppLink).toHaveAttribute(
+        expect(dashboardLink).toHaveAttribute(
           "aria-label",
-          "View Detailed WEPP Model Results",
+          "View WEPP model dashboard",
         );
-        expect(weppLink).toHaveAttribute("href");
-        expect(weppLink).toHaveAttribute("target", "_blank");
-        expect(weppLink).toHaveAttribute("rel", "noopener noreferrer");
+        expect(dashboardLink).toHaveAttribute("href");
+        expect(dashboardLink).toHaveAttribute("target", "_blank");
+        expect(dashboardLink).toHaveAttribute("rel", "noopener noreferrer");
+
+        const reportLink = screen.getByRole("link", {
+          name: /view WEPP interactive report/i,
+        });
+        expect(reportLink).toHaveAttribute(
+          "aria-label",
+          "View WEPP interactive report",
+        );
+        expect(reportLink).toHaveAttribute("href");
+        expect(reportLink).toHaveAttribute("target", "_blank");
+        expect(reportLink).toHaveAttribute("rel", "noopener noreferrer");
       });
     });
   });
