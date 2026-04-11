@@ -1,7 +1,5 @@
 import React from "react";
 import { tss } from "../utils/tss";
-import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
-import SmallScreenNotice from "../components/SmallScreenNotice";
 import RogerLew from "../assets/images/roger_lew.png";
 import MarianaDobre from "../assets/images/mariana_dobre.png";
 import ErinBrooks from "../assets/images/erin_brooks.png";
@@ -15,36 +13,13 @@ import JennyAdam from "../assets/images/jenny_adam.png";
 import KevinBladon from "../assets/images/kevin_bladon.png";
 import RyanCole from "../assets/images/ryan_cole.png";
 import PeteRobichaud from "../assets/images/pete_robichaud.png";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
+import SidePanelLayout from "../components/SidePanelLayout";
 
 const useStyles = tss.create(({ theme }) => ({
-  root: {
-    display: "flex",
-    flex: 1,
-    height: "calc(100vh - 64px)",
-    overflow: "hidden",
-  },
-  sidePanel: {
-    width: "30%",
-    minWidth: 280,
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
-    minHeight: 0,
-    background: theme.palette.surface.overlay,
-    color: theme.palette.text.primary,
-  },
-  sidePanelContent: {
-    flex: 1,
-    minHeight: 0,
-    overflowY: "auto",
-    padding: "10px 30px 0",
-    boxSizing: "border-box",
-  },
   navButtons: {
     display: "flex",
     flexDirection: "column",
@@ -66,13 +41,6 @@ const useStyles = tss.create(({ theme }) => ({
       borderBottom: `1px solid ${theme.palette.accent.main}`,
       color: theme.palette.accent.main,
     },
-  },
-  mainContent: {
-    flex: 1,
-    overflowY: "auto",
-    color: theme.palette.text.primary,
-    background: theme.palette.surface.content,
-    padding: "0 40px 50px 40px",
   },
   universitySections: {
     textAlign: "center",
@@ -278,69 +246,65 @@ const MemberCard = ({ person }: { person: TeamMember }) => {
 const SidePanel = () => {
   const { classes } = useStyles();
   return (
-    <Paper elevation={3} square className={classes.sidePanel}>
-      <div className={classes.sidePanelContent}>
-        <Typography variant="h2" fontWeight={"bold"} marginY={2}>
-          Project Team & Partners
-        </Typography>
-        <Typography variant="body1">
-          Select from the following to see our team of experts and partner
-          institutions:
-        </Typography>
-        <div className={classes.navButtons}>
-          <Button
-            className={classes.navButton}
-            onClick={(e) =>
-              scrollToUniversity(e, "Washington_State_University")
-            }
-          >
-            Washington State University
-          </Button>
-          <Button
-            className={classes.navButton}
-            onClick={(e) => scrollToUniversity(e, "University_of_Idaho")}
-          >
-            University of Idaho
-          </Button>
-          <Button
-            className={classes.navButton}
-            onClick={(e) => scrollToUniversity(e, "University_of_Nevada,_Reno")}
-          >
-            University of Nevada, Reno
-          </Button>
-          <Button
-            className={classes.navButton}
-            onClick={(e) => scrollToUniversity(e, "Oregon_State_University")}
-          >
-            Oregon State University
-          </Button>
-          <Button
-            className={classes.navButton}
-            onClick={(e) =>
-              scrollToUniversity(
-                e,
-                "US_Forest_Service,_Rocky_Mtn_Research_Station",
-              )
-            }
-          >
-            US Forest Service
-          </Button>
-          <Button
-            className={classes.navButton}
-            onClick={(e) => scrollToUniversity(e, "partner_section")}
-          >
-            Partners
-          </Button>
-        </div>
+    <>
+      <Typography variant="h2" fontWeight={"bold"} marginY={2}>
+        Project Team & Partners
+      </Typography>
+      <Typography variant="body1">
+        Select from the following to see our team of experts and partner
+        institutions:
+      </Typography>
+      <div className={classes.navButtons}>
+        <Button
+          className={classes.navButton}
+          onClick={(e) => scrollToUniversity(e, "Washington_State_University")}
+        >
+          Washington State University
+        </Button>
+        <Button
+          className={classes.navButton}
+          onClick={(e) => scrollToUniversity(e, "University_of_Idaho")}
+        >
+          University of Idaho
+        </Button>
+        <Button
+          className={classes.navButton}
+          onClick={(e) => scrollToUniversity(e, "University_of_Nevada,_Reno")}
+        >
+          University of Nevada, Reno
+        </Button>
+        <Button
+          className={classes.navButton}
+          onClick={(e) => scrollToUniversity(e, "Oregon_State_University")}
+        >
+          Oregon State University
+        </Button>
+        <Button
+          className={classes.navButton}
+          onClick={(e) =>
+            scrollToUniversity(
+              e,
+              "US_Forest_Service,_Rocky_Mtn_Research_Station",
+            )
+          }
+        >
+          US Forest Service
+        </Button>
+        <Button
+          className={classes.navButton}
+          onClick={(e) => scrollToUniversity(e, "partner_section")}
+        >
+          Partners
+        </Button>
       </div>
-    </Paper>
+    </>
   );
 };
 
 const Content = () => {
   const { classes } = useStyles();
   return (
-    <div className={classes.mainContent}>
+    <>
       <div className={classes.universitySections}>
         {groupedMembers.map(({ name: university, members }) => (
           <section
@@ -448,7 +412,7 @@ const Content = () => {
           </Link>
         </Stack>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -456,17 +420,7 @@ const Content = () => {
  * Layout for the TEAM page.
  */
 export default function Team() {
-  const { classes } = useStyles();
-  const isSmallScreen = useIsSmallScreen();
-
-  if (isSmallScreen) {
-    return <SmallScreenNotice />;
-  }
-
   return (
-    <div className={classes.root}>
-      <SidePanel />
-      <Content />
-    </div>
+    <SidePanelLayout sidePanel={<SidePanel />} mainContent={<Content />} />
   );
 }
