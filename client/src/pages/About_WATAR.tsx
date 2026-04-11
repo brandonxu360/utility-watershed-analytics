@@ -4,7 +4,7 @@ import watar_diagram from "../assets/images/watar_diagram.png";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import SidePanelLayout from "../components/SidePanelLayout";
+import SidePanelLayout from "../components/side-panels/SidePanelLayout";
 
 const useStyles = tss.create(({ theme }) => ({
   backButton: {

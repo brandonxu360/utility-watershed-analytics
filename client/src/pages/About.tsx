@@ -15,7 +15,7 @@ import osu_dark from "../assets/images/osu_logo_horiz_dark.png";
 import usfs from "../assets/images/usfs_rockyMtn_logo.png";
 import firewise_diagram from "../assets/images/firewise_diagram.png";
 import fire_image from "../assets/images/wildfire-threat-water-supply.jpg";
-import SidePanelLayout from "../components/SidePanelLayout";
+import SidePanelLayout from "../components/side-panels/SidePanelLayout";
 
 const useStyles = tss.create(({ theme }) => ({
   navButtons: {

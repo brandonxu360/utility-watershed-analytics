@@ -1,7 +1,7 @@
-import { tss } from "../utils/tss";
-import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
+import { tss } from "../../utils/tss";
+import { useIsSmallScreen } from "../../hooks/useIsSmallScreen";
 import Paper from "@mui/material/Paper";
-import SmallScreenNotice from "./SmallScreenNotice";
+import SmallScreenNotice from "../SmallScreenNotice";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
