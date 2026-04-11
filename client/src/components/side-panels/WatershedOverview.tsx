@@ -242,7 +242,10 @@ export default function WatershedOverview() {
 
   return (
     <div className={classes.root}>
-      <BackButton onClick={() => navigate({ to: "/" })} label="Close watershed overview panel" />
+      <BackButton
+        onClick={() => navigate({ to: "/" })}
+        label="Close watershed overview panel"
+      />
       <div className={classes.contentBox}>
         <div className={classes.titleHeader}>
           <div>

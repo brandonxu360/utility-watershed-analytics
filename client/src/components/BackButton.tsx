@@ -25,11 +25,7 @@ export default function BackButton({ onClick, label }: BackButtonProps) {
   const { classes } = useStyles();
 
   return (
-    <Button
-      className={classes.root}
-      onClick={onClick}
-      aria-label={`${label}`}
-    >
+    <Button className={classes.root} onClick={onClick} aria-label={`${label}`}>
       BACK
     </Button>
   );

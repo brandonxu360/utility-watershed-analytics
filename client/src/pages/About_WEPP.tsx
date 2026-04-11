@@ -56,7 +56,10 @@ const SidePanel = () => {
   const navigate = useNavigate();
   return (
     <>
-      <BackButton onClick={() => navigate({ to: "/about" })} label="Back to about page" />
+      <BackButton
+        onClick={() => navigate({ to: "/about" })}
+        label="Back to about page"
+      />
       <Typography component="h2" variant="h2" fontWeight="bold" marginY={2}>
         About WEPP
       </Typography>
@@ -109,9 +112,7 @@ const Content = () => {
       </Typography>
       <ul>
         <li>Field-sized areas or conservation treatment units</li>
-        <li>
-          hillslopes, channels, and watersheds
-        </li>
+        <li>hillslopes, channels, and watersheds</li>
       </ul>
       <Typography variant="body1" mb={3}>
         The WEPP model predicts:
