@@ -89,14 +89,25 @@ export function applyAction(
  * Disable a layer and clean up after it: cascade-disable its dependents,
  * then auto-disable its non-default-on requirements when no other enabled
  * layer still needs them.  Operates on `next` via replacement.
+ *
+ * `visited` prevents infinite loops in the unlikely event of a cycle in the
+ * dependency graph, and ensures each layer is only processed once per call.
  */
-function disableLayer(next: DesiredMap, id: LayerId): void {
+function disableLayer(
+  next: DesiredMap,
+  id: LayerId,
+  visited: Set<LayerId> = new Set(),
+): void {
+  if (visited.has(id)) return;
+  visited.add(id);
+
   next[id] = { ...next[id], enabled: false };
 
-  // Cascade: disable layers that require this one
+  // Cascade: recursively disable layers that require this one so their own
+  // requirements are also torn down transitively.
   for (const depId of getDependents(id)) {
     if (next[depId].enabled) {
-      next[depId] = { ...next[depId], enabled: false };
+      disableLayer(next, depId, visited);
     }
   }
 
@@ -108,7 +119,7 @@ function disableLayer(next: DesiredMap, id: LayerId): void {
       (depId) => depId !== id && next[depId].enabled,
     );
     if (!stillNeeded && next[reqId].enabled) {
-      next[reqId] = { ...next[reqId], enabled: false };
+      disableLayer(next, reqId, visited);
     }
   }
 }
