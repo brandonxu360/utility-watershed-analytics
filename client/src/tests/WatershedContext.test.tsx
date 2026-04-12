@@ -140,7 +140,7 @@ describe("WatershedContext", () => {
     runId = "run-2";
     rerender();
 
-    expect(result.current.layerDesired.channels.enabled).toBe(false);
+    expect(result.current.layerDesired.channels.enabled).toBe(true);
     expect(result.current.layerDesired).toEqual(INITIAL_DESIRED);
   });
 
@@ -271,9 +271,9 @@ describe("WatershedContext", () => {
       wrapper: WatershedTestWrapper,
     });
 
-    // All disabled initially
-    expect(result.current.effective.channels.enabled).toBe(false);
-    expect(result.current.activeIds).toEqual([]);
+    // Channels enabled by default
+    expect(result.current.effective.channels.enabled).toBe(true);
+    expect(result.current.activeIds).toEqual(["channels"]);
 
     act(() => {
       result.current.dispatchLayerAction({

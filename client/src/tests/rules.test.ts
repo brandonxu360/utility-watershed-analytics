@@ -191,7 +191,6 @@ describe("rules – applyAction", () => {
       state = applyAction(state, { type: "RESET" });
 
       for (const [id, layerState] of Object.entries(state)) {
-        expect(layerState.enabled).toBe(false);
         expect(layerState).toEqual(INITIAL_DESIRED[id as keyof DesiredMap]);
       }
     });

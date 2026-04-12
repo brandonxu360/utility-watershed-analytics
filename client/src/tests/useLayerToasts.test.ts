@@ -210,7 +210,11 @@ describe("useLayerToasts", () => {
   });
 
   it("does not toast when desired is off", () => {
-    const desiredOff = INITIAL_DESIRED; // all off
+    const desiredOff = (() => {
+      const d = JSON.parse(JSON.stringify(INITIAL_DESIRED)) as DesiredMap;
+      for (const id of Object.keys(d)) d[id as keyof DesiredMap].enabled = false;
+      return d;
+    })(); // all off
     const enabledEffective = buildEffective({
       channels: { enabled: true },
     });
