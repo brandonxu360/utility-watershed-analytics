@@ -68,7 +68,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 420,
-    requires: ["subcatchment"],
+    requires: ["subcatchment", "channels"],
     defaults: { opacity: 1, params: {} },
   },
 
@@ -79,7 +79,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 420,
-    requires: ["subcatchment"],
+    requires: ["subcatchment", "channels"],
     defaults: {
       opacity: 0.85,
       params: { metric: "vegetationCover", year: null, bands: "all" },
@@ -114,7 +114,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 420,
-    requires: ["subcatchment"],
+    requires: ["subcatchment", "channels"],
     defaults: {
       opacity: 0.85,
       params: { scenario: null, variable: "sediment_yield" },

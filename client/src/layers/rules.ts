@@ -16,10 +16,11 @@ import {
 } from "./registry";
 
 function buildInitialDesired(): DesiredMap {
+  const defaultEnabled: ReadonlySet<LayerId> = new Set(["channels"]);
   const map = {} as DesiredMap;
   for (const [id, desc] of Object.entries(LAYER_REGISTRY)) {
     map[id as LayerId] = {
-      enabled: false,
+      enabled: defaultEnabled.has(id as LayerId),
       opacity: desc.defaults.opacity,
       params: { ...desc.defaults.params },
     };
