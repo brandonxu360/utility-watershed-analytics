@@ -57,6 +57,7 @@ export interface LayerDescriptor {
   requires?: LayerId[];
   zoomRange?: { min: number; max: number };
   defaults: {
+    enabled: boolean;
     opacity: number;
     params: Record<string, unknown>;
   };
@@ -147,8 +148,7 @@ export type BlockedReason =
       kind: "zoom-out-of-range";
       current: number;
       required: { min: number; max: number };
-    }
-  | { kind: "excluded-by"; layerId: LayerId };
+    };
 
 export interface LayerEffectiveState {
   /**

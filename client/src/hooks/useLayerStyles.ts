@@ -5,10 +5,12 @@ import { selectedStyle, defaultStyle } from "../components/map/constants";
 import { buildHillslopeTooltip } from "../utils/tooltipContent";
 import type { PathOptions } from "leaflet";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
+
 import type {
   WatershedProperties,
   WatershedCollection,
 } from "../types/WatershedProperties";
+
 import type { LanduseMap } from "../api/types";
 import type { ScenarioDataRow } from "../layers/scenario";
 import type { ChoroplethStyleFn } from "./useChoropleth";

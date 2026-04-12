@@ -68,6 +68,10 @@ describe("rules – applyAction", () => {
       expect(state.sbs.enabled).toBe(true);
       expect(state.landuse.enabled).toBe(false);
       expect(state.choropleth.enabled).toBe(false);
+      // subcatchment is auto-torn-down because no other layer requires it
+      expect(state.subcatchment.enabled).toBe(false);
+      // channels stays on (default-on)
+      expect(state.channels.enabled).toBe(true);
     });
 
     it("does not affect layers in other groups", () => {
@@ -119,6 +123,22 @@ describe("rules – applyAction", () => {
       state = applyAction(state, { type: "TOGGLE", id: "sbs", on: true });
       state = applyAction(state, { type: "TOGGLE", id: "channels", on: false });
       expect(state.sbs.enabled).toBe(true);
+    });
+
+    it("disabling a dependency tears down requirements of its now-disabled dependents", () => {
+      let state = fresh();
+      state = applyAction(state, { type: "TOGGLE", id: "landuse", on: true });
+      expect(state.landuse.enabled).toBe(true);
+      expect(state.subcatchment.enabled).toBe(true);
+      expect(state.channels.enabled).toBe(true);
+
+      // Disabling channels should cascade: landuse loses channels (a requirement)
+      // so landuse is disabled, and then subcatchment—only needed by landuse—
+      // should also be torn down.
+      state = applyAction(state, { type: "TOGGLE", id: "channels", on: false });
+      expect(state.channels.enabled).toBe(false);
+      expect(state.landuse.enabled).toBe(false);
+      expect(state.subcatchment.enabled).toBe(false);
     });
   });
 
@@ -191,7 +211,6 @@ describe("rules – applyAction", () => {
       state = applyAction(state, { type: "RESET" });
 
       for (const [id, layerState] of Object.entries(state)) {
-        expect(layerState.enabled).toBe(false);
         expect(layerState).toEqual(INITIAL_DESIRED[id as keyof DesiredMap]);
       }
     });

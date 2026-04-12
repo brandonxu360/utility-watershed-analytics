@@ -20,10 +20,14 @@ function freshRuntime(): LayerRuntime {
 describe("evaluate", () => {
   // ─── Basic pass-through ────────────────────────────────────────────────
 
-  it("all layers disabled desired → all layers disabled effective", () => {
+  it("initial desired → only default-on layers are effectively enabled", () => {
     const eff = evaluate(fresh(), freshRuntime());
-    for (const state of Object.values(eff)) {
-      expect(state.enabled).toBe(false);
+    for (const [id, state] of Object.entries(eff)) {
+      if (id === "channels") {
+        expect(state.enabled).toBe(true);
+      } else {
+        expect(state.enabled).toBe(false);
+      }
       expect(state.blockedReasons).toEqual([]);
       expect(state.loading).toBe(false);
     }
@@ -221,9 +225,9 @@ describe("selectOrderedActiveIds", () => {
     // subcatchment zIndex=400 < channels zIndex=410
   });
 
-  it("returns empty array when nothing is enabled", () => {
+  it("returns only default-on layers when using initial desired", () => {
     const eff = evaluate(fresh(), freshRuntime());
-    expect(selectOrderedActiveIds(eff)).toEqual([]);
+    expect(selectOrderedActiveIds(eff)).toEqual(["channels"]);
   });
 });
 

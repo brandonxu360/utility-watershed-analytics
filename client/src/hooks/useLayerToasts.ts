@@ -55,8 +55,6 @@ export function useLayerToasts(desired: DesiredMap, effective: EffectiveMap) {
                   return `Requires ${LAYER_REGISTRY[r.layerId].label}`;
                 case "zoom-out-of-range":
                   return `Visible at zoom ${r.required.min}–${r.required.max}`;
-                case "excluded-by":
-                  return `Excluded by ${LAYER_REGISTRY[r.layerId].label}`;
               }
             })
             .join("; ");

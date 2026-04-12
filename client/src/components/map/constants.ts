@@ -6,10 +6,9 @@ export const defaultStyle = {
 };
 
 export const selectedStyle = {
-  color: "#2c2c2c",
+  color: "#ffff00",
   weight: 3,
-  fillColor: "#4a83ec",
-  fillOpacity: 0.5,
+  fillOpacity: 0,
 };
 
 export const highlightedStyle = {

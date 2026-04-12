@@ -144,6 +144,7 @@ vi.mock("react-leaflet", () => ({
   },
   ScaleControl: () => <div data-testid="scale-control" />,
   useMap: () => ({}),
+  Pane: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 vi.mock("../components/map/controls/ZoomIn", () => ({
@@ -439,7 +440,7 @@ describe("Map Component", () => {
 
       const feature = { id: "watershed-1" };
       const style = lastWatershedGeoJsonProps!.style(feature);
-      expect(style).toMatchObject({ fillOpacity: 0.5 });
+      expect(style).toMatchObject({ fillOpacity: 0 });
     });
 
     it("applies default style to non-matching watershed", async () => {
@@ -554,6 +555,9 @@ describe("Map Component", () => {
 
     it("does not show channels when disabled", async () => {
       mockUseParams.mockReturnValue("watershed-1");
+      const d = JSON.parse(JSON.stringify(INITIAL_DESIRED)) as DesiredMap;
+      d.channels.enabled = false;
+      mockDesired = d;
 
       renderWithProviders(<WatershedMap />);
 

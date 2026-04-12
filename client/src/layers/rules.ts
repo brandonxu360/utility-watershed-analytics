@@ -15,11 +15,23 @@ import {
   getDependents,
 } from "./registry";
 
+/** Layers that start enabled and are exempt from requirement teardown. */
+const DEFAULT_ENABLED: ReadonlySet<LayerId> = new Set(
+  (
+    Object.entries(LAYER_REGISTRY) as [
+      LayerId,
+      (typeof LAYER_REGISTRY)[LayerId],
+    ][]
+  )
+    .filter(([, desc]) => desc.defaults.enabled)
+    .map(([id]) => id),
+);
+
 function buildInitialDesired(): DesiredMap {
   const map = {} as DesiredMap;
   for (const [id, desc] of Object.entries(LAYER_REGISTRY)) {
     map[id as LayerId] = {
-      enabled: false,
+      enabled: desc.defaults.enabled,
       opacity: desc.defaults.opacity,
       params: { ...desc.defaults.params },
     };
@@ -74,6 +86,45 @@ export function applyAction(
 }
 
 /**
+ * Disable a layer and clean up after it: cascade-disable its dependents,
+ * then auto-disable its non-default-on requirements when no other enabled
+ * layer still needs them.  Operates on `next` via replacement.
+ *
+ * `visited` prevents infinite loops in the unlikely event of a cycle in the
+ * dependency graph, and ensures each layer is only processed once per call.
+ */
+function disableLayer(
+  next: DesiredMap,
+  id: LayerId,
+  visited: Set<LayerId> = new Set(),
+): void {
+  if (visited.has(id)) return;
+  visited.add(id);
+
+  next[id] = { ...next[id], enabled: false };
+
+  // Cascade: recursively disable layers that require this one so their own
+  // requirements are also torn down transitively.
+  for (const depId of getDependents(id)) {
+    if (next[depId].enabled) {
+      disableLayer(next, depId, visited);
+    }
+  }
+
+  // Teardown: disable non-default-on requirements no longer needed
+  const desc = getDescriptor(id);
+  for (const reqId of desc.requires ?? []) {
+    if (DEFAULT_ENABLED.has(reqId)) continue;
+    const stillNeeded = getDependents(reqId).some(
+      (depId) => depId !== id && next[depId].enabled,
+    );
+    if (!stillNeeded && next[reqId].enabled) {
+      disableLayer(next, reqId, visited);
+    }
+  }
+}
+
+/**
  * Toggle a layer on or off, enforcing:
  *  1. `requires`        → auto-enable prerequisite layers
  *  2. exclusive groups  → auto-disable siblings in the same exclusive group
@@ -103,17 +154,12 @@ function applyToggle(
     if (group.type === "exclusive") {
       for (const sibling of getLayersInGroup(desc.group)) {
         if (sibling.id !== id && next[sibling.id].enabled) {
-          next[sibling.id] = { ...next[sibling.id], enabled: false };
+          disableLayer(next, sibling.id);
         }
       }
     }
   } else {
-    // Disable dependents (e.g. disabling subcatchment → disable landuse & choropleth)
-    for (const depId of getDependents(id)) {
-      if (next[depId].enabled) {
-        next[depId] = { ...next[depId], enabled: false };
-      }
-    }
+    disableLayer(next, id);
   }
 
   return next;

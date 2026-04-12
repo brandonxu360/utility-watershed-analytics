@@ -18,9 +18,8 @@ import type {
   BlockedReason,
   LayerDescriptor,
 } from "./types";
-import { LAYER_REGISTRY } from "./registry";
 
-// ── Processing order ────────────────────────────────────────────────────────
+import { LAYER_REGISTRY } from "./registry";
 
 /**
  * Return layer ids in dependency-safe order: layers without `requires` first,
@@ -45,8 +44,6 @@ function getProcessOrder(): LayerId[] {
 }
 
 const PROCESS_ORDER: LayerId[] = getProcessOrder();
-
-// ── Evaluator ───────────────────────────────────────────────────────────────
 
 /**
  * Compute effective state for every layer.
@@ -121,8 +118,6 @@ export function evaluate(
 
   return effective;
 }
-
-// ── Derived helpers ─────────────────────────────────────────────────────────
 
 /** Layer IDs that are effectively enabled, sorted by zIndex (ascending). */
 export function selectOrderedActiveIds(effective: EffectiveMap): LayerId[] {

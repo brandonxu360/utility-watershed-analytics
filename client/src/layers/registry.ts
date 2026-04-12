@@ -37,7 +37,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 400,
-    defaults: { opacity: 0, params: {} },
+    defaults: { enabled: false, opacity: 0, params: {} },
   },
 
   channels: {
@@ -47,7 +47,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 410,
-    defaults: { opacity: 1, params: {} },
+    defaults: { enabled: true, opacity: 1, params: {} },
   },
 
   patches: {
@@ -58,7 +58,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     pane: "overlayPane",
     zIndex: 405,
     // Placeholder — no renderer yet
-    defaults: { opacity: 0.5, params: {} },
+    defaults: { enabled: false, opacity: 0.5, params: {} },
   },
 
   landuse: {
@@ -68,8 +68,8 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 420,
-    requires: ["subcatchment"],
-    defaults: { opacity: 1, params: {} },
+    requires: ["subcatchment", "channels"],
+    defaults: { enabled: false, opacity: 1, params: {} },
   },
 
   choropleth: {
@@ -79,8 +79,9 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 420,
-    requires: ["subcatchment"],
+    requires: ["subcatchment", "channels"],
     defaults: {
+      enabled: false,
       opacity: 0.85,
       params: { metric: "vegetationCover", year: null, bands: "all" },
     },
@@ -93,7 +94,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "raster",
     pane: "rasterPane",
     zIndex: 500,
-    defaults: { opacity: 0.8, params: { mode: "legacy" } },
+    defaults: { enabled: false, opacity: 0.8, params: { mode: "legacy" } },
   },
 
   fireSeverity: {
@@ -104,7 +105,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     pane: "rasterPane",
     zIndex: 490,
     // Placeholder — no renderer yet
-    defaults: { opacity: 0.8, params: {} },
+    defaults: { enabled: false, opacity: 0.8, params: {} },
   },
 
   scenario: {
@@ -114,8 +115,9 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 420,
-    requires: ["subcatchment"],
+    requires: ["subcatchment", "channels"],
     defaults: {
+      enabled: false,
       opacity: 0.85,
       params: { scenario: null, variable: "sediment_yield" },
     },
@@ -128,7 +130,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "raster",
     pane: "rasterPane",
     zIndex: 510,
-    defaults: { opacity: 0.7, params: { filename: null } },
+    defaults: { enabled: false, opacity: 0.7, params: { filename: null } },
   },
 
   rhessysOutputs: {
@@ -139,6 +141,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     pane: "rasterPane",
     zIndex: 515,
     defaults: {
+      enabled: false,
       opacity: 0.7,
       params: {
         scenario: null,
