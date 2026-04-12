@@ -68,6 +68,10 @@ describe("rules – applyAction", () => {
       expect(state.sbs.enabled).toBe(true);
       expect(state.landuse.enabled).toBe(false);
       expect(state.choropleth.enabled).toBe(false);
+      // subcatchment is auto-torn-down because no other layer requires it
+      expect(state.subcatchment.enabled).toBe(false);
+      // channels stays on (default-on)
+      expect(state.channels.enabled).toBe(true);
     });
 
     it("does not affect layers in other groups", () => {

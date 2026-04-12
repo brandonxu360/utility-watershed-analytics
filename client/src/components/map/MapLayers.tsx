@@ -1,10 +1,11 @@
-import { GeoJSON } from "react-leaflet";
+import { GeoJSON, Pane } from "react-leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { queryKeys } from "../../api/queryKeys";
 import { fetchWatersheds } from "../../api/api";
 import { useRunId } from "../../hooks/useRunId";
 import { useWatershed } from "../../contexts/WatershedContext";
+import { LAYER_REGISTRY } from "../../layers/registry";
 import { useChoropleth } from "../../hooks/useChoropleth";
 import { useScenarioData } from "../../hooks/useScenarioData";
 import { useRhessysChoropleth } from "../../hooks/useRhessysChoropleth";
@@ -128,7 +129,12 @@ export default function MapLayers() {
       )}
 
       {channelsEffective && channelData && (
-        <GeoJSON data={channelData} style={channelStyle} />
+        <Pane
+          name="channelsPane"
+          style={{ zIndex: LAYER_REGISTRY.channels.zIndex }}
+        >
+          <GeoJSON data={channelData} style={channelStyle} />
+        </Pane>
       )}
 
       {sbsEffective && runId && (

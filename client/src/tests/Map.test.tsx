@@ -144,6 +144,7 @@ vi.mock("react-leaflet", () => ({
   },
   ScaleControl: () => <div data-testid="scale-control" />,
   useMap: () => ({}),
+  Pane: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 vi.mock("../components/map/controls/ZoomIn", () => ({

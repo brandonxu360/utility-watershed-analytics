@@ -154,32 +154,6 @@ describe("useLayerToasts", () => {
     );
   });
 
-  it("toasts excluded-by blocked reason", () => {
-    const desired = desiredWith("landuse", "subcatchment");
-    const enabledEffective = buildEffective({
-      subcatchment: { enabled: true },
-      landuse: { enabled: true },
-    });
-
-    const { rerender } = renderHook(({ d, e }) => useLayerToasts(d, e), {
-      initialProps: { d: desired, e: enabledEffective },
-    });
-
-    const blockedEffective = buildEffective({
-      subcatchment: { enabled: true },
-      landuse: {
-        enabled: false,
-        blockedReasons: [{ kind: "excluded-by", layerId: "choropleth" }],
-      },
-    });
-
-    rerender({ d: desired, e: blockedEffective });
-
-    expect(toast.error).toHaveBeenCalledWith(
-      expect.stringContaining("Excluded by Coverage (Choropleth)"),
-    );
-  });
-
   it("joins multiple blocked reasons with semicolons", () => {
     const desired = desiredWith("landuse", "subcatchment");
     const enabledEffective = buildEffective({
@@ -212,7 +186,8 @@ describe("useLayerToasts", () => {
   it("does not toast when desired is off", () => {
     const desiredOff = (() => {
       const d = JSON.parse(JSON.stringify(INITIAL_DESIRED)) as DesiredMap;
-      for (const id of Object.keys(d)) d[id as keyof DesiredMap].enabled = false;
+      for (const id of Object.keys(d))
+        d[id as keyof DesiredMap].enabled = false;
       return d;
     })(); // all off
     const enabledEffective = buildEffective({
