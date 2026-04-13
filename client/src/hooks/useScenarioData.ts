@@ -5,10 +5,8 @@ import { useRunId } from "./useRunId";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
 import { useScenarioDataOnly } from "./useScenarioDataOnly";
-
+import { useColormapStyle } from "./useColormapStyle";
 import { type ScenarioDataRow } from "../layers/scenario";
-
-import { createColormap, normalizeValue, RGBAArray } from "../utils/colormap";
 
 export interface UseScenarioDataResult {
   isLoading: boolean;
@@ -19,9 +17,6 @@ export interface UseScenarioDataResult {
   getScenarioRow: (weppid: number | undefined) => ScenarioDataRow | null;
 }
 
-/**
- * Hook to fetch scenario WEPP loss data.
- */
 export function useScenarioData(): UseScenarioDataResult {
   const runId = useRunId();
   const { isEffective } = useWatershed();
@@ -49,51 +44,27 @@ export function useScenarioData(): UseScenarioDataResult {
 
   const scenarioEffective = isEffective("scenario");
 
-  const scenarioColormap = useMemo<RGBAArray | null>(() => {
-    if (!scenarioEffective || !range) return null;
-    return createColormap({
-      colormap: variableConfig.colormap,
-      nshades: 256,
-      format: "rgba",
-    }) as RGBAArray;
-  }, [scenarioEffective, range, variableConfig.colormap]);
+  const numericMap = useMemo<Map<number, number> | null>(() => {
+    if (!scenarioEffective || !hasData) return null;
+    const m = new Map<number, number>();
+    for (const [id, row] of dataByWeppId) {
+      m.set(id, row[scenarioVariable]);
+    }
+    return m;
+  }, [scenarioEffective, hasData, dataByWeppId, scenarioVariable]);
+
+  const { getStyle } = useColormapStyle(
+    numericMap,
+    range,
+    variableConfig.colormap,
+  );
 
   const getScenarioStyle = useCallback(
     (weppid: number | undefined): PathOptions | null => {
-      if (
-        !scenarioEffective ||
-        !hasData ||
-        !scenarioColormap ||
-        !range ||
-        weppid === undefined
-      )
-        return null;
-
-      const row = dataByWeppId.get(weppid);
-      if (!row) return null;
-
-      const normalized = normalizeValue(
-        row[scenarioVariable],
-        range.min,
-        range.max,
-      );
-      const colorIndex = Math.round(normalized * (scenarioColormap.length - 1));
-      const [r, g, b] = scenarioColormap[colorIndex] || [128, 128, 128];
-      return {
-        color: "#2c2c2c",
-        weight: 0.75,
-        fillColor: `rgb(${r}, ${g}, ${b})`,
-        fillOpacity: 0.85,
-      };
+      if (!scenarioEffective || !hasData || weppid === undefined) return null;
+      return getStyle(weppid);
     },
-    [
-      scenarioEffective,
-      hasData,
-      scenarioColormap,
-      range,
-      dataByWeppId,
-      scenarioVariable,
-    ],
+    [scenarioEffective, hasData, getStyle],
   );
 
   const getScenarioRow = useCallback(

@@ -1,14 +1,13 @@
-import { useMemo, useCallback } from "react";
+import { useCallback } from "react";
 import { PathOptions } from "leaflet";
 import { useLayerQuery } from "./useLayerQuery";
+import { useColormapStyle } from "./useColormapStyle";
 
 import {
   useChoroplethData,
   type ChoroplethType,
   CHOROPLETH_CONFIG,
 } from "./useChoroplethData";
-
-import { createColormap, normalizeValue, ColorArray } from "../utils/colormap";
 
 export type ChoroplethStyleFn = (id: number | undefined) => PathOptions | null;
 
@@ -42,53 +41,18 @@ export function useChoropleth(): UseChoroplethResult {
       !choroplethError && choroplethData != null && choroplethData.size > 0,
   });
 
-  const colormap = useMemo(() => {
-    if (!config) return null;
-    return createColormap({
-      colormap: config.colormap,
-      nshades: 256,
-      format: "hex",
-    }) as ColorArray;
-  }, [config]);
-
-  const getColor = useCallback(
-    (id: number | undefined): string | null => {
-      if (
-        choroplethType === "none" ||
-        !choroplethData ||
-        !choroplethRange ||
-        !colormap ||
-        id === undefined
-      ) {
-        return null;
-      }
-
-      const value = choroplethData.get(id);
-      if (value === undefined) return null;
-
-      const normalized = normalizeValue(
-        value,
-        choroplethRange.min,
-        choroplethRange.max,
-      );
-      return colormap.map(normalized);
-    },
-    [choroplethType, choroplethData, choroplethRange, colormap],
+  const { getColor, getStyle: getChoroplethStyle } = useColormapStyle(
+    choroplethData,
+    choroplethRange,
+    config?.colormap ?? "viridis",
   );
 
-  const getChoroplethStyle = useCallback(
-    (id: number | undefined): PathOptions | null => {
-      const fillColor = getColor(id);
-      if (!fillColor) return null;
-
-      return {
-        color: "#2c2c2c",
-        weight: 0.75,
-        fillColor,
-        fillOpacity: 0.85,
-      };
+  const getColorGuarded = useCallback(
+    (id: number | undefined): string | null => {
+      if (choroplethType === "none") return null;
+      return getColor(id);
     },
-    [getColor],
+    [choroplethType, getColor],
   );
 
   return {
@@ -98,7 +62,7 @@ export function useChoropleth(): UseChoroplethResult {
     range: choroplethRange,
     isActive,
     config,
-    getColor,
+    getColor: getColorGuarded,
     getChoroplethStyle,
   };
 }
