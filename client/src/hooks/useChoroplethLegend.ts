@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useChoroplethData, type CHOROPLETH_CONFIG } from "./useChoroplethData";
 import { useScenarioDataOnly } from "./useScenarioDataOnly";
-import { useRhessysSpatialInputs } from "./useRhessysSpatialInputs";
-import { useLanduseData } from "./useLanduseData";
+import { useRhessysSpatialData } from "./useRhessysSpatialData";
+import { useLanduseDataOnly } from "./useLanduseDataOnly";
 import { useRhessysOutputsData } from "./useRhessysOutputsData";
 import { useRhessysChoroplethData } from "./useRhessysChoroplethData";
 import { getLayerParams } from "../layers/types";
@@ -165,7 +165,7 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
   // RHESSys spatial inputs
   const rhessysSpatialEffective = isEffective("rhessysSpatial");
   const rhessysSpatialParams = getLayerParams(layerDesired, "rhessysSpatial");
-  const { files: rhessysSpatialFiles } = useRhessysSpatialInputs(runId);
+  const { files: rhessysSpatialFiles } = useRhessysSpatialData(runId);
   const selectedRhessysFile = useMemo(
     () =>
       rhessysSpatialFiles.find(
@@ -196,7 +196,7 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
     useRhessysChoroplethData();
 
   // Land use
-  const { landuseLegendMap } = useLanduseData(runId);
+  const { landuseLegendMap } = useLanduseDataOnly(runId);
   const landuseEffective = isEffective("landuse");
 
   return useMemo((): ChoroplethLegendProps | null => {
