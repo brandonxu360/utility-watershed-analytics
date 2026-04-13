@@ -1,3 +1,5 @@
+import L from "leaflet";
+import { useCallback, useMemo } from "react";
 import { GeoJSON, Pane } from "react-leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -12,16 +14,25 @@ import { useRhessysChoropleth } from "../../hooks/useRhessysChoropleth";
 import { useSubcatchmentData } from "../../hooks/useSubcatchmentData";
 import { useChannelData } from "../../hooks/useChannelData";
 import { useLanduseData } from "../../hooks/useLanduseData";
-import { useLayerStyles } from "../../hooks/useLayerStyles";
 import { getLayerParams } from "../../layers/types";
 import { MapEffect } from "../../utils/map/MapEffectUtil";
-import type { LeafletMouseEvent } from "leaflet";
+import { selectedStyle, defaultStyle } from "./constants";
+import { buildHillslopeTooltip } from "../../utils/tooltipContent";
+import type { PathOptions, LeafletMouseEvent } from "leaflet";
+import type { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
+import type { WatershedProperties } from "../../types/WatershedProperties";
 import MapLoadingOverlay from "./MapLoadingOverlay";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import SbsLayer from "./SbsLayer";
 import RhessysSpatialLayer from "./RhessysSpatialLayer";
 import RhessysOutputLayer from "./RhessysOutputLayer";
 import RhessysChoroplethLayer from "./RhessysChoroplethLayer";
+
+const CHANNEL_STYLE: PathOptions = {
+  color: "#000080",
+  fillOpacity: 1,
+  weight: 2,
+};
 
 export default function MapLayers() {
   const navigate = useNavigate();
@@ -73,21 +84,90 @@ export default function MapLayers() {
   ).filename;
   const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
 
-  const {
-    watershedStyle,
-    subcatchmentStyle,
-    tooltipContent,
-    channelStyle,
-    sbsBounds,
-  } = useLayerStyles({
-    runId,
-    watersheds,
-    choroplethActive,
-    landuseData,
-    getChoroplethStyle,
-    getScenarioStyle,
-    getScenarioRow,
-  });
+  const landuseEffective = isEffective("landuse");
+
+  const anyRasterActive =
+    isEffective("sbs") ||
+    isEffective("rhessysSpatial") ||
+    isEffective("rhessysOutputs");
+
+  const watershedStyle = useCallback(
+    (
+      feature:
+        | GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>
+        | undefined,
+    ): PathOptions => {
+      const base =
+        feature?.id?.toString() === runId ? selectedStyle : defaultStyle;
+      if (anyRasterActive) {
+        return { ...base, fillOpacity: 0 };
+      }
+      return base;
+    },
+    [runId, anyRasterActive],
+  );
+
+  const subcatchmentStyle = useCallback(
+    (
+      feature:
+        | GeoJSON.Feature<GeoJSON.Geometry, SubcatchmentProperties>
+        | undefined,
+    ): PathOptions => {
+      if (choroplethActive && feature?.properties?.weppid) {
+        const choroplethStyle = getChoroplethStyle(feature.properties.weppid);
+        if (choroplethStyle) return choroplethStyle;
+      }
+
+      if (feature?.properties?.weppid) {
+        const scenarioStyle = getScenarioStyle(feature.properties.weppid);
+        if (scenarioStyle) return scenarioStyle;
+      }
+
+      if (landuseEffective && feature?.properties?.topazid) {
+        const landuseInfo = landuseData?.[feature.properties.topazid];
+        if (landuseInfo?.color) {
+          return {
+            color: "#2c2c2c",
+            weight: 0.75,
+            fillColor: landuseInfo.color,
+            fillOpacity: 1,
+          };
+        }
+      }
+
+      return {
+        color: "#ffff00",
+        weight: 1,
+        fillOpacity: 0,
+      };
+    },
+    [
+      landuseEffective,
+      landuseData,
+      choroplethActive,
+      getChoroplethStyle,
+      getScenarioStyle,
+    ],
+  );
+
+  const tooltipContent = useCallback(
+    (props: Partial<SubcatchmentProperties>) =>
+      buildHillslopeTooltip(props, getScenarioRow(props.weppid)),
+    [getScenarioRow],
+  );
+
+  const sbsBounds = useMemo((): L.LatLngBoundsExpression | undefined => {
+    if (!runId || !watersheds) return undefined;
+    const feature = watersheds.features?.find(
+      (f: GeoJSON.Feature) => f.id?.toString() === runId,
+    );
+    if (!feature) return undefined;
+    try {
+      return L.geoJSON(feature).getBounds();
+    } catch {
+      return undefined;
+    }
+  }, [runId, watersheds]);
 
   const isLoading = [
     watershedsLoading,
@@ -133,7 +213,7 @@ export default function MapLayers() {
           name="channelsPane"
           style={{ zIndex: LAYER_REGISTRY.channels.zIndex }}
         >
-          <GeoJSON data={channelData} style={channelStyle} />
+          <GeoJSON data={channelData} style={CHANNEL_STYLE} />
         </Pane>
       )}
 
