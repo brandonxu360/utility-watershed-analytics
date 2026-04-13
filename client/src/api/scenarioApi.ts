@@ -1,4 +1,6 @@
+import { queryOptions } from "@tanstack/react-query";
 import { postQuery, toFiniteNumber } from "./queryUtils";
+import { queryKeys } from "./queryKeys";
 import type { QueryPayload } from "./types";
 import { AVAILABLE_SCENARIOS, formatScenarioLabel } from "../layers/scenario";
 import type { ScenarioType, ScenarioDataRow } from "../layers/scenario";
@@ -180,4 +182,13 @@ export async function fetchScenariosSummary(
   return fulfilledResults
     .map((r) => r.value)
     .filter((r): r is ScenarioSummaryRow => r !== null);
+}
+
+export function scenariosSummaryOptions(runId: string | null) {
+  return queryOptions<ScenarioSummaryRow[]>({
+    queryKey: queryKeys.scenariosSummary.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchScenariosSummary(runId!, signal),
+    enabled: !!runId,
+    retry: 1,
+  });
 }

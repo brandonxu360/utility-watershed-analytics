@@ -1,7 +1,8 @@
 import { ChangeEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRunId } from "../../../hooks/useRunId";
 import { useWatershed } from "../../../contexts/WatershedContext";
-import { useScenariosSummary } from "../../../hooks/useScenariosSummary";
+import { scenariosSummaryOptions } from "../../../api/scenarioApi";
 import { hasActiveDependents } from "../../../layers/registry";
 import { getLayerParams } from "../../../layers/types";
 
@@ -136,7 +137,7 @@ export default function WeppSection() {
     effective,
   } = useWatershed();
 
-  const { data: scenariosSummary } = useScenariosSummary(runId);
+  const { data: scenariosSummary } = useQuery(scenariosSummaryOptions(runId));
 
   const availableScenarios = scenariosSummary ?? [];
 

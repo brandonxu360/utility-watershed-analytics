@@ -277,7 +277,7 @@ describe("useScenarioData", () => {
       weight: 0.75,
       fillOpacity: 0.85,
     });
-    expect(style!.fillColor).toMatch(/^rgb\(\d+, \d+, \d+\)$/);
+    expect(style!.fillColor).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
   it("returns a style for runoff variable", async () => {
@@ -295,7 +295,7 @@ describe("useScenarioData", () => {
 
     const style = result.current.getScenarioStyle(2);
     expect(style).not.toBeNull();
-    expect(style!.fillColor).toMatch(/^rgb\(\d+, \d+, \d+\)$/);
+    expect(style!.fillColor).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
   it("reports data availability via useLayerQuery", async () => {
