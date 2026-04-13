@@ -1,7 +1,6 @@
 import { ChangeEvent } from "react";
 import { useRunId } from "../../../hooks/useRunId";
 import { useWatershed } from "../../../contexts/WatershedContext";
-import { useLayerToggle } from "../../../hooks/useLayerToggle";
 import { useScenariosSummary } from "../../../hooks/useScenariosSummary";
 import { hasActiveDependents } from "../../../layers/registry";
 import { getLayerParams } from "../../../layers/types";
@@ -126,13 +125,13 @@ const useStyles = tss.create(({ theme }) => ({
 
 export default function WeppSection() {
   const { classes } = useStyles();
-  const toggle = useLayerToggle();
 
   const runId = useRunId();
 
   const {
     layerDesired,
     dispatchLayerAction,
+    toggleLayer: toggle,
     enableLayerWithParams,
     effective,
   } = useWatershed();

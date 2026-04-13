@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { ReactNode } from "react";
-
-import { useChoropleth } from "../hooks/useChoropleth";
-
+import {
+  CHOROPLETH_CONFIG,
+  CHOROPLETH_YEARS,
+  useChoropleth,
+} from "../hooks/useChoropleth";
 import { INITIAL_DESIRED } from "../layers/rules";
+import type { ReactNode } from "react";
 import type { DesiredMap } from "../layers/types";
 
 const mockUseParams = vi.fn(() => "batch;;test-batch;;test-run");
@@ -22,14 +24,8 @@ vi.mock("../api/rapApi", () => ({
 }));
 
 import { fetchRapChoropleth } from "../api/rapApi";
-import {
-  CHOROPLETH_CONFIG,
-  CHOROPLETH_YEARS,
-} from "../hooks/useChoroplethData";
 
 const mockFetchRapChoropleth = vi.mocked(fetchRapChoropleth);
-
-/* ── useWatershed mock ─────────────────────────────────────── */
 
 let mockDesired: DesiredMap = JSON.parse(JSON.stringify(INITIAL_DESIRED));
 

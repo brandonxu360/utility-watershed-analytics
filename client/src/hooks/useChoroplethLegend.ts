@@ -160,7 +160,7 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
     range: scenarioRange,
     variableConfig: scenarioVarConfig,
   } = useScenarioData();
-  
+
   const scenarioEffective = isEffective("scenario");
 
   // RHESSys spatial inputs

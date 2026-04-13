@@ -17,6 +17,8 @@ import type {
   EffectiveMap,
 } from "../layers/types";
 
+import { ALL_LAYER_IDS } from "../layers/types";
+
 import { INITIAL_DESIRED, INITIAL_RUNTIME, applyAction } from "../layers/rules";
 
 import {
@@ -81,7 +83,8 @@ function watershedReducer(
       };
 
     case "SET_LAYER_LOADING":
-      if (state.layerRuntime.loading[action.id] === action.loading) return state;
+      if (state.layerRuntime.loading[action.id] === action.loading)
+        return state;
       return {
         ...state,
         layerRuntime: {
@@ -124,6 +127,7 @@ export interface WatershedContextValue {
   setZoom: (zoom: number) => void;
   setSelectedHillslope: (id: number | null) => void;
   clearSelectedHillslope: () => void;
+  toggleLayer: (id: string, checked: boolean) => void;
 
   effective: EffectiveMap;
   activeIds: LayerId[];
@@ -189,6 +193,15 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
     [],
   );
 
+  const toggleLayer = useCallback((id: string, checked: boolean) => {
+    if (!ALL_LAYER_IDS.includes(id as LayerId)) return;
+    const layerId = id as LayerId;
+    dispatch({ type: "TOGGLE", id: layerId, on: checked });
+    if (layerId === "subcatchment" && !checked) {
+      dispatch({ type: "CLEAR_SELECTED_HILLSLOPE" });
+    }
+  }, []);
+
   const effective = useMemo(
     () => evaluate(state.layerDesired, state.layerRuntime),
     [state.layerDesired, state.layerRuntime],
@@ -222,6 +235,7 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
       setZoom,
       setSelectedHillslope,
       clearSelectedHillslope,
+      toggleLayer,
       effective,
       activeIds,
       isBlocked,
@@ -238,6 +252,7 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
       setZoom,
       setSelectedHillslope,
       clearSelectedHillslope,
+      toggleLayer,
       effective,
       activeIds,
       isBlocked,

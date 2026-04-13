@@ -1,6 +1,5 @@
 import { ChangeEvent } from "react";
 import { useWatershed } from "../../../contexts/WatershedContext";
-import { useLayerToggle } from "../../../hooks/useLayerToggle";
 import { useRunId } from "../../../hooks/useRunId";
 import { API_ENDPOINTS } from "../../../api/apiEndpoints";
 import { getLayerParams } from "../../../layers/types";
@@ -42,10 +41,12 @@ const useStyles = tss.create(({ theme }) => ({
 
 export default function WatershedDataSection() {
   const { classes } = useStyles();
-  const toggle = useLayerToggle();
+  const {
+    toggleLayer: toggle,
+    layerDesired,
+    enableLayerWithParams,
+  } = useWatershed();
   const runId = useRunId();
-
-  const { layerDesired, enableLayerWithParams } = useWatershed();
 
   const landuseChecked = layerDesired.landuse.enabled;
   const sbsChecked = layerDesired.sbs.enabled;
