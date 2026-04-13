@@ -88,7 +88,7 @@ function ActiveBottomPanel({
 
   if (isEffective("choropleth")) {
     return (
-      <BottomPanel isOpen>
+      <BottomPanel key="choropleth" isOpen>
         <VegetationCover />
       </BottomPanel>
     );
@@ -96,7 +96,7 @@ function ActiveBottomPanel({
 
   if (isEffective("rhessysOutputs") && hasChoroplethData) {
     return (
-      <BottomPanel isOpen>
+      <BottomPanel key="rhessysOutputs" isOpen>
         <RhessysTimeSeries />
       </BottomPanel>
     );
@@ -108,7 +108,7 @@ function ActiveBottomPanel({
 
   if (runId) {
     return (
-      <BottomPanel isOpen>
+      <BottomPanel key="scenarios" isOpen>
         <ScenariosTable />
       </BottomPanel>
     );
