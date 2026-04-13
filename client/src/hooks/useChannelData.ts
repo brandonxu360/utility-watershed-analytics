@@ -1,47 +1,27 @@
-/**
- * useChannelData — colocates channel fetching and runtime reporting.
- *
- * Responsibilities:
- *  1. `useQuery` for channel GeoJSON (gated on `layerDesired.channels.enabled`)
- *  2. Reports data-availability and loading to layer runtime via `useLayerQuery`
- */
-
-import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
 import { fetchChannels } from "../api/api";
 import { useWatershed } from "../contexts/WatershedContext";
-import { useLayerQuery } from "./useLayerQuery";
+import { useLayerData } from "./useLayerData";
 
 export interface UseChannelDataResult {
-  /** Channel GeoJSON FeatureCollection (or undefined while loading). */
   channelData: GeoJSON.FeatureCollection | undefined;
-  /** Whether the query is currently in-flight. */
   channelLoading: boolean;
 }
 
 export function useChannelData(runId: string | null): UseChannelDataResult {
   const { layerDesired } = useWatershed();
+  const enabled = Boolean(layerDesired.channels.enabled && runId);
 
-  const channelsEnabled = layerDesired.channels.enabled;
+  const { data, isLoading } = useLayerData(
+    "channels",
+    queryKeys.channels.byRun(runId ?? ""),
+    (signal) => fetchChannels(runId!, signal),
+    enabled,
+    {
+      hasDataFn: (d) => (d?.features?.length ?? 0) > 0,
+      cancellationKey: queryKeys.channels.all,
+    },
+  );
 
-  // ── Fetch ─────────────────────────────────────────────────────────────
-  const {
-    data: channelData,
-    isLoading: channelLoading,
-    isError: channelError,
-  } = useQuery({
-    queryKey: queryKeys.channels.byRun(runId ?? ""),
-    queryFn: ({ signal }) => fetchChannels(runId!, signal),
-    enabled: Boolean(channelsEnabled && runId),
-  });
-
-  // ── Report data availability & loading ────────────────────────────────
-  useLayerQuery("channels", {
-    enabled: Boolean(channelsEnabled && runId),
-    isLoading: channelLoading,
-    hasData: !channelError && (channelData?.features?.length ?? 0) > 0,
-    queryKey: queryKeys.channels.all,
-  });
-
-  return { channelData, channelLoading };
+  return { channelData: data ?? undefined, channelLoading: isLoading };
 }

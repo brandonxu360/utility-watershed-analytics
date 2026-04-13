@@ -1,21 +1,10 @@
-/**
- * useSubcatchmentData — colocates subcatchment fetching and runtime reporting.
- *
- * Responsibilities:
- *  1. `useQuery` for subcatchment GeoJSON (gated on `layerDesired.subcatchment.enabled`)
- *  2. Reports data-availability and loading to layer runtime via `useLayerQuery`
- */
-
-import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
 import { fetchSubcatchments } from "../api/api";
 import { useWatershed } from "../contexts/WatershedContext";
-import { useLayerQuery } from "./useLayerQuery";
+import { useLayerData } from "./useLayerData";
 
 export interface UseSubcatchmentDataResult {
-  /** Subcatchment GeoJSON FeatureCollection (or undefined while loading). */
   subcatchments: GeoJSON.FeatureCollection | undefined;
-  /** Whether the query is currently in-flight. */
   subLoading: boolean;
 }
 
@@ -23,27 +12,18 @@ export function useSubcatchmentData(
   runId: string | null,
 ): UseSubcatchmentDataResult {
   const { layerDesired } = useWatershed();
+  const enabled = Boolean(layerDesired.subcatchment.enabled && runId);
 
-  const subcatchmentEnabled = layerDesired.subcatchment.enabled;
+  const { data, isLoading } = useLayerData(
+    "subcatchment",
+    queryKeys.subcatchments.byRun(runId ?? ""),
+    (signal) => fetchSubcatchments(runId!, signal),
+    enabled,
+    {
+      hasDataFn: (d) => (d?.features?.length ?? 0) > 0,
+      cancellationKey: queryKeys.subcatchments.all,
+    },
+  );
 
-  // ── Fetch ─────────────────────────────────────────────────────────────
-  const {
-    data: subcatchments,
-    isLoading: subLoading,
-    isError: subError,
-  } = useQuery({
-    queryKey: queryKeys.subcatchments.byRun(runId ?? ""),
-    queryFn: ({ signal }) => fetchSubcatchments(runId!, signal),
-    enabled: Boolean(subcatchmentEnabled && runId),
-  });
-
-  // ── Report data availability & loading ────────────────────────────────
-  useLayerQuery("subcatchment", {
-    enabled: Boolean(subcatchmentEnabled && runId),
-    isLoading: subLoading,
-    hasData: !subError && (subcatchments?.features?.length ?? 0) > 0,
-    queryKey: queryKeys.subcatchments.all,
-  });
-
-  return { subcatchments, subLoading };
+  return { subcatchments: data ?? undefined, subLoading: isLoading };
 }
