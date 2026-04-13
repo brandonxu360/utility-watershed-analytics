@@ -1,23 +1,3 @@
-/**
- * WatershedContext — ALL watershed-scoped state in a single reducer.
- *
- * ### Automatic reset
- * - Navigate away from Home (e.g. /team) → provider unmounts → state GC'd.
- * - Switch watersheds (runId changes) → RESET dispatched → `INITIAL_STATE`.
- *
- * Adding a new piece of watershed-scoped state means:
- *  1. Add the field + default to `INITIAL_STATE`
- *  2. Add an action case to `watershedReducer`
- *  3. Expose a convenience setter in the context value
- *
- * The RESET action always returns `INITIAL_STATE`, so nothing extra is
- * needed — no manual "enumerate every field to clear" pattern.
- *
- * ### Declarative UI
- * Panel / legend components derive visibility from `isEffective`.
- * They render when their layer is active and vanish when it isn't.
- */
-
 import {
   createContext,
   useContext,
@@ -87,6 +67,8 @@ function watershedReducer(
       return INITIAL_STATE;
 
     case "SET_DATA_AVAILABILITY":
+      if (state.layerRuntime.dataAvailability[action.id] === action.available)
+        return state;
       return {
         ...state,
         layerRuntime: {
@@ -99,6 +81,7 @@ function watershedReducer(
       };
 
     case "SET_LAYER_LOADING":
+      if (state.layerRuntime.loading[action.id] === action.loading) return state;
       return {
         ...state,
         layerRuntime: {

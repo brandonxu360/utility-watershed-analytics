@@ -1,12 +1,20 @@
 import { useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
 import { PathOptions } from "leaflet";
 import { useRunId } from "./useRunId";
 import { useWatershed } from "../contexts/WatershedContext";
+import { getLayerParams } from "../layers/types";
+import { fetchScenarioData } from "../api/scenarioApi";
+import { computeRobustRange } from "../utils/colormap";
 import { useLayerQuery } from "./useLayerQuery";
-import { useScenarioDataOnly } from "./useScenarioDataOnly";
 import { useColormapStyle } from "./useColormapStyle";
-import { type ScenarioDataRow } from "../layers/scenario";
+
+import {
+  type ScenarioDataRow,
+  type ScenarioVariableType,
+  SCENARIO_VARIABLE_CONFIG,
+} from "../layers/scenario";
 
 export interface UseScenarioDataResult {
   isLoading: boolean;
@@ -19,18 +27,44 @@ export interface UseScenarioDataResult {
 
 export function useScenarioData(): UseScenarioDataResult {
   const runId = useRunId();
-  const { isEffective } = useWatershed();
+  const { layerDesired, isEffective } = useWatershed();
+  const params = getLayerParams(layerDesired, "scenario");
 
-  const {
-    hasData,
-    isLoading,
-    range,
-    variableConfig,
-    dataByWeppId,
-    scenarioVariable,
-    scenarioEnabled,
-    selectedScenario,
-  } = useScenarioDataOnly();
+  const selectedScenario = params.scenario ?? null;
+  const scenarioVariable: ScenarioVariableType =
+    params.variable ?? "sediment_yield";
+  const scenarioEnabled = layerDesired.scenario.enabled;
+
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.scenarioData.byScenario(
+      runId ?? "",
+      selectedScenario ?? "",
+    ),
+    queryFn: ({ signal }) =>
+      fetchScenarioData({ runId: runId!, scenario: selectedScenario! }, signal),
+    enabled: !!runId && !!selectedScenario && scenarioEnabled,
+    retry: 1,
+  });
+
+  const dataByWeppId = useMemo(() => {
+    const map = new Map<number, ScenarioDataRow>();
+    if (data) {
+      for (const row of data) map.set(row.wepp_id, row);
+    }
+    return map;
+  }, [data]);
+
+  const hasData = dataByWeppId.size > 0;
+
+  const range = useMemo(() => {
+    if (!hasData) return null;
+    const values = Array.from(dataByWeppId.values()).map(
+      (row) => row[scenarioVariable],
+    );
+    return computeRobustRange(values);
+  }, [hasData, dataByWeppId, scenarioVariable]);
+
+  const variableConfig = SCENARIO_VARIABLE_CONFIG[scenarioVariable];
 
   useLayerQuery("scenario", {
     enabled: scenarioEnabled,

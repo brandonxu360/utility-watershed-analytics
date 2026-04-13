@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { useWatershed } from "../contexts/WatershedContext";
-import { useChoroplethData, type CHOROPLETH_CONFIG } from "./useChoroplethData";
-import { useScenarioDataOnly } from "./useScenarioDataOnly";
-import { useRhessysSpatialData } from "./useRhessysSpatialData";
-import { useLanduseDataOnly } from "./useLanduseDataOnly";
+import { useChoropleth, type CHOROPLETH_CONFIG } from "./useChoropleth";
+import { useScenarioData } from "./useScenarioData";
+import { useRhessysSpatialInputs } from "./useRhessysSpatialInputs";
+import { useLanduseData } from "./useLanduseData";
 import { useRhessysOutputsData } from "./useRhessysOutputsData";
 import { useRhessysChoroplethData } from "./useRhessysChoroplethData";
 import { getLayerParams } from "../layers/types";
@@ -152,20 +152,21 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
     isLoading: choroplethLoading,
     config: choroplethConfig,
     range: choroplethRange,
-  } = useChoroplethData();
+  } = useChoropleth();
 
   // WEPP scenario
   const {
     hasData: hasScenarioData,
     range: scenarioRange,
     variableConfig: scenarioVarConfig,
-  } = useScenarioDataOnly();
+  } = useScenarioData();
+  
   const scenarioEffective = isEffective("scenario");
 
   // RHESSys spatial inputs
   const rhessysSpatialEffective = isEffective("rhessysSpatial");
   const rhessysSpatialParams = getLayerParams(layerDesired, "rhessysSpatial");
-  const { files: rhessysSpatialFiles } = useRhessysSpatialData(runId);
+  const { files: rhessysSpatialFiles } = useRhessysSpatialInputs(runId);
   const selectedRhessysFile = useMemo(
     () =>
       rhessysSpatialFiles.find(
@@ -196,7 +197,7 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
     useRhessysChoroplethData();
 
   // Land use
-  const { landuseLegendMap } = useLanduseDataOnly(runId);
+  const { landuseLegendMap } = useLanduseData(runId);
   const landuseEffective = isEffective("landuse");
 
   return useMemo((): ChoroplethLegendProps | null => {

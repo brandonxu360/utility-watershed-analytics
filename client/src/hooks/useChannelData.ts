@@ -1,7 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
 import { fetchChannels } from "../api/api";
 import { useWatershed } from "../contexts/WatershedContext";
-import { useLayerData } from "./useLayerData";
+import { useLayerQuery } from "./useLayerQuery";
 
 export interface UseChannelDataResult {
   channelData: GeoJSON.FeatureCollection | undefined;
@@ -12,16 +13,18 @@ export function useChannelData(runId: string | null): UseChannelDataResult {
   const { layerDesired } = useWatershed();
   const enabled = Boolean(layerDesired.channels.enabled && runId);
 
-  const { data, isLoading } = useLayerData(
-    "channels",
-    queryKeys.channels.byRun(runId ?? ""),
-    (signal) => fetchChannels(runId!, signal),
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.channels.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchChannels(runId!, signal),
     enabled,
-    {
-      hasDataFn: (d) => (d?.features?.length ?? 0) > 0,
-      cancellationKey: queryKeys.channels.all,
-    },
-  );
+  });
+
+  useLayerQuery("channels", {
+    enabled,
+    isLoading,
+    hasData: !error && (data?.features?.length ?? 0) > 0,
+    queryKey: queryKeys.channels.all,
+  });
 
   return { channelData: data ?? undefined, channelLoading: isLoading };
 }

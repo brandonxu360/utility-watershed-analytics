@@ -1,10 +1,21 @@
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
+import { fetchRhessysSpatialInputs } from "../api/rhessysApi";
 import { useLayerQuery } from "./useLayerQuery";
-import { useRhessysSpatialData } from "./useRhessysSpatialData";
+import type { RhessysSpatialFile } from "../api/types";
+
+type RhessysSpatialResponse = { files: RhessysSpatialFile[] };
 
 export function useRhessysSpatialInputs(runId: string | null) {
-  const { files, isLoading } = useRhessysSpatialData(runId);
   const enabled = !!runId;
+
+  const { data, isLoading } = useQuery<RhessysSpatialResponse>({
+    queryKey: queryKeys.rhessysSpatialInputs.byRun(runId ?? ""),
+    queryFn: ({ signal }) => fetchRhessysSpatialInputs(runId!, signal),
+    enabled,
+  });
+
+  const files = data?.files ?? [];
 
   useLayerQuery("rhessysSpatial", {
     enabled,
