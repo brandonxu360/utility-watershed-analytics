@@ -1,24 +1,14 @@
 import { useMemo, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
 import { PathOptions } from "leaflet";
 import { useRunId } from "./useRunId";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
-import { getLayerParams } from "../layers/types";
-import { fetchScenarioData } from "../api/scenarioApi";
+import { useScenarioDataOnly } from "./useScenarioDataOnly";
 
-import {
-  type ScenarioDataRow,
-  SCENARIO_VARIABLE_CONFIG,
-} from "../layers/scenario";
+import { type ScenarioDataRow } from "../layers/scenario";
 
-import {
-  computeRobustRange,
-  createColormap,
-  normalizeValue,
-  RGBAArray,
-} from "../utils/colormap";
+import { createColormap, normalizeValue, RGBAArray } from "../utils/colormap";
 
 export interface UseScenarioDataResult {
   isLoading: boolean;
@@ -34,34 +24,18 @@ export interface UseScenarioDataResult {
  */
 export function useScenarioData(): UseScenarioDataResult {
   const runId = useRunId();
+  const { isEffective } = useWatershed();
 
-  const { layerDesired, isEffective } = useWatershed();
-  const params = getLayerParams(layerDesired, "scenario");
-
-  const selectedScenario = params.scenario ?? null;
-  const scenarioVariable = params.variable ?? "sediment_yield";
-  const scenarioEnabled = layerDesired.scenario.enabled;
-
-  const { data, isLoading } = useQuery({
-    queryKey: queryKeys.scenarioData.byScenario(
-      runId ?? "",
-      selectedScenario ?? "",
-    ),
-    queryFn: ({ signal }) =>
-      fetchScenarioData({ runId: runId!, scenario: selectedScenario! }, signal),
-    enabled: !!runId && !!selectedScenario && scenarioEnabled,
-    retry: 1,
-  });
-
-  const dataByWeppId = useMemo(() => {
-    const map = new Map<number, ScenarioDataRow>();
-    if (data) {
-      for (const row of data) map.set(row.wepp_id, row);
-    }
-    return map;
-  }, [data]);
-
-  const hasData = dataByWeppId.size > 0;
+  const {
+    hasData,
+    isLoading,
+    range,
+    variableConfig,
+    dataByWeppId,
+    scenarioVariable,
+    scenarioEnabled,
+    selectedScenario,
+  } = useScenarioDataOnly();
 
   useLayerQuery("scenario", {
     enabled: scenarioEnabled,
@@ -72,16 +46,6 @@ export function useScenarioData(): UseScenarioDataResult {
       selectedScenario ?? "",
     ),
   });
-
-  const range = useMemo(() => {
-    if (!hasData) return null;
-    const values = Array.from(dataByWeppId.values()).map(
-      (row) => row[scenarioVariable],
-    );
-    return computeRobustRange(values);
-  }, [hasData, dataByWeppId, scenarioVariable]);
-
-  const variableConfig = SCENARIO_VARIABLE_CONFIG[scenarioVariable];
 
   const scenarioEffective = isEffective("scenario");
 

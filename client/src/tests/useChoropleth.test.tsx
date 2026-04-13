@@ -2,11 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import {
-  useChoropleth,
-  CHOROPLETH_CONFIG,
-  CHOROPLETH_YEARS,
-} from "../hooks/useChoropleth";
+
+import { useChoropleth } from "../hooks/useChoropleth";
+
 import { INITIAL_DESIRED } from "../layers/rules";
 import type { DesiredMap } from "../layers/types";
 
@@ -24,6 +22,10 @@ vi.mock("../api/rapApi", () => ({
 }));
 
 import { fetchRapChoropleth } from "../api/rapApi";
+import {
+  CHOROPLETH_CONFIG,
+  CHOROPLETH_YEARS,
+} from "../hooks/useChoroplethData";
 
 const mockFetchRapChoropleth = vi.mocked(fetchRapChoropleth);
 

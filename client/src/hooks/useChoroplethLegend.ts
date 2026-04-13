@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useWatershed } from "../contexts/WatershedContext";
-import { useChoropleth } from "./useChoropleth";
-import { useScenarioData } from "./useScenarioData";
+import { useChoroplethData } from "./useChoroplethData";
+import { useScenarioDataOnly } from "./useScenarioDataOnly";
 import { useRhessysSpatialInputs } from "./useRhessysSpatialInputs";
 import { useLanduseData } from "./useLanduseData";
 import { useRhessysOutputsData } from "./useRhessysOutputsData";
@@ -35,14 +35,15 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
     isLoading: choroplethLoading,
     config: choroplethConfig,
     range: choroplethRange,
-  } = useChoropleth();
+  } = useChoroplethData();
 
   // WEPP scenario
   const {
     hasData: hasScenarioData,
     range: scenarioRange,
     variableConfig: scenarioVarConfig,
-  } = useScenarioData();
+  } = useScenarioDataOnly();
+
   const scenarioEffective = isEffective("scenario");
 
   // RHESSys spatial
@@ -57,7 +58,7 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
     [rhessysSpatialFiles, rhessysSpatialParams.filename],
   );
 
-  // RHESSys outputs — data-only hook (no layer reporting side-effects)
+  // RHESSys outputs
   const rhessysOutputsEffective = isEffective("rhessysOutputs");
   const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
   const {
@@ -66,7 +67,7 @@ export function useChoroplethLegend(): ChoroplethLegendProps | null {
     valueRanges: outputValueRanges,
   } = useRhessysOutputsData(runId);
 
-  // RHESSys dynamic choropleth — data-only hook avoids heavy derivations
+  // RHESSys dynamic choropleth
   const { isActive: rhessysChoroplethActive, range: rhessysChoroplethRange } =
     useRhessysChoroplethData();
 
