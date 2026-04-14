@@ -140,7 +140,7 @@ export default function MapLayers() {
       {channelsEffective && channelData && (
         <Pane
           name="channelsPane"
-          style={{ zIndex: LAYER_REGISTRY.channels.zIndex }}
+          style={{ zIndex: LAYER_REGISTRY.channels.zIndex, pointerEvents: "none" }}
         >
           <GeoJSON data={channelData} style={CHANNEL_STYLE} />
         </Pane>

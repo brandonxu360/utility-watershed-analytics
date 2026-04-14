@@ -68,7 +68,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 420,
-    requires: ["subcatchment", "channels"],
+    requires: ["subcatchment"],
     defaults: { enabled: false, opacity: 1, params: {} },
   },
 
@@ -79,7 +79,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 420,
-    requires: ["subcatchment", "channels"],
+    requires: ["subcatchment"],
     defaults: {
       enabled: false,
       opacity: 0.85,
@@ -115,7 +115,7 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     kind: "vector",
     pane: "overlayPane",
     zIndex: 420,
-    requires: ["subcatchment", "channels"],
+    requires: ["subcatchment"],
     defaults: {
       enabled: false,
       opacity: 0.85,
