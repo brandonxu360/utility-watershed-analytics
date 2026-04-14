@@ -19,6 +19,8 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import Collapse from "@mui/material/Collapse";
+import Divider from "@mui/material/Divider";
+import { alpha } from "@mui/material/styles";
 import WeppSection from "./sections/WeppSection";
 import WatershedDataSection from "./sections/WatershedDataSection";
 import RhessysSection from "./sections/RhessysSection";
@@ -45,6 +47,33 @@ const useStyles = tss.create(({ theme }) => ({
   sectionHeading: {
     fontWeight: 600,
     marginBottom: theme.spacing(1),
+    fontSize: theme.typography.h6.fontSize,
+  },
+  sectionSubheading: {
+    fontSize: theme.typography.body2.fontSize,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    marginBottom: theme.spacing(1),
+    color: alpha(theme.palette.primary.contrastText, 0.9),
+  },
+  sectionSubgroup: {
+    padding: theme.spacing(1.25),
+    borderRadius: theme.shape.borderRadius,
+    border: `1px solid ${alpha(theme.palette.primary.contrastText, 0.2)}`,
+    background:
+      `linear-gradient(180deg, ${alpha(theme.palette.primary.contrastText, 0.1)} 0%, ${alpha(theme.palette.primary.contrastText, 0.04)} 100%)`,
+  },
+  sectionSubgroupControls: {
+    marginBottom: theme.spacing(1.5),
+  },
+  sectionSubgroupLinks: {
+    marginTop: theme.spacing(1.5),
+  },
+  sectionDivider: {
+    borderColor: alpha(theme.palette.primary.contrastText, 0.24),
+    marginTop: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
   },
   emptyState: {
     fontSize: theme.typography.body2.fontSize,
@@ -53,15 +82,15 @@ const useStyles = tss.create(({ theme }) => ({
   },
   title: {
     marginBottom: theme.spacing(1.5),
-    fontSize: theme.typography.h3.fontSize,
+    fontSize: theme.typography.h2.fontSize,
   },
   titleMulti: {
     marginBottom: theme.spacing(1),
-    fontSize: `calc((${theme.typography.h3.fontSize} + ${theme.typography.h4.fontSize}) / 2)`,
+    fontSize: `calc((${theme.typography.h2.fontSize} + ${theme.typography.h3.fontSize}) / 2)`,
   },
   paragraph: {
     marginBottom: theme.spacing(2),
-    fontSize: theme.typography.body1.fontSize,
+    fontSize: theme.typography.h6.fontSize,
   },
   actionLink: {
     fontSize: theme.typography.body2.fontSize,
@@ -109,10 +138,10 @@ const useStyles = tss.create(({ theme }) => ({
     appearance: "none",
     WebkitAppearance: "none",
     padding: theme.spacing(0.75, 1),
-    border: "1px solid rgba(255, 255, 255, 0.2)",
+    border: `1px solid ${alpha(theme.palette.primary.contrastText, 0.28)}`,
     borderRadius: theme.shape.borderRadius,
     "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.06)",
+      backgroundColor: alpha(theme.palette.primary.contrastText, 0.12),
     },
   },
   reportDropdownLabel: {
@@ -122,6 +151,11 @@ const useStyles = tss.create(({ theme }) => ({
   reportDropdownLinks: {
     paddingLeft: theme.spacing(1),
     paddingTop: theme.spacing(0.75),
+  },
+  linksHint: {
+    fontSize: theme.typography.body2.fontSize,
+    color: alpha(theme.palette.primary.contrastText, 0.82),
+    marginBottom: theme.spacing(1),
   },
 }));
 
@@ -361,77 +395,99 @@ export default function WatershedOverview() {
           <Typography variant="body1" className={classes.sectionHeading}>
             Short Term Impact
           </Typography>
-          <Link
-            href={runId ? API_ENDPOINTS.WEPP_DASHBOARD(runId) : undefined}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={classes.actionLink}
-            underline="always"
-            aria-label="View WEPP model dashboard"
+
+          <div
+            className={`${classes.sectionSubgroup} ${classes.sectionSubgroupControls}`}
           >
-            View WEPP model dashboard
-          </Link>
-          <Link
-            href={runId ? API_ENDPOINTS.WEPP_DEVAL_DETAILS(runId) : undefined}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={classes.actionLink}
-            underline="always"
-            aria-label="View WEPP interactive report"
+            <Typography className={classes.sectionSubheading}>
+              Map Controls
+            </Typography>
+            <WeppSection />
+          </div>
+
+          <Divider className={classes.sectionDivider} />
+
+          <div
+            className={`${classes.sectionSubgroup} ${classes.sectionSubgroupLinks}`}
           >
-            View WEPP interactive report
-          </Link>
-          {runId === MILLCREEK_RUN_ID && (
-            <div className={classes.reportDropdownWrapper}>
-              <button
-                className={classes.reportDropdownHeader}
-                onClick={() => setRxfireOpen((prev) => !prev)}
-                aria-expanded={rxfireOpen}
-                aria-controls="rxfire-links"
-              >
-                <Typography className={classes.reportDropdownLabel}>
-                  Site Specific Prescribed Fire Scenarios
-                </Typography>
-                {rxfireOpen ? (
-                  <ExpandLessIcon fontSize="small" />
-                ) : (
-                  <ExpandMoreIcon fontSize="small" />
-                )}
-              </button>
-              <Collapse in={rxfireOpen}>
-                <div id="rxfire-links" className={classes.reportDropdownLinks}>
-                  <Link
-                    href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Manager_Defined.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={classes.actionLink}
-                    underline="always"
-                  >
-                    Manager Defined
-                  </Link>
-                  <Link
-                    href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Stream_Order_2.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={classes.actionLink}
-                    underline="always"
-                  >
-                    Stream Order 2
-                  </Link>
-                  <Link
-                    href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Stream_Order_3.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={classes.actionLink}
-                    underline="always"
-                  >
-                    Stream Order 3
-                  </Link>
-                </div>
-              </Collapse>
-            </div>
-          )}
-          <WeppSection />
+            <Typography className={classes.sectionSubheading}>
+              Links and Reports
+            </Typography>
+            <Typography className={classes.linksHint}>
+              Open model dashboards and downloadable reports.
+            </Typography>
+            <Link
+              href={runId ? API_ENDPOINTS.WEPP_DASHBOARD(runId) : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={classes.actionLink}
+              underline="always"
+              aria-label="View WEPP model dashboard"
+            >
+              View WEPP model dashboard
+            </Link>
+            <Link
+              href={runId ? API_ENDPOINTS.WEPP_DEVAL_DETAILS(runId) : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={classes.actionLink}
+              underline="always"
+              aria-label="View WEPP interactive report"
+            >
+              View WEPP interactive report
+            </Link>
+            {runId === MILLCREEK_RUN_ID && (
+              <div className={classes.reportDropdownWrapper}>
+                <button
+                  type="button"
+                  className={classes.reportDropdownHeader}
+                  onClick={() => setRxfireOpen((prev) => !prev)}
+                  aria-expanded={rxfireOpen}
+                  aria-controls="rxfire-links"
+                >
+                  <Typography className={classes.reportDropdownLabel}>
+                    Site Specific Prescribed Fire Scenarios
+                  </Typography>
+                  {rxfireOpen ? (
+                    <ExpandLessIcon fontSize="small" />
+                  ) : (
+                    <ExpandMoreIcon fontSize="small" />
+                  )}
+                </button>
+                <Collapse in={rxfireOpen}>
+                  <div id="rxfire-links" className={classes.reportDropdownLinks}>
+                    <Link
+                      href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Manager_Defined.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={classes.actionLink}
+                      underline="always"
+                    >
+                      Manager Defined
+                    </Link>
+                    <Link
+                      href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Stream_Order_2.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={classes.actionLink}
+                      underline="always"
+                    >
+                      Stream Order 2
+                    </Link>
+                    <Link
+                      href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Stream_Order_3.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={classes.actionLink}
+                      underline="always"
+                    >
+                      Stream Order 3
+                    </Link>
+                  </div>
+                </Collapse>
+              </div>
+            )}
+          </div>
         </Paper>
 
         {hasNoLongTermData ? null : (
@@ -439,8 +495,29 @@ export default function WatershedOverview() {
             <Typography variant="body1" className={classes.sectionHeading}>
               Long Term Impact
             </Typography>
-            <RhessysSection />
-            <RhessysOutputsSection />
+
+            <div
+              className={`${classes.sectionSubgroup} ${classes.sectionSubgroupControls}`}
+            >
+              <Typography className={classes.sectionSubheading}>
+                Map Controls
+              </Typography>
+              <RhessysSection />
+              <RhessysOutputsSection />
+            </div>
+
+            <Divider className={classes.sectionDivider} />
+
+            <div
+              className={`${classes.sectionSubgroup} ${classes.sectionSubgroupLinks}`}
+            >
+              <Typography className={classes.sectionSubheading}>
+                Links and Reports
+              </Typography>
+              <Typography className={classes.linksHint}>
+                No external reports are currently available for this section.
+              </Typography>
+            </div>
           </Paper>
         )}
 

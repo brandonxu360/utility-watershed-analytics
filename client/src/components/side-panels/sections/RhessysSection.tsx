@@ -23,6 +23,9 @@ const useStyles = tss.create(({ theme }) => ({
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.contrastText,
     },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.primary.contrastText,
+    },
     "& .MuiSvgIcon-root": {
       color: theme.palette.primary.contrastText,
     },
