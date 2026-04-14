@@ -1,4 +1,4 @@
-import { useMemo, useState, type KeyboardEvent } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useRunId } from "../../hooks/useRunId";
 import { useQuery } from "@tanstack/react-query";
@@ -100,7 +100,14 @@ const useStyles = tss.create(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    width: "100%",
+    textAlign: "left",
     cursor: "pointer",
+    backgroundColor: "transparent",
+    color: "inherit",
+    font: "inherit",
+    appearance: "none",
+    WebkitAppearance: "none",
     padding: theme.spacing(0.75, 1),
     border: "1px solid rgba(255, 255, 255, 0.2)",
     borderRadius: theme.shape.borderRadius,
@@ -206,6 +213,8 @@ function SkeletonWatershedPanel() {
     </div>
   );
 }
+
+const MILLCREEK_RUN_ID = "mdobre-invincible-scarab";
 
 export default function WatershedOverview() {
   const { classes } = useStyles();
@@ -372,19 +381,11 @@ export default function WatershedOverview() {
           >
             View WEPP interactive report
           </Link>
-          {runId === "mdobre-invincible-scarab" && (
+          {runId === MILLCREEK_RUN_ID && (
             <div className={classes.reportDropdownWrapper}>
-              <div
+              <button
                 className={classes.reportDropdownHeader}
                 onClick={() => setRxfireOpen((prev) => !prev)}
-                onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setRxfireOpen((prev: boolean) => !prev);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
                 aria-expanded={rxfireOpen}
                 aria-controls="rxfire-links"
               >
@@ -396,9 +397,9 @@ export default function WatershedOverview() {
                 ) : (
                   <ExpandMoreIcon fontSize="small" />
                 )}
-              </div>
+              </button>
               <Collapse in={rxfireOpen}>
-                <div className={classes.reportDropdownLinks}>
+                <div id="rxfire-links" className={classes.reportDropdownLinks}>
                   <Link
                     href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Manager_Defined.html"
                     target="_blank"
