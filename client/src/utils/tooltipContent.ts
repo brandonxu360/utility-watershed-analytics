@@ -1,6 +1,7 @@
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 import type { ScenarioDataRow, ScenarioVariableType } from "../layers/scenario";
 import type { VegetationBandType } from "./constants";
+import { startYear, endYear } from "./constants";
 
 export type TooltipContext =
   | { layer: "scenario"; variable: ScenarioVariableType; row: ScenarioDataRow }
@@ -80,7 +81,8 @@ function choroplethSection(
 ): string[] {
   const fmt = (n: number) =>
     n.toLocaleString(undefined, { maximumFractionDigits: 1 });
-  const yearLabel = year !== null ? `${year}` : "Avg. 1986–2023";
+
+  const yearLabel = year !== null ? `${year}` : `Avg. ${startYear}–${endYear}`;
 
   if (bands === "all" && components) {
     return [
