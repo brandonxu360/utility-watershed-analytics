@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useRunId } from "../../hooks/useRunId";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +16,9 @@ import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import DownloadIcon from "@mui/icons-material/Download";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import Collapse from "@mui/material/Collapse";
 import WeppSection from "./sections/WeppSection";
 import WatershedDataSection from "./sections/WatershedDataSection";
 import RhessysSection from "./sections/RhessysSection";
@@ -89,6 +92,29 @@ const useStyles = tss.create(({ theme }) => ({
     display: "flex",
     alignItems: "flex-start",
     justifyContent: "space-between",
+  },
+  reportDropdownWrapper: {
+    marginBottom: theme.spacing(1.5),
+  },
+  reportDropdownHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    cursor: "pointer",
+    padding: theme.spacing(0.75, 1),
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    borderRadius: theme.shape.borderRadius,
+    "&:hover": {
+      backgroundColor: "rgba(255, 255, 255, 0.06)",
+    },
+  },
+  reportDropdownLabel: {
+    fontSize: theme.typography.body2.fontSize,
+    fontWeight: 600,
+  },
+  reportDropdownLinks: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: theme.spacing(0.75),
   },
 }));
 
@@ -186,6 +212,7 @@ export default function WatershedOverview() {
   const navigate = useNavigate();
 
   const runId = useRunId();
+  const [rxfireOpen, setRxfireOpen] = useState(false);
 
   // Lightweight data checks for the Long Term Impact visibility guard.
   // The sections themselves call the full hooks with useLayerQuery side-effects.
@@ -345,6 +372,56 @@ export default function WatershedOverview() {
           >
             View WEPP interactive report
           </Link>
+          {runId === "mdobre-invincible-scarab" && (
+            <div className={classes.reportDropdownWrapper}>
+              <div
+                className={classes.reportDropdownHeader}
+                onClick={() => setRxfireOpen((prev) => !prev)}
+                role="button"
+                aria-expanded={rxfireOpen}
+              >
+                <Typography className={classes.reportDropdownLabel}>
+                  Site Specific Prescribed Fire Scenarios
+                </Typography>
+                {rxfireOpen ? (
+                  <ExpandLessIcon fontSize="small" />
+                ) : (
+                  <ExpandMoreIcon fontSize="small" />
+                )}
+              </div>
+              <Collapse in={rxfireOpen}>
+                <div className={classes.reportDropdownLinks}>
+                  <Link
+                    href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Manager_Defined.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={classes.actionLink}
+                    underline="always"
+                  >
+                    Manager Defined
+                  </Link>
+                  <Link
+                    href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Stream_Order_2.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={classes.actionLink}
+                    underline="always"
+                  >
+                    Stream Order 2
+                  </Link>
+                  <Link
+                    href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Stream_Order_3.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={classes.actionLink}
+                    underline="always"
+                  >
+                    Stream Order 3
+                  </Link>
+                </div>
+              </Collapse>
+            </div>
+          )}
           <WeppSection />
         </Paper>
 

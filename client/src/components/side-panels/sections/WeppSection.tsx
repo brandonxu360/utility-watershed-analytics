@@ -47,9 +47,6 @@ const useStyles = tss.create(({ theme }) => ({
     },
   },
   scenarioGroup: {
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
-    padding: theme.spacing(1),
     marginBottom: theme.spacing(0.5),
   },
   scenarioSelect: {
@@ -63,9 +60,18 @@ const useStyles = tss.create(({ theme }) => ({
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.contrastText,
     },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.primary.contrastText,
+    },
     "& .MuiSvgIcon-root": {
       color: theme.palette.primary.contrastText,
     },
+  },
+  scenarioSelectPaper: {
+    maxHeight: 300,
+  },
+  scenarioFormControl: {
+    marginTop: theme.spacing(0.5),
   },
   scenarioLabel: {
     color: theme.palette.primary.contrastText,
@@ -175,7 +181,7 @@ export default function WeppSection() {
   return (
     <>
       <div className={classes.scenarioGroup}>
-        <FormControl fullWidth size="small" disabled={scenarioLoading}>
+        <FormControl fullWidth size="small" disabled={scenarioLoading} className={classes.scenarioFormControl}>
           <InputLabel
             id="scenario-select-label"
             className={classes.scenarioLabel}
@@ -199,6 +205,7 @@ export default function WeppSection() {
             label="Scenario"
             onChange={handleScenarioSelect}
             className={classes.scenarioSelect}
+            MenuProps={{ PaperProps: { className: classes.scenarioSelectPaper } }}
           >
             <MenuItem value="none">None</MenuItem>
             {availableScenarios.map((s) => (
