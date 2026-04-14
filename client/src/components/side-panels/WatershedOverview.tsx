@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type KeyboardEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useRunId } from "../../hooks/useRunId";
 import { useQuery } from "@tanstack/react-query";
@@ -377,8 +377,16 @@ export default function WatershedOverview() {
               <div
                 className={classes.reportDropdownHeader}
                 onClick={() => setRxfireOpen((prev) => !prev)}
+                onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setRxfireOpen((prev: boolean) => !prev);
+                  }
+                }}
                 role="button"
+                tabIndex={0}
                 aria-expanded={rxfireOpen}
+                aria-controls="rxfire-links"
               >
                 <Typography className={classes.reportDropdownLabel}>
                   Site Specific Prescribed Fire Scenarios
