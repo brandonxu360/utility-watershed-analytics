@@ -15,19 +15,13 @@ import { useLanduseData } from "../../hooks/useLanduseData";
 import { useLayerStyles } from "../../hooks/useLayerStyles";
 import { getLayerParams } from "../../layers/types";
 import { MapEffect } from "../../utils/map/MapEffectUtil";
-import type { PathOptions, LeafletMouseEvent } from "leaflet";
+import type { LeafletMouseEvent } from "leaflet";
 import MapLoadingOverlay from "./MapLoadingOverlay";
 import SubcatchmentLayer from "./SubcatchmentLayer";
 import SbsLayer from "./SbsLayer";
 import RhessysSpatialLayer from "./RhessysSpatialLayer";
 import RhessysOutputLayer from "./RhessysOutputLayer";
 import RhessysChoroplethLayer from "./RhessysChoroplethLayer";
-
-const CHANNEL_STYLE: PathOptions = {
-  color: "#000080",
-  fillOpacity: 1,
-  weight: 2,
-};
 
 export default function MapLayers() {
   const navigate = useNavigate();
@@ -83,20 +77,25 @@ export default function MapLayers() {
   ).filename;
   const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
 
-  const { watershedStyle, subcatchmentStyle, tooltipContent, sbsBounds } =
-    useLayerStyles({
-      runId,
-      watersheds,
-      choroplethActive,
-      getChoroplethStyle,
-      getChoroplethData,
-      choroplethBands,
-      choroplethYear,
-      getScenarioStyle,
-      getScenarioRow,
-      scenarioVariable,
-      landuseData,
-    });
+  const {
+    watershedStyle,
+    subcatchmentStyle,
+    tooltipContent,
+    channelStyle,
+    sbsBounds,
+  } = useLayerStyles({
+    runId,
+    watersheds,
+    choroplethActive,
+    getChoroplethStyle,
+    getChoroplethData,
+    choroplethBands,
+    choroplethYear,
+    getScenarioStyle,
+    getScenarioRow,
+    scenarioVariable,
+    landuseData,
+  });
 
   const isLoading = [
     watershedsLoading,
@@ -145,7 +144,7 @@ export default function MapLayers() {
             pointerEvents: "none",
           }}
         >
-          <GeoJSON data={channelData} style={CHANNEL_STYLE} />
+          <GeoJSON data={channelData} style={channelStyle} />
         </Pane>
       )}
 

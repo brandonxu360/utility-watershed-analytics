@@ -9,7 +9,7 @@ type RhessysSpatialResponse = { files: RhessysSpatialFile[] };
 export function useRhessysSpatialInputs(runId: string | null) {
   const enabled = !!runId;
 
-  const { data, isLoading } = useQuery<RhessysSpatialResponse>({
+  const { data, isLoading, isError } = useQuery<RhessysSpatialResponse>({
     queryKey: queryKeys.rhessysSpatialInputs.byRun(runId ?? ""),
     queryFn: ({ signal }) => fetchRhessysSpatialInputs(runId!, signal),
     enabled,
@@ -20,7 +20,7 @@ export function useRhessysSpatialInputs(runId: string | null) {
   useLayerQuery("rhessysSpatial", {
     enabled,
     isLoading,
-    hasData: files.length > 0,
+    hasData: !isError && files.length > 0,
     queryKey: queryKeys.rhessysSpatialInputs.byRun(runId ?? ""),
   });
 

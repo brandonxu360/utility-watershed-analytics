@@ -12,8 +12,6 @@ function fresh(): DesiredMap {
 }
 
 describe("rules – applyAction", () => {
-  // ─── TOGGLE ON ─────────────────────────────────────────────────────────
-
   describe("TOGGLE on", () => {
     it("enables a standalone layer (channels)", () => {
       const next = applyAction(fresh(), {
@@ -92,8 +90,6 @@ describe("rules – applyAction", () => {
     });
   });
 
-  // ─── TOGGLE OFF ────────────────────────────────────────────────────────
-
   describe("TOGGLE off", () => {
     it("disables a standalone layer", () => {
       let state = fresh();
@@ -133,13 +129,15 @@ describe("rules – applyAction", () => {
 
       // Disabling subcatchment should cascade: landuse requires subcatchment,
       // so landuse is disabled when its dependency is removed.
-      state = applyAction(state, { type: "TOGGLE", id: "subcatchment", on: false });
+      state = applyAction(state, {
+        type: "TOGGLE",
+        id: "subcatchment",
+        on: false,
+      });
       expect(state.subcatchment.enabled).toBe(false);
       expect(state.landuse.enabled).toBe(false);
     });
   });
-
-  // ─── SET_OPACITY ───────────────────────────────────────────────────────
 
   describe("SET_OPACITY", () => {
     it("updates opacity without changing enabled or params", () => {
@@ -155,8 +153,6 @@ describe("rules – applyAction", () => {
       expect(state.sbs.params).toEqual({ mode: "legacy" });
     });
   });
-
-  // ─── SET_PARAM ─────────────────────────────────────────────────────────
 
   describe("SET_PARAM", () => {
     it("sets a param without changing enabled or opacity", () => {
@@ -194,8 +190,6 @@ describe("rules – applyAction", () => {
     });
   });
 
-  // ─── RESET ─────────────────────────────────────────────────────────────
-
   describe("RESET", () => {
     it("restores all layers to initial state", () => {
       let state = fresh();
@@ -213,8 +207,6 @@ describe("rules – applyAction", () => {
     });
   });
 });
-
-// ─── enableWithParams ────────────────────────────────────────────────────────
 
 describe("rules – enableWithParams", () => {
   it("enables choropleth with metric param and auto-enables subcatchment", () => {

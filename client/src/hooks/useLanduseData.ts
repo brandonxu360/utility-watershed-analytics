@@ -17,7 +17,11 @@ export function useLanduseData(runId: string | null): UseLanduseDataResult {
   const enabled = Boolean(layerDesired.landuse.enabled && runId);
   const landuseEffective = isEffective("landuse");
 
-  const { data: landuseData = null, isLoading } = useQuery<LanduseMap>({
+  const {
+    data: landuseData = null,
+    isLoading,
+    isError,
+  } = useQuery<LanduseMap>({
     queryKey: queryKeys.landuse.undisturbed(runId ?? ""),
     queryFn: ({ signal }) => fetchLanduse({ runId: runId! }, signal),
     enabled,
@@ -26,7 +30,8 @@ export function useLanduseData(runId: string | null): UseLanduseDataResult {
   useLayerQuery("landuse", {
     enabled,
     isLoading,
-    hasData: landuseData != null && Object.keys(landuseData).length > 0,
+    hasData:
+      !isError && landuseData != null && Object.keys(landuseData).length > 0,
     queryKey: queryKeys.landuse.undisturbed(runId ?? ""),
   });
 

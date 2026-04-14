@@ -150,6 +150,12 @@ export function useChoropleth(): UseChoroplethResult {
     enabled: isEnabled,
     isLoading,
     hasData: !error && choroplethData != null && choroplethData.size > 0,
+    queryKey: queryKeys.rapChoropleth.byParams(
+      runId ?? "",
+      choroplethType,
+      choroplethYear,
+      effectiveBands,
+    ),
   });
 
   const { getColor, getStyle: getChoroplethStyle } = useColormapStyle(

@@ -35,6 +35,7 @@ export function useScenarioData(): UseScenarioDataResult {
   const scenarioVariable: ScenarioVariableType =
     params.variable ?? "sediment_yield";
   const scenarioEnabled = layerDesired.scenario.enabled;
+  const queryEnabled = !!runId && !!selectedScenario && scenarioEnabled;
 
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.scenarioData.byScenario(
@@ -43,7 +44,7 @@ export function useScenarioData(): UseScenarioDataResult {
     ),
     queryFn: ({ signal }) =>
       fetchScenarioData({ runId: runId!, scenario: selectedScenario! }, signal),
-    enabled: !!runId && !!selectedScenario && scenarioEnabled,
+    enabled: queryEnabled,
     retry: 1,
   });
 
@@ -68,7 +69,7 @@ export function useScenarioData(): UseScenarioDataResult {
   const variableConfig = SCENARIO_VARIABLE_CONFIG[scenarioVariable];
 
   useLayerQuery("scenario", {
-    enabled: scenarioEnabled,
+    enabled: queryEnabled,
     isLoading,
     hasData,
     queryKey: queryKeys.scenarioData.byScenario(
