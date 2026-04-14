@@ -48,7 +48,7 @@ export default function MapLayers() {
     isActive: choroplethActive,
     isLoading: choroplethLoading,
     getChoroplethStyle,
-    getChoroplethValue,
+    getChoroplethData,
     choroplethBands,
     choroplethYear,
   } = useChoropleth();
@@ -89,7 +89,7 @@ export default function MapLayers() {
       watersheds,
       choroplethActive,
       getChoroplethStyle,
-      getChoroplethValue,
+      getChoroplethData,
       choroplethBands,
       choroplethYear,
       getScenarioStyle,
@@ -140,7 +140,10 @@ export default function MapLayers() {
       {channelsEffective && channelData && (
         <Pane
           name="channelsPane"
-          style={{ zIndex: LAYER_REGISTRY.channels.zIndex, pointerEvents: "none" }}
+          style={{
+            zIndex: LAYER_REGISTRY.channels.zIndex,
+            pointerEvents: "none",
+          }}
         >
           <GeoJSON data={channelData} style={CHANNEL_STYLE} />
         </Pane>

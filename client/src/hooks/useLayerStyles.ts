@@ -28,7 +28,9 @@ interface UseLayerStylesInput {
   watersheds: WatershedCollection | undefined;
   choroplethActive: boolean;
   getChoroplethStyle: ChoroplethStyleFn;
-  getChoroplethValue: (weppid: number | undefined) => number | null;
+  getChoroplethData: (
+    weppid: number | undefined,
+  ) => { value: number; shrub?: number; tree?: number } | null;
   choroplethBands: VegetationBandType;
   choroplethYear: number | null;
   getScenarioStyle: (weppid: number | undefined) => PathOptions | null;
@@ -42,7 +44,7 @@ export function useLayerStyles({
   watersheds,
   choroplethActive,
   getChoroplethStyle,
-  getChoroplethValue,
+  getChoroplethData,
   choroplethBands,
   choroplethYear,
   getScenarioStyle,
@@ -122,13 +124,18 @@ export function useLayerStyles({
       let context: TooltipContext;
 
       if (choroplethActive && props.weppid !== undefined) {
-        const value = getChoroplethValue(props.weppid);
-        if (value !== null && choroplethYear !== null) {
+        const data = getChoroplethData(props.weppid);
+        if (data) {
+          const components =
+            data.shrub !== undefined && data.tree !== undefined
+              ? { shrub: data.shrub, tree: data.tree }
+              : undefined;
           context = {
             layer: "choropleth",
             bands: choroplethBands,
             year: choroplethYear,
-            value,
+            value: data.value,
+            components,
           };
           return buildHillslopeTooltip(props, context);
         }
@@ -156,7 +163,7 @@ export function useLayerStyles({
     },
     [
       choroplethActive,
-      getChoroplethValue,
+      getChoroplethData,
       choroplethBands,
       choroplethYear,
       getScenarioRow,

@@ -65,6 +65,8 @@ export type FetchRapChoroplethOptions = {
 export type RapChoroplethRow = {
   wepp_id: number;
   value: number;
+  shrub?: number;
+  tree?: number;
 };
 
 export type LanduseEntry = {

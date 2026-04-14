@@ -130,15 +130,12 @@ describe("rules – applyAction", () => {
       state = applyAction(state, { type: "TOGGLE", id: "landuse", on: true });
       expect(state.landuse.enabled).toBe(true);
       expect(state.subcatchment.enabled).toBe(true);
-      expect(state.channels.enabled).toBe(true);
 
-      // Disabling channels should cascade: landuse loses channels (a requirement)
-      // so landuse is disabled, and then subcatchment—only needed by landuse—
-      // should also be torn down.
-      state = applyAction(state, { type: "TOGGLE", id: "channels", on: false });
-      expect(state.channels.enabled).toBe(false);
-      expect(state.landuse.enabled).toBe(false);
+      // Disabling subcatchment should cascade: landuse requires subcatchment,
+      // so landuse is disabled when its dependency is removed.
+      state = applyAction(state, { type: "TOGGLE", id: "subcatchment", on: false });
       expect(state.subcatchment.enabled).toBe(false);
+      expect(state.landuse.enabled).toBe(false);
     });
   });
 

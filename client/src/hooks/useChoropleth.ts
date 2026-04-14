@@ -45,7 +45,9 @@ interface UseChoroplethResult {
   range: { min: number; max: number } | null;
   getColor: (id: number | undefined) => string | null;
   getChoroplethStyle: ChoroplethStyleFn;
-  getChoroplethValue: (id: number | undefined) => number | null;
+  getChoroplethData: (
+    id: number | undefined,
+  ) => { value: number; shrub?: number; tree?: number } | null;
   choroplethBands: VegetationBandType;
   choroplethYear: number | null;
   isActive: boolean;
@@ -98,35 +100,47 @@ export function useChoropleth(): UseChoroplethResult {
     enabled: isEnabled,
   });
 
-  const { choroplethData, range, dataError } = useMemo(() => {
-    if (!rawData) {
-      return { choroplethData: null, range: null, dataError: null };
-    }
-
-    const dataMap = new Map<number, number>();
-    const values: number[] = [];
-
-    for (const row of rawData) {
-      if (Number.isFinite(row.value)) {
-        dataMap.set(row.wepp_id, row.value);
-        values.push(row.value);
+  const { choroplethData, choroplethComponents, range, dataError } =
+    useMemo(() => {
+      if (!rawData) {
+        return {
+          choroplethData: null,
+          choroplethComponents: null,
+          range: null,
+          dataError: null,
+        };
       }
-    }
 
-    if (values.length === 0) {
+      const dataMap = new Map<number, number>();
+      const componentsMap = new Map<number, { shrub: number; tree: number }>();
+      const values: number[] = [];
+
+      for (const row of rawData) {
+        if (Number.isFinite(row.value)) {
+          dataMap.set(row.wepp_id, row.value);
+          values.push(row.value);
+        }
+        if (row.shrub !== undefined && row.tree !== undefined) {
+          componentsMap.set(row.wepp_id, { shrub: row.shrub, tree: row.tree });
+        }
+      }
+
+      if (values.length === 0) {
+        return {
+          choroplethData: null,
+          choroplethComponents: null,
+          range: null,
+          dataError: "No valid data available for the selected options",
+        };
+      }
+
       return {
-        choroplethData: null,
-        range: null,
-        dataError: "No valid data available for the selected options",
+        choroplethData: dataMap,
+        choroplethComponents: componentsMap.size > 0 ? componentsMap : null,
+        range: computeRobustRange(values, 0.02, 0.98),
+        dataError: null,
       };
-    }
-
-    return {
-      choroplethData: dataMap,
-      range: computeRobustRange(values, 0.02, 0.98),
-      dataError: null,
-    };
-  }, [rawData]);
+    }, [rawData]);
 
   const error = isError
     ? `Failed to load data: ${queryError instanceof Error ? queryError.message : String(queryError)}`
@@ -152,13 +166,18 @@ export function useChoropleth(): UseChoroplethResult {
     [choroplethType, getColor],
   );
 
-  const getChoroplethValue = useCallback(
-    (id: number | undefined): number | null => {
+  const getChoroplethData = useCallback(
+    (
+      id: number | undefined,
+    ): { value: number; shrub?: number; tree?: number } | null => {
       if (choroplethType === "none" || !choroplethData || id === undefined)
         return null;
-      return choroplethData.get(id) ?? null;
+      const value = choroplethData.get(id);
+      if (value === undefined) return null;
+      const comp = choroplethComponents?.get(id);
+      return comp ? { value, shrub: comp.shrub, tree: comp.tree } : { value };
     },
-    [choroplethType, choroplethData],
+    [choroplethType, choroplethData, choroplethComponents],
   );
 
   return {
@@ -170,7 +189,7 @@ export function useChoropleth(): UseChoroplethResult {
     config,
     getColor: getColorGuarded,
     getChoroplethStyle,
-    getChoroplethValue,
+    getChoroplethData,
     choroplethBands: choroplethBands as VegetationBandType,
     choroplethYear: (choroplethYear as number | null) ?? null,
   };

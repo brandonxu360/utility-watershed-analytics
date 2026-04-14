@@ -8,8 +8,9 @@ export type TooltipContext =
   | {
       layer: "choropleth";
       bands: VegetationBandType;
-      year: number;
+      year: number | null;
       value: number;
+      components?: { shrub: number; tree: number };
     }
   | { layer: "none" };
 
@@ -73,12 +74,24 @@ const BAND_LABELS: Record<VegetationBandType, string> = {
 
 function choroplethSection(
   bands: VegetationBandType,
-  year: number,
+  year: number | null,
   value: number,
+  components?: { shrub: number; tree: number },
 ): string[] {
+  const fmt = (n: number) =>
+    n.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  const yearLabel = year !== null ? `${year}` : "Avg. 1986–2023";
+
+  if (bands === "all" && components) {
+    return [
+      `<strong>Shrub Cover:</strong> ${fmt(components.shrub)}%`,
+      `<strong>Tree Cover:</strong> ${fmt(components.tree)}%`,
+      `<strong>Total Cover (${yearLabel}):</strong> ${fmt(value)}%`,
+    ];
+  }
+
   const label = BAND_LABELS[bands];
-  const pct = value.toLocaleString(undefined, { maximumFractionDigits: 1 });
-  return [`<strong>${label} (${year}):</strong> ${pct}%`];
+  return [`<strong>${label} (${yearLabel}):</strong> ${fmt(value)}%`];
 }
 
 /**
@@ -101,7 +114,12 @@ export function buildHillslopeTooltip(
       section = landuseSection(context.desc);
       break;
     case "choropleth":
-      section = choroplethSection(context.bands, context.year, context.value);
+      section = choroplethSection(
+        context.bands,
+        context.year,
+        context.value,
+        context.components,
+      );
       break;
     case "none":
       section = geometrySection(props);
