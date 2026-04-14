@@ -21,6 +21,7 @@ export interface UseScenarioDataResult {
   hasData: boolean;
   range: { min: number; max: number } | null;
   variableConfig: { label: string; colormap: string; unit: string };
+  scenarioVariable: ScenarioVariableType;
   getScenarioStyle: (weppid: number | undefined) => PathOptions | null;
   getScenarioRow: (weppid: number | undefined) => ScenarioDataRow | null;
 }
@@ -114,6 +115,7 @@ export function useScenarioData(): UseScenarioDataResult {
     hasData,
     range,
     variableConfig,
+    scenarioVariable,
     getScenarioStyle,
     getScenarioRow,
   };

@@ -45,6 +45,9 @@ interface UseChoroplethResult {
   range: { min: number; max: number } | null;
   getColor: (id: number | undefined) => string | null;
   getChoroplethStyle: ChoroplethStyleFn;
+  getChoroplethValue: (id: number | undefined) => number | null;
+  choroplethBands: VegetationBandType;
+  choroplethYear: number | null;
   isActive: boolean;
   config: (typeof CHOROPLETH_CONFIG)[keyof typeof CHOROPLETH_CONFIG] | null;
 }
@@ -149,6 +152,15 @@ export function useChoropleth(): UseChoroplethResult {
     [choroplethType, getColor],
   );
 
+  const getChoroplethValue = useCallback(
+    (id: number | undefined): number | null => {
+      if (choroplethType === "none" || !choroplethData || id === undefined)
+        return null;
+      return choroplethData.get(id) ?? null;
+    },
+    [choroplethType, choroplethData],
+  );
+
   return {
     choropleth: choroplethType,
     isLoading,
@@ -158,6 +170,9 @@ export function useChoropleth(): UseChoroplethResult {
     config,
     getColor: getColorGuarded,
     getChoroplethStyle,
+    getChoroplethValue,
+    choroplethBands: choroplethBands as VegetationBandType,
+    choroplethYear: (choroplethYear as number | null) ?? null,
   };
 }
 
