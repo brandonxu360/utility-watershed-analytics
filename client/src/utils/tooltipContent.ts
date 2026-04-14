@@ -82,18 +82,23 @@ function choroplethSection(
   const fmt = (n: number) =>
     n.toLocaleString(undefined, { maximumFractionDigits: 1 });
 
-  const yearLabel = year !== null ? `${year}` : `Avg. ${startYear}–${endYear}`;
+  const yearLabel =
+    year !== null ? `${year}` : `${startYear}&ndash;${endYear} Average`;
 
   if (bands === "all" && components) {
     return [
+      `<strong>${yearLabel}</strong>`,
       `<strong>Shrub Cover:</strong> ${fmt(components.shrub)}%`,
       `<strong>Tree Cover:</strong> ${fmt(components.tree)}%`,
-      `<strong>Total Cover (${yearLabel}):</strong> ${fmt(value)}%`,
+      `<strong>Total Cover:</strong> ${fmt(value)}%`,
     ];
   }
 
   const label = BAND_LABELS[bands];
-  return [`<strong>${label} (${yearLabel}):</strong> ${fmt(value)}%`];
+  return [
+    `<strong>${yearLabel}</strong>`,
+    `<strong>${label}:</strong> ${fmt(value)}%`,
+  ];
 }
 
 /**

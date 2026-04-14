@@ -133,7 +133,8 @@ describe("buildHillslopeTooltip", () => {
         year: 2010,
         value: 42.567,
       });
-      expect(html).toContain("Shrub Cover (2010):");
+      expect(html).toContain("2010");
+      expect(html).toContain("Shrub Cover:");
       expect(html).toContain("42.6%");
     });
 
@@ -144,7 +145,8 @@ describe("buildHillslopeTooltip", () => {
         year: 2020,
         value: 15,
       });
-      expect(html).toContain("Tree Cover (2020):");
+      expect(html).toContain("2020");
+      expect(html).toContain("Tree Cover:");
     });
 
     it("uses correct label for all band", () => {
@@ -154,7 +156,8 @@ describe("buildHillslopeTooltip", () => {
         year: 1999,
         value: 60,
       });
-      expect(html).toContain("Total Cover (1999):");
+      expect(html).toContain("1999");
+      expect(html).toContain("Total Cover:");
     });
 
     it("hides geometry fields", () => {
