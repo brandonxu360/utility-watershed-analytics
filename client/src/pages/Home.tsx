@@ -105,7 +105,7 @@ export default function Home(): JSX.Element {
                   isScrolled && classes.scrollHintVisible,
                 )}
               >
-                Press Back to close this panel
+                Press Back to return to the map
               </span>
             </div>
           )}
