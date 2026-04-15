@@ -129,6 +129,7 @@ export default function MapLayers() {
 
       {subcatchmentEffective && subcatchments?.features?.length && (
         <SubcatchmentLayer
+          key={runId}
           data={subcatchments}
           style={subcatchmentStyle}
           coverageActive={choroplethActive || scenarioEffective}
@@ -144,7 +145,7 @@ export default function MapLayers() {
             pointerEvents: "none",
           }}
         >
-          <GeoJSON data={channelData} style={channelStyle} />
+          <GeoJSON key={runId} data={channelData} style={channelStyle} />
         </Pane>
       )}
 
