@@ -318,7 +318,7 @@ export default function WatershedOverview() {
 
         <Paper elevation={0} className={classes.impactPaper}>
           <Typography variant="body1" className={classes.sectionHeading}>
-            Short Term Impact
+            Stream flow and erosion
           </Typography>
           <Link
             href={runId ? API_ENDPOINTS.WEPP_DASHBOARD(runId) : undefined}
@@ -346,7 +346,7 @@ export default function WatershedOverview() {
         {hasNoLongTermData ? null : (
           <Paper elevation={0} className={classes.impactPaper}>
             <Typography variant="body1" className={classes.sectionHeading}>
-              Long Term Impact
+              Water quality and vegetation growth
             </Typography>
             <RhessysSection />
             <RhessysOutputsSection />

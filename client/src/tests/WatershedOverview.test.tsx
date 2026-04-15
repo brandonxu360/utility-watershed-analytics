@@ -180,7 +180,7 @@ describe("WatershedOverview", () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
-        expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
+        expect(screen.getByText("Stream flow and erosion")).toBeInTheDocument();
         expect(screen.getByText("Watershed Data")).toBeInTheDocument();
       });
     });
