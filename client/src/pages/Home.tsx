@@ -1,5 +1,7 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import { useRunId } from "../hooks/useRunId";
+import { useRef, useState, useEffect } from "react";
 import { tss } from "../utils/tss";
 import { WatershedProvider, useWatershed } from "../contexts/WatershedContext";
 import { VegetationCover } from "../components/bottom-panels/VegetationCover";
@@ -11,6 +13,7 @@ import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
 import BottomPanel from "../components/bottom-panels/BottomPanel";
 import WatershedMap from "../components/map/WatershedMap";
+import BackButton from "../components/BackButton";
 import Paper from "@mui/material/Paper";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -28,6 +31,23 @@ const useStyles = tss.create(({ theme }) => ({
     minHeight: 0,
     background: theme.palette.primary.dark,
     color: theme.palette.primary.contrastText,
+  },
+  backButtonBar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: `0 ${theme.spacing(4)}`,
+    background: theme.palette.surface.overlay,
+  },
+  scrollHint: {
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.text.primary,
+    fontStyle: "italic",
+    opacity: 0,
+    transition: "opacity 0.25s ease",
+  },
+  scrollHintVisible: {
+    opacity: 1,
   },
   sidePanelContent: {
     flex: 1,
@@ -49,9 +69,19 @@ const useStyles = tss.create(({ theme }) => ({
 }));
 
 export default function Home(): JSX.Element {
-  const { classes } = useStyles();
-
+  const { classes, cx } = useStyles();
+  const navigate = useNavigate();
   const runId = useRunId();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setIsScrolled(el.scrollTop > 0);
+    el.addEventListener("scroll", onScroll);
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
 
   const isSmallScreen = useIsSmallScreen();
 
@@ -63,7 +93,23 @@ export default function Home(): JSX.Element {
     <WatershedProvider runId={runId}>
       <div className={classes.root}>
         <Paper elevation={3} className={classes.sidePanel} square>
-          <div className={classes.sidePanelContent}>
+          {runId && (
+            <div className={classes.backButtonBar}>
+              <BackButton
+                onClick={() => navigate({ to: "/" })}
+                label="Close watershed overview panel"
+              />
+              <span
+                className={cx(
+                  classes.scrollHint,
+                  isScrolled && classes.scrollHintVisible,
+                )}
+              >
+                Press Back to close this panel
+              </span>
+            </div>
+          )}
+          <div ref={scrollRef} className={classes.sidePanelContent}>
             {runId ? <WatershedOverview /> : <HomeSidePanelContent />}
           </div>
         </Paper>

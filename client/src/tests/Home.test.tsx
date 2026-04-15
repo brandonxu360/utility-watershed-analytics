@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import Home from "../pages/Home";
 
@@ -145,6 +145,42 @@ describe("Home Component Tests", () => {
       render(<Home />);
       const notice = await screen.findByText(/Best viewed on larger screens/i);
       expect(notice).toBeInTheDocument();
+    });
+  });
+
+  describe("back button", () => {
+    beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).innerWidth = 1280;
+    });
+    it("renders the back button when a watershed is selected", () => {
+      mockUseParams.mockReturnValue("test-watershed-123");
+      render(<Home />);
+      const backButton = screen.getByRole("button", {
+        name: /close watershed overview panel/i,
+      });
+      expect(backButton).toBeInTheDocument();
+      expect(backButton).toHaveTextContent("BACK");
+    });
+
+    it("does not render the back button on the home view", () => {
+      mockUseParams.mockReturnValue(null);
+      render(<Home />);
+      expect(
+        screen.queryByRole("button", {
+          name: /close watershed overview panel/i,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("navigates to home when back button is clicked", () => {
+      mockUseParams.mockReturnValue("test-watershed-123");
+      render(<Home />);
+      const backButton = screen.getByRole("button", {
+        name: /close watershed overview panel/i,
+      });
+      fireEvent.click(backButton);
+      expect(mockNavigate).toHaveBeenCalledWith({ to: "/" });
     });
   });
 });

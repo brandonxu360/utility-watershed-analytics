@@ -21,7 +21,6 @@ import WatershedDataSection from "./sections/WatershedDataSection";
 import RhessysSection from "./sections/RhessysSection";
 import RhessysOutputsSection from "./sections/RhessysOutputsSection";
 import { useRhessysOutputsData } from "../../hooks/useRhessysOutputsData";
-import BackButton from "../BackButton";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
@@ -84,6 +83,33 @@ const useStyles = tss.create(({ theme }) => ({
     flexDirection: "column",
     gap: theme.spacing(1.5),
     marginTop: theme.spacing(4),
+  },
+  stickyBar: {
+    position: "sticky",
+    top: 0,
+    zIndex: 10,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    background: theme.palette.surface.overlaySolid,
+    paddingBottom: theme.spacing(0.5),
+    marginLeft: "-30px",
+    marginRight: "-30px",
+    paddingLeft: "30px",
+    paddingRight: "30px",
+  },
+  scrollHint: {
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.text.primary,
+    fontStyle: "italic",
+    opacity: 0,
+    transition: "opacity 0.25s ease",
+  },
+  scrollHintVisible: {
+    opacity: 1,
+  },
+  backButton: {
+    margin: 0,
   },
   titleHeader: {
     display: "flex",
@@ -251,10 +277,6 @@ export default function WatershedOverview() {
 
   return (
     <div className={classes.root}>
-      <BackButton
-        onClick={() => navigate({ to: "/" })}
-        label="Close watershed overview panel"
-      />
       <div className={classes.contentBox}>
         <div className={classes.titleHeader}>
           <div>

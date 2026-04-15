@@ -14,6 +14,7 @@ declare module "@mui/material/styles" {
       light: string;
       dark: string;
       overlay: string;
+      overlaySolid: string;
       border: string;
       accordion: string;
       content: string;
@@ -29,6 +30,7 @@ declare module "@mui/material/styles" {
       light: string;
       dark: string;
       overlay: string;
+      overlaySolid: string;
       border: string;
       accordion: string;
       content: string;
@@ -126,6 +128,7 @@ const darkPalette = {
     light: "#F5F5F5",
     dark: "#121212",
     overlay: "rgba(0, 0, 0, 0.8)",
+    overlaySolid: "#070707",
     border: "#000000",
     accordion: "#333333",
     content: "#242424",
@@ -168,6 +171,7 @@ const lightPalette = {
     light: "#FFFFFF",
     dark: "#E0E0E0",
     overlay: "rgba(255, 255, 255, 0.8)",
+    overlaySolid: "#FFFFFF",
     border: "#E0E0E0",
     accordion: "#E4E4E4",
     content: "#F1F1F1",

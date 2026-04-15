@@ -24,7 +24,7 @@ const useStyles = tss.create(({ theme }) => ({
     flex: 1,
     minHeight: 0,
     overflowY: "auto",
-    padding: "10px 30px 0",
+    padding: "0 30px 0",
     boxSizing: "border-box",
   },
   mainContent: {
