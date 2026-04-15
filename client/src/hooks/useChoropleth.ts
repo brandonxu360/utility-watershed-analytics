@@ -72,7 +72,7 @@ export function useChoropleth(): UseChoroplethResult {
   const effectiveBands = useMemo(() => {
     if (!config) return [];
     if (choroplethType === "vegetationCover") {
-      return VEGETATION_BANDS[choroplethBands as VegetationBandType];
+      return VEGETATION_BANDS[choroplethBands as VegetationBandType] ?? [];
     }
     return config.bands;
   }, [config, choroplethType, choroplethBands]);

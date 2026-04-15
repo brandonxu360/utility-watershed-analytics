@@ -123,7 +123,11 @@ export default function MapLayers() {
               ? selectedStyle
               : { opacity: 0, fillOpacity: 0 };
           }}
-          onEachFeature={(_, layer) => layer.on({ click: onWatershedClick })}
+          onEachFeature={(feature, layer) => {
+            if (!runId || feature?.id?.toString() === runId) {
+              layer.on({ click: onWatershedClick });
+            }
+          }}
         />
       )}
 

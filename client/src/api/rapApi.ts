@@ -226,12 +226,16 @@ export async function fetchRapChoropleth(
 
   // When multiple bands are requested, also return each band individually
   // so the tooltip can show the breakdown (e.g. shrub% + tree% separately).
+  // Only bands 5 (shrub) and 6 (tree) have known aliases; filter others out to
+  // avoid duplicate or incorrectly-labelled aggregation columns.
   const perBandAggregations =
     validBands.length > 1
-      ? validBands.map((b) => ({
-          alias: b === 5 ? "shrub" : "tree",
-          expression: `COALESCE(SUM(CASE WHEN rap.band = ${b} THEN rap.value * hillslopes.area ELSE 0 END) / NULLIF(SUM(CASE WHEN rap.band = ${b} THEN hillslopes.area ELSE 0 END), 0), 0)`,
-        }))
+      ? validBands
+          .filter((b) => b === 5 || b === 6)
+          .map((b) => ({
+            alias: b === 5 ? "shrub" : "tree",
+            expression: `COALESCE(SUM(CASE WHEN rap.band = ${b} THEN rap.value * hillslopes.area ELSE 0 END) / NULLIF(SUM(CASE WHEN rap.band = ${b} THEN hillslopes.area ELSE 0 END), 0), 0)`,
+          }))
       : [];
 
   const payload: QueryPayload = {
