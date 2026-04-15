@@ -1,16 +1,12 @@
 import L from "leaflet";
 import { useCallback, useMemo } from "react";
 import { useWatershed } from "../contexts/WatershedContext";
-import { selectedStyle, defaultStyle } from "../components/map/constants";
 import { buildHillslopeTooltip } from "../utils/tooltipContent";
 import type { TooltipContext } from "../utils/tooltipContent";
 import type { PathOptions } from "leaflet";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 
-import type {
-  WatershedProperties,
-  WatershedCollection,
-} from "../types/WatershedProperties";
+import type { WatershedCollection } from "../types/WatershedProperties";
 
 import type { LanduseMap } from "../api/types";
 import type { ScenarioDataRow, ScenarioVariableType } from "../layers/scenario";
@@ -55,26 +51,6 @@ export function useLayerStyles({
   const { isEffective } = useWatershed();
 
   const landuseEffective = isEffective("landuse");
-  const anyRasterActive =
-    isEffective("sbs") ||
-    isEffective("rhessysSpatial") ||
-    isEffective("rhessysOutputs");
-
-  const watershedStyle = useCallback(
-    (
-      feature:
-        | GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>
-        | undefined,
-    ): PathOptions => {
-      const base =
-        feature?.id?.toString() === runId ? selectedStyle : defaultStyle;
-      if (anyRasterActive) {
-        return { ...base, fillOpacity: 0 };
-      }
-      return base;
-    },
-    [runId, anyRasterActive],
-  );
 
   const subcatchmentStyle = useCallback(
     (
@@ -187,7 +163,6 @@ export function useLayerStyles({
   }, [runId, watersheds]);
 
   return {
-    watershedStyle,
     subcatchmentStyle,
     tooltipContent,
     channelStyle: CHANNEL_STYLE,

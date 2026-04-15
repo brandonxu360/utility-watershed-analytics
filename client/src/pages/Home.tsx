@@ -105,7 +105,7 @@ export default function Home(): JSX.Element {
                   isScrolled && classes.scrollHintVisible,
                 )}
               >
-                Press Back to return to the map
+                Press Back to view all watersheds
               </span>
             </div>
           )}
