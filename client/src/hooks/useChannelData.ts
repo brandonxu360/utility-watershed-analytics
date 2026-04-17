@@ -1,11 +1,3 @@
-/**
- * useChannelData — colocates channel fetching and runtime reporting.
- *
- * Responsibilities:
- *  1. `useQuery` for channel GeoJSON (gated on `layerDesired.channels.enabled`)
- *  2. Reports data-availability and loading to layer runtime via `useLayerQuery`
- */
-
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
 import { fetchChannels } from "../api/api";
@@ -13,35 +5,26 @@ import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
 
 export interface UseChannelDataResult {
-  /** Channel GeoJSON FeatureCollection (or undefined while loading). */
   channelData: GeoJSON.FeatureCollection | undefined;
-  /** Whether the query is currently in-flight. */
   channelLoading: boolean;
 }
 
 export function useChannelData(runId: string | null): UseChannelDataResult {
   const { layerDesired } = useWatershed();
+  const enabled = Boolean(layerDesired.channels.enabled && runId);
 
-  const channelsEnabled = layerDesired.channels.enabled;
-
-  // ── Fetch ─────────────────────────────────────────────────────────────
-  const {
-    data: channelData,
-    isLoading: channelLoading,
-    isError: channelError,
-  } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.channels.byRun(runId ?? ""),
     queryFn: ({ signal }) => fetchChannels(runId!, signal),
-    enabled: Boolean(channelsEnabled && runId),
+    enabled,
   });
 
-  // ── Report data availability & loading ────────────────────────────────
   useLayerQuery("channels", {
-    enabled: Boolean(channelsEnabled && runId),
-    isLoading: channelLoading,
-    hasData: !channelError && (channelData?.features?.length ?? 0) > 0,
+    enabled,
+    isLoading,
+    hasData: !error && (data?.features?.length ?? 0) > 0,
     queryKey: queryKeys.channels.all,
   });
 
-  return { channelData, channelLoading };
+  return { channelData: data ?? undefined, channelLoading: isLoading };
 }

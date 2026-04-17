@@ -1,21 +1,9 @@
-/**
- * Hook that fires toast notifications when layers become blocked.
- *
- * Replaces the scattered useEffect auto-disable toasts in WatershedMap.tsx.
- * Watches the effective state and shows a toast when a layer transitions
- * from "effectively enabled" to "blocked" — but only if the user desires it on.
- */
-
 import { useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { LAYER_REGISTRY } from "../layers/registry";
 import type { EffectiveMap, DesiredMap } from "../layers/types";
 import { ALL_LAYER_IDS } from "../layers/types";
 
-/**
- * Call this once in the map container. It tracks previous effective state
- * and fires toasts on transitions.
- */
 export function useLayerToasts(desired: DesiredMap, effective: EffectiveMap) {
   const prevEffective = useRef<EffectiveMap | null>(null);
   const prevDesired = useRef<DesiredMap | null>(null);

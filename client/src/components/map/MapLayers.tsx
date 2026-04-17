@@ -13,6 +13,7 @@ import { useSubcatchmentData } from "../../hooks/useSubcatchmentData";
 import { useChannelData } from "../../hooks/useChannelData";
 import { useLanduseData } from "../../hooks/useLanduseData";
 import { useLayerStyles } from "../../hooks/useLayerStyles";
+import { defaultStyle, selectedStyle } from "./constants";
 import { getLayerParams } from "../../layers/types";
 import { MapEffect } from "../../utils/map/MapEffectUtil";
 import type { LeafletMouseEvent } from "leaflet";
@@ -42,12 +43,16 @@ export default function MapLayers() {
     isActive: choroplethActive,
     isLoading: choroplethLoading,
     getChoroplethStyle,
+    getChoroplethData,
+    choroplethBands,
+    choroplethYear,
   } = useChoropleth();
 
   const {
     isLoading: scenarioLoading,
     getScenarioStyle,
     getScenarioRow,
+    scenarioVariable,
   } = useScenarioData();
 
   const {
@@ -73,21 +78,20 @@ export default function MapLayers() {
   ).filename;
   const rhessysOutputsParams = getLayerParams(layerDesired, "rhessysOutputs");
 
-  const {
-    watershedStyle,
-    subcatchmentStyle,
-    tooltipContent,
-    channelStyle,
-    sbsBounds,
-  } = useLayerStyles({
-    runId,
-    watersheds,
-    choroplethActive,
-    landuseData,
-    getChoroplethStyle,
-    getScenarioStyle,
-    getScenarioRow,
-  });
+  const { subcatchmentStyle, tooltipContent, channelStyle, sbsBounds } =
+    useLayerStyles({
+      runId,
+      watersheds,
+      choroplethActive,
+      getChoroplethStyle,
+      getChoroplethData,
+      choroplethBands,
+      choroplethYear,
+      getScenarioStyle,
+      getScenarioRow,
+      scenarioVariable,
+      landuseData,
+    });
 
   const isLoading = [
     watershedsLoading,
@@ -110,17 +114,26 @@ export default function MapLayers() {
 
       {watersheds && <MapEffect watershedId={runId} watersheds={watersheds} />}
 
-      {(!subcatchmentEffective || !subcatchments?.features?.length) &&
-        watersheds && (
-          <GeoJSON
-            data={watersheds}
-            style={watershedStyle}
-            onEachFeature={(_, layer) => layer.on({ click: onWatershedClick })}
-          />
-        )}
+      {watersheds && (
+        <GeoJSON
+          data={watersheds}
+          style={(feature) => {
+            if (!runId) return defaultStyle;
+            return feature?.id?.toString() === runId
+              ? selectedStyle
+              : { opacity: 0, fillOpacity: 0 };
+          }}
+          onEachFeature={(feature, layer) => {
+            if (!runId || feature?.id?.toString() === runId) {
+              layer.on({ click: onWatershedClick });
+            }
+          }}
+        />
+      )}
 
       {subcatchmentEffective && subcatchments?.features?.length && (
         <SubcatchmentLayer
+          key={runId}
           data={subcatchments}
           style={subcatchmentStyle}
           coverageActive={choroplethActive || scenarioEffective}
@@ -131,9 +144,12 @@ export default function MapLayers() {
       {channelsEffective && channelData && (
         <Pane
           name="channelsPane"
-          style={{ zIndex: LAYER_REGISTRY.channels.zIndex }}
+          style={{
+            zIndex: LAYER_REGISTRY.channels.zIndex,
+            pointerEvents: "none",
+          }}
         >
-          <GeoJSON data={channelData} style={channelStyle} />
+          <GeoJSON key={runId} data={channelData} style={channelStyle} />
         </Pane>
       )}
 

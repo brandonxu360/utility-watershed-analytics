@@ -1,15 +1,3 @@
-/**
- * useRhessysOutputsData — pure data hook for the RHESSys output catalog.
- *
- * Returns the query result without any layer-system side-effects.
- * Use this when you need the catalog data (scenarios, variables, value ranges)
- * without triggering `useLayerQuery` reporting — e.g. inside
- * `useChoroplethLegend` which resolves legend props from multiple layer hooks.
- *
- * For the full hook that also reports into the layer runtime, use
- * `useRhessysOutputs` instead.
- */
-
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
 

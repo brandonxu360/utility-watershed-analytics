@@ -26,7 +26,6 @@ import WatershedDataSection from "./sections/WatershedDataSection";
 import RhessysSection from "./sections/RhessysSection";
 import RhessysOutputsSection from "./sections/RhessysOutputsSection";
 import { useRhessysOutputsData } from "../../hooks/useRhessysOutputsData";
-import BackButton from "../BackButton";
 
 const useStyles = tss.create(({ theme }) => ({
   root: {
@@ -321,10 +320,6 @@ export default function WatershedOverview() {
 
   return (
     <div className={classes.root}>
-      <BackButton
-        onClick={() => navigate({ to: "/" })}
-        label="Close watershed overview panel"
-      />
       <div className={classes.contentBox}>
         <div className={classes.titleHeader}>
           <div>
@@ -393,7 +388,7 @@ export default function WatershedOverview() {
 
         <Paper elevation={0} className={classes.impactPaper}>
           <Typography variant="body1" className={classes.sectionHeading}>
-            Short Term Impact
+            Stream flow and erosion
           </Typography>
 
           <div
@@ -493,7 +488,7 @@ export default function WatershedOverview() {
         {hasNoLongTermData ? null : (
           <Paper elevation={0} className={classes.impactPaper}>
             <Typography variant="body1" className={classes.sectionHeading}>
-              Long Term Impact
+              Water quality and vegetation growth
             </Typography>
 
             <div

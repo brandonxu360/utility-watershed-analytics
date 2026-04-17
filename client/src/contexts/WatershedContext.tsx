@@ -1,23 +1,3 @@
-/**
- * WatershedContext — ALL watershed-scoped state in a single reducer.
- *
- * ### Automatic reset
- * - Navigate away from Home (e.g. /team) → provider unmounts → state GC'd.
- * - Switch watersheds (runId changes) → RESET dispatched → `INITIAL_STATE`.
- *
- * Adding a new piece of watershed-scoped state means:
- *  1. Add the field + default to `INITIAL_STATE`
- *  2. Add an action case to `watershedReducer`
- *  3. Expose a convenience setter in the context value
- *
- * The RESET action always returns `INITIAL_STATE`, so nothing extra is
- * needed — no manual "enumerate every field to clear" pattern.
- *
- * ### Declarative UI
- * Panel / legend components derive visibility from `isEffective`.
- * They render when their layer is active and vanish when it isn't.
- */
-
 import {
   createContext,
   useContext,
@@ -36,6 +16,8 @@ import type {
   LayerRuntime,
   EffectiveMap,
 } from "../layers/types";
+
+import { ALL_LAYER_IDS } from "../layers/types";
 
 import { INITIAL_DESIRED, INITIAL_RUNTIME, applyAction } from "../layers/rules";
 
@@ -87,6 +69,8 @@ function watershedReducer(
       return INITIAL_STATE;
 
     case "SET_DATA_AVAILABILITY":
+      if (state.layerRuntime.dataAvailability[action.id] === action.available)
+        return state;
       return {
         ...state,
         layerRuntime: {
@@ -99,6 +83,8 @@ function watershedReducer(
       };
 
     case "SET_LAYER_LOADING":
+      if (state.layerRuntime.loading[action.id] === action.loading)
+        return state;
       return {
         ...state,
         layerRuntime: {
@@ -141,6 +127,7 @@ export interface WatershedContextValue {
   setZoom: (zoom: number) => void;
   setSelectedHillslope: (id: number | null) => void;
   clearSelectedHillslope: () => void;
+  toggleLayer: (id: string, checked: boolean) => void;
 
   effective: EffectiveMap;
   activeIds: LayerId[];
@@ -206,6 +193,15 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
     [],
   );
 
+  const toggleLayer = useCallback((id: string, checked: boolean) => {
+    if (!ALL_LAYER_IDS.includes(id as LayerId)) return;
+    const layerId = id as LayerId;
+    dispatch({ type: "TOGGLE", id: layerId, on: checked });
+    if (layerId === "subcatchment" && !checked) {
+      dispatch({ type: "CLEAR_SELECTED_HILLSLOPE" });
+    }
+  }, []);
+
   const effective = useMemo(
     () => evaluate(state.layerDesired, state.layerRuntime),
     [state.layerDesired, state.layerRuntime],
@@ -239,6 +235,7 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
       setZoom,
       setSelectedHillslope,
       clearSelectedHillslope,
+      toggleLayer,
       effective,
       activeIds,
       isBlocked,
@@ -255,6 +252,7 @@ export function WatershedProvider({ runId, children }: WatershedProviderProps) {
       setZoom,
       setSelectedHillslope,
       clearSelectedHillslope,
+      toggleLayer,
       effective,
       activeIds,
       isBlocked,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import { WatershedProvider } from "../contexts/WatershedContext";
@@ -176,25 +176,11 @@ describe("WatershedOverview", () => {
       });
     });
 
-    it("renders back button", async () => {
-      renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() =>
-        expect(screen.getByText("Test Watershed")).toBeInTheDocument(),
-      );
-
-      const backButton = screen.getByRole("button", {
-        name: /close watershed overview panel/i,
-      });
-      expect(backButton).toBeInTheDocument();
-      expect(backButton).toHaveTextContent("BACK");
-    });
-
     it("renders watershed model accordion sections", async () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
-        expect(screen.getByText("Short Term Impact")).toBeInTheDocument();
+        expect(screen.getByText("Stream flow and erosion")).toBeInTheDocument();
         expect(screen.getByText("Watershed Data")).toBeInTheDocument();
       });
     });
@@ -217,28 +203,6 @@ describe("WatershedOverview", () => {
       await waitFor(() => {
         expect(screen.getByText("Impact Assessment")).toBeInTheDocument();
       });
-    });
-  });
-
-  describe("navigation", () => {
-    beforeEach(() => {
-      mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockResolvedValue(mockWatershedData);
-    });
-
-    it("navigates to home when back button is clicked", async () => {
-      renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() => {
-        expect(screen.getByText("Test Watershed")).toBeInTheDocument();
-      });
-
-      const backButton = screen.getByRole("button", {
-        name: /close watershed overview panel/i,
-      });
-      fireEvent.click(backButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith({ to: "/" });
     });
   });
 
@@ -288,32 +252,6 @@ describe("WatershedOverview", () => {
     beforeEach(() => {
       mockUseParams.mockReturnValue("test-watershed-123");
       mockFetchWatersheds.mockResolvedValue(mockWatershedData);
-    });
-
-    it("back button has proper aria-label", async () => {
-      renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() => {
-        const backButton = screen.getByRole("button", {
-          name: /close watershed overview panel/i,
-        });
-        expect(backButton).toHaveAttribute(
-          "aria-label",
-          "Close watershed overview panel",
-        );
-      });
-    });
-
-    it("back button is focusable and clickable", async () => {
-      renderWithProviders(<WatershedOverview />);
-
-      await waitFor(() => {
-        const backButton = screen.getByRole("button", {
-          name: /close watershed overview panel/i,
-        });
-        expect(backButton).not.toBeDisabled();
-        expect(backButton).toHaveAttribute("type", "button");
-      });
     });
 
     it("WEPP model links have proper aria-labels and open externally", async () => {

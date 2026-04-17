@@ -1,13 +1,3 @@
-/**
- * useRhessysChoropleth — thin wrapper around useRhessysChoroplethData
- * that adds the heavy derivations (dataMap, getStyle, styleKey) needed
- * for rendering the Gate Creek dynamic choropleth on the map.
- *
- * Components that only need isActive / range (e.g. useChoroplethLegend)
- * should import useRhessysChoroplethData directly to avoid the cost of
- * building the Map and style callback.
- */
-
 import { useMemo, useCallback } from "react";
 import { PathOptions } from "leaflet";
 import { useWatershed } from "../contexts/WatershedContext";

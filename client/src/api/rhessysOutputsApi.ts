@@ -1,6 +1,8 @@
+import { queryOptions, keepPreviousData } from "@tanstack/react-query";
 import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
 import { postQuery, toFiniteNumber } from "./queryUtils";
+import { queryKeys } from "./queryKeys";
 
 import { getVariableMeta, resolveParquetConfig } from "./rhessys/utils";
 
@@ -198,5 +200,49 @@ export async function fetchRhessysTimeSeries(opts: {
       result[v] = toFiniteNumber(row[v], 0);
     }
     return result as RhessysTimeSeriesRow;
+  });
+}
+
+type ChartPoint = { name: string; value: number };
+
+type RhessysTimeSeriesParams = {
+  runId: string | null;
+  scenario: string;
+  variable: string;
+  spatialScale: SpatialScale;
+};
+
+export function rhessysTimeSeriesOptions({
+  runId,
+  scenario,
+  variable,
+  spatialScale,
+}: RhessysTimeSeriesParams) {
+  const isYearly = spatialScale === "patch";
+
+  return queryOptions({
+    queryKey: queryKeys.rhessysTimeSeries.byParams(
+      runId ?? "",
+      scenario,
+      variable,
+      spatialScale,
+    ),
+    queryFn: ({ signal }) =>
+      fetchRhessysTimeSeries({
+        runId: runId!,
+        scenario,
+        variables: [variable],
+        spatialScale,
+        signal,
+      }),
+    enabled: !!runId,
+    placeholderData: keepPreviousData,
+    select: (rows: RhessysTimeSeriesRow[]): ChartPoint[] =>
+      rows.map((row) => ({
+        name: isYearly
+          ? String(row.year)
+          : `${row.year}-${String(row.month).padStart(2, "0")}`,
+        value: (row[variable] as number) ?? 0,
+      })),
   });
 }

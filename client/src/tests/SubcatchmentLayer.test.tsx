@@ -116,7 +116,7 @@ describe("SubcatchmentLayer", () => {
   });
 
   const defaultTooltip = (props: Partial<SubcatchmentProperties>) =>
-    buildHillslopeTooltip(props);
+    buildHillslopeTooltip(props, { layer: "none" });
 
   const data = {
     type: "FeatureCollection",

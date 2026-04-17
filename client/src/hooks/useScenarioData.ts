@@ -4,43 +4,38 @@ import { queryKeys } from "../api/queryKeys";
 import { PathOptions } from "leaflet";
 import { useRunId } from "./useRunId";
 import { useWatershed } from "../contexts/WatershedContext";
-import { useLayerQuery } from "./useLayerQuery";
 import { getLayerParams } from "../layers/types";
 import { fetchScenarioData } from "../api/scenarioApi";
+import { computeRobustRange } from "../utils/colormap";
+import { useLayerQuery } from "./useLayerQuery";
+import { useColormapStyle } from "./useColormapStyle";
 
 import {
   type ScenarioDataRow,
+  type ScenarioVariableType,
   SCENARIO_VARIABLE_CONFIG,
 } from "../layers/scenario";
-
-import {
-  computeRobustRange,
-  createColormap,
-  normalizeValue,
-  RGBAArray,
-} from "../utils/colormap";
 
 export interface UseScenarioDataResult {
   isLoading: boolean;
   hasData: boolean;
   range: { min: number; max: number } | null;
   variableConfig: { label: string; colormap: string; unit: string };
+  scenarioVariable: ScenarioVariableType;
   getScenarioStyle: (weppid: number | undefined) => PathOptions | null;
   getScenarioRow: (weppid: number | undefined) => ScenarioDataRow | null;
 }
 
-/**
- * Hook to fetch scenario WEPP loss data.
- */
 export function useScenarioData(): UseScenarioDataResult {
   const runId = useRunId();
-
   const { layerDesired, isEffective } = useWatershed();
   const params = getLayerParams(layerDesired, "scenario");
 
   const selectedScenario = params.scenario ?? null;
-  const scenarioVariable = params.variable ?? "sediment_yield";
+  const scenarioVariable: ScenarioVariableType =
+    params.variable ?? "sediment_yield";
   const scenarioEnabled = layerDesired.scenario.enabled;
+  const queryEnabled = !!runId && !!selectedScenario && scenarioEnabled;
 
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.scenarioData.byScenario(
@@ -49,7 +44,7 @@ export function useScenarioData(): UseScenarioDataResult {
     ),
     queryFn: ({ signal }) =>
       fetchScenarioData({ runId: runId!, scenario: selectedScenario! }, signal),
-    enabled: !!runId && !!selectedScenario && scenarioEnabled,
+    enabled: queryEnabled,
     retry: 1,
   });
 
@@ -63,16 +58,6 @@ export function useScenarioData(): UseScenarioDataResult {
 
   const hasData = dataByWeppId.size > 0;
 
-  useLayerQuery("scenario", {
-    enabled: scenarioEnabled,
-    isLoading,
-    hasData,
-    queryKey: queryKeys.scenarioData.byScenario(
-      runId ?? "",
-      selectedScenario ?? "",
-    ),
-  });
-
   const range = useMemo(() => {
     if (!hasData) return null;
     const values = Array.from(dataByWeppId.values()).map(
@@ -83,53 +68,39 @@ export function useScenarioData(): UseScenarioDataResult {
 
   const variableConfig = SCENARIO_VARIABLE_CONFIG[scenarioVariable];
 
+  useLayerQuery("scenario", {
+    enabled: queryEnabled,
+    isLoading,
+    hasData,
+    queryKey: queryKeys.scenarioData.byScenario(
+      runId ?? "",
+      selectedScenario ?? "",
+    ),
+  });
+
   const scenarioEffective = isEffective("scenario");
 
-  const scenarioColormap = useMemo<RGBAArray | null>(() => {
-    if (!scenarioEffective || !range) return null;
-    return createColormap({
-      colormap: variableConfig.colormap,
-      nshades: 256,
-      format: "rgba",
-    }) as RGBAArray;
-  }, [scenarioEffective, range, variableConfig.colormap]);
+  const numericMap = useMemo<Map<number, number> | null>(() => {
+    if (!scenarioEffective || !hasData) return null;
+    const m = new Map<number, number>();
+    for (const [id, row] of dataByWeppId) {
+      m.set(id, row[scenarioVariable]);
+    }
+    return m;
+  }, [scenarioEffective, hasData, dataByWeppId, scenarioVariable]);
+
+  const { getStyle } = useColormapStyle(
+    numericMap,
+    range,
+    variableConfig.colormap,
+  );
 
   const getScenarioStyle = useCallback(
     (weppid: number | undefined): PathOptions | null => {
-      if (
-        !scenarioEffective ||
-        !hasData ||
-        !scenarioColormap ||
-        !range ||
-        weppid === undefined
-      )
-        return null;
-
-      const row = dataByWeppId.get(weppid);
-      if (!row) return null;
-
-      const normalized = normalizeValue(
-        row[scenarioVariable],
-        range.min,
-        range.max,
-      );
-      const colorIndex = Math.round(normalized * (scenarioColormap.length - 1));
-      const [r, g, b] = scenarioColormap[colorIndex] || [128, 128, 128];
-      return {
-        color: "#2c2c2c",
-        weight: 0.75,
-        fillColor: `rgb(${r}, ${g}, ${b})`,
-        fillOpacity: 0.85,
-      };
+      if (!scenarioEffective || !hasData || weppid === undefined) return null;
+      return getStyle(weppid);
     },
-    [
-      scenarioEffective,
-      hasData,
-      scenarioColormap,
-      range,
-      dataByWeppId,
-      scenarioVariable,
-    ],
+    [scenarioEffective, hasData, getStyle],
   );
 
   const getScenarioRow = useCallback(
@@ -145,6 +116,7 @@ export function useScenarioData(): UseScenarioDataResult {
     hasData,
     range,
     variableConfig,
+    scenarioVariable,
     getScenarioStyle,
     getScenarioRow,
   };

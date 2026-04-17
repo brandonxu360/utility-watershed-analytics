@@ -18,6 +18,7 @@ vi.mock("../utils/download", () => ({
 
 vi.mock("@tanstack/react-query", () => ({
   useQuery: (opts: unknown) => mockUseQuery(opts),
+  queryOptions: (opts: unknown) => opts,
 }));
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {

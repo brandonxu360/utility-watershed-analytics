@@ -443,7 +443,7 @@ describe("Map Component", () => {
       expect(style).toMatchObject({ fillOpacity: 0 });
     });
 
-    it("applies default style to non-matching watershed", async () => {
+    it("hides non-matching watershed when one is selected", async () => {
       mockUseParams.mockReturnValue("watershed-1");
       renderWithProviders(<WatershedMap />);
 
@@ -453,7 +453,7 @@ describe("Map Component", () => {
 
       const feature = { id: "watershed-2" };
       const style = lastWatershedGeoJsonProps!.style(feature);
-      expect(style).toMatchObject({ fillOpacity: 0.25 });
+      expect(style).toMatchObject({ opacity: 0, fillOpacity: 0 });
     });
 
     it("navigates to watershed on click", async () => {

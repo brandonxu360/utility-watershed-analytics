@@ -224,6 +224,20 @@ export async function fetchRapChoropleth(
           .join(" + ")
       : "COALESCE(SUM(rap.value * hillslopes.area) / NULLIF(SUM(hillslopes.area), 0), 0)";
 
+  // When multiple bands are requested, also return each band individually
+  // so the tooltip can show the breakdown (e.g. shrub% + tree% separately).
+  // Only bands 5 (shrub) and 6 (tree) have known aliases; filter others out to
+  // avoid duplicate or incorrectly-labelled aggregation columns.
+  const perBandAggregations =
+    validBands.length > 1
+      ? validBands
+          .filter((b) => b === 5 || b === 6)
+          .map((b) => ({
+            alias: b === 5 ? "shrub" : "tree",
+            expression: `COALESCE(SUM(CASE WHEN rap.band = ${b} THEN rap.value * hillslopes.area ELSE 0 END) / NULLIF(SUM(CASE WHEN rap.band = ${b} THEN hillslopes.area ELSE 0 END), 0), 0)`,
+          }))
+      : [];
+
   const payload: QueryPayload = {
     datasets: [
       { path: "rap/rap_ts.parquet", alias: "rap" },
@@ -233,10 +247,8 @@ export async function fetchRapChoropleth(
     columns: ["hillslopes.wepp_id AS wepp_id"],
     filters,
     aggregations: [
-      {
-        alias: "value",
-        expression: aggregationExpr,
-      },
+      { alias: "value", expression: aggregationExpr },
+      ...perBandAggregations,
     ],
     group_by: ["hillslopes.wepp_id"],
     order_by: ["hillslopes.wepp_id"],
@@ -248,10 +260,13 @@ export async function fetchRapChoropleth(
   return rawRows
     .map((r) => {
       const row = r as Record<string, unknown>;
-      return {
+      const mapped: RapChoroplethRow = {
         wepp_id: toFiniteNumber(row.wepp_id),
         value: toFiniteNumber(row.value ?? row.val),
       };
+      if (row.shrub !== undefined) mapped.shrub = toFiniteNumber(row.shrub);
+      if (row.tree !== undefined) mapped.tree = toFiniteNumber(row.tree);
+      return mapped;
     })
     .filter((r) => Number.isFinite(r.wepp_id));
 }

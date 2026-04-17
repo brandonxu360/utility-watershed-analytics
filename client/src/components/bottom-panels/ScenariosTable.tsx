@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRunId } from "../../hooks/useRunId";
-
-import { type ScenarioSummaryRow } from "../../api/scenarioApi";
-import { useScenariosSummary } from "../../hooks/useScenariosSummary";
-
+import {
+  type ScenarioSummaryRow,
+  scenariosSummaryOptions,
+} from "../../api/scenarioApi";
 import { tss } from "../../utils/tss";
 import { copyCsv, downloadCsv } from "../../utils/download";
 import IconButton from "@mui/material/IconButton";
@@ -124,7 +125,9 @@ export function ScenariosTable() {
     .replace(/\s+/g, "_");
   const [copied, setCopied] = useState(false);
 
-  const { data, isLoading, isError, error } = useScenariosSummary(runId);
+  const { data, isLoading, isError, error } = useQuery(
+    scenariosSummaryOptions(runId),
+  );
 
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

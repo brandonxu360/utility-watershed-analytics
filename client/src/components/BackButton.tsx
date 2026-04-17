@@ -19,13 +19,22 @@ const useStyles = tss.create(({ theme }) => ({
 interface BackButtonProps {
   onClick: () => void;
   label: string;
+  className?: string;
 }
 
-export default function BackButton({ onClick, label }: BackButtonProps) {
-  const { classes } = useStyles();
+export default function BackButton({
+  onClick,
+  label,
+  className,
+}: BackButtonProps) {
+  const { classes, cx } = useStyles();
 
   return (
-    <Button className={classes.root} onClick={onClick} aria-label={`${label}`}>
+    <Button
+      className={cx(classes.root, className)}
+      onClick={onClick}
+      aria-label={label}
+    >
       BACK
     </Button>
   );

@@ -1,19 +1,17 @@
 import L from "leaflet";
 import { useCallback, useMemo } from "react";
 import { useWatershed } from "../contexts/WatershedContext";
-import { selectedStyle, defaultStyle } from "../components/map/constants";
 import { buildHillslopeTooltip } from "../utils/tooltipContent";
+import type { TooltipContext } from "../utils/tooltipContent";
 import type { PathOptions } from "leaflet";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 
-import type {
-  WatershedProperties,
-  WatershedCollection,
-} from "../types/WatershedProperties";
+import type { WatershedCollection } from "../types/WatershedProperties";
 
 import type { LanduseMap } from "../api/types";
-import type { ScenarioDataRow } from "../layers/scenario";
+import type { ScenarioDataRow, ScenarioVariableType } from "../layers/scenario";
 import type { ChoroplethStyleFn } from "./useChoropleth";
+import type { VegetationBandType } from "../utils/constants";
 
 const CHANNEL_STYLE: PathOptions = {
   color: "#000080",
@@ -26,8 +24,14 @@ interface UseLayerStylesInput {
   watersheds: WatershedCollection | undefined;
   choroplethActive: boolean;
   getChoroplethStyle: ChoroplethStyleFn;
+  getChoroplethData: (
+    weppid: number | undefined,
+  ) => { value: number; shrub?: number; tree?: number } | null;
+  choroplethBands: VegetationBandType;
+  choroplethYear: number | null;
   getScenarioStyle: (weppid: number | undefined) => PathOptions | null;
   getScenarioRow: (weppid: number | undefined) => ScenarioDataRow | null;
+  scenarioVariable: ScenarioVariableType;
   landuseData: LanduseMap | undefined;
 }
 
@@ -36,33 +40,17 @@ export function useLayerStyles({
   watersheds,
   choroplethActive,
   getChoroplethStyle,
+  getChoroplethData,
+  choroplethBands,
+  choroplethYear,
   getScenarioStyle,
   getScenarioRow,
+  scenarioVariable,
   landuseData,
 }: UseLayerStylesInput) {
   const { isEffective } = useWatershed();
 
   const landuseEffective = isEffective("landuse");
-  const anyRasterActive =
-    isEffective("sbs") ||
-    isEffective("rhessysSpatial") ||
-    isEffective("rhessysOutputs");
-
-  const watershedStyle = useCallback(
-    (
-      feature:
-        | GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>
-        | undefined,
-    ): PathOptions => {
-      const base =
-        feature?.id?.toString() === runId ? selectedStyle : defaultStyle;
-      if (anyRasterActive) {
-        return { ...base, fillOpacity: 0 };
-      }
-      return base;
-    },
-    [runId, anyRasterActive],
-  );
 
   const subcatchmentStyle = useCallback(
     (
@@ -108,9 +96,57 @@ export function useLayerStyles({
   );
 
   const tooltipContent = useCallback(
-    (props: Partial<SubcatchmentProperties>) =>
-      buildHillslopeTooltip(props, getScenarioRow(props.weppid)),
-    [getScenarioRow],
+    (props: Partial<SubcatchmentProperties>) => {
+      let context: TooltipContext;
+
+      if (choroplethActive && props.weppid !== undefined) {
+        const data = getChoroplethData(props.weppid);
+        if (data) {
+          const components =
+            data.shrub !== undefined && data.tree !== undefined
+              ? { shrub: data.shrub, tree: data.tree }
+              : undefined;
+          context = {
+            layer: "choropleth",
+            bands: choroplethBands,
+            year: choroplethYear,
+            value: data.value,
+            components,
+          };
+          return buildHillslopeTooltip(props, context);
+        }
+      }
+
+      const scenarioRow = getScenarioRow(props.weppid);
+      if (scenarioRow) {
+        context = {
+          layer: "scenario",
+          variable: scenarioVariable,
+          row: scenarioRow,
+        };
+        return buildHillslopeTooltip(props, context);
+      }
+
+      if (landuseEffective && props.topazid !== undefined) {
+        const desc = landuseData?.[props.topazid]?.desc;
+        if (desc) {
+          context = { layer: "landuse", desc };
+          return buildHillslopeTooltip(props, context);
+        }
+      }
+
+      return buildHillslopeTooltip(props, { layer: "none" });
+    },
+    [
+      choroplethActive,
+      getChoroplethData,
+      choroplethBands,
+      choroplethYear,
+      getScenarioRow,
+      scenarioVariable,
+      landuseEffective,
+      landuseData,
+    ],
   );
 
   const sbsBounds = useMemo((): L.LatLngBoundsExpression | undefined => {
@@ -127,7 +163,6 @@ export function useLayerStyles({
   }, [runId, watersheds]);
 
   return {
-    watershedStyle,
     subcatchmentStyle,
     tooltipContent,
     channelStyle: CHANNEL_STYLE,

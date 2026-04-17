@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback } from "react";
 import Typography from "@mui/material/Typography";
+import { useQuery } from "@tanstack/react-query";
 import { useRunId } from "../../hooks/useRunId";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -8,8 +9,9 @@ import MenuItem from "@mui/material/MenuItem";
 import { tss } from "../../utils/tss";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { getLayerParams } from "../../layers/types";
-import { useRhessysTimeSeries } from "../../hooks/useRhessysTimeSeries";
+import { rhessysTimeSeriesOptions } from "../../api/rhessysOutputsApi";
 import { CoverageLineChart } from "../CoverageLineChart";
+
 import {
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_VARIABLES,
@@ -102,12 +104,14 @@ export const RhessysTimeSeries: React.FC = () => {
   const varMeta = availableVariables.find((v) => v.id === effectiveVariable);
   const isYearly = spatialScale === "patch";
 
-  const { data: chartData = [], isLoading } = useRhessysTimeSeries({
-    runId,
-    scenario: effectiveScenario,
-    variable: effectiveVariable,
-    spatialScale,
-  });
+  const { data: chartData = [], isLoading } = useQuery(
+    rhessysTimeSeriesOptions({
+      runId,
+      scenario: effectiveScenario,
+      variable: effectiveVariable,
+      spatialScale,
+    }),
+  );
 
   const handleVariableChange = useCallback(
     (e: SelectChangeEvent) => {
