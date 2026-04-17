@@ -1,10 +1,3 @@
-/**
- * Static domain constants for the Gate Creek RHESSys integration.
- *
- * Parquet paths, scenario/variable catalogs, and geometry metadata.
- * Helper functions live in `utils.ts` alongside this file.
- */
-
 import type { SpatialScale } from "../types";
 
 /**
@@ -14,10 +7,6 @@ import type { SpatialScale } from "../types";
 export const CHOROPLETH_RUN_IDS: ReadonlySet<string> = new Set([
   "aversive-forestry",
 ]);
-
-// ---------------------------------------------------------------------------
-// Parquet dataset paths
-// ---------------------------------------------------------------------------
 
 /** Hydrology parquets: hillslope.daily / patch.yearly per scenario. */
 export const PARQUET_PATHS: Record<string, Record<SpatialScale, string>> = {
@@ -73,10 +62,6 @@ export const GROW_BASIN_DAILY_PATHS: Record<string, string> = {
   S4b: "rhessys/scenarios/S4b/grow_basin.daily.parquet",
 };
 
-// ---------------------------------------------------------------------------
-// Spatial-ID columns
-// ---------------------------------------------------------------------------
-
 export const SPATIAL_ID_COLUMN: Record<SpatialScale, string> = {
   hillslope: "hillID",
   patch: "patchID",
@@ -88,10 +73,6 @@ export const GROW_SPATIAL_ID_COLUMN: Record<SpatialScale, string> = {
   patch: "patchID",
 };
 
-// ---------------------------------------------------------------------------
-// Variable source type \u2014 determines which parquet file to query
-// ---------------------------------------------------------------------------
-
 export type VariableSource = "base" | "grow";
 
 export type GateCreekVariable = {
@@ -100,10 +81,6 @@ export type GateCreekVariable = {
   units: string;
   source: VariableSource;
 };
-
-// ---------------------------------------------------------------------------
-// Gate Creek UI metadata
-// ---------------------------------------------------------------------------
 
 export const GATE_CREEK_YEAR_RANGE = { min: 1985, max: 2024 };
 

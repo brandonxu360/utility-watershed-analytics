@@ -173,7 +173,11 @@ docker compose down
 docker compose down -v
 
 # Or remove only the watershed data volume (project-specific name shown by `docker volume ls`)
-docker volume rm watershed_data
+docker volume rm <watershed_data_volume_name>
+
+# Start services
+
+docker compose up -d
 
 # Force reload data into database (clears DB first, then reloads)
 docker compose exec server python manage.py load_watershed_data --force

@@ -256,9 +256,6 @@ export default function WatershedOverview() {
   const runId = useRunId();
   const [rxfireOpen, setRxfireOpen] = useState(false);
 
-  // Lightweight data checks for the Long Term Impact visibility guard.
-  // The sections themselves call the full hooks with useLayerQuery side-effects.
-  // React Query deduplicates the underlying fetches.
   const { data: spatialData, isLoading: rhessysLoading } = useQuery({
     queryKey: queryKeys.rhessysSpatialInputs.byRun(runId ?? ""),
     queryFn: ({ signal }) => fetchRhessysSpatialInputs(runId!, signal),
