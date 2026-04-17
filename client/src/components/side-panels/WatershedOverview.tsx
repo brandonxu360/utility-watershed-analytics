@@ -60,8 +60,7 @@ const useStyles = tss.create(({ theme }) => ({
     padding: theme.spacing(1.25),
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${alpha(theme.palette.primary.contrastText, 0.2)}`,
-    background:
-      `linear-gradient(180deg, ${alpha(theme.palette.primary.contrastText, 0.1)} 0%, ${alpha(theme.palette.primary.contrastText, 0.04)} 100%)`,
+    background: `linear-gradient(180deg, ${alpha(theme.palette.primary.contrastText, 0.1)} 0%, ${alpha(theme.palette.primary.contrastText, 0.04)} 100%)`,
   },
   sectionSubgroupControls: {
     marginBottom: theme.spacing(1.5),
@@ -256,9 +255,6 @@ export default function WatershedOverview() {
   const runId = useRunId();
   const [rxfireOpen, setRxfireOpen] = useState(false);
 
-  // Lightweight data checks for the Long Term Impact visibility guard.
-  // The sections themselves call the full hooks with useLayerQuery side-effects.
-  // React Query deduplicates the underlying fetches.
   const { data: spatialData, isLoading: rhessysLoading } = useQuery({
     queryKey: queryKeys.rhessysSpatialInputs.byRun(runId ?? ""),
     queryFn: ({ signal }) => fetchRhessysSpatialInputs(runId!, signal),
@@ -450,7 +446,10 @@ export default function WatershedOverview() {
                   )}
                 </button>
                 <Collapse in={rxfireOpen}>
-                  <div id="rxfire-links" className={classes.reportDropdownLinks}>
+                  <div
+                    id="rxfire-links"
+                    className={classes.reportDropdownLinks}
+                  >
                     <Link
                       href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Manager_Defined.html"
                       target="_blank"
@@ -499,19 +498,6 @@ export default function WatershedOverview() {
               </Typography>
               <RhessysSection />
               <RhessysOutputsSection />
-            </div>
-
-            <Divider className={classes.sectionDivider} />
-
-            <div
-              className={`${classes.sectionSubgroup} ${classes.sectionSubgroupLinks}`}
-            >
-              <Typography className={classes.sectionSubheading}>
-                Links and Reports
-              </Typography>
-              <Typography className={classes.linksHint}>
-                No external reports are currently available for this section.
-              </Typography>
             </div>
           </Paper>
         )}
