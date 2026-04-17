@@ -181,7 +181,12 @@ export default function WeppSection() {
   return (
     <>
       <div className={classes.scenarioGroup}>
-        <FormControl fullWidth size="small" disabled={scenarioLoading} className={classes.scenarioFormControl}>
+        <FormControl
+          fullWidth
+          size="small"
+          disabled={scenarioLoading}
+          className={classes.scenarioFormControl}
+        >
           <InputLabel
             id="scenario-select-label"
             className={classes.scenarioLabel}
@@ -205,7 +210,9 @@ export default function WeppSection() {
             label="Scenario"
             onChange={handleScenarioSelect}
             className={classes.scenarioSelect}
-            MenuProps={{ PaperProps: { className: classes.scenarioSelectPaper } }}
+            MenuProps={{
+              PaperProps: { className: classes.scenarioSelectPaper },
+            }}
           >
             <MenuItem value="none">None</MenuItem>
             {availableScenarios.map((s) => (

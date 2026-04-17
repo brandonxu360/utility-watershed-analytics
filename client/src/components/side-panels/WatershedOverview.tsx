@@ -60,8 +60,7 @@ const useStyles = tss.create(({ theme }) => ({
     padding: theme.spacing(1.25),
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${alpha(theme.palette.primary.contrastText, 0.2)}`,
-    background:
-      `linear-gradient(180deg, ${alpha(theme.palette.primary.contrastText, 0.1)} 0%, ${alpha(theme.palette.primary.contrastText, 0.04)} 100%)`,
+    background: `linear-gradient(180deg, ${alpha(theme.palette.primary.contrastText, 0.1)} 0%, ${alpha(theme.palette.primary.contrastText, 0.04)} 100%)`,
   },
   sectionSubgroupControls: {
     marginBottom: theme.spacing(1.5),
@@ -447,7 +446,10 @@ export default function WatershedOverview() {
                   )}
                 </button>
                 <Collapse in={rxfireOpen}>
-                  <div id="rxfire-links" className={classes.reportDropdownLinks}>
+                  <div
+                    id="rxfire-links"
+                    className={classes.reportDropdownLinks}
+                  >
                     <Link
                       href="https://wepp-in-the-woods.github.io/millcreek-rxfire-reports/MillCreek_RxFire_Report_Manager_Defined.html"
                       target="_blank"
