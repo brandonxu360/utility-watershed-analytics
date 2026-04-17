@@ -497,19 +497,6 @@ export default function WatershedOverview() {
               <RhessysSection />
               <RhessysOutputsSection />
             </div>
-
-            <Divider className={classes.sectionDivider} />
-
-            <div
-              className={`${classes.sectionSubgroup} ${classes.sectionSubgroupLinks}`}
-            >
-              <Typography className={classes.sectionSubheading}>
-                Links and Reports
-              </Typography>
-              <Typography className={classes.linksHint}>
-                No external reports are currently available for this section.
-              </Typography>
-            </div>
           </Paper>
         )}
 
