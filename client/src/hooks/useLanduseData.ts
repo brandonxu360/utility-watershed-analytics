@@ -18,7 +18,7 @@ export function useLanduseData(runId: string | null): UseLanduseDataResult {
   const landuseEffective = isEffective("landuse");
 
   const {
-    data: landuseData = null,
+    data: landuseData,
     isLoading,
     isError,
   } = useQuery<LanduseMap>({
