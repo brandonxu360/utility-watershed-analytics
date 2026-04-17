@@ -11,6 +11,7 @@ import JennyAdam from "../assets/images/jenny_adam.png";
 import KevinBladon from "../assets/images/kevin_bladon.png";
 import RyanCole from "../assets/images/ryan_cole.png";
 import PeteRobichaud from "../assets/images/pete_robichaud.png";
+import AbdisaKebebew from "../assets/images/abdisa_kebebew.jpg";
 
 export interface TeamMember {
   name: string;
@@ -45,6 +46,12 @@ export const groupedMembers: UniversityGroup[] = [
         img: JennyAdam,
         role: "Professor, Civil & Environmental Engineering",
         web: "https://ce.wsu.edu/faculty/adam/",
+      },
+      {
+        name: "Abdisa Kebebew",
+        img: AbdisaKebebew,
+        role: "Graduate Research Assistant",
+        web: "https://scholar.google.com/citations?hl=en&user=0xbYpO4AAAAJ"
       },
     ],
   },
