@@ -18,6 +18,7 @@ import Tooltip from "@mui/material/Tooltip";
 import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import PanelStatus from "../PanelStatus";
 import Collapse from "@mui/material/Collapse";
 import Divider from "@mui/material/Divider";
 import { alpha } from "@mui/material/styles";
@@ -306,8 +307,12 @@ export default function WatershedOverview() {
   }, [watershed?.properties?.huc10_pws_names, watershed?.properties?.pws_name]);
 
   if (isLoading) return <SkeletonWatershedPanel />;
-  if (error) return <div>Error: {(error as Error).message}</div>;
-  if (!watersheds?.features) return <div>No watershed data found.</div>;
+  if (error)
+    return (
+      <PanelStatus status="error" message={error ? error.message : undefined} />
+    );
+  if (!watersheds?.features)
+    return <PanelStatus status="empty" message="No watershed data found." />;
 
   if (!watershed) {
     toast.error("Watershed not found.");
