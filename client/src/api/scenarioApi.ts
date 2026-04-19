@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { postQuery, toFiniteNumber } from "./queryUtils";
 import { queryKeys } from "./queryKeys";
+import { isApiError } from "./errors";
 import type { QueryPayload } from "./types/query";
 import { AVAILABLE_SCENARIOS, formatScenarioLabel } from "./types/scenario";
 import type { ScenarioType, ScenarioDataRow } from "./types/scenario";
@@ -170,6 +171,13 @@ export async function fetchScenariosSummary(
   );
 
   if (fulfilledResults.length === 0 && rejectedResults.length > 0) {
+    // If every failure is a 404, this watershed simply has no WEPP scenario
+    // data — treat it as empty rather than an error.
+    const allNotFound = rejectedResults.every(
+      (r) => isApiError(r.reason) && r.reason.status === 404,
+    );
+    if (allNotFound) return [];
+
     const reasons = rejectedResults
       .map((r) => r.reason)
       .filter((reason) => reason != null)
