@@ -20,7 +20,6 @@ export const ALL_LAYER_IDS = [
   "landuse",
   "choropleth",
   "sbs",
-  "fireSeverity",
   "scenario",
   "rhessysSpatial",
   "rhessysOutputs",
@@ -101,7 +100,6 @@ export type LayerParamsMap = {
   landuse: EmptyParams;
   choropleth: ChoroplethParams;
   sbs: SbsParams;
-  fireSeverity: EmptyParams;
   scenario: ScenarioParams;
   rhessysSpatial: RhessysSpatialParams;
   rhessysOutputs: RhessysOutputParams;
@@ -178,3 +176,8 @@ export type LayerAction =
   | { type: "SET_PARAM"; id: LayerId; key: string; value: unknown }
   | { type: "ENABLE_WITH_PARAMS"; id: LayerId; params: Record<string, unknown> }
   | { type: "RESET" };
+
+export type BottomPanelKey =
+  | "vegetationCover"
+  | "rhessysTimeSeries"
+  | "scenarios";

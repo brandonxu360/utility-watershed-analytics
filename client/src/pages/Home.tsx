@@ -2,18 +2,14 @@ import { useNavigate } from "@tanstack/react-router";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 import { useRunId } from "../hooks/useRunId";
 import { tss } from "../utils/tss";
-import { WatershedProvider, useWatershed } from "../contexts/WatershedContext";
-import { VegetationCover } from "../components/bottom-panels/VegetationCover";
-import { ScenariosTable } from "../components/bottom-panels/ScenariosTable";
-import { RhessysTimeSeries } from "../components/bottom-panels/RhessysTimeSeries";
-import { useRhessysOutputsData } from "../hooks/useRhessysOutputsData";
+import { WatershedProvider } from "../contexts/WatershedContext";
 import WatershedOverview from "../components/side-panels/WatershedOverview";
 import HomeSidePanelContent from "../components/side-panels/HomeInfoPanel";
 import SmallScreenNotice from "../components/SmallScreenNotice";
-import BottomPanel from "../components/bottom-panels/BottomPanel";
 import WatershedMap from "../components/map/WatershedMap";
 import BackButton from "../components/BackButton";
 import Paper from "@mui/material/Paper";
+import ActiveBottomPanel from "../components/bottom-panels/ActiveBottomPanel";
 
 const useStyles = tss
   .withParams<{ hasRunId: boolean }>()
@@ -110,43 +106,4 @@ export default function Home(): JSX.Element {
       </div>
     </WatershedProvider>
   );
-}
-
-function ActiveBottomPanel({
-  runId,
-}: {
-  runId: string | null;
-}): JSX.Element | null {
-  const { isEffective } = useWatershed();
-  const { hasChoroplethData } = useRhessysOutputsData(runId);
-
-  if (isEffective("choropleth")) {
-    return (
-      <BottomPanel key="choropleth" isOpen>
-        <VegetationCover />
-      </BottomPanel>
-    );
-  }
-
-  if (isEffective("rhessysOutputs") && hasChoroplethData) {
-    return (
-      <BottomPanel key="rhessysOutputs" isOpen>
-        <RhessysTimeSeries />
-      </BottomPanel>
-    );
-  }
-
-  if (isEffective("rhessysOutputs") || isEffective("rhessysSpatial")) {
-    return null;
-  }
-
-  if (runId) {
-    return (
-      <BottomPanel key="scenarios" isOpen>
-        <ScenariosTable />
-      </BottomPanel>
-    );
-  }
-
-  return null;
 }

@@ -1,14 +1,3 @@
-/**
- * Evaluator: desired + runtime → effective + blocked reasons.
- *
- * This replaces the two `useEffect` blocks in WatershedMap.tsx that silently
- * mutated store state when data was missing. Instead, desired state is never
- * touched by runtime conditions — evaluate() simply tells us what to *render*
- * and *why* something can't render.
- *
- * Pure function — no side effects, no store, no React.
- */
-
 import type {
   LayerId,
   DesiredMap,
@@ -17,6 +6,7 @@ import type {
   LayerEffectiveState,
   BlockedReason,
   LayerDescriptor,
+  BottomPanelKey,
 } from "./types";
 
 import { LAYER_REGISTRY } from "./registry";
@@ -137,4 +127,18 @@ export function isDesiredButBlocked(
   effective: EffectiveMap,
 ): boolean {
   return desired[id].enabled && !effective[id].enabled;
+}
+
+export function resolveBottomPanel(
+  effective: EffectiveMap,
+  runId: string | null,
+  hasChoropleth: boolean,
+): BottomPanelKey | null {
+  if (effective.choropleth.enabled) return "vegetationCover";
+  if (effective.rhessysOutputs.enabled && hasChoropleth)
+    return "rhessysTimeSeries";
+  if (effective.rhessysOutputs.enabled || effective.rhessysSpatial.enabled)
+    return null;
+  if (runId) return "scenarios";
+  return null;
 }
