@@ -15,7 +15,7 @@ import { useLanduseData } from "../../hooks/useLanduseData";
 import { useLayerStyles } from "../../hooks/useLayerStyles";
 import { defaultStyle, selectedStyle } from "./constants";
 import { getLayerParams } from "../../layers/types";
-import { MapEffect } from "../../utils/map/MapEffectUtil";
+import { MapEffect } from "../../utils/mapEffect";
 import type { LeafletMouseEvent } from "leaflet";
 import MapLoadingOverlay from "./MapLoadingOverlay";
 import SubcatchmentLayer from "./SubcatchmentLayer";

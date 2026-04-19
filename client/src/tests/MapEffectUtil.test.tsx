@@ -91,7 +91,7 @@ describe("MapEffectUtil", () => {
     vi.clearAllMocks();
     vi.resetModules();
     moveendListeners = [];
-    const mod = await import("../utils/map/MapEffectUtil");
+    const mod = await import("../utils/mapEffect");
     MapEffect = mod.MapEffect;
   });
 

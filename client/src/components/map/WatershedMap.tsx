@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, ScaleControl } from "react-leaflet";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import { useRunId } from "../../hooks/useRunId";
-import { getSavedMapView } from "../../utils/map/MapEffectUtil";
+import { getSavedMapView } from "../../utils/mapEffect";
 import { fetchWatersheds } from "../../api/api";
 import { tss } from "../../utils/tss";
 import { useWatershed } from "../../contexts/WatershedContext";

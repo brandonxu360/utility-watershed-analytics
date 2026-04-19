@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { zoomToFeature } from "../utils/map/MapUtil";
+import { zoomToFeature } from "../utils/zoomToFeature";
 import type { Map as LeafletMap } from "leaflet";
 
 describe("MapUtil", () => {

@@ -1,11 +1,11 @@
 import { useMap } from "react-leaflet";
 import { useEffect, useRef } from "react";
-import { zoomToFeature } from "./MapUtil";
+import { zoomToFeature } from "./zoomToFeature";
 
 import type {
   WatershedProperties,
   WatershedCollection,
-} from "../../types/WatershedProperties";
+} from "../types/WatershedProperties";
 
 import L from "leaflet";
 

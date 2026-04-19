@@ -3,7 +3,7 @@ import { SubcatchmentProperties } from "../../types/SubcatchmentProperties";
 import { useWatershed } from "../../contexts/WatershedContext";
 import { useEffect, useRef } from "react";
 import { Layer, LeafletEvent, PathOptions } from "leaflet";
-import { zoomToFeature } from "../../utils/map/MapUtil";
+import { zoomToFeature } from "../../utils/zoomToFeature";
 import { selectedStyle, highlightedStyle } from "./constants";
 
 // Renders subcatchment hillslope polygons and binds hover-only tooltips
