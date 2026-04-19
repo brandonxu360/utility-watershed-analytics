@@ -1,5 +1,5 @@
-import type { ScenarioType, ScenarioVariableType } from "./scenario";
-import type { SpatialScale } from "../api/types";
+import type { ScenarioType, ScenarioVariableType } from "../api/types/scenario";
+import type { SpatialScale } from "../api/types/rhessys";
 
 /**
  * Core type definitions for the declarative layer system.

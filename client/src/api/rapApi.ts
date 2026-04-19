@@ -8,15 +8,14 @@ import {
   createBandFilter,
 } from "./queryUtils";
 
-import {
+import type {
   AggregatedRapRow,
   FetchRapOptions,
   FetchRapChoroplethOptions,
   RapChoroplethRow,
   RapRow,
-  QueryPayload,
-  QueryFilter,
-} from "./types";
+} from "./types/rap";
+import type { QueryPayload, QueryFilter } from "./types/query";
 
 /**
  * Build a RAP timeseries query payload for a single Topaz ID.

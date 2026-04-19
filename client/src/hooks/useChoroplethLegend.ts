@@ -9,7 +9,7 @@ import { useRhessysChoroplethData } from "./useRhessysChoroplethData";
 import { getLayerParams } from "../layers/types";
 import { useRunId } from "./useRunId";
 import { GATE_CREEK_VARIABLES } from "../api/rhessys/constants";
-import type { RhessysSpatialFile, SpatialScale } from "../api/types";
+import type { RhessysSpatialFile, SpatialScale } from "../api/types/rhessys";
 
 import type {
   ChoroplethLegendProps,
@@ -20,7 +20,7 @@ import type {
   RhessysOutputScenario,
   RhessysOutputVariable,
   RhessysOutputValueRange,
-} from "../api/types";
+} from "../api/types/rhessys";
 
 function buildVegetationLegend(
   config: (typeof CHOROPLETH_CONFIG)[keyof typeof CHOROPLETH_CONFIG],

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../api/queryKeys";
 import { fetchRhessysSpatialInputs } from "../api/rhessysApi";
 import { useLayerQuery } from "./useLayerQuery";
-import type { RhessysSpatialFile } from "../api/types";
+import type { RhessysSpatialFile } from "../api/types/rhessys";
 
 type RhessysSpatialResponse = { files: RhessysSpatialFile[] };
 

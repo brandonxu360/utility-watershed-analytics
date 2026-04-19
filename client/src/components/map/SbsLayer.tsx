@@ -1,7 +1,7 @@
 import { TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
-import { SbsColorMode } from "../../api/types";
+import type { SbsColorMode } from "../../api/types/sbs";
 import { getDescriptor } from "../../layers/registry";
 import type { LayerId } from "../../layers/types";
 

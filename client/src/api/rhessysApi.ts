@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
-import type { RhessysSpatialListResponse } from "./types";
+import type { RhessysSpatialListResponse } from "./types/rhessys";
 
 /**
  * Fetch the list of available RHESSys spatial input GeoTIFFs for a watershed.

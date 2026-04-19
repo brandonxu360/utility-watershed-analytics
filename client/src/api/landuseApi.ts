@@ -1,10 +1,10 @@
 import { addQueryFlags, postQuery, toFiniteNumber } from "./queryUtils";
-import {
+import type {
   FetchLanduseOptions,
   LanduseMap,
   LanduseEntry,
-  QueryPayload,
-} from "./types";
+} from "./types/landuse";
+import type { QueryPayload } from "./types/query";
 
 export type { LanduseMap, LanduseEntry, FetchLanduseOptions };
 

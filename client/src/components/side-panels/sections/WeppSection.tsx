@@ -12,7 +12,7 @@ import {
   SCENARIO_DESCRIPTIONS,
   type ScenarioType,
   type ScenarioVariableType,
-} from "../../../layers/scenario";
+} from "../../../api/types/scenario";
 
 import { tss } from "../../../utils/tss";
 import Typography from "@mui/material/Typography";

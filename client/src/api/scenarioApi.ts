@@ -1,9 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
 import { postQuery, toFiniteNumber } from "./queryUtils";
 import { queryKeys } from "./queryKeys";
-import type { QueryPayload } from "./types";
-import { AVAILABLE_SCENARIOS, formatScenarioLabel } from "../layers/scenario";
-import type { ScenarioType, ScenarioDataRow } from "../layers/scenario";
+import type { QueryPayload } from "./types/query";
+import { AVAILABLE_SCENARIOS, formatScenarioLabel } from "./types/scenario";
+import type { ScenarioType, ScenarioDataRow } from "./types/scenario";
 
 const SCENARIO_LOSS_PATH = "wepp/output/interchange/loss_pw0.hill.parquet";
 const SCENARIO_SUMMARY_PATH = "wepp/output/interchange/loss_pw0.out.parquet";

@@ -8,8 +8,11 @@ import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 
 import type { WatershedCollection } from "../types/WatershedProperties";
 
-import type { LanduseMap } from "../api/types";
-import type { ScenarioDataRow, ScenarioVariableType } from "../layers/scenario";
+import type { LanduseMap } from "../api/types/landuse";
+import type {
+  ScenarioDataRow,
+  ScenarioVariableType,
+} from "../api/types/scenario";
 import type { ChoroplethStyleFn } from "./useChoropleth";
 import type { VegetationBandType } from "../utils/constants";
 

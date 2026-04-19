@@ -13,7 +13,7 @@ import {
   type VegetationBandType,
 } from "../../utils/constants";
 
-import { AggregatedRapRow } from "../../api/types";
+import type { AggregatedRapRow } from "../../api/types/rap";
 import fetchRap from "../../api/rapApi";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";

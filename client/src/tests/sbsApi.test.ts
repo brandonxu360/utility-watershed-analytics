@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { SbsColormapResponse } from "../api/types";
+import type { SbsColormapResponse } from "../api/types/sbs";
 
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);

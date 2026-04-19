@@ -9,9 +9,9 @@ import { getVariableMeta, resolveParquetConfig } from "./rhessys/utils";
 import type {
   RhessysOutputListResponse,
   RhessysChoroplethRow,
-  QueryPayload,
   SpatialScale,
-} from "./types";
+} from "./types/rhessys";
+import type { QueryPayload } from "./types/query";
 
 export type RhessysTimeSeriesRow = {
   year: number;
