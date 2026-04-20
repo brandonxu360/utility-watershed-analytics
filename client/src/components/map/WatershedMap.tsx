@@ -17,9 +17,17 @@ import SearchControl from "./controls/Search";
 import SbsLegend from "./controls/SbsLegend";
 import ChoroplethLegend from "./controls/ChoroplethLegend";
 import MapLayers from "./MapLayers";
+import PanelStatus from "../PanelStatus";
 import "leaflet/dist/leaflet.css";
 
 const useStyles = tss.create(() => ({
+  errorWrapper: {
+    display: "flex",
+    height: "100%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   mapContainer: {
     height: "100%",
     width: "100%",
@@ -90,7 +98,12 @@ export default function WatershedMap(): JSX.Element {
     "Satellite" | "Topographic"
   >("Satellite");
 
-  if (watershedsError) return <div>Error: {watershedsError.message}</div>;
+  if (watershedsError)
+    return (
+      <div className={classes.errorWrapper}>
+        <PanelStatus status="error" message={watershedsError.message} />
+      </div>
+    );
 
   const tileLayer = TILE_LAYERS[selectedLayerId];
 
