@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as queryUtils from "../api/queryUtils";
+import { ApiError } from "../api/errors";
+import { fetchScenarioData, fetchScenariosSummary } from "../api/scenarioApi";
+import { AVAILABLE_SCENARIOS } from "../api/types/scenario";
 
 vi.mock("../api/queryUtils", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api/queryUtils")>();
@@ -10,9 +13,6 @@ vi.mock("../api/queryUtils", async (importOriginal) => {
 });
 
 const mockPostQuery = vi.mocked(queryUtils.postQuery);
-
-const { fetchScenarioData, fetchScenariosSummary } =
-  await import("../api/scenarioApi");
 
 const TEST_RUN_ID = "batch;;test-batch;;test-run";
 const signal = new AbortController().signal;
@@ -339,8 +339,7 @@ describe("fetchScenariosSummary", () => {
   describe("payload construction", () => {
     it("sends one postQuery call per available scenario", async () => {
       await fetchScenariosSummary(TEST_RUN_ID, signal);
-      // 5 scenarios: undisturbed, thinning_40_75, thinning_65_93, prescribed_fire, wildfire
-      expect(mockPostQuery).toHaveBeenCalledTimes(5);
+      expect(mockPostQuery).toHaveBeenCalledTimes(AVAILABLE_SCENARIOS.length);
     });
 
     it("uses loss_pw0.out.parquet dataset path", async () => {
@@ -371,12 +370,12 @@ describe("fetchScenariosSummary", () => {
 
     it("omits scenario from payload for wildfire", async () => {
       await fetchScenariosSummary(TEST_RUN_ID, signal);
-      // wildfire is the 5th scenario (index 4)
-      const wildfirePayload = mockPostQuery.mock.calls[4][1] as Record<
-        string,
-        unknown
-      >;
-      expect(wildfirePayload.scenario).toBeUndefined();
+      const payloads = mockPostQuery.mock.calls.map(
+        (call) => call[1] as Record<string, unknown>,
+      );
+      // Exactly one call should have no scenario field (wildfire)
+      const callsWithoutScenario = payloads.filter((p) => !("scenario" in p));
+      expect(callsWithoutScenario).toHaveLength(1);
     });
   });
 
@@ -398,7 +397,7 @@ describe("fetchScenariosSummary", () => {
 
       const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
 
-      expect(result.length).toBe(5);
+      expect(result.length).toBe(AVAILABLE_SCENARIOS.length);
       const row = result[0];
       // 1.5 / 100 = 0.015 t/ha
       expect(row.hillslopeSoilLoss).toBeCloseTo(0.015);
@@ -504,8 +503,8 @@ describe("fetchScenariosSummary", () => {
       });
 
       const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
-      // 4 out of 5 succeed
-      expect(result.length).toBe(4);
+      // all succeed except call #2
+      expect(result.length).toBe(AVAILABLE_SCENARIOS.length - 1);
     });
 
     it("throws when all scenarios fail", async () => {
@@ -521,6 +520,42 @@ describe("fetchScenariosSummary", () => {
 
       await expect(fetchScenariosSummary(TEST_RUN_ID, signal)).rejects.toThrow(
         TEST_RUN_ID,
+      );
+    });
+
+    it("returns [] when all scenarios reject with ApiError status 404", async () => {
+      mockPostQuery.mockRejectedValue(
+        new ApiError("Not Found", { status: 404, statusText: "Not Found" }),
+      );
+
+      const result = await fetchScenariosSummary(TEST_RUN_ID, signal);
+      expect(result).toEqual([]);
+    });
+
+    it("throws when at least one rejection is not a 404 ApiError", async () => {
+      let callCount = 0;
+      mockPostQuery.mockImplementation(async () => {
+        callCount++;
+        if (callCount === 1)
+          throw new ApiError("Not Found", {
+            status: 404,
+            statusText: "Not Found",
+          });
+        throw new Error("Server error");
+      });
+
+      await expect(fetchScenariosSummary(TEST_RUN_ID, signal)).rejects.toThrow(
+        /Failed to fetch scenario summaries/,
+      );
+    });
+
+    it("throws when all rejections are ApiErrors with a non-404 status", async () => {
+      mockPostQuery.mockRejectedValue(
+        new ApiError("Internal Server Error", { status: 500 }),
+      );
+
+      await expect(fetchScenariosSummary(TEST_RUN_ID, signal)).rejects.toThrow(
+        /Failed to fetch scenario summaries/,
       );
     });
   });

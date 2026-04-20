@@ -1,14 +1,17 @@
 import { describe, it, expect } from "vitest";
+
 import {
   evaluate,
   selectOrderedActiveIds,
   isDesiredButBlocked,
+  resolveBottomPanel,
 } from "../layers/evaluate";
+
+import type { EffectiveMap } from "../layers/types";
 import { INITIAL_DESIRED, INITIAL_RUNTIME, applyAction } from "../layers/rules";
 import { LAYER_REGISTRY } from "../layers/registry";
 import type { DesiredMap, LayerRuntime } from "../layers/types";
 
-// Helpers
 function fresh(): DesiredMap {
   return JSON.parse(JSON.stringify(INITIAL_DESIRED));
 }
@@ -18,8 +21,6 @@ function freshRuntime(): LayerRuntime {
 }
 
 describe("evaluate", () => {
-  // ─── Basic pass-through ────────────────────────────────────────────────
-
   it("initial desired → only default-on layers are effectively enabled", () => {
     const eff = evaluate(fresh(), freshRuntime());
     for (const [id, state] of Object.entries(eff)) {
@@ -43,8 +44,6 @@ describe("evaluate", () => {
     expect(eff.channels.enabled).toBe(true);
     expect(eff.channels.blockedReasons).toEqual([]);
   });
-
-  // ─── Data availability blocking ───────────────────────────────────────
 
   it("blocks a layer when dataAvailability is false", () => {
     const desired = applyAction(fresh(), {
@@ -88,8 +87,6 @@ describe("evaluate", () => {
     expect(eff.channels.enabled).toBe(true);
   });
 
-  // ─── Required-layer blocking ──────────────────────────────────────────
-
   it("blocks landuse when subcatchment effective is disabled (missing data)", () => {
     // User enables landuse (which auto-enables subcatchment via rules)
     const desired = applyAction(fresh(), {
@@ -116,7 +113,6 @@ describe("evaluate", () => {
     });
   });
 
-  // ─── Zoom blocking ────────────────────────────────────────────────────
   // Currently no layers have zoomRange in the registry, but the evaluator
   // supports it. We test the code path with a synthetic scenario.
 
@@ -144,8 +140,6 @@ describe("evaluate", () => {
     }
   });
 
-  // ─── Loading flag ─────────────────────────────────────────────────────
-
   it("sets loading=true when runtime.loading is true (does NOT block)", () => {
     const desired = applyAction(fresh(), {
       type: "TOGGLE",
@@ -171,8 +165,6 @@ describe("evaluate", () => {
     expect(eff.subcatchment.loading).toBe(false);
   });
 
-  // ─── Opacity pass-through ─────────────────────────────────────────────
-
   it("passes through opacity from desired", () => {
     let desired = applyAction(fresh(), { type: "TOGGLE", id: "sbs", on: true });
     desired = applyAction(desired, {
@@ -183,8 +175,6 @@ describe("evaluate", () => {
     const eff = evaluate(desired, freshRuntime());
     expect(eff.sbs.opacity).toBe(0.4);
   });
-
-  // ─── Multiple blocking reasons accumulate ─────────────────────────────
 
   it("accumulates multiple blocked reasons", () => {
     // landuse requires subcatchment and its own data
@@ -203,8 +193,6 @@ describe("evaluate", () => {
     expect(eff.landuse.blockedReasons.length).toBeGreaterThanOrEqual(2);
   });
 });
-
-// ─── selectOrderedActiveIds ──────────────────────────────────────────────────
 
 describe("selectOrderedActiveIds", () => {
   it("returns enabled layers sorted by zIndex", () => {
@@ -230,8 +218,6 @@ describe("selectOrderedActiveIds", () => {
     expect(selectOrderedActiveIds(eff)).toEqual(["channels"]);
   });
 });
-
-// ─── isDesiredButBlocked ─────────────────────────────────────────────────────
 
 describe("isDesiredButBlocked", () => {
   it("returns true when user wants it on but it is blocked", () => {
@@ -262,5 +248,66 @@ describe("isDesiredButBlocked", () => {
     const desired = fresh();
     const eff = evaluate(desired, freshRuntime());
     expect(isDesiredButBlocked("channels", desired, eff)).toBe(false);
+  });
+});
+
+describe("resolveBottomPanel", () => {
+  /** Build a minimal EffectiveMap with only the specified keys enabled. */
+  function makeEffective(
+    enabled: Partial<Record<keyof EffectiveMap, boolean>>,
+  ): EffectiveMap {
+    const eff = evaluate(fresh(), freshRuntime());
+    for (const [id, val] of Object.entries(enabled) as [
+      keyof EffectiveMap,
+      boolean,
+    ][]) {
+      eff[id].enabled = val;
+    }
+    return eff;
+  }
+
+  it("returns 'vegetationCover' when choropleth is effective", () => {
+    const eff = makeEffective({ choropleth: true });
+    expect(resolveBottomPanel(eff, null, false)).toBe("vegetationCover");
+  });
+
+  it("choropleth takes priority over rhessysOutputs+hasChoropleth", () => {
+    const eff = makeEffective({ choropleth: true, rhessysOutputs: true });
+    expect(resolveBottomPanel(eff, null, true)).toBe("vegetationCover");
+  });
+
+  it("returns 'rhessysTimeSeries' when rhessysOutputs is effective and hasChoropleth is true", () => {
+    const eff = makeEffective({ choropleth: false, rhessysOutputs: true });
+    expect(resolveBottomPanel(eff, "some-run", true)).toBe("rhessysTimeSeries");
+  });
+
+  it("returns null when rhessysOutputs is effective but hasChoropleth is false", () => {
+    const eff = makeEffective({ choropleth: false, rhessysOutputs: true });
+    expect(resolveBottomPanel(eff, "some-run", false)).toBeNull();
+  });
+
+  it("returns null when rhessysSpatial is effective", () => {
+    const eff = makeEffective({ choropleth: false, rhessysSpatial: true });
+    expect(resolveBottomPanel(eff, "some-run", false)).toBeNull();
+  });
+
+  it("returns null when rhessysSpatial is effective even with hasChoropleth true", () => {
+    const eff = makeEffective({ choropleth: false, rhessysSpatial: true });
+    expect(resolveBottomPanel(eff, "some-run", true)).toBeNull();
+  });
+
+  it("returns 'scenarios' when runId is present and no rhessys/choropleth layers are active", () => {
+    const eff = makeEffective({});
+    expect(resolveBottomPanel(eff, "some-run", false)).toBe("scenarios");
+  });
+
+  it("returns null when runId is null and no layers are active", () => {
+    const eff = makeEffective({});
+    expect(resolveBottomPanel(eff, null, false)).toBeNull();
+  });
+
+  it("returns null when runId is null even with hasChoropleth true but rhessysOutputs off", () => {
+    const eff = makeEffective({});
+    expect(resolveBottomPanel(eff, null, true)).toBeNull();
   });
 });

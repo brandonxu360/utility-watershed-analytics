@@ -97,17 +97,6 @@ export const LAYER_REGISTRY: Record<LayerId, LayerDescriptor> = {
     defaults: { enabled: false, opacity: 0.8, params: { mode: "legacy" } },
   },
 
-  fireSeverity: {
-    id: "fireSeverity",
-    label: "Fire Severity",
-    group: "overlays",
-    kind: "raster",
-    pane: "rasterPane",
-    zIndex: 490,
-    // Placeholder — no renderer yet
-    defaults: { enabled: false, opacity: 0.8, params: {} },
-  },
-
   scenario: {
     id: "scenario",
     label: "WEPP Scenario",

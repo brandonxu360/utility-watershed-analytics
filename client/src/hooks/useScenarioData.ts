@@ -14,7 +14,7 @@ import {
   type ScenarioDataRow,
   type ScenarioVariableType,
   SCENARIO_VARIABLE_CONFIG,
-} from "../layers/scenario";
+} from "../api/types/scenario";
 
 export interface UseScenarioDataResult {
   isLoading: boolean;

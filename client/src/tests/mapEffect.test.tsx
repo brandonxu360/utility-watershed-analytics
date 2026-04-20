@@ -31,7 +31,7 @@ vi.mock("react-leaflet", () => ({
 }));
 
 const mockZoomToFeature = vi.fn();
-vi.mock("../utils/map/MapUtil", () => ({
+vi.mock("../utils/zoomToFeature", () => ({
   zoomToFeature: (...args: unknown[]) => mockZoomToFeature(...args),
 }));
 
@@ -91,7 +91,7 @@ describe("MapEffectUtil", () => {
     vi.clearAllMocks();
     vi.resetModules();
     moveendListeners = [];
-    const mod = await import("../utils/map/MapEffectUtil");
+    const mod = await import("../utils/mapEffect");
     MapEffect = mod.MapEffect;
   });
 

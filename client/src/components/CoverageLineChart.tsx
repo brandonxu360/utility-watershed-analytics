@@ -1,5 +1,6 @@
 import React from "react";
 import { tss } from "../utils/tss";
+import PanelStatus from "./PanelStatus";
 
 import {
   ResponsiveContainer,
@@ -33,15 +34,6 @@ const useStyles = tss.create(({ theme }) => ({
     height: 300,
     minWidth: 0,
   },
-  emptyState: {
-    height: "calc(100% - 32px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: theme.palette.muted.main,
-    fontSize: 32,
-    padding: theme.spacing(1),
-  },
   title: {
     textAlign: "center",
     margin: `0 0 ${theme.spacing(1)}`,
@@ -60,9 +52,7 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
   return (
     <div className={classes.container}>
       {isEmpty ? (
-        <div role="status" aria-live="polite" className={classes.emptyState}>
-          {`No data found for ${title}`}
-        </div>
+        <PanelStatus status="empty" message={`No data found for ${title}`} />
       ) : (
         <>
           <h3 data-testid="coverage-chart" className={classes.title}>

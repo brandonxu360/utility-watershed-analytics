@@ -19,11 +19,9 @@ import Typography from "@mui/material/Typography";
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadIcon from "@mui/icons-material/Download";
+import PanelStatus from "../PanelStatus";
 
 const useStyles = tss.create(({ theme }) => ({
-  statusMessage: {
-    padding: theme.spacing(3),
-  },
   headerCell: {
     fontWeight: 600,
   },
@@ -145,35 +143,19 @@ export function ScenariosTable() {
     copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
   }
 
-  if (isLoading) {
+  if (isLoading)
+    return <PanelStatus status="loading" message="Loading scenario data…" />;
+  if (isError)
     return (
-      <Typography align="center" className={classes.statusMessage}>
-        Loading scenario data…
-      </Typography>
+      <PanelStatus status="error" message={error ? error.message : undefined} />
     );
-  }
-
-  if (isError) {
+  if (!data || data.length === 0)
     return (
-      <Typography
-        align="center"
-        color="error"
-        className={classes.statusMessage}
-      >
-        {error instanceof Error
-          ? error.message
-          : "Failed to load scenario data"}
-      </Typography>
+      <PanelStatus
+        status="empty"
+        message="No scenario data for this watershed."
+      />
     );
-  }
-
-  if (!data || data.length === 0) {
-    return (
-      <Typography align="center" className={classes.statusMessage}>
-        No scenario data available.
-      </Typography>
-    );
-  }
 
   return (
     <>

@@ -1,5 +1,8 @@
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
-import type { ScenarioDataRow, ScenarioVariableType } from "../layers/scenario";
+import type {
+  ScenarioDataRow,
+  ScenarioVariableType,
+} from "../api/types/scenario";
 import type { VegetationBandType } from "./constants";
 import { startYear, endYear } from "./constants";
 

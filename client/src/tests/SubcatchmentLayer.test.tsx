@@ -23,7 +23,7 @@ const geometry: GeoJSON.Point = { type: "Point", coordinates: [0, 0] };
 const mockMap = {} as unknown;
 const mockZoomToFeature = vi.fn();
 
-vi.mock("../utils/map/MapUtil", () => ({
+vi.mock("../utils/zoomToFeature", () => ({
   zoomToFeature: (...args: unknown[]) => mockZoomToFeature(...args),
 }));
 

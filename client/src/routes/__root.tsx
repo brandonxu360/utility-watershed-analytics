@@ -1,6 +1,7 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import Navbar from "../components/Navbar";
+import NotFoundPage from "../pages/NotFound";
 
 export const Route = createRootRoute({
   component: () => (
@@ -14,5 +15,5 @@ export const Route = createRootRoute({
       )}
     </>
   ),
-  notFoundComponent: () => <div>404: Page Not Found</div>,
+  notFoundComponent: NotFoundPage,
 });

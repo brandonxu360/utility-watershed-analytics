@@ -7,7 +7,7 @@ import type {
   RhessysOutputScenario,
   RhessysOutputVariable,
   RhessysOutputValueRange,
-} from "../api/types";
+} from "../api/types/rhessys";
 
 import { CHOROPLETH_RUN_IDS } from "../api/rhessys/constants";
 

@@ -2,12 +2,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { INITIAL_DESIRED, INITIAL_RUNTIME } from "../layers/rules";
+
 import {
   evaluate,
   selectOrderedActiveIds,
   isDesiredButBlocked,
 } from "../layers/evaluate";
+
 import type { LayerId, DesiredMap, LayerRuntime } from "../layers/types";
+
 import WatershedMap from "../components/map/WatershedMap";
 
 const mockNavigate = vi.fn();
@@ -63,8 +66,6 @@ const { mockUseChoropleth } = vi.hoisted(() => ({
 vi.mock("../hooks/useChoropleth", () => ({
   useChoropleth: () => mockUseChoropleth(),
 }));
-
-/* ── useWatershed mock ────────────────────────────────────────────────── */
 
 const mockDispatchLayerAction = vi.fn();
 const mockSetDataAvailability = vi.fn();
@@ -209,7 +210,7 @@ vi.mock("../components/map/SubcatchmentLayer", () => ({
   },
 }));
 
-vi.mock("../utils/map/MapEffectUtil", () => ({
+vi.mock("../utils/mapEffect", () => ({
   MapEffect: ({ watershedId }: { watershedId: string | null }) => (
     <div data-testid="map-effect" data-watershed-id={watershedId} />
   ),
@@ -397,7 +398,7 @@ describe("Map Component", () => {
       renderWithProviders(<WatershedMap />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Error: Network error/)).toBeInTheDocument();
+        expect(screen.getByText(/Network error/)).toBeInTheDocument();
       });
     });
   });

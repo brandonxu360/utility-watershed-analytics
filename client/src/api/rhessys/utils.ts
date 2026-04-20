@@ -1,8 +1,4 @@
-/**
- * Gate Creek RHESSys helpers: parquet resolution, variable lookup, patch geometry.
- */
-
-import type { SpatialScale } from "../types";
+import type { SpatialScale } from "../types/rhessys";
 
 import type {
   GateCreekVariable,

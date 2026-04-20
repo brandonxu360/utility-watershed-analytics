@@ -3,8 +3,7 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Typography from "@mui/material/Typography";
-import CircularProgress from "@mui/material/CircularProgress";
+import PanelStatus from "../../PanelStatus";
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { useRunId } from "../../../hooks/useRunId";
 import { useRhessysSpatialInputs } from "../../../hooks/useRhessysSpatialInputs";
@@ -35,13 +34,6 @@ const useStyles = tss.create(({ theme }) => ({
   },
   formControl: {
     marginTop: theme.spacing(0.5),
-  },
-  loadingRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(1),
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
   },
   label: {
     color: theme.palette.primary.contrastText,
@@ -82,16 +74,14 @@ export default function RhessysSection() {
     [enableLayerWithParams, dispatchLayerAction],
   );
 
-  if (isLoading) {
+  if (isLoading)
     return (
-      <div className={classes.loadingRow}>
-        <CircularProgress size={16} />
-        <Typography variant="body2" color="textSecondary">
-          Checking for spatial data...
-        </Typography>
-      </div>
+      <PanelStatus
+        status="loading"
+        size="sm"
+        message="Checking for spatial data…"
+      />
     );
-  }
 
   if (files.length === 0) {
     return null;

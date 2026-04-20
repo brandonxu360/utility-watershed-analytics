@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildHillslopeTooltip } from "../utils/tooltipContent";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
-import type { ScenarioDataRow } from "../layers/scenario";
+import type { ScenarioDataRow } from "../api/types/scenario";
 
 const baseProps: Partial<SubcatchmentProperties> = {
   topazid: 101,

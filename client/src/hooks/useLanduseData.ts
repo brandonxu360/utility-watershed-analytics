@@ -4,7 +4,7 @@ import { queryKeys } from "../api/queryKeys";
 import { fetchLanduse } from "../api/landuseApi";
 import { useWatershed } from "../contexts/WatershedContext";
 import { useLayerQuery } from "./useLayerQuery";
-import type { LanduseMap } from "../api/types";
+import type { LanduseMap } from "../api/types/landuse";
 
 export interface UseLanduseDataResult {
   landuseData: LanduseMap | undefined;
