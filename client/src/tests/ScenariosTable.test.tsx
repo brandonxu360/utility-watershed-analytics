@@ -73,9 +73,7 @@ describe("ScenariosTable", () => {
         error: "string error",
       });
       render(<ScenariosTable />);
-      expect(
-        screen.getByText(/failed to load scenario data/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/unable to load data/i)).toBeInTheDocument();
     });
 
     it("shows the Error message when the error is an Error instance", () => {
@@ -98,7 +96,7 @@ describe("ScenariosTable", () => {
       });
       render(<ScenariosTable />);
       expect(
-        screen.getByText(/no scenario data available/i),
+        screen.getByText(/no scenario data for this watershed/i),
       ).toBeInTheDocument();
     });
 
@@ -111,7 +109,7 @@ describe("ScenariosTable", () => {
       });
       render(<ScenariosTable />);
       expect(
-        screen.getByText(/no scenario data available/i),
+        screen.getByText(/no scenario data for this watershed/i),
       ).toBeInTheDocument();
     });
   });

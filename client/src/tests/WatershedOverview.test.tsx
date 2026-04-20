@@ -124,7 +124,7 @@ describe("WatershedOverview", () => {
       renderWithProviders(<WatershedOverview />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Error: Network error/i)).toBeInTheDocument();
+        expect(screen.getByText(/Network error/i)).toBeInTheDocument();
       });
     });
   });

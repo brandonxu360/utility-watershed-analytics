@@ -31,7 +31,7 @@ vi.mock("react-leaflet", () => ({
 }));
 
 const mockZoomToFeature = vi.fn();
-vi.mock("../utils/map/MapUtil", () => ({
+vi.mock("../utils/zoomToFeature", () => ({
   zoomToFeature: (...args: unknown[]) => mockZoomToFeature(...args),
 }));
 

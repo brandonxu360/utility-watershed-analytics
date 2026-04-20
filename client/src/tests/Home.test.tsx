@@ -35,7 +35,12 @@ vi.mock("../components/bottom-panels/BottomPanel", () => ({
 }));
 
 vi.mock("../components/bottom-panels/VegetationCover", () => ({
+  default: () => <div data-testid="vegetation-cover" />,
   VegetationCover: () => <div data-testid="vegetation-cover" />,
+}));
+
+vi.mock("../hooks/useRhessysOutputsData", () => ({
+  useRhessysOutputsData: () => ({ hasChoroplethData: false }),
 }));
 
 vi.mock("../components/bottom-panels/ScenariosTable", () => ({
@@ -50,6 +55,11 @@ vi.mock("../contexts/WatershedContext", () => ({
   ),
   useWatershed: () => ({
     isEffective: (id: string) => !!mockEffectiveLayers[id],
+    effective: {
+      choropleth: { enabled: !!mockEffectiveLayers["choropleth"] },
+      rhessysOutputs: { enabled: !!mockEffectiveLayers["rhessysOutputs"] },
+      rhessysSpatial: { enabled: !!mockEffectiveLayers["rhessysSpatial"] },
+    },
   }),
 }));
 

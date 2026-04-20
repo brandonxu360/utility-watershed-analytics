@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
-import { YEAR_BOUNDS, QueryFilter } from "./types/query";
-import type { QueryPayload } from "./types/query";
+import { YEAR_BOUNDS } from "./types/query";
+import type { QueryPayload, QueryFilter } from "./types/query";
 import { checkResponse } from "./errors";
 
 /**
