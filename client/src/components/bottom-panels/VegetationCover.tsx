@@ -22,6 +22,7 @@ import MenuItem from "@mui/material/MenuItem";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import MuiSelect, { type SelectChangeEvent } from "@mui/material/Select";
+import PanelStatus from "../PanelStatus";
 
 type RapStatus = {
   state: "loading" | "ready" | "error";
@@ -100,6 +101,7 @@ const useStyles = tss.create(({ theme }) => ({
 
 export const VegetationCover: React.FC = () => {
   const { classes } = useStyles();
+
   const {
     layerDesired,
     dispatchLayerAction,
@@ -395,14 +397,20 @@ export const VegetationCover: React.FC = () => {
         <Typography align="center">Loading vegetation data…</Typography>
       )}
 
-      <div ref={chartContainerRef}>
-        <CoverageLineChart
-          data={chartData}
-          title={chartTitle}
-          lineKeys={vegOption.chartKeys}
-          yAxisLabel="Percent Cover (%)"
-        />
-      </div>
+      {rapStatus.state === "error" && (
+        <PanelStatus status="error" message="Failed to load vegetation data." />
+      )}
+
+      {rapStatus.state === "ready" && (
+        <div ref={chartContainerRef}>
+          <CoverageLineChart
+            data={chartData}
+            title={chartTitle}
+            lineKeys={vegOption.chartKeys}
+            yAxisLabel="Percent Cover (%)"
+          />
+        </div>
+      )}
     </div>
   );
 };

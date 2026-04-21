@@ -24,7 +24,6 @@ export type CoverageLineChartProps = {
     activeFill: string;
     activeStroke: string;
   }[];
-  /** optional label to display on the Y axis (e.g. "Percent Cover (%)") */
   yAxisLabel?: string;
 };
 
@@ -83,7 +82,6 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
                         angle: -90,
                         position: "insideLeft",
                         dx: -15,
-                        // centre rotated label both horizontally and vertically
                         style: {
                           textAnchor: "middle",
                           dominantBaseline: "middle",
