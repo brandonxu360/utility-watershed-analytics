@@ -31,7 +31,6 @@ export type CoverageLineChartProps = {
 const useStyles = tss.create(({ theme }) => ({
   container: {
     width: "100%",
-    height: 300,
     minWidth: 0,
   },
   title: {
@@ -59,7 +58,7 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
             {title}
           </h3>
 
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={300}>
             <LineChart
               data={data}
               margin={{
