@@ -70,7 +70,7 @@ const useStyles = tss.create(({ theme }) => ({
     marginTop: theme.spacing(1.5),
   },
   sectionDivider: {
-    borderColor: alpha(theme.palette.primary.contrastText, 0.24),
+    borderColor: alpha(theme.palette.primary.contrastText, 0.5),
     marginTop: theme.spacing(1.5),
     marginBottom: theme.spacing(1.5),
   },

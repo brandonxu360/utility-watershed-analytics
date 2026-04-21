@@ -25,6 +25,7 @@ import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { alpha, Divider } from "@mui/material";
 
 const useStyles = tss.create(({ theme }) => ({
   layer: {
@@ -49,6 +50,11 @@ const useStyles = tss.create(({ theme }) => ({
   scenarioGroup: {
     marginBottom: theme.spacing(0.5),
   },
+  sectionDivider: {
+    borderColor: alpha(theme.palette.primary.contrastText, 0.5),
+    marginTop: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
+  },
   scenarioSelect: {
     color: theme.palette.primary.contrastText,
     "& .MuiSelect-select": {
@@ -68,7 +74,7 @@ const useStyles = tss.create(({ theme }) => ({
     },
   },
   scenarioSelectPaper: {
-    maxHeight: 300,
+    maxHeight: 200,
   },
   scenarioFormControl: {
     marginTop: theme.spacing(0.5),
@@ -274,6 +280,7 @@ export default function WeppSection() {
                 </div>
               ))}
             </RadioGroup>
+            <Divider className={classes.sectionDivider} />
           </>
         )}
       </div>

@@ -42,7 +42,7 @@ const useStyles = tss.create(({ theme }) => ({
     },
   },
   selectPaper: {
-    maxHeight: 300,
+    maxHeight: 200,
   },
   formControl: {
     marginTop: theme.spacing(1.5),
@@ -303,18 +303,6 @@ export default function RhessysOutputsSection() {
   // Dynamic choropleth (Gate Creek)
   return (
     <>
-      <ToggleButtonGroup
-        value={selectedSpatialScale}
-        exclusive
-        onChange={handleSpatialScaleChange}
-        size="small"
-        fullWidth
-        className={classes.toggleGroup}
-      >
-        <ToggleButton value="hillslope">Hillslope</ToggleButton>
-        <ToggleButton value="patch">Patch</ToggleButton>
-      </ToggleButtonGroup>
-
       <FormControl fullWidth size="small" className={classes.formControl}>
         <InputLabel
           id="rhessys-choropleth-scenario-label"
@@ -389,6 +377,17 @@ export default function RhessysOutputsSection() {
               ))}
             </Select>
           </FormControl>
+          <ToggleButtonGroup
+            value={selectedSpatialScale}
+            exclusive
+            onChange={handleSpatialScaleChange}
+            size="small"
+            fullWidth
+            className={classes.toggleGroup}
+          >
+            <ToggleButton value="hillslope">Hillslope</ToggleButton>
+            <ToggleButton value="patch">Patch</ToggleButton>
+          </ToggleButtonGroup>
         </>
       )}
     </>

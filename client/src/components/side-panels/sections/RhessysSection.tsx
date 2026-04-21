@@ -9,6 +9,7 @@ import { useRunId } from "../../../hooks/useRunId";
 import { useRhessysSpatialInputs } from "../../../hooks/useRhessysSpatialInputs";
 import { getLayerParams } from "../../../layers/types";
 import { tss } from "../../../utils/tss";
+import { alpha, Divider } from "@mui/material";
 
 const useStyles = tss.create(({ theme }) => ({
   select: {
@@ -40,6 +41,11 @@ const useStyles = tss.create(({ theme }) => ({
     "&.Mui-focused": {
       color: theme.palette.primary.contrastText,
     },
+  },
+  sectionDivider: {
+    borderColor: alpha(theme.palette.primary.contrastText, 0.5),
+    marginTop: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
   },
 }));
 
@@ -88,28 +94,31 @@ export default function RhessysSection() {
   }
 
   return (
-    <FormControl fullWidth size="small" className={classes.formControl}>
-      <InputLabel id="rhessys-spatial-select-label" className={classes.label}>
-        Spatial Input
-      </InputLabel>
-      <Select
-        labelId="rhessys-spatial-select-label"
-        id="rhessys-spatial-select"
-        value={layerEnabled && selectedFilename ? selectedFilename : "none"}
-        label="Spatial Input"
-        onChange={handleChange}
-        className={classes.select}
-        MenuProps={{
-          PaperProps: { className: classes.selectPaper },
-        }}
-      >
-        <MenuItem value="none">None</MenuItem>
-        {files.map((f) => (
-          <MenuItem key={f.filename} value={f.filename}>
-            {f.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <>
+      <FormControl fullWidth size="small" className={classes.formControl}>
+        <InputLabel id="rhessys-spatial-select-label" className={classes.label}>
+          Spatial Input
+        </InputLabel>
+        <Select
+          labelId="rhessys-spatial-select-label"
+          id="rhessys-spatial-select"
+          value={layerEnabled && selectedFilename ? selectedFilename : "none"}
+          label="Spatial Input"
+          onChange={handleChange}
+          className={classes.select}
+          MenuProps={{
+            PaperProps: { className: classes.selectPaper },
+          }}
+        >
+          <MenuItem value="none">None</MenuItem>
+          {files.map((f) => (
+            <MenuItem key={f.filename} value={f.filename}>
+              {f.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <Divider className={classes.sectionDivider} />
+    </>
   );
 }

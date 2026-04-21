@@ -32,7 +32,7 @@ const useStyles = tss
     backButtonBar: {
       position: "sticky",
       top: 0,
-      zIndex: 1,
+      zIndex: 100,
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
