@@ -9,7 +9,7 @@ import type {
   RhessysOutputValueRange,
 } from "../api/types/rhessys";
 
-import { CHOROPLETH_RUN_IDS } from "../api/rhessys/constants";
+import { CHOROPLETH_RUN_IDS } from "../api/constants";
 
 export function useRhessysOutputsData(runId: string | null) {
   const { data, isLoading, error } = useQuery({

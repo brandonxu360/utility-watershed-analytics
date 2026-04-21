@@ -1,4 +1,4 @@
-import type { SpatialScale } from "../types/rhessys";
+import type { SpatialScale } from "./types/rhessys";
 
 /**
  * Run IDs whose WEPPcloud stores contain RHESSys scenario parquet files

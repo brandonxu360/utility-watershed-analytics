@@ -116,6 +116,7 @@ export default function MapLayers() {
 
       {watersheds && (
         <GeoJSON
+          key={runId ?? "home"}
           data={watersheds}
           style={(feature) => {
             if (!runId) return defaultStyle;

@@ -8,7 +8,7 @@ import { useRhessysOutputsData } from "./useRhessysOutputsData";
 import { useRhessysChoroplethData } from "./useRhessysChoroplethData";
 import { getLayerParams } from "../layers/types";
 import { useRunId } from "./useRunId";
-import { GATE_CREEK_VARIABLES } from "../api/rhessys/constants";
+import { GATE_CREEK_VARIABLES } from "../api/constants";
 import type { RhessysSpatialFile, SpatialScale } from "../api/types/rhessys";
 
 import type {

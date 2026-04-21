@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import * as queryUtils from "../api/queryUtils";
+import * as queryUtils from "../api/utils";
 import { ApiError } from "../api/errors";
 import { fetchScenarioData, fetchScenariosSummary } from "../api/scenarioApi";
 import { AVAILABLE_SCENARIOS } from "../api/types/scenario";
 
-vi.mock("../api/queryUtils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../api/queryUtils")>();
+vi.mock("../api/utils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api/utils")>();
   return {
     ...actual,
     postQuery: vi.fn().mockResolvedValue([]),

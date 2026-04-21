@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { postQuery, toFiniteNumber } from "./queryUtils";
+import { postQuery, toFiniteNumber } from "./utils";
 import { queryKeys } from "./queryKeys";
 import { isApiError } from "./errors";
 import type { QueryPayload } from "./types/query";

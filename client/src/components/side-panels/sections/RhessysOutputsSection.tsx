@@ -20,7 +20,7 @@ import {
   GATE_CREEK_VARIABLES,
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_YEAR_RANGE,
-} from "../../../api/rhessys/constants";
+} from "../../../api/constants";
 
 const useStyles = tss.create(({ theme }) => ({
   select: {
