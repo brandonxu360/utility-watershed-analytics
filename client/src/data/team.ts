@@ -50,7 +50,7 @@ export const groupedMembers: UniversityGroup[] = [
       {
         name: "Abdisa Kebebew",
         img: AbdisaKebebew,
-        role: "Graduate Research Assistant",
+        role: "PhD Candidate, Civil and Environmental Engineering",
         web: "https://scholar.google.com/citations?hl=en&user=0xbYpO4AAAAJ",
       },
     ],
