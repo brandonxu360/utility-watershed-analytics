@@ -85,10 +85,36 @@ export type GateCreekVariable = {
 export const GATE_CREEK_YEAR_RANGE = { min: 1985, max: 2024 };
 
 export const GATE_CREEK_SCENARIOS = [
-  { id: "S1", label: "S1 \u2013 Pre-fire Baseline" },
-  { id: "S2", label: "S2 \u2013 Post-fire Land Cover" },
-  { id: "S4b", label: "S4b \u2013 Post-fire Regrowth" },
+  {
+    id: "S1",
+    label: "S1 \u2013 Pre-fire Baseline",
+    description:
+      "Vegetation growth and water fluxes simulated under 1985 land use conditions — assuming no wildfire and no land use change through the present, with transient climate forcing.",
+  },
+  {
+    id: "S2",
+    label: "S2 \u2013 Post-fire Land Cover",
+    description:
+      "Vegetation growth and water fluxes simulated under 2021 land use conditions — reflecting post-2020 wildfire land cover — with no succession dynamics but transient climate forcing.",
+  },
+  {
+    id: "S4b",
+    label: "S4b \u2013 Post-fire Regrowth",
+    description:
+      "Vegetation growth and water fluxes simulated with real wildfire effects under transient climate forcing, using observed soil burn severity and modelling post-fire regrowth without succession dynamics.",
+  },
 ];
+
+/**
+ * One-sentence descriptions for RHESSys raster-output scenarios (Mill Creek / Victoria).
+ * Keys must match the scenario IDs returned by the backend.
+ */
+export const RHESSYS_OUTPUT_SCENARIO_DESCRIPTIONS: Record<string, string> = {
+  baseline: "Unmodified simulation based on observed historic climate data.",
+  heavy_thin:
+    "Historic climate simulation with a heavy forest thinning (40% overstory, 80% understory) applied basin-wide on April 1, 2002.",
+  fire: "Historic climate simulation with a prescribed fire set for the whole basin on September 1, 2003.",
+};
 
 export const GATE_CREEK_VARIABLES: Record<SpatialScale, GateCreekVariable[]> = {
   hillslope: [

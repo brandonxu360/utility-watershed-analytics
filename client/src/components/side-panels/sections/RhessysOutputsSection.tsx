@@ -7,6 +7,9 @@ import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { useRunId } from "../../../hooks/useRunId";
 import { useRhessysOutputs } from "../../../hooks/useRhessysOutputs";
@@ -20,6 +23,7 @@ import {
   GATE_CREEK_VARIABLES,
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_YEAR_RANGE,
+  RHESSYS_OUTPUT_SCENARIO_DESCRIPTIONS,
 } from "../../../api/constants";
 
 const useStyles = tss.create(({ theme }) => ({
@@ -68,6 +72,27 @@ const useStyles = tss.create(({ theme }) => ({
         },
       },
     },
+  },
+  scenarioInfo: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: theme.spacing(0.5),
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.common.white,
+    background: theme.palette.accent.main,
+    borderRadius: "999px",
+    padding: `${theme.spacing(0.25)} ${theme.spacing(1)}`,
+    cursor: "help",
+    userSelect: "none" as const,
+    marginTop: theme.spacing(1),
+  },
+  tooltipBubble: {
+    backgroundColor: theme.palette.accent.main,
+    color: theme.palette.common.white,
+    fontSize: theme.typography.caption.fontSize,
+  },
+  tooltipArrow: {
+    color: theme.palette.accent.main,
   },
 }));
 
@@ -244,6 +269,11 @@ export default function RhessysOutputsSection() {
 
   // Pre-computed raster maps (Victoria + Mill Creek)
   if (hasRasterData && selectedMode !== "choropleth") {
+    const rasterDescription =
+      selectedScenario != null
+        ? RHESSYS_OUTPUT_SCENARIO_DESCRIPTIONS[selectedScenario]
+        : undefined;
+
     return (
       <>
         <FormControl fullWidth size="small" className={classes.formControl}>
@@ -270,6 +300,28 @@ export default function RhessysOutputsSection() {
             ))}
           </Select>
         </FormControl>
+
+        {layerEnabled && selectedScenario && rasterDescription && (
+          <Tooltip
+            title={rasterDescription}
+            placement="top"
+            arrow
+            classes={{
+              tooltip: classes.tooltipBubble,
+              arrow: classes.tooltipArrow,
+            }}
+          >
+            <Typography
+              className={classes.scenarioInfo}
+              tabIndex={0}
+              role="button"
+              aria-label="About this scenario"
+            >
+              <InfoOutlinedIcon fontSize="inherit" />
+              About this scenario
+            </Typography>
+          </Tooltip>
+        )}
 
         {layerEnabled && selectedScenario && (
           <FormControl fullWidth size="small" className={classes.formControl}>
@@ -301,6 +353,10 @@ export default function RhessysOutputsSection() {
   }
 
   // Dynamic choropleth (Gate Creek)
+  const selectedScenarioMeta = GATE_CREEK_SCENARIOS.find(
+    (s) => s.id === selectedScenario,
+  );
+
   return (
     <>
       <FormControl fullWidth size="small" className={classes.formControl}>
@@ -327,6 +383,30 @@ export default function RhessysOutputsSection() {
           ))}
         </Select>
       </FormControl>
+
+      {layerEnabled &&
+        selectedScenario &&
+        selectedScenarioMeta?.description && (
+          <Tooltip
+            title={selectedScenarioMeta.description}
+            placement="top"
+            arrow
+            classes={{
+              tooltip: classes.tooltipBubble,
+              arrow: classes.tooltipArrow,
+            }}
+          >
+            <Typography
+              className={classes.scenarioInfo}
+              tabIndex={0}
+              role="button"
+              aria-label="About this scenario"
+            >
+              <InfoOutlinedIcon fontSize="inherit" />
+              About this scenario
+            </Typography>
+          </Tooltip>
+        )}
 
       {layerEnabled && selectedScenario && (
         <>
@@ -377,6 +457,25 @@ export default function RhessysOutputsSection() {
               ))}
             </Select>
           </FormControl>
+          <Tooltip
+            title="Water fluxes and productivities are sensitive to climate variability — selecting different years lets you explore that range rather than relying on a single year."
+            placement="top"
+            arrow
+            classes={{
+              tooltip: classes.tooltipBubble,
+              arrow: classes.tooltipArrow,
+            }}
+          >
+            <Typography
+              className={classes.scenarioInfo}
+              tabIndex={0}
+              role="button"
+              aria-label="Why select a year?"
+            >
+              <InfoOutlinedIcon fontSize="inherit" />
+              Why select a year?
+            </Typography>
+          </Tooltip>
           <ToggleButtonGroup
             value={selectedSpatialScale}
             exclusive
