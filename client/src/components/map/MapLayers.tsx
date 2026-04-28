@@ -13,7 +13,8 @@ import { useSubcatchmentData } from "../../hooks/useSubcatchmentData";
 import { useChannelData } from "../../hooks/useChannelData";
 import { useLanduseData } from "../../hooks/useLanduseData";
 import { useLayerStyles } from "../../hooks/useLayerStyles";
-import { defaultStyle, selectedStyle } from "./constants";
+import { defaultStyle, selectedStyle, highlightedStyle } from "./constants";
+import type { WatershedProperties } from "../../types/WatershedProperties";
 import { getLayerParams } from "../../layers/types";
 import { MapEffect } from "../../utils/mapEffect";
 import type { LeafletMouseEvent } from "leaflet";
@@ -124,6 +125,26 @@ export default function MapLayers() {
               : { opacity: 0, fillOpacity: 0 };
           }}
           onEachFeature={(feature, layer) => {
+            const props = feature.properties as WatershedProperties | null;
+
+            if (!runId) {
+              const name = props?.pws_name ?? "Unknown Watershed";
+              const parts = [props?.county_nam, props?.state]
+                .filter(Boolean)
+                .join(", ");
+              const html = `<span class="tooltip-bold"><strong>${name}</strong>${parts ? `<br/>${parts}` : ""}</span>`;
+              layer.bindTooltip(html, { className: "tooltip", sticky: true, direction: "top", offset: [0, -8] });
+
+              layer.on({
+                mouseover: (e) => {
+                  e.target.setStyle(highlightedStyle);
+                },
+                mouseout: (e) => {
+                  e.target.setStyle(defaultStyle);
+                },
+              });
+            }
+
             if (!runId || feature?.id?.toString() === runId) {
               layer.on({ click: onWatershedClick });
             }
