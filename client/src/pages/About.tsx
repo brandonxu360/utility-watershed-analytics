@@ -281,6 +281,14 @@ const Content = () => {
               </Typography>
             </Stack>
             <Stack direction="row" spacing={2} alignItems="center">
+              <Link to="/about/wepp-cloud" className={classes.btnLink}>
+                WEPPcloud
+              </Link>
+              <Typography variant="body1">
+                Web-based WEPP watershed modeling platform
+              </Typography>
+            </Stack>
+            <Stack direction="row" spacing={2} alignItems="center">
               <Link to="/about/rhessys" className={classes.btnLink}>
                 RHESSys
               </Link>
@@ -288,6 +296,27 @@ const Content = () => {
                 Regional Hydro-Ecological Simulation System
               </Typography>
             </Stack>
+          </Stack>
+          <Typography variant="body2" mt={3} mb={1} fontWeight={600}>
+            WEPPcloud Documentation
+          </Typography>
+          <Stack spacing={1}>
+            <a
+              href="https://wepp.cloud/weppcloud/usersum/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={classes.contentLink}
+            >
+              WEPPcloud User Guide &amp; Reference
+            </a>
+            <a
+              href="https://wepp.cloud/weppcloud/usersum/doc/usersum.weppcloud.faq"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={classes.contentLink}
+            >
+              WEPPcloud FAQ
+            </a>
           </Stack>
         </Grid>
         <Grid size={{ xs: 12, lg: 6 }}>
