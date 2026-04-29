@@ -117,6 +117,7 @@ export default function MapLayers() {
 
       {watersheds && (
         <GeoJSON
+          key={runId ?? "no-watershed"}
           data={watersheds}
           style={(feature) => {
             if (!runId) return defaultStyle;
@@ -132,8 +133,16 @@ export default function MapLayers() {
               const parts = [props?.county_nam, props?.state]
                 .filter(Boolean)
                 .join(", ");
-              const html = `<span class="tooltip-bold"><strong>${name}</strong>${parts ? `<br/>${parts}` : ""}</span>`;
-              layer.bindTooltip(html, {
+              const container = document.createElement("span");
+              container.className = "tooltip-bold";
+              const nameEl = document.createElement("strong");
+              nameEl.textContent = name;
+              container.appendChild(nameEl);
+              if (parts) {
+                container.appendChild(document.createElement("br"));
+                container.appendChild(document.createTextNode(parts));
+              }
+              layer.bindTooltip(container, {
                 className: "tooltip",
                 sticky: true,
                 direction: "top",
