@@ -464,7 +464,7 @@ describe("Map Component", () => {
         expect(lastWatershedGeoJsonProps).toBeTruthy();
       });
 
-      const mockLayer = { on: vi.fn() };
+      const mockLayer = { on: vi.fn(), bindTooltip: vi.fn() };
       const feature = { id: "test-watershed-click" };
 
       lastWatershedGeoJsonProps!.onEachFeature(
@@ -476,7 +476,8 @@ describe("Map Component", () => {
         expect.objectContaining({ click: expect.any(Function) }),
       );
 
-      const clickHandler = mockLayer.on.mock.calls[0][0].click;
+      const clickCall = mockLayer.on.mock.calls.find((call) => call[0].click);
+      const clickHandler = clickCall![0].click;
       clickHandler({ sourceTarget: { feature } });
 
       expect(mockNavigate).toHaveBeenCalledWith({

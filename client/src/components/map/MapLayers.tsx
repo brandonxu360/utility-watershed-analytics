@@ -133,7 +133,12 @@ export default function MapLayers() {
                 .filter(Boolean)
                 .join(", ");
               const html = `<span class="tooltip-bold"><strong>${name}</strong>${parts ? `<br/>${parts}` : ""}</span>`;
-              layer.bindTooltip(html, { className: "tooltip", sticky: true, direction: "top", offset: [0, -8] });
+              layer.bindTooltip(html, {
+                className: "tooltip",
+                sticky: true,
+                direction: "top",
+                offset: [0, -8],
+              });
 
               layer.on({
                 mouseover: (e) => {
