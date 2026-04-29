@@ -1,118 +1,49 @@
-import { tss } from "../../../utils/tss";
 import { useCallback, useMemo } from "react";
-import PanelStatus from "../../PanelStatus";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select, { type SelectChangeEvent } from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useWatershed } from "../../../contexts/WatershedContext";
-import { useRunId } from "../../../hooks/useRunId";
-import { useRhessysOutputs } from "../../../hooks/useRhessysOutputs";
-
 import {
   getLayerParams,
   type RhessysOutputParams,
 } from "../../../layers/types";
-
+import { type useRhessysOutputs } from "../../../hooks/useRhessysOutputs";
 import {
   GATE_CREEK_VARIABLES,
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_YEAR_RANGE,
   RHESSYS_OUTPUT_SCENARIO_DESCRIPTIONS,
 } from "../../../api/constants";
+import { useStyles } from "../watershedStyles";
+import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import PanelStatus from "../../PanelStatus";
 
-const useStyles = tss.create(({ theme }) => ({
-  select: {
-    color: theme.palette.primary.contrastText,
-    "& .MuiSelect-select": {
-      fontSize: theme.typography.body2.fontSize,
-    },
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.contrastText,
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.contrastText,
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.contrastText,
-    },
-    "& .MuiSvgIcon-root": {
-      color: theme.palette.primary.contrastText,
-    },
-  },
-  selectPaper: {
-    maxHeight: 200,
-  },
-  formControl: {
-    marginTop: theme.spacing(1.5),
-  },
-  label: {
-    color: theme.palette.primary.contrastText,
-    "&.Mui-focused": {
-      color: theme.palette.primary.contrastText,
-    },
-  },
-  toggleGroup: {
-    marginTop: theme.spacing(1),
-    "& .MuiToggleButton-root": {
-      color: theme.palette.primary.contrastText,
-      borderColor: theme.palette.primary.contrastText,
-      fontSize: theme.typography.caption.fontSize,
-      padding: `${theme.spacing(0.25)} ${theme.spacing(1)}`,
-      "&.Mui-selected": {
-        backgroundColor: theme.palette.primary.contrastText,
-        color: theme.palette.primary.main,
-        "&:hover": {
-          backgroundColor: theme.palette.primary.contrastText,
-        },
-      },
-    },
-  },
-  scenarioInfo: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: theme.spacing(0.5),
-    fontSize: theme.typography.caption.fontSize,
-    color: theme.palette.common.white,
-    background: theme.palette.accent.main,
-    borderRadius: "999px",
-    padding: `${theme.spacing(0.25)} ${theme.spacing(1)}`,
-    cursor: "help",
-    userSelect: "none" as const,
-    marginTop: theme.spacing(1),
-  },
-  tooltipBubble: {
-    backgroundColor: theme.palette.accent.main,
-    color: theme.palette.common.white,
-    fontSize: theme.typography.caption.fontSize,
-  },
-  tooltipArrow: {
-    color: theme.palette.accent.main,
-  },
-}));
-
-const years = Array.from(
+const gateCreekYears = Array.from(
   { length: GATE_CREEK_YEAR_RANGE.max - GATE_CREEK_YEAR_RANGE.min + 1 },
   (_, i) => GATE_CREEK_YEAR_RANGE.min + i,
 );
 
-export default function RhessysOutputsSection() {
+export function RhessysOutputsControls({
+  scenarios,
+  variables,
+  isLoading,
+  hasChoroplethData,
+}: {
+  scenarios: ReturnType<typeof useRhessysOutputs>["scenarios"];
+  variables: ReturnType<typeof useRhessysOutputs>["variables"];
+  isLoading: boolean;
+  hasChoroplethData: boolean;
+}) {
   const { classes } = useStyles();
-
-  const runId = useRunId();
-
-  const { scenarios, variables, isLoading, hasChoroplethData } =
-    useRhessysOutputs(runId);
-
   const {
     layerDesired,
-    enableLayerWithParams,
     dispatchLayerAction,
+    enableLayerWithParams,
     effective,
   } = useWatershed();
 
@@ -121,19 +52,20 @@ export default function RhessysOutputsSection() {
   const selectedVariable = params.variable ?? null;
   const selectedMode =
     params.mode ?? (scenarios.length > 0 ? "raster" : "choropleth");
-  const selectedSpatialScale = params.spatialScale ?? "hillslope";
+  const selectedSpatialScale = (params.spatialScale ?? "hillslope") as
+    | "hillslope"
+    | "patch";
   const selectedYear = params.year ?? 2000;
   const layerEnabled = effective.rhessysOutputs.enabled;
-
   const hasRasterData = scenarios.length > 0;
 
-  // Pre-computed maps: variables available for the selected scenario
-  const currentScenarioMeta = scenarios.find((s) => s.id === selectedScenario);
-  const availableVariables = currentScenarioMeta
-    ? variables.filter((v) => currentScenarioMeta.variables.includes(v.id))
-    : variables;
+  const availableVariables = useMemo(() => {
+    const meta = scenarios.find((s) => s.id === selectedScenario);
+    return meta
+      ? variables.filter((v) => meta.variables.includes(v.id))
+      : variables;
+  }, [scenarios, variables, selectedScenario]);
 
-  // Dynamic choropleth: variables for current spatial scale
   const choroplethVariables = useMemo(
     () => GATE_CREEK_VARIABLES[selectedSpatialScale] ?? [],
     [selectedSpatialScale],
@@ -157,39 +89,18 @@ export default function RhessysOutputsSection() {
   );
 
   const updateParams = useCallback(
-    (overrides: Partial<RhessysOutputParams>) => {
+    (overrides: Partial<RhessysOutputParams>) =>
       enableLayerWithParams("rhessysOutputs", {
         ...currentParams,
         ...overrides,
-      });
-    },
+      }),
     [enableLayerWithParams, currentParams],
   );
 
-  const turnOff = useCallback(() => {
-    dispatchLayerAction({ type: "TOGGLE", id: "rhessysOutputs", on: false });
-  }, [dispatchLayerAction]);
-
-  const handleScenarioChange = useCallback(
-    (event: SelectChangeEvent) => {
-      const value = event.target.value;
-      if (value === "none") return turnOff();
-      updateParams({
-        scenario: value,
-        variable: selectedVariable || variables[0]?.id || null,
-        mode: "raster",
-        spatialScale: null,
-        year: null,
-      });
-    },
-    [updateParams, turnOff, selectedVariable, variables],
-  );
-
-  const handleVariableChange = useCallback(
-    (event: SelectChangeEvent) => {
-      updateParams({ variable: event.target.value });
-    },
-    [updateParams],
+  const turnOff = useCallback(
+    () =>
+      dispatchLayerAction({ type: "TOGGLE", id: "rhessysOutputs", on: false }),
+    [dispatchLayerAction],
   );
 
   const handleSpatialScaleChange = useCallback(
@@ -198,19 +109,15 @@ export default function RhessysOutputsSection() {
       newScale: "hillslope" | "patch" | null,
     ) => {
       if (!newScale) return;
-
       const vars = GATE_CREEK_VARIABLES[newScale];
-      const variableStillValid = vars.some((v) => v.id === selectedVariable);
-      const nextVariable = variableStillValid
+      const nextVariable = vars.some((v) => v.id === selectedVariable)
         ? selectedVariable
         : (vars[0]?.id ?? null);
-
       const nextParams: Partial<RhessysOutputParams> = {
         spatialScale: newScale,
         variable: nextVariable,
         mode: "choropleth",
       };
-
       if (layerEnabled) {
         updateParams(nextParams);
       } else {
@@ -227,33 +134,6 @@ export default function RhessysOutputsSection() {
     [updateParams, dispatchLayerAction, layerEnabled, selectedVariable],
   );
 
-  const handleChoroplethScenarioChange = useCallback(
-    (event: SelectChangeEvent) => {
-      const value = event.target.value;
-      if (value === "none") return turnOff();
-      updateParams({
-        scenario: value,
-        variable: selectedVariable || choroplethVariables[0]?.id || null,
-        mode: "choropleth",
-      });
-    },
-    [updateParams, turnOff, selectedVariable, choroplethVariables],
-  );
-
-  const handleChoroplethVariableChange = useCallback(
-    (event: SelectChangeEvent) => {
-      updateParams({ variable: event.target.value, mode: "choropleth" });
-    },
-    [updateParams],
-  );
-
-  const handleYearChange = useCallback(
-    (event: SelectChangeEvent) => {
-      updateParams({ year: Number(event.target.value), mode: "choropleth" });
-    },
-    [updateParams],
-  );
-
   if (isLoading)
     return (
       <PanelStatus
@@ -262,10 +142,7 @@ export default function RhessysOutputsSection() {
         message="Checking for output data…"
       />
     );
-
-  if (!hasRasterData && !hasChoroplethData) {
-    return null;
-  }
+  if (!hasRasterData && !hasChoroplethData) return null;
 
   // Pre-computed raster maps (Victoria + Mill Creek)
   if (hasRasterData && selectedMode !== "choropleth") {
@@ -273,13 +150,16 @@ export default function RhessysOutputsSection() {
       selectedScenario != null
         ? RHESSYS_OUTPUT_SCENARIO_DESCRIPTIONS[selectedScenario]
         : undefined;
-
     return (
       <>
-        <FormControl fullWidth size="small" className={classes.formControl}>
+        <FormControl
+          fullWidth
+          size="small"
+          className={classes.rhessysOutputFormControl}
+        >
           <InputLabel
             id="rhessys-outputs-scenario-label"
-            className={classes.label}
+            className={classes.rhessysLabel}
           >
             Scenario
           </InputLabel>
@@ -288,9 +168,21 @@ export default function RhessysOutputsSection() {
             id="rhessys-outputs-scenario-select"
             value={layerEnabled && selectedScenario ? selectedScenario : "none"}
             label="Scenario"
-            onChange={handleScenarioChange}
-            className={classes.select}
-            MenuProps={{ PaperProps: { className: classes.selectPaper } }}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "none") return turnOff();
+              updateParams({
+                scenario: value,
+                variable: selectedVariable || variables[0]?.id || null,
+                mode: "raster",
+                spatialScale: null,
+                year: null,
+              });
+            }}
+            className={classes.rhessysSelect}
+            MenuProps={{
+              PaperProps: { className: classes.rhessysOutputSelectPaper },
+            }}
           >
             <MenuItem value="none">None</MenuItem>
             {scenarios.map((s) => (
@@ -324,10 +216,14 @@ export default function RhessysOutputsSection() {
         )}
 
         {layerEnabled && selectedScenario && (
-          <FormControl fullWidth size="small" className={classes.formControl}>
+          <FormControl
+            fullWidth
+            size="small"
+            className={classes.rhessysOutputFormControl}
+          >
             <InputLabel
               id="rhessys-outputs-variable-label"
-              className={classes.label}
+              className={classes.rhessysLabel}
             >
               Variable
             </InputLabel>
@@ -336,9 +232,11 @@ export default function RhessysOutputsSection() {
               id="rhessys-outputs-variable-select"
               value={selectedVariable || ""}
               label="Variable"
-              onChange={handleVariableChange}
-              className={classes.select}
-              MenuProps={{ PaperProps: { className: classes.selectPaper } }}
+              onChange={(e) => updateParams({ variable: e.target.value })}
+              className={classes.rhessysSelect}
+              MenuProps={{
+                PaperProps: { className: classes.rhessysOutputSelectPaper },
+              }}
             >
               {availableVariables.map((v) => (
                 <MenuItem key={v.id} value={v.id}>
@@ -356,13 +254,16 @@ export default function RhessysOutputsSection() {
   const selectedScenarioMeta = GATE_CREEK_SCENARIOS.find(
     (s) => s.id === selectedScenario,
   );
-
   return (
     <>
-      <FormControl fullWidth size="small" className={classes.formControl}>
+      <FormControl
+        fullWidth
+        size="small"
+        className={classes.rhessysOutputFormControl}
+      >
         <InputLabel
           id="rhessys-choropleth-scenario-label"
-          className={classes.label}
+          className={classes.rhessysLabel}
         >
           Scenario
         </InputLabel>
@@ -371,9 +272,19 @@ export default function RhessysOutputsSection() {
           id="rhessys-choropleth-scenario-select"
           value={layerEnabled && selectedScenario ? selectedScenario : "none"}
           label="Scenario"
-          onChange={handleChoroplethScenarioChange}
-          className={classes.select}
-          MenuProps={{ PaperProps: { className: classes.selectPaper } }}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === "none") return turnOff();
+            updateParams({
+              scenario: value,
+              variable: selectedVariable || choroplethVariables[0]?.id || null,
+              mode: "choropleth",
+            });
+          }}
+          className={classes.rhessysSelect}
+          MenuProps={{
+            PaperProps: { className: classes.rhessysOutputSelectPaper },
+          }}
         >
           <MenuItem value="none">None</MenuItem>
           {GATE_CREEK_SCENARIOS.map((s) => (
@@ -410,10 +321,14 @@ export default function RhessysOutputsSection() {
 
       {layerEnabled && selectedScenario && (
         <>
-          <FormControl fullWidth size="small" className={classes.formControl}>
+          <FormControl
+            fullWidth
+            size="small"
+            className={classes.rhessysOutputFormControl}
+          >
             <InputLabel
               id="rhessys-choropleth-variable-label"
-              className={classes.label}
+              className={classes.rhessysLabel}
             >
               Variable
             </InputLabel>
@@ -422,9 +337,13 @@ export default function RhessysOutputsSection() {
               id="rhessys-choropleth-variable-select"
               value={selectedVariable || ""}
               label="Variable"
-              onChange={handleChoroplethVariableChange}
-              className={classes.select}
-              MenuProps={{ PaperProps: { className: classes.selectPaper } }}
+              onChange={(e) =>
+                updateParams({ variable: e.target.value, mode: "choropleth" })
+              }
+              className={classes.rhessysSelect}
+              MenuProps={{
+                PaperProps: { className: classes.rhessysOutputSelectPaper },
+              }}
             >
               {choroplethVariables.map((v) => (
                 <MenuItem key={v.id} value={v.id}>
@@ -434,10 +353,14 @@ export default function RhessysOutputsSection() {
             </Select>
           </FormControl>
 
-          <FormControl fullWidth size="small" className={classes.formControl}>
+          <FormControl
+            fullWidth
+            size="small"
+            className={classes.rhessysOutputFormControl}
+          >
             <InputLabel
               id="rhessys-choropleth-year-label"
-              className={classes.label}
+              className={classes.rhessysLabel}
             >
               Year
             </InputLabel>
@@ -446,17 +369,25 @@ export default function RhessysOutputsSection() {
               id="rhessys-choropleth-year-select"
               value={String(selectedYear)}
               label="Year"
-              onChange={handleYearChange}
-              className={classes.select}
-              MenuProps={{ PaperProps: { className: classes.selectPaper } }}
+              onChange={(e) =>
+                updateParams({
+                  year: Number(e.target.value),
+                  mode: "choropleth",
+                })
+              }
+              className={classes.rhessysSelect}
+              MenuProps={{
+                PaperProps: { className: classes.rhessysOutputSelectPaper },
+              }}
             >
-              {years.map((y) => (
+              {gateCreekYears.map((y) => (
                 <MenuItem key={y} value={String(y)}>
                   {y}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+
           <Tooltip
             title="Water fluxes and productivities are sensitive to climate variability — selecting different years lets you explore that range rather than relying on a single year."
             placement="top"
@@ -476,6 +407,7 @@ export default function RhessysOutputsSection() {
               Why select a year?
             </Typography>
           </Tooltip>
+
           <ToggleButtonGroup
             value={selectedSpatialScale}
             exclusive

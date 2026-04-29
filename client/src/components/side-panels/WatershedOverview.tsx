@@ -4,159 +4,31 @@ import { useRunId } from "../../hooks/useRunId";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import { fetchWatersheds } from "../../api/api";
-import { fetchRhessysSpatialInputs } from "../../api/rhessysApi";
 import { API_ENDPOINTS } from "../../api/apiEndpoints";
 import { WatershedProperties } from "../../types/WatershedProperties";
-import { tss } from "../../utils/tss";
 import { toast } from "react-toastify";
+import { useWatershed } from "../../contexts/WatershedContext";
+import { useRhessysSpatialInputs } from "../../hooks/useRhessysSpatialInputs";
+import { useRhessysOutputs } from "../../hooks/useRhessysOutputs";
+import { scenariosSummaryOptions } from "../../api/scenarioApi";
+import { getLayerParams } from "../../layers/types";
+import { useStyles } from "./watershedStyles";
+import { WeppControls } from "./sections/WeppControls";
+import { RhessysSpatialControls } from "./sections/RhessysSpatialControls";
+import { RhessysOutputsControls } from "./sections/RhessysOutputsControls";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import Checkbox from "@mui/material/Checkbox";
+import Collapse from "@mui/material/Collapse";
+import Divider from "@mui/material/Divider";
 import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import PanelStatus from "../PanelStatus";
-import Collapse from "@mui/material/Collapse";
-import Divider from "@mui/material/Divider";
-import { alpha } from "@mui/material/styles";
-import WeppSection from "./sections/WeppSection";
-import WatershedDataSection from "./sections/WatershedDataSection";
-import RhessysSection from "./sections/RhessysSection";
-import RhessysOutputsSection from "./sections/RhessysOutputsSection";
-import { useRhessysOutputsData } from "../../hooks/useRhessysOutputsData";
-
-const useStyles = tss.create(({ theme }) => ({
-  root: {
-    paddingBottom: theme.spacing(4),
-  },
-  contentBox: {
-    marginTop: theme.spacing(2),
-  },
-  modelsBox: {
-    marginTop: theme.spacing(3),
-  },
-  impactPaper: {
-    marginTop: theme.spacing(1.5),
-    padding: theme.spacing(1.5),
-    backgroundColor: theme.palette.primary.main,
-    borderRadius: theme.shape.borderRadius,
-  },
-  sectionHeading: {
-    fontWeight: 600,
-    marginBottom: theme.spacing(1),
-    fontSize: theme.typography.h6.fontSize,
-  },
-  sectionSubheading: {
-    fontSize: theme.typography.body2.fontSize,
-    fontWeight: 700,
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    marginBottom: theme.spacing(1),
-    color: alpha(theme.palette.primary.contrastText, 0.9),
-  },
-  sectionSubgroup: {
-    padding: theme.spacing(1.25),
-    borderRadius: theme.shape.borderRadius,
-    border: `1px solid ${alpha(theme.palette.primary.contrastText, 0.2)}`,
-    background: `linear-gradient(180deg, ${alpha(theme.palette.primary.contrastText, 0.1)} 0%, ${alpha(theme.palette.primary.contrastText, 0.04)} 100%)`,
-  },
-  sectionSubgroupControls: {
-    marginBottom: theme.spacing(1.5),
-  },
-  sectionSubgroupLinks: {
-    marginTop: theme.spacing(1.5),
-  },
-  sectionDivider: {
-    borderColor: alpha(theme.palette.primary.contrastText, 0.5),
-    marginTop: theme.spacing(1.5),
-    marginBottom: theme.spacing(1.5),
-  },
-  emptyState: {
-    fontSize: theme.typography.body2.fontSize,
-    color: theme.palette.text.secondary,
-    fontStyle: "italic",
-  },
-  title: {
-    marginBottom: theme.spacing(1.5),
-    fontSize: theme.typography.h2.fontSize,
-  },
-  titleMulti: {
-    marginBottom: theme.spacing(1),
-    fontSize: `calc((${theme.typography.h2.fontSize} + ${theme.typography.h3.fontSize}) / 2)`,
-  },
-  paragraph: {
-    marginBottom: theme.spacing(2),
-    fontSize: theme.typography.h6.fontSize,
-  },
-  actionLink: {
-    fontSize: theme.typography.body2.fontSize,
-    color: theme.palette.accent.light,
-    textAlign: "left",
-    cursor: "pointer",
-    display: "block",
-    marginBottom: theme.spacing(1.5),
-    textDecorationColor: theme.palette.accent.light,
-  },
-  skeletonClose: {
-    marginTop: theme.spacing(1.5),
-    marginBottom: theme.spacing(2),
-  },
-  skeletonText: {
-    marginBottom: theme.spacing(1),
-  },
-  skeletonParagraph: {
-    marginBottom: theme.spacing(1.5),
-  },
-  skeletonGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(1.5),
-    marginTop: theme.spacing(4),
-  },
-  titleHeader: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-  },
-  reportDropdownWrapper: {
-    marginBottom: theme.spacing(1.5),
-  },
-  reportDropdownHeader: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    textAlign: "left",
-    cursor: "pointer",
-    backgroundColor: "transparent",
-    color: "inherit",
-    font: "inherit",
-    appearance: "none",
-    WebkitAppearance: "none",
-    padding: theme.spacing(0.75, 1),
-    border: `1px solid ${alpha(theme.palette.primary.contrastText, 0.28)}`,
-    borderRadius: theme.shape.borderRadius,
-    "&:hover": {
-      backgroundColor: alpha(theme.palette.primary.contrastText, 0.12),
-    },
-  },
-  reportDropdownLabel: {
-    fontSize: theme.typography.body2.fontSize,
-    fontWeight: 600,
-  },
-  reportDropdownLinks: {
-    paddingLeft: theme.spacing(1),
-    paddingTop: theme.spacing(0.75),
-  },
-  linksHint: {
-    fontSize: theme.typography.body2.fontSize,
-    color: alpha(theme.palette.primary.contrastText, 0.82),
-    marginBottom: theme.spacing(1),
-  },
-}));
 
 /**
  * Renders the "skeleton" version of the watershed panel while loading.
@@ -252,23 +124,10 @@ const MILLCREEK_RUN_ID = "mdobre-invincible-scarab";
 export default function WatershedOverview() {
   const { classes } = useStyles();
   const navigate = useNavigate();
-
   const runId = useRunId();
   const [rxfireOpen, setRxfireOpen] = useState(false);
 
-  const { data: spatialData, isLoading: rhessysLoading } = useQuery({
-    queryKey: queryKeys.rhessysSpatialInputs.byRun(runId ?? ""),
-    queryFn: ({ signal }) => fetchRhessysSpatialInputs(runId!, signal),
-    enabled: !!runId,
-  });
-
-  const spatialFiles = spatialData?.files ?? [];
-
-  const {
-    scenarios: outputScenarios,
-    isLoading: outputsLoading,
-    hasChoroplethData,
-  } = useRhessysOutputsData(runId);
+  const { layerDesired, toggleLayer, enableLayerWithParams } = useWatershed();
 
   const {
     data: watersheds,
@@ -279,6 +138,20 @@ export default function WatershedOverview() {
     queryFn: fetchWatersheds,
   });
 
+  // All hook calls live here so useLayerQuery side-effects fire exactly once.
+  // The fetched data is passed as props to the sub-components below.
+  const { files: rhessysSpatialFiles, isLoading: rhessysSpatialLoading } =
+    useRhessysSpatialInputs(runId);
+
+  const {
+    scenarios: rhessysOutputScenarios,
+    variables: rhessysOutputVariables,
+    isLoading: rhessysOutputsLoading,
+    hasChoroplethData,
+  } = useRhessysOutputs(runId);
+
+  const { data: scenariosSummary } = useQuery(scenariosSummaryOptions(runId));
+
   const watershed = useMemo(() => {
     if (!watersheds?.features || !runId) return null;
     return watersheds.features.find(
@@ -288,10 +161,10 @@ export default function WatershedOverview() {
   }, [watersheds?.features, runId]);
 
   const hasNoLongTermData =
-    !rhessysLoading &&
-    !outputsLoading &&
-    spatialFiles.length === 0 &&
-    outputScenarios.length === 0 &&
+    !rhessysSpatialLoading &&
+    !rhessysOutputsLoading &&
+    rhessysSpatialFiles.length === 0 &&
+    rhessysOutputScenarios.length === 0 &&
     !hasChoroplethData;
 
   const hasMultipleUtilities =
@@ -302,7 +175,6 @@ export default function WatershedOverview() {
       .split(";")
       .map((name: string) => name.trim())
       .filter((name: string) => name.length > 0);
-
     return names.length > 0 ? names : [watershed?.properties?.pws_name ?? ""];
   }, [watershed?.properties?.huc10_pws_names, watershed?.properties?.pws_name]);
 
@@ -321,6 +193,7 @@ export default function WatershedOverview() {
 
   return (
     <div className={classes.root}>
+      {/* ── Watershed properties ───────────────────────────────────────── */}
       <div className={classes.contentBox}>
         <div className={classes.titleHeader}>
           <div>
@@ -387,6 +260,7 @@ export default function WatershedOverview() {
           <strong>Impact Assessment</strong>
         </Typography>
 
+        {/* ── Stream flow and erosion ───────────────────────────────────── */}
         <Paper elevation={0} className={classes.impactPaper}>
           <Typography variant="body1" className={classes.sectionHeading}>
             Stream flow and erosion
@@ -398,7 +272,7 @@ export default function WatershedOverview() {
             <Typography className={classes.sectionSubheading}>
               Map Controls
             </Typography>
-            <WeppSection />
+            <WeppControls availableScenarios={scenariosSummary ?? []} />
           </div>
 
           <Divider className={classes.sectionDivider} />
@@ -489,7 +363,8 @@ export default function WatershedOverview() {
           </div>
         </Paper>
 
-        {hasNoLongTermData ? null : (
+        {/* ── Water quality and vegetation growth ──────────────────────── */}
+        {!hasNoLongTermData && (
           <Paper elevation={0} className={classes.impactPaper}>
             <Typography variant="body1" className={classes.sectionHeading}>
               Water quality and vegetation growth
@@ -501,17 +376,93 @@ export default function WatershedOverview() {
               <Typography className={classes.sectionSubheading}>
                 Map Controls
               </Typography>
-              <RhessysSection />
-              <RhessysOutputsSection />
+
+              <RhessysSpatialControls
+                files={rhessysSpatialFiles}
+                isLoading={rhessysSpatialLoading}
+              />
+              <RhessysOutputsControls
+                scenarios={rhessysOutputScenarios}
+                variables={rhessysOutputVariables}
+                isLoading={rhessysOutputsLoading}
+                hasChoroplethData={hasChoroplethData}
+              />
             </div>
           </Paper>
         )}
 
+        {/* ── Watershed Data ────────────────────────────────────────────── */}
         <Paper elevation={0} className={classes.impactPaper}>
           <Typography variant="body1" className={classes.sectionHeading}>
             Watershed Data
           </Typography>
-          <WatershedDataSection />
+
+          <div className={classes.layer}>
+            <Typography className={classes.layerTitle}>
+              Land Use (2025)
+            </Typography>
+            <Checkbox
+              checked={layerDesired.landuse.enabled}
+              onChange={(e) => toggleLayer(e.target.id, e.target.checked)}
+              className={classes.layerCheckbox}
+              slotProps={{ input: { id: "landuse" } }}
+            />
+          </div>
+          <div className={classes.layer}>
+            <Typography className={classes.layerTitle}>
+              Vegetation Cover
+            </Typography>
+            <Checkbox
+              checked={
+                layerDesired.choropleth.enabled &&
+                getLayerParams(layerDesired, "choropleth").metric ===
+                  "vegetationCover"
+              }
+              onChange={(e) => {
+                if (e.target.checked) {
+                  enableLayerWithParams("choropleth", {
+                    metric: "vegetationCover",
+                  });
+                } else {
+                  toggleLayer("choropleth", false);
+                }
+              }}
+              className={classes.layerCheckbox}
+              slotProps={{ input: { id: "vegetationCover" } }}
+            />
+          </div>
+          <div className={classes.layer}>
+            <Typography className={classes.layerTitle}>
+              Predicted Soil Burn Severity
+            </Typography>
+            {layerDesired.sbs.enabled && runId && (
+              <Tooltip title="Download SBS GeoTIFF">
+                <IconButton
+                  className={classes.layerDownloadButton}
+                  size="small"
+                  aria-label="Download SBS GeoTIFF"
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = API_ENDPOINTS.SBS_TIFF_DOWNLOAD(runId);
+                    link.target = "_blank";
+                    link.rel = "noopener noreferrer";
+                    link.download = "";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                >
+                  <DownloadIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Checkbox
+              checked={layerDesired.sbs.enabled}
+              onChange={(e) => toggleLayer(e.target.id, e.target.checked)}
+              className={classes.layerCheckbox}
+              slotProps={{ input: { id: "sbs" } }}
+            />
+          </div>
         </Paper>
       </div>
     </div>

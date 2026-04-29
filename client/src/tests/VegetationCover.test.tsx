@@ -516,7 +516,12 @@ describe("VegetationCover", () => {
         expect(mockFetchRap).toHaveBeenCalled();
       });
 
-      expect(screen.getByTestId("coverage-chart")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          screen.getByText("Failed to load vegetation data."),
+        ).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId("coverage-chart")).not.toBeInTheDocument();
     });
 
     it("handles fetch error without message", async () => {
@@ -530,7 +535,12 @@ describe("VegetationCover", () => {
         expect(mockFetchRap).toHaveBeenCalled();
       });
 
-      expect(screen.getByTestId("coverage-chart")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          screen.getByText("Failed to load vegetation data."),
+        ).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId("coverage-chart")).not.toBeInTheDocument();
     });
 
     it("fetches data with specific year parameter", async () => {
