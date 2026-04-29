@@ -68,6 +68,13 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
     if (!Array.isArray(watersheds?.features) || !watersheds.features.length)
       return;
 
+    const applyViewportConstraints = (bounds: L.LatLngBounds) => {
+      const paddedBoundsForPan = bounds.pad(1.0);
+      const paddedBoundsForZoom = bounds.pad(0.5);
+      map.setMaxBounds(paddedBoundsForPan);
+      map.setMinZoom(map.getBoundsZoom(paddedBoundsForZoom));
+    };
+
     if (watershedId) {
       const matchingFeature = watersheds.features.find(
         (feature: GeoJSON.Feature<GeoJSON.Geometry, WatershedProperties>) =>
@@ -76,16 +83,21 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
       if (matchingFeature) {
         const layer = L.geoJSON(matchingFeature);
         const featureBounds = layer.getBounds();
-        if (hasPositioned.current || savedCenter) {
-          // Map already has a reasonable position — animate.
-          zoomToFeature(map, layer);
-        } else if (featureBounds.isValid()) {
-          // Direct URL, first-ever load — jump instantly so the user
-          // doesn't see the fallback center.
-          map.fitBounds(featureBounds, { maxZoom: 16 });
-          const c = map.getCenter();
-          savedCenter = [c.lat, c.lng];
-          savedZoom = map.getZoom();
+        if (featureBounds.isValid()) {
+          // Apply constraints before animation so Leaflet respects them during the transition.
+          applyViewportConstraints(featureBounds);
+
+          if (hasPositioned.current || savedCenter) {
+            // Map already has a reasonable position — animate.
+            zoomToFeature(map, layer);
+          } else {
+            // Direct URL, first-ever load — jump instantly so the user
+            // doesn't see the fallback center.
+            map.fitBounds(featureBounds, { maxZoom: 16 });
+            const c = map.getCenter();
+            savedCenter = [c.lat, c.lng];
+            savedZoom = map.getZoom();
+          }
         }
         hasPositioned.current = true;
       }
@@ -93,15 +105,19 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
     }
 
     // Home view — only reposition on the very first load.
-    if (hasPositioned.current || savedCenter) {
-      hasPositioned.current = true;
-      return;
-    }
     try {
       const bounds = L.geoJSON(watersheds).getBounds();
       if (bounds.isValid()) {
+        applyViewportConstraints(bounds);
+      }
+
+      if (hasPositioned.current || savedCenter) {
+        hasPositioned.current = true;
+        return;
+      }
+
+      if (bounds.isValid()) {
         map.fitBounds(bounds, { padding: [30, 30] });
-        map.setMaxBounds(bounds.pad(0.5));
         const c = map.getCenter();
         savedCenter = [c.lat, c.lng];
         savedZoom = map.getZoom();
