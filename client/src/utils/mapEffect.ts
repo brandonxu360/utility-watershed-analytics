@@ -105,16 +105,17 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
     }
 
     // Home view — only reposition on the very first load.
-    const bounds = L.geoJSON(watersheds).getBounds();
-    if (bounds.isValid()) {
-      applyViewportConstraints(bounds);
-    }
-
-    if (hasPositioned.current || savedCenter) {
-      hasPositioned.current = true;
-      return;
-    }
     try {
+      const bounds = L.geoJSON(watersheds).getBounds();
+      if (bounds.isValid()) {
+        applyViewportConstraints(bounds);
+      }
+
+      if (hasPositioned.current || savedCenter) {
+        hasPositioned.current = true;
+        return;
+      }
+
       if (bounds.isValid()) {
         map.fitBounds(bounds, { padding: [30, 30] });
         const c = map.getCenter();
