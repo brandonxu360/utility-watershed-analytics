@@ -1,6 +1,5 @@
 import { useWatershed } from "../../../contexts/WatershedContext";
 import { getLayerParams } from "../../../layers/types";
-import { type useRhessysSpatialInputs } from "../../../hooks/useRhessysSpatialInputs";
 import { useStyles } from "../watershedStyles";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -8,12 +7,13 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
 import PanelStatus from "../../PanelStatus";
+import type { RhessysSpatialFile } from "../../../api/types/rhessys";
 
 export function RhessysSpatialControls({
   files,
   isLoading,
 }: {
-  files: ReturnType<typeof useRhessysSpatialInputs>["files"];
+  files: RhessysSpatialFile[];
   isLoading: boolean;
 }) {
   const { classes } = useStyles();

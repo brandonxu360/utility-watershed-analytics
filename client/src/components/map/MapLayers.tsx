@@ -132,7 +132,7 @@ export default function MapLayers() {
         />
       )}
 
-      {subcatchmentEffective && subcatchments?.features?.length && (
+      {subcatchmentEffective && !!subcatchments?.features?.length && (
         <SubcatchmentLayer
           key={`subcatchment-${runId}`}
           data={subcatchments}

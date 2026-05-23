@@ -4,13 +4,14 @@ import {
   getLayerParams,
   type RhessysOutputParams,
 } from "../../../layers/types";
-import { type useRhessysOutputs } from "../../../hooks/useRhessysOutputs";
+
 import {
   GATE_CREEK_VARIABLES,
   GATE_CREEK_SCENARIOS,
   GATE_CREEK_YEAR_RANGE,
   RHESSYS_OUTPUT_SCENARIO_DESCRIPTIONS,
 } from "../../../api/constants";
+
 import { useStyles } from "../watershedStyles";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
@@ -22,6 +23,10 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PanelStatus from "../../PanelStatus";
+import type {
+  RhessysOutputScenario,
+  RhessysOutputVariable,
+} from "../../../api/types/rhessys";
 
 const gateCreekYears = Array.from(
   { length: GATE_CREEK_YEAR_RANGE.max - GATE_CREEK_YEAR_RANGE.min + 1 },
@@ -34,8 +39,8 @@ export function RhessysOutputsControls({
   isLoading,
   hasChoroplethData,
 }: {
-  scenarios: ReturnType<typeof useRhessysOutputs>["scenarios"];
-  variables: ReturnType<typeof useRhessysOutputs>["variables"];
+  scenarios: RhessysOutputScenario[];
+  variables: RhessysOutputVariable[];
   isLoading: boolean;
   hasChoroplethData: boolean;
 }) {

@@ -62,15 +62,15 @@ export function WeppControls({
             labelId="scenario-select-label"
             id="scenario-select"
             value={
-              !scenarioEnabled || !selectedScenario
+              !scenarioEnabled ||
+              !selectedScenario ||
+              availableScenarios.length === 0
                 ? "none"
-                : availableScenarios.length === 0
+                : availableScenarios.some(
+                      (s) => s.scenario === selectedScenario,
+                    )
                   ? selectedScenario
-                  : availableScenarios.some(
-                        (s) => s.scenario === selectedScenario,
-                      )
-                    ? selectedScenario
-                    : "none"
+                  : "none"
             }
             label="Scenario"
             onChange={(e) => {
