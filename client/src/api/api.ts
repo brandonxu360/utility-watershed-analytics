@@ -1,9 +1,11 @@
 import { API_ENDPOINTS } from "./apiEndpoints";
 import { checkResponse } from "./errors";
+
 import type {
   WatershedProperties,
   WatershedCollection,
 } from "../types/WatershedProperties";
+
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
 
 /**

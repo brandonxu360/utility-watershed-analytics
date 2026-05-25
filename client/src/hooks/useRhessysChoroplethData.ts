@@ -14,7 +14,7 @@ import {
 import {
   getPatchGeometryQueryScenario,
   getPatchGeometryRevision,
-} from "../api/rhessys/utils";
+} from "../api/utils";
 
 export function useRhessysChoroplethData() {
   const runId = useRunId();

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { extractRows, toFiniteNumber } from "../api/queryUtils";
+import { extractRows, toFiniteNumber } from "../api/utils";
 
-describe("queryUtils", () => {
+describe("utils", () => {
   describe("extractRows", () => {
     it("returns array directly if input is array", () => {
       const input = [{ id: 1 }, { id: 2 }];

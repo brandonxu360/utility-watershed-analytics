@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fetchLanduse } from "../api/landuseApi";
-import * as queryUtils from "../api/queryUtils";
+import * as utils from "../api/utils";
 
-vi.mock("../api/queryUtils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../api/queryUtils")>();
+vi.mock("../api/utils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api/utils")>();
   return {
     ...actual,
     postQuery: vi.fn().mockResolvedValue([]),
   };
 });
 
-const mockPostQuery = vi.mocked(queryUtils.postQuery);
+const mockPostQuery = vi.mocked(utils.postQuery);
 
 const TEST_RUN_PATH = "batch;;test-batch;;test-run";
 const signal = new AbortController().signal;
