@@ -17,7 +17,6 @@ import { WeppControls } from "./sections/WeppControls";
 import { RhessysSpatialControls } from "./sections/RhessysSpatialControls";
 import { RhessysOutputsControls } from "./sections/RhessysOutputsControls";
 import Typography from "@mui/material/Typography";
-import Skeleton from "@mui/material/Skeleton";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
@@ -29,95 +28,6 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import PanelStatus from "../PanelStatus";
-
-/**
- * Renders the "skeleton" version of the watershed panel while loading.
- */
-function SkeletonWatershedPanel() {
-  const { classes } = useStyles();
-  return (
-    <div data-testid="skeleton-panel">
-      <Skeleton
-        variant="rectangular"
-        width="20%"
-        height="1.75rem"
-        className={classes.skeletonClose}
-        data-testid="skeleton-close-button"
-      />
-      <Skeleton
-        variant="text"
-        width="60%"
-        height="1.75rem"
-        className={classes.skeletonText}
-        data-testid="skeleton-title-text"
-      />
-
-      <Skeleton
-        variant="text"
-        width="90%"
-        height="1.75rem"
-        className={classes.skeletonParagraph}
-      />
-      <Skeleton
-        variant="text"
-        width="60%"
-        height="1.75rem"
-        className={classes.skeletonParagraph}
-      />
-      <Skeleton
-        variant="text"
-        width="60%"
-        height="1.75rem"
-        className={classes.skeletonParagraph}
-      />
-      <Skeleton
-        variant="text"
-        width="60%"
-        height="1.75rem"
-        className={classes.skeletonParagraph}
-      />
-      <Skeleton
-        variant="text"
-        width="60%"
-        height="1.75rem"
-        className={classes.skeletonParagraph}
-      />
-      <Skeleton
-        variant="text"
-        width="90%"
-        height="1.75rem"
-        className={classes.skeletonParagraph}
-      />
-
-      <div className={classes.skeletonGroup}>
-        <Skeleton
-          variant="rectangular"
-          width="100%"
-          height="3rem"
-          data-testid="skeleton-button"
-        />
-        <Skeleton
-          variant="rectangular"
-          width="100%"
-          height="3rem"
-          data-testid="skeleton-button"
-        />
-        <Skeleton
-          variant="rectangular"
-          width="100%"
-          height="3rem"
-          data-testid="skeleton-button"
-        />
-        <Skeleton
-          variant="rectangular"
-          width="100%"
-          height="3rem"
-          data-testid="skeleton-button"
-        />
-      </div>
-    </div>
-  );
-}
 
 const MILLCREEK_RUN_ID = "mdobre-invincible-scarab";
 
@@ -178,7 +88,7 @@ export default function WatershedOverview() {
     return names.length > 0 ? names : [watershed?.properties?.pws_name ?? ""];
   }, [watershed?.properties?.huc10_pws_names, watershed?.properties?.pws_name]);
 
-  if (isLoading) return <SkeletonWatershedPanel />;
+  if (isLoading) return <PanelStatus status="loading" />;
   if (error)
     return (
       <PanelStatus status="error" message={error ? error.message : undefined} />

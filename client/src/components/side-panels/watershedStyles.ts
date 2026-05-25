@@ -73,22 +73,6 @@ export const useStyles = tss.create(({ theme }) => ({
     marginBottom: theme.spacing(1.5),
     textDecorationColor: theme.palette.accent.light,
   },
-  skeletonClose: {
-    marginTop: theme.spacing(1.5),
-    marginBottom: theme.spacing(2),
-  },
-  skeletonText: {
-    marginBottom: theme.spacing(1),
-  },
-  skeletonParagraph: {
-    marginBottom: theme.spacing(1.5),
-  },
-  skeletonGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(1.5),
-    marginTop: theme.spacing(4),
-  },
   titleHeader: {
     display: "flex",
     alignItems: "flex-start",
