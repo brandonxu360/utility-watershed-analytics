@@ -1,4 +1,5 @@
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
+import type { WatershedProperties } from "../types/WatershedProperties";
 import type {
   ScenarioDataRow,
   ScenarioVariableType,
@@ -138,4 +139,12 @@ export function buildHillslopeTooltip(
 
   const lines = [...headerSection(props), ...section];
   return `<span class="tooltip-bold">${lines.join("<br/>")}</span>`;
+}
+
+export function buildWatershedTooltip(
+  props: Partial<WatershedProperties> | null,
+): string {
+  const name = props?.pws_name ?? "Unknown Watershed";
+  const parts = [props?.county_nam, props?.state].filter(Boolean).join(", ");
+  return `<span class="tooltip-bold"><strong>${name}</strong>${parts ? `<br>${parts}` : ""}</span>`;
 }

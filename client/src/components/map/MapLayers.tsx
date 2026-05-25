@@ -17,6 +17,7 @@ import { defaultStyle, selectedStyle, highlightedStyle } from "./constants";
 import type { WatershedProperties } from "../../types/WatershedProperties";
 import { getLayerParams } from "../../layers/types";
 import { MapEffect } from "../../utils/mapEffect";
+import { buildWatershedTooltip } from "../../utils/tooltipContent";
 import type { LeafletMouseEvent } from "leaflet";
 import MapLoadingOverlay from "./MapLoadingOverlay";
 import SubcatchmentLayer from "./SubcatchmentLayer";
@@ -129,20 +130,7 @@ export default function MapLayers() {
             const props = feature.properties as WatershedProperties | null;
 
             if (!runId) {
-              const name = props?.pws_name ?? "Unknown Watershed";
-              const parts = [props?.county_nam, props?.state]
-                .filter(Boolean)
-                .join(", ");
-              const container = document.createElement("span");
-              container.className = "tooltip-bold";
-              const nameEl = document.createElement("strong");
-              nameEl.textContent = name;
-              container.appendChild(nameEl);
-              if (parts) {
-                container.appendChild(document.createElement("br"));
-                container.appendChild(document.createTextNode(parts));
-              }
-              layer.bindTooltip(container, {
+              layer.bindTooltip(buildWatershedTooltip(props), {
                 className: "tooltip",
                 sticky: true,
                 direction: "top",
