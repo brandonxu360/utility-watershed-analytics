@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fetchRap, fetchRapChoropleth } from "../api/rapApi";
-import * as queryUtils from "../api/queryUtils";
+import * as queryUtils from "../api/utils";
 
-vi.mock("../api/queryUtils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../api/queryUtils")>();
+vi.mock("../api/utils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api/utils")>();
   return {
     ...actual,
     postQuery: vi.fn().mockResolvedValue([]),
