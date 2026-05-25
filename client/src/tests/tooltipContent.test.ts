@@ -215,7 +215,7 @@ describe("buildWatershedTooltip", () => {
 
   it("omits location line entirely when both county and state are absent", () => {
     const html = buildWatershedTooltip({ pws_name: "Cedar River" });
-    expect(html).not.toContain("<br>");
+    expect(html).not.toMatch(/<br\s*\/?>/i);
   });
 
   it("wraps output in tooltip-bold span", () => {
