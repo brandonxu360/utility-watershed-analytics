@@ -117,7 +117,7 @@ export default function MapLayers() {
 
       {watersheds && (
         <GeoJSON
-          key={runId ?? "no-watershed"}
+          key={`watersheds-${runId ?? "home"}`}
           data={watersheds}
           style={(feature) => {
             if (!runId) return defaultStyle;
@@ -166,9 +166,9 @@ export default function MapLayers() {
         />
       )}
 
-      {subcatchmentEffective && subcatchments?.features?.length && (
+      {subcatchmentEffective && !!subcatchments?.features?.length && (
         <SubcatchmentLayer
-          key={runId}
+          key={`subcatchment-${runId}`}
           data={subcatchments}
           style={subcatchmentStyle}
           coverageActive={choroplethActive || scenarioEffective}
@@ -184,7 +184,11 @@ export default function MapLayers() {
             pointerEvents: "none",
           }}
         >
-          <GeoJSON key={runId} data={channelData} style={channelStyle} />
+          <GeoJSON
+            key={`channels-${runId}`}
+            data={channelData}
+            style={channelStyle}
+          />
         </Pane>
       )}
 

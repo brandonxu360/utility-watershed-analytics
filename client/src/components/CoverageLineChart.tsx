@@ -24,14 +24,12 @@ export type CoverageLineChartProps = {
     activeFill: string;
     activeStroke: string;
   }[];
-  /** optional label to display on the Y axis (e.g. "Percent Cover (%)") */
   yAxisLabel?: string;
 };
 
 const useStyles = tss.create(({ theme }) => ({
   container: {
     width: "100%",
-    height: 300,
     minWidth: 0,
   },
   title: {
@@ -59,7 +57,7 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
             {title}
           </h3>
 
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={300}>
             <LineChart
               data={data}
               margin={{
@@ -84,7 +82,6 @@ export const CoverageLineChart: React.FC<CoverageLineChartProps> = ({
                         angle: -90,
                         position: "insideLeft",
                         dx: -15,
-                        // centre rotated label both horizontally and vertically
                         style: {
                           textAnchor: "middle",
                           dominantBaseline: "middle",

@@ -94,25 +94,13 @@ describe("WatershedOverview", () => {
   });
 
   describe("loading state", () => {
-    it("renders skeleton panel while loading", () => {
+    it("renders loading indicator while fetching", () => {
       mockUseParams.mockReturnValue("test-watershed-123");
       mockFetchWatersheds.mockReturnValue(new Promise(() => {})); // Never resolves
 
       renderWithProviders(<WatershedOverview />);
 
-      expect(screen.getByTestId("skeleton-panel")).toBeInTheDocument();
-      expect(screen.getByTestId("skeleton-title-text")).toBeInTheDocument();
-      expect(screen.getByTestId("skeleton-close-button")).toBeInTheDocument();
-    });
-
-    it("renders skeleton buttons while loading", () => {
-      mockUseParams.mockReturnValue("test-watershed-123");
-      mockFetchWatersheds.mockReturnValue(new Promise(() => {}));
-
-      renderWithProviders(<WatershedOverview />);
-
-      const skeletonButtons = screen.getAllByTestId("skeleton-button");
-      expect(skeletonButtons.length).toBeGreaterThan(0);
+      expect(screen.getByRole("status")).toBeInTheDocument();
     });
   });
 

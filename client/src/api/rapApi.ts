@@ -6,7 +6,7 @@ import {
   toFiniteNumber,
   createYearFilter,
   createBandFilter,
-} from "./queryUtils";
+} from "./utils";
 
 import type {
   AggregatedRapRow,
