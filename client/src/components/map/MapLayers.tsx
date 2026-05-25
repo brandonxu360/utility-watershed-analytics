@@ -13,9 +13,11 @@ import { useSubcatchmentData } from "../../hooks/useSubcatchmentData";
 import { useChannelData } from "../../hooks/useChannelData";
 import { useLanduseData } from "../../hooks/useLanduseData";
 import { useLayerStyles } from "../../hooks/useLayerStyles";
-import { defaultStyle, selectedStyle } from "./constants";
+import { defaultStyle, selectedStyle, highlightedStyle } from "./constants";
+import type { WatershedProperties } from "../../types/WatershedProperties";
 import { getLayerParams } from "../../layers/types";
 import { MapEffect } from "../../utils/mapEffect";
+import { buildWatershedTooltip } from "../../utils/tooltipContent";
 import type { LeafletMouseEvent } from "leaflet";
 import MapLoadingOverlay from "./MapLoadingOverlay";
 import SubcatchmentLayer from "./SubcatchmentLayer";
@@ -125,6 +127,26 @@ export default function MapLayers() {
               : { opacity: 0, fillOpacity: 0 };
           }}
           onEachFeature={(feature, layer) => {
+            const props = feature.properties as WatershedProperties | null;
+
+            if (!runId) {
+              layer.bindTooltip(buildWatershedTooltip(props), {
+                className: "tooltip",
+                sticky: true,
+                direction: "top",
+                offset: [0, -8],
+              });
+
+              layer.on({
+                mouseover: (e) => {
+                  e.target.setStyle(highlightedStyle);
+                },
+                mouseout: (e) => {
+                  e.target.setStyle(defaultStyle);
+                },
+              });
+            }
+
             if (!runId || feature?.id?.toString() === runId) {
               layer.on({ click: onWatershedClick });
             }
