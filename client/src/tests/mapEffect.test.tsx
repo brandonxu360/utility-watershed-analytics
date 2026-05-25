@@ -360,5 +360,38 @@ describe("MapEffectUtil", () => {
       expect(mockMap.fitBounds).not.toHaveBeenCalled();
       expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
+
+    it("does not mark hasPositioned when feature bounds are invalid", () => {
+      // Make bounds invalid for the first call (watershed branch), then valid for home-view
+      mockBounds.isValid.mockReturnValueOnce(false);
+
+      const watersheds = createWatershedData([{ id: "ws-1" }]);
+
+      const { rerender } = renderHook(
+        (props: {
+          watershedId: string | null;
+          watersheds: GeoJSON.FeatureCollection<
+            GeoJSON.Geometry,
+            WatershedProperties
+          >;
+        }) => MapEffect(props),
+        { initialProps: { watershedId: "ws-1", watersheds } },
+      );
+
+      // Invalid bounds: no positioning should occur
+      expect(mockMap.fitBounds).not.toHaveBeenCalled();
+      expect(mockZoomToFeature).not.toHaveBeenCalled();
+
+      // Simulate a data refresh (new watersheds reference) with now-valid bounds.
+      // This triggers the effect to re-run. hasPositioned was never set, so the
+      // code should take the instant fitBounds path (not the animated path).
+      const updatedWatersheds = createWatershedData([{ id: "ws-1" }]);
+      rerender({ watershedId: "ws-1", watersheds: updatedWatersheds });
+
+      expect(mockMap.fitBounds).toHaveBeenCalledWith(mockBounds, {
+        maxZoom: 16,
+      });
+      expect(mockZoomToFeature).not.toHaveBeenCalled();
+    });
   });
 });

@@ -98,8 +98,8 @@ export function MapEffect({ watershedId, watersheds }: MapEffectProps): null {
             savedCenter = [c.lat, c.lng];
             savedZoom = map.getZoom();
           }
+          hasPositioned.current = true;
         }
-        hasPositioned.current = true;
       }
       return;
     }
