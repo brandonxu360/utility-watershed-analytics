@@ -15,6 +15,7 @@ const mockMap = {
   flyToBounds: vi.fn(),
   fitBounds: vi.fn(),
   setMaxBounds: vi.fn(),
+  setMinZoom: vi.fn(),
   getBoundsZoom: vi.fn(() => 12),
   on: vi.fn((event: string, handler: MoveendHandler) => {
     if (event === "moveend") moveendListeners.push(handler);
@@ -147,9 +148,13 @@ describe("MapEffectUtil", () => {
       );
       // First-ever render: fitBounds (instant) not zoomToFeature (animated)
       expect(mockZoomToFeature).not.toHaveBeenCalled();
+      expect(mockBounds.pad).toHaveBeenCalledWith(0.5);
       expect(mockMap.fitBounds).toHaveBeenCalledWith(mockBounds, {
         maxZoom: 16,
       });
+      expect(mockMap.setMaxBounds).toHaveBeenCalledWith(mockBounds);
+      expect(mockMap.getBoundsZoom).toHaveBeenCalledWith(mockBounds);
+      expect(mockMap.setMinZoom).toHaveBeenCalledWith(12);
     });
 
     it("matches feature id as string when id is numeric", () => {
@@ -202,6 +207,8 @@ describe("MapEffectUtil", () => {
       });
       expect(mockBounds.pad).toHaveBeenCalledWith(0.5);
       expect(mockMap.setMaxBounds).toHaveBeenCalledWith(mockBounds);
+      expect(mockMap.getBoundsZoom).toHaveBeenCalledWith(mockBounds);
+      expect(mockMap.setMinZoom).toHaveBeenCalledWith(12);
     });
 
     it("does not re-run initial fit on subsequent renders", () => {
@@ -288,6 +295,9 @@ describe("MapEffectUtil", () => {
       // Should animate (savedCenter exists) instead of instant fitBounds
       expect(mockZoomToFeature).toHaveBeenCalledWith(mockMap, mockTempLayer);
       expect(mockMap.fitBounds).not.toHaveBeenCalled();
+      expect(mockMap.setMaxBounds).toHaveBeenCalledWith(mockBounds);
+      expect(mockMap.getBoundsZoom).toHaveBeenCalledWith(mockBounds);
+      expect(mockMap.setMinZoom).toHaveBeenCalledWith(12);
     });
 
     it("does not re-zoom on back navigation (watershed to home)", () => {
@@ -348,6 +358,39 @@ describe("MapEffectUtil", () => {
       renderMapEffect({ watershedId: null, watersheds });
 
       expect(mockMap.fitBounds).not.toHaveBeenCalled();
+      expect(mockZoomToFeature).not.toHaveBeenCalled();
+    });
+
+    it("does not mark hasPositioned when feature bounds are invalid", () => {
+      // Make bounds invalid for the first call (watershed branch), then valid for home-view
+      mockBounds.isValid.mockReturnValueOnce(false);
+
+      const watersheds = createWatershedData([{ id: "ws-1" }]);
+
+      const { rerender } = renderHook(
+        (props: {
+          watershedId: string | null;
+          watersheds: GeoJSON.FeatureCollection<
+            GeoJSON.Geometry,
+            WatershedProperties
+          >;
+        }) => MapEffect(props),
+        { initialProps: { watershedId: "ws-1", watersheds } },
+      );
+
+      // Invalid bounds: no positioning should occur
+      expect(mockMap.fitBounds).not.toHaveBeenCalled();
+      expect(mockZoomToFeature).not.toHaveBeenCalled();
+
+      // Simulate a data refresh (new watersheds reference) with now-valid bounds.
+      // This triggers the effect to re-run. hasPositioned was never set, so the
+      // code should take the instant fitBounds path (not the animated path).
+      const updatedWatersheds = createWatershedData([{ id: "ws-1" }]);
+      rerender({ watershedId: "ws-1", watersheds: updatedWatersheds });
+
+      expect(mockMap.fitBounds).toHaveBeenCalledWith(mockBounds, {
+        maxZoom: 16,
+      });
       expect(mockZoomToFeature).not.toHaveBeenCalled();
     });
   });
