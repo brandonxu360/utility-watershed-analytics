@@ -25,7 +25,8 @@ import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { alpha, Divider } from "@mui/material";
+import Divider from "@mui/material/Divider";
+import { alpha } from "@mui/material/styles";
 
 const useStyles = tss.create(({ theme }) => ({
   layer: {
