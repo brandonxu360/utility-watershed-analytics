@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { buildHillslopeTooltip } from "../utils/tooltipContent";
+import {
+  buildHillslopeTooltip,
+  buildWatershedTooltip,
+} from "../utils/tooltipContent";
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
+import type { WatershedProperties } from "../types/WatershedProperties";
 import type { ScenarioDataRow } from "../api/types/scenario";
 
 const baseProps: Partial<SubcatchmentProperties> = {
@@ -169,6 +173,91 @@ describe("buildHillslopeTooltip", () => {
       });
       expect(html).not.toContain("Width:");
       expect(html).not.toContain("Slope:");
+    });
+  });
+});
+
+describe("buildWatershedTooltip", () => {
+  it("falls back to 'Unknown Watershed' when props are null", () => {
+    const html = buildWatershedTooltip(null);
+    expect(html).toContain("Unknown Watershed");
+  });
+
+  it("falls back to 'Unknown Watershed' when pws_name is missing", () => {
+    const html = buildWatershedTooltip({});
+    expect(html).toContain("Unknown Watershed");
+  });
+
+  it("renders pws_name when provided", () => {
+    const html = buildWatershedTooltip({ pws_name: "Cedar River" });
+    expect(html).toContain("Cedar River");
+  });
+
+  it("renders county and state when both present", () => {
+    const props: Partial<WatershedProperties> = {
+      pws_name: "Cedar River",
+      county_nam: "King County",
+      state: "WA",
+    };
+    const html = buildWatershedTooltip(props);
+    expect(html).toContain("King County, WA");
+  });
+
+  it("renders only county when state is absent", () => {
+    const props: Partial<WatershedProperties> = {
+      pws_name: "Cedar River",
+      county_nam: "King County",
+    };
+    const html = buildWatershedTooltip(props);
+    expect(html).toContain("King County");
+    expect(html).not.toContain(",");
+  });
+
+  it("omits location line entirely when both county and state are absent", () => {
+    const html = buildWatershedTooltip({ pws_name: "Cedar River" });
+    expect(html).not.toMatch(/<br\s*\/?>/i);
+  });
+
+  it("wraps output in tooltip-bold span", () => {
+    const html = buildWatershedTooltip({ pws_name: "Cedar River" });
+    expect(html).toMatch(/^<span class="tooltip-bold">.*<\/span>$/s);
+  });
+
+  describe("XSS prevention", () => {
+    /**
+     * These tests parse the tooltip output as HTML the same way Leaflet does
+     * (via innerHTML) and assert that no unexpected elements were injected.
+     * A string-only check (toContain("&lt;script&gt;")) can mask double-escaping
+     * bugs; DOM parsing is the actual proof.
+     */
+    it("does not inject elements from a malicious pws_name", () => {
+      const output = buildWatershedTooltip({
+        pws_name: "<img src=x onerror=alert(1)>",
+      });
+      const container = document.createElement("div");
+      container.innerHTML = output;
+      expect(container.querySelectorAll("img")).toHaveLength(0);
+      expect(container.querySelector("strong")?.textContent).toBe(
+        "<img src=x onerror=alert(1)>",
+      );
+    });
+
+    it("does not inject elements from a malicious county_nam", () => {
+      const output = buildWatershedTooltip({
+        pws_name: "Safe Name",
+        county_nam: "<script>alert(1)</script>",
+      });
+      const container = document.createElement("div");
+      container.innerHTML = output;
+      expect(container.querySelectorAll("script")).toHaveLength(0);
+    });
+
+    it("preserves the raw text content after round-tripping through innerHTML", () => {
+      const payload = `<b>bold</b> & "quoted" O'Brien`;
+      const output = buildWatershedTooltip({ pws_name: payload });
+      const container = document.createElement("div");
+      container.innerHTML = output;
+      expect(container.querySelector("strong")?.textContent).toBe(payload);
     });
   });
 });

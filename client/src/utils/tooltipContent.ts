@@ -1,4 +1,5 @@
 import type { SubcatchmentProperties } from "../types/SubcatchmentProperties";
+import type { WatershedProperties } from "../types/WatershedProperties";
 import type {
   ScenarioDataRow,
   ScenarioVariableType,
@@ -17,6 +18,25 @@ export type TooltipContext =
       components?: { shrub: number; tree: number };
     }
   | { layer: "none" };
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
+/** Tagged template literal that auto-escapes all interpolated values as HTML text. */
+function html(strings: TemplateStringsArray, ...values: unknown[]): string {
+  let result = strings[0];
+  for (let i = 0; i < values.length; i++) {
+    result += escapeHtml(String(values[i] ?? ""));
+    result += strings[i + 1];
+  }
+  return result;
+}
 
 function formatMass(kg: number): string {
   if (Math.abs(kg) >= 1000)
@@ -42,7 +62,7 @@ function geometrySection(props: Partial<SubcatchmentProperties>): string[] {
     `<strong>Area:</strong> ${props.hillslope_area ?? "N/A"} m²`,
     `<strong>Slope:</strong> ${props.slope_scalar?.toFixed(2) ?? "N/A"}`,
     `<strong>Aspect:</strong> ${props.aspect?.toFixed(2) ?? "N/A"}`,
-    `<strong>Soil:</strong> ${props.simple_texture ?? "N/A"}`,
+    html`<strong>Soil:</strong> ${props.simple_texture ?? "N/A"}`,
   ];
 }
 
@@ -67,7 +87,7 @@ function scenarioSection(
 }
 
 function landuseSection(desc: string): string[] {
-  return [`<strong>Land Use:</strong> ${desc}`];
+  return [html`<strong>Land Use:</strong> ${desc}`];
 }
 
 const BAND_LABELS: Record<VegetationBandType, string> = {
@@ -86,7 +106,7 @@ function choroplethSection(
     n.toLocaleString(undefined, { maximumFractionDigits: 1 });
 
   const yearLabel =
-    year !== null ? `${year}` : `${startYear}&ndash;${endYear} Average`;
+    year !== null ? `${year}` : `${startYear}\u2013${endYear} Average`;
 
   if (bands === "all" && components) {
     return [
@@ -138,4 +158,15 @@ export function buildHillslopeTooltip(
 
   const lines = [...headerSection(props), ...section];
   return `<span class="tooltip-bold">${lines.join("<br/>")}</span>`;
+}
+
+export function buildWatershedTooltip(
+  props: Partial<WatershedProperties> | null,
+): string {
+  const name = props?.pws_name ?? "Unknown Watershed";
+  const parts = [props?.county_nam, props?.state].filter(Boolean) as string[];
+  const namePart = html`<strong>${name}</strong>`;
+  // ", " contains no HTML-special characters, so joining before escaping is safe
+  const locationPart = parts.length > 0 ? html`<br />${parts.join(", ")}` : "";
+  return `<span class="tooltip-bold">${namePart}${locationPart}</span>`;
 }
