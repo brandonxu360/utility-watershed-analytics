@@ -10,7 +10,9 @@
 # Official GDAL image, comes with PROJ (GEOS not included)
 # Base stage with common dependencies - this is a multistage dockerfile to 
 # support both development and production environments
-FROM ghcr.io/osgeo/gdal:alpine-small-latest AS base
+# Pinned to 3.12.0 (Alpine 3.22 / Python 3.13) — newer tags ship Python 3.14
+# which breaks rpds-py==0.22.3 (bundled PyO3 only supports up to Python 3.13).
+FROM ghcr.io/osgeo/gdal:alpine-small-3.12.0 AS base
 
 # Debugging purposes - Python output straight to terminal
 ENV PYTHONUNBUFFERED=1
